@@ -78,7 +78,7 @@ export default function GiveawaysPage() {
                 className="px-6 py-2 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-400 hover:to-teal-400 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-green-500/30 flex items-center gap-2"
               >
                 <span className="text-lg">+</span>
-                Create your giveaway
+                Create my giveaway
               </button>
             </div>
           </div>

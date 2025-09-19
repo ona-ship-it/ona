@@ -108,7 +108,7 @@ export default function Home() {
               href="/giveaways"
               className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-purple-600 hover:to-blue-600 transition-all duration-300 shadow-lg shadow-purple-500/25 hover:shadow-xl transform hover:scale-105"
             >
-              Start Playing
+              + Create
             </Link>
           </div>
 
