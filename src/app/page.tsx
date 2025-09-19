@@ -1,15 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
   const [showSignUpModal, setShowSignUpModal] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-950 to-slate-950 text-white relative overflow-hidden">

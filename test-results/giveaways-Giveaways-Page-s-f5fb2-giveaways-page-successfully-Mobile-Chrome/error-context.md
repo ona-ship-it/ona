@@ -1,0 +1,241 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7] [cursor=pointer]:
+      - img [ref=e8] [cursor=pointer]
+    - generic [ref=e11] [cursor=pointer]:
+      - button "Open issues overlay" [ref=e12] [cursor=pointer]:
+        - generic [ref=e13] [cursor=pointer]:
+          - generic [ref=e14] [cursor=pointer]: "0"
+          - generic [ref=e15] [cursor=pointer]: "1"
+        - generic [ref=e16] [cursor=pointer]: Issue
+      - button "Collapse issues badge" [ref=e17] [cursor=pointer]:
+        - img [ref=e18] [cursor=pointer]
+  - generic [ref=e20]:
+    - navigation [ref=e21]:
+      - generic [ref=e23]:
+        - heading "Onagui Giveaways" [level=1] [ref=e25]
+        - generic [ref=e26]:
+          - button "🏠 Home" [ref=e27]
+          - button "+ Create my giveaway" [ref=e28]:
+            - generic [ref=e29]: +
+            - text: Create my giveaway
+    - generic [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - generic [ref=e33] [cursor=pointer]:
+            - generic [ref=e34] [cursor=pointer]: 🔥
+            - heading "Most Popular" [level=2] [ref=e35] [cursor=pointer]
+            - generic [ref=e36] [cursor=pointer]: ▶
+          - generic [ref=e37]:
+            - button [ref=e38]:
+              - img [ref=e39]
+            - button [ref=e41]:
+              - img [ref=e42]
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - generic [ref=e46]:
+              - generic [ref=e47]: 💎
+              - generic [ref=e48]: $300
+            - heading "$300 Weekend Special" [level=3] [ref=e49]
+            - paragraph [ref=e50]: by ONAGUI
+            - generic [ref=e51]:
+              - generic [ref=e52]: 1234 entries
+              - generic [ref=e53]: 2d 5h
+            - button "Enter" [ref=e54]
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - generic [ref=e57]: 💎
+              - generic [ref=e58]: $750
+            - heading "$750 Premium Raffle" [level=3] [ref=e59]
+            - paragraph [ref=e60]: by ONAGUI
+            - generic [ref=e61]:
+              - generic [ref=e62]: 856 entries
+              - generic [ref=e63]: 1d 12h
+            - button "Enter" [ref=e64]
+          - generic [ref=e65]:
+            - generic [ref=e66]:
+              - generic [ref=e67]: 💎
+              - generic [ref=e68]: $50
+            - heading "$50 Starter Raffle" [level=3] [ref=e69]
+            - paragraph [ref=e70]: by ONAGUI
+            - generic [ref=e71]:
+              - generic [ref=e72]: 2341 entries
+              - generic [ref=e73]: 3d 8h
+            - button "Enter" [ref=e74]
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - generic [ref=e77]: 💎
+              - generic [ref=e78]: $100
+            - heading "$100 Quick Win Raffle" [level=3] [ref=e79]
+            - paragraph [ref=e80]: by ONAGUI
+            - generic [ref=e81]:
+              - generic [ref=e82]: 567 entries
+              - generic [ref=e83]: 6h 30m
+            - button "Enter" [ref=e84]
+          - generic [ref=e85]:
+            - generic [ref=e86]:
+              - generic [ref=e87]: 💎
+              - generic [ref=e88]: $500
+            - heading "$500 Cash Prize Raffle" [level=3] [ref=e89]
+            - paragraph [ref=e90]: by ONAGUI
+            - generic [ref=e91]:
+              - generic [ref=e92]: 1890 entries
+              - generic [ref=e93]: 4d 2h
+            - button "Enter" [ref=e94]
+          - generic [ref=e95]:
+            - generic [ref=e96]:
+              - generic [ref=e97]: 💎
+              - generic [ref=e98]: $1000
+            - heading "$1000 Mega Raffle" [level=3] [ref=e99]
+            - paragraph [ref=e100]: by ONAGUI
+            - generic [ref=e101]:
+              - generic [ref=e102]: 3456 entries
+              - generic [ref=e103]: 5d 10h
+            - button "Enter" [ref=e104]
+      - generic [ref=e105]:
+        - generic [ref=e106]:
+          - generic [ref=e107] [cursor=pointer]:
+            - generic [ref=e108] [cursor=pointer]: ⭐
+            - heading "Favorites Onagui Powered Giveaway" [level=2] [ref=e109] [cursor=pointer]
+            - generic [ref=e110] [cursor=pointer]: ▶
+          - generic [ref=e111]:
+            - button [ref=e112]:
+              - img [ref=e113]
+            - button [ref=e115]:
+              - img [ref=e116]
+        - generic [ref=e118]:
+          - generic [ref=e119] [cursor=pointer]:
+            - generic [ref=e122] [cursor=pointer]: 🎮
+            - generic [ref=e123] [cursor=pointer]:
+              - heading "Gaming Setup Giveaway" [level=3] [ref=e124] [cursor=pointer]
+              - generic [ref=e125] [cursor=pointer]: Gaming PC
+              - generic [ref=e126] [cursor=pointer]:
+                - generic [ref=e127] [cursor=pointer]: 890 entries
+                - button "Join" [ref=e128]
+          - generic [ref=e129] [cursor=pointer]:
+            - generic [ref=e132] [cursor=pointer]: 📱
+            - generic [ref=e133] [cursor=pointer]:
+              - heading "iPhone 15 Pro Max" [level=3] [ref=e134] [cursor=pointer]
+              - generic [ref=e135] [cursor=pointer]: iPhone
+              - generic [ref=e136] [cursor=pointer]:
+                - generic [ref=e137] [cursor=pointer]: 2,340 entries
+                - button "Join" [ref=e138]
+          - generic [ref=e139] [cursor=pointer]:
+            - generic [ref=e142] [cursor=pointer]: 🎮
+            - generic [ref=e143] [cursor=pointer]:
+              - heading "PlayStation 5 Bundle" [level=3] [ref=e144] [cursor=pointer]
+              - generic [ref=e145] [cursor=pointer]: PS5
+              - generic [ref=e146] [cursor=pointer]:
+                - generic [ref=e147] [cursor=pointer]: 1,567 entries
+                - button "Join" [ref=e148]
+          - generic [ref=e149] [cursor=pointer]:
+            - generic [ref=e152] [cursor=pointer]: 💻
+            - generic [ref=e153] [cursor=pointer]:
+              - heading "MacBook Air M3" [level=3] [ref=e154] [cursor=pointer]
+              - generic [ref=e155] [cursor=pointer]: MacBook
+              - generic [ref=e156] [cursor=pointer]:
+                - generic [ref=e157] [cursor=pointer]: 987 entries
+                - button "Join" [ref=e158]
+      - generic [ref=e159]:
+        - generic [ref=e160]:
+          - generic [ref=e161] [cursor=pointer]:
+            - generic [ref=e162] [cursor=pointer]: ⚡
+            - heading "Last Chance" [level=2] [ref=e163] [cursor=pointer]
+            - generic [ref=e164] [cursor=pointer]: Closing Today!
+            - generic [ref=e165] [cursor=pointer]: ▶
+          - generic [ref=e166]:
+            - button [ref=e167]:
+              - img [ref=e168]
+            - button [ref=e170]:
+              - img [ref=e171]
+        - generic [ref=e173]:
+          - generic [ref=e174] [cursor=pointer]:
+            - generic [ref=e175] [cursor=pointer]: 2h 30m
+            - generic [ref=e178] [cursor=pointer]: 💰
+            - generic [ref=e179] [cursor=pointer]:
+              - heading "Emergency Cash Drop" [level=3] [ref=e180] [cursor=pointer]
+              - generic [ref=e181] [cursor=pointer]: $200
+              - generic [ref=e182] [cursor=pointer]:
+                - generic [ref=e183] [cursor=pointer]: 456 entries
+                - button "Enter Now!" [ref=e184]
+          - generic [ref=e185] [cursor=pointer]:
+            - generic [ref=e186] [cursor=pointer]: 4h 15m
+            - generic [ref=e189] [cursor=pointer]: 💻
+            - generic [ref=e190] [cursor=pointer]:
+              - heading "Last Minute Laptop" [level=3] [ref=e191] [cursor=pointer]
+              - generic [ref=e192] [cursor=pointer]: Laptop
+              - generic [ref=e193] [cursor=pointer]:
+                - generic [ref=e194] [cursor=pointer]: 234 entries
+                - button "Enter Now!" [ref=e195]
+          - generic [ref=e196] [cursor=pointer]:
+            - generic [ref=e197] [cursor=pointer]: 1h 45m
+            - generic [ref=e200] [cursor=pointer]: 🎧
+            - generic [ref=e201] [cursor=pointer]:
+              - heading "Final Call AirPods" [level=3] [ref=e202] [cursor=pointer]
+              - generic [ref=e203] [cursor=pointer]: AirPods
+              - generic [ref=e204] [cursor=pointer]:
+                - generic [ref=e205] [cursor=pointer]: 678 entries
+                - button "Enter Now!" [ref=e206]
+          - generic [ref=e207] [cursor=pointer]:
+            - generic [ref=e208] [cursor=pointer]: 3h 20m
+            - generic [ref=e211] [cursor=pointer]: 🎁
+            - generic [ref=e212] [cursor=pointer]:
+              - heading "Urgent Gift Card" [level=3] [ref=e213] [cursor=pointer]
+              - generic [ref=e214] [cursor=pointer]: $150
+              - generic [ref=e215] [cursor=pointer]:
+                - generic [ref=e216] [cursor=pointer]: 123 entries
+                - button "Enter Now!" [ref=e217]
+      - generic [ref=e218]:
+        - generic [ref=e219]:
+          - generic [ref=e220] [cursor=pointer]:
+            - generic [ref=e221] [cursor=pointer]: ✨
+            - heading "Recently Added Giveaways" [level=2] [ref=e222] [cursor=pointer]
+            - generic [ref=e223] [cursor=pointer]: Fresh!
+            - generic [ref=e224] [cursor=pointer]: ▶
+          - generic [ref=e225]:
+            - button [ref=e226]:
+              - img [ref=e227]
+            - button [ref=e229]:
+              - img [ref=e230]
+        - generic [ref=e232]:
+          - generic [ref=e233] [cursor=pointer]:
+            - generic [ref=e234] [cursor=pointer]: NEW
+            - generic [ref=e237] [cursor=pointer]: 🚗
+            - generic [ref=e238] [cursor=pointer]:
+              - heading "Brand New Tesla Model 3" [level=3] [ref=e239] [cursor=pointer]
+              - generic [ref=e240] [cursor=pointer]: Tesla
+              - generic [ref=e241] [cursor=pointer]:
+                - generic [ref=e242] [cursor=pointer]: 45 entries
+                - button "Be First!" [ref=e243]
+          - generic [ref=e244] [cursor=pointer]:
+            - generic [ref=e245] [cursor=pointer]: NEW
+            - generic [ref=e248] [cursor=pointer]: 💰
+            - generic [ref=e249] [cursor=pointer]:
+              - heading "Fresh $1000 Cash" [level=3] [ref=e250] [cursor=pointer]
+              - generic [ref=e251] [cursor=pointer]: $1000
+              - generic [ref=e252] [cursor=pointer]:
+                - generic [ref=e253] [cursor=pointer]: 23 entries
+                - button "Be First!" [ref=e254]
+          - generic [ref=e255] [cursor=pointer]:
+            - generic [ref=e256] [cursor=pointer]: NEW
+            - generic [ref=e259] [cursor=pointer]: 📱
+            - generic [ref=e260] [cursor=pointer]:
+              - heading "New iPad Pro 2024" [level=3] [ref=e261] [cursor=pointer]
+              - generic [ref=e262] [cursor=pointer]: iPad
+              - generic [ref=e263] [cursor=pointer]:
+                - generic [ref=e264] [cursor=pointer]: 67 entries
+                - button "Be First!" [ref=e265]
+          - generic [ref=e266] [cursor=pointer]:
+            - generic [ref=e267] [cursor=pointer]: NEW
+            - generic [ref=e270] [cursor=pointer]: 📱
+            - generic [ref=e271] [cursor=pointer]:
+              - heading "Latest Samsung Galaxy" [level=3] [ref=e272] [cursor=pointer]
+              - generic [ref=e273] [cursor=pointer]: Galaxy S24
+              - generic [ref=e274] [cursor=pointer]:
+                - generic [ref=e275] [cursor=pointer]: 89 entries
+                - button "Be First!" [ref=e276]
+  - alert [ref=e277]
+```

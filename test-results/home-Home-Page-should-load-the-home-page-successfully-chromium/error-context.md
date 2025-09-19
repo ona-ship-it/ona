@@ -1,0 +1,44 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e9]:
+      - generic [ref=e11]:
+        - link "Onagui" [ref=e13] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e14]:
+          - link "Fundraise" [ref=e15] [cursor=pointer]:
+            - /url: /campaigns
+          - link "Giveaways" [ref=e16] [cursor=pointer]:
+            - /url: /giveaways
+          - link "Raffles" [ref=e17] [cursor=pointer]:
+            - /url: /raffles
+          - link "Marketplace" [ref=e18] [cursor=pointer]:
+            - /url: /marketplace
+        - generic [ref=e19]:
+          - generic [ref=e21]:
+            - generic [ref=e22]: 🔍
+            - textbox "Search" [ref=e23]
+          - button "Sign In" [ref=e24]
+    - main [ref=e25]:
+      - generic [ref=e26]:
+        - heading "Onagui" [level=1] [ref=e28]
+        - paragraph [ref=e30]: Statistically Onagui Is Your Best Chance To Win
+        - link "+ Create" [ref=e32] [cursor=pointer]:
+          - /url: /giveaways
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]: $50K+
+            - generic [ref=e36]: Total Prizes Won
+          - generic [ref=e37]:
+            - generic [ref=e38]: 10K+
+            - generic [ref=e39]: Active Players
+          - generic [ref=e40]:
+            - generic [ref=e41]: 95%
+            - generic [ref=e42]: Win Rate
+    - generic [ref=e43]: Activer Windows
+  - button "Open Next.js Dev Tools" [ref=e49] [cursor=pointer]:
+    - img [ref=e50] [cursor=pointer]
+  - alert [ref=e53]
+```
