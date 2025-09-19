@@ -18,6 +18,23 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## 🚀 CI/CD Pipeline Test
+
+This section was added to test our GitHub Actions CI/CD pipeline! The following workflows should trigger:
+
+- **CI Workflow**: Code quality checks, linting, testing, and security audits
+- **Deployment Workflow**: Automated deployment to Vercel (on master branch)
+- **Maintenance Workflow**: Weekly dependency updates and health checks
+
+### Pipeline Features:
+- ✅ ESLint and Prettier code quality checks
+- ✅ Multi-version Node.js testing (18.x, 20.x, 21.x)
+- ✅ Security auditing with npm audit and TruffleHog
+- ✅ Bundle size analysis for pull requests
+- ✅ Automated Vercel deployments
+- ✅ Performance monitoring with Lighthouse
+- ✅ Dependabot for dependency updates
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
