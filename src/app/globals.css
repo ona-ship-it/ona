@@ -2,7 +2,17 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
+}
+
+.dark {
+  --background: #1a0033;
+  --foreground: #ededed;
+}
+
+html[data-theme="darker"] {
+  --background: #0a0015;
+  --foreground: #ededed;
 }
 
 @theme inline {
@@ -12,15 +22,26 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
+  background-color: var(--background) !important;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease;
+}
+
+/* Make sure the header background changes with theme */
+header {
+  background-color: var(--background) !important;
+  transition: background-color 0.3s ease;
+}
+
+/* Make sure main content area changes with theme */
+main {
+  background-color: var(--background) !important;
+  transition: background-color 0.3s ease;
+}
+
+/* Keep UI elements consistent */
+.bg-white, .bg-gray-100, .bg-gray-200 {
+  transition: background-color 0.3s ease;
 }
