@@ -539,7 +539,7 @@ function RecentlyAddedGiveaways() {
 }
 
 // Giveaway Card Component for Most Popular Influencers
-function GiveawayCard({ giveaway, index }) {
+function GiveawayCard({ giveaway, index }: { giveaway: any; index: number }) {
   return (
     <div 
       className="flex-shrink-0 w-72 bg-gray-900/70 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-purple-500 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/30 mb-2 mx-1"
@@ -566,7 +566,7 @@ function GiveawayCard({ giveaway, index }) {
 }
 
 // Favorite Card Component
-function FavoriteCard({ giveaway, index }) {
+function FavoriteCard({ giveaway, index }: { giveaway: any; index: number }) {
   return (
     <div 
       className="flex-shrink-0 w-72 bg-gray-900/70 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-purple-500 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
@@ -593,7 +593,7 @@ function FavoriteCard({ giveaway, index }) {
 }
 
 // Last Chance Card Component
-function LastChanceCard({ giveaway, index }) {
+function LastChanceCard({ giveaway, index }: { giveaway: any; index: number }) {
   return (
     <div 
       className="flex-shrink-0 w-72 bg-gray-900/70 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-purple-500 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
@@ -620,7 +620,7 @@ function LastChanceCard({ giveaway, index }) {
 }
 
 // Recent Card Component
-function RecentCard({ giveaway, index }) {
+function RecentCard({ giveaway, index }: { giveaway: any; index: number }) {
   return (
     <div 
       className="flex-shrink-0 w-72 bg-gray-900/70 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-purple-500 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"

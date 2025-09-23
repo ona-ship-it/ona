@@ -115,7 +115,7 @@ export default function FeaturedContent() {
   ];
 
   // Generic card component for displaying items
-  const Card = ({ item, type }) => {
+  const Card = ({ item, type }: { item: any; type: string }) => {
     let details;
     let link;
 
