@@ -1,4 +1,10 @@
+# Ona - Next.js App
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## About Ona
+
+Ona is a platform for giveaways, fundraising, and raffles.
 
 ## Getting Started
 
