@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Navigation from '../components/Navigation';
 import OnaguiSymbol from '../components/OnaguiSymbol';
 import PageTitle from '@/components/PageTitle';
-import { useState } from 'react';
 
 export default function Home() {
   return (
