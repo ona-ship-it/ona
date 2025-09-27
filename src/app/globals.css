@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+.dark {
+  --background: #1a0033;
+  --foreground: #ededed;
+}
+
+html[data-theme="darker"] {
+  --background: #0a0015;
+  --foreground: #ededed;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background-color: var(--background) !important;
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease;
+}
+
+/* Make sure the header background changes with theme */
+header {
+  background-color: var(--background) !important;
+  transition: background-color 0.3s ease;
+}
+
+/* Make sure main content area changes with theme */
+main {
+  background-color: var(--background) !important;
+  transition: background-color 0.3s ease;
+}
+
+/* Keep UI elements consistent */
+.bg-white, .bg-gray-100, .bg-gray-200 {
+  transition: background-color 0.3s ease;
+}
