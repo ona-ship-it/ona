@@ -64,7 +64,7 @@ export default function MarketplacePage() {
                     <p className={`text-sm ${isDarker ? 'text-gray-400' : 'text-gray-500'}`}>by SneakerHead</p>
                   </div>
                 </div>
-                <p className={`${isDarker ? 'text-gray-300' : 'text-gray-600'} mb-4`}>Brand new Nike Air Jordan 1 Retro High OG "Chicago" - Size 10.</p>
+                <p className={`${isDarker ? 'text-gray-300' : 'text-gray-600'} mb-4`}>Brand new Nike Air Jordan 1 Retro High OG &quot;Chicago&quot; - Size 10.</p>
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-xl text-purple-600">$899</span>
                   <button className={`px-4 py-2 rounded-full ${isDarker ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} text-sm font-medium`}>

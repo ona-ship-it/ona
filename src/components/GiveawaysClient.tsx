@@ -539,7 +539,17 @@ function RecentlyAddedGiveaways() {
 }
 
 // Giveaway Card Component for Most Popular Influencers
-function GiveawayCard({ giveaway, index }: { giveaway: any; index: number }) {
+interface Giveaway {
+  id: number;
+  title: string;
+  prize: string;
+  entries: string;
+  image: string;
+  influencer: string;
+  gradient: string;
+}
+
+function GiveawayCard({ giveaway, index }: { giveaway: Giveaway; index: number }) {
   return (
     <div 
       className="flex-shrink-0 w-72 bg-gray-900/70 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-purple-500 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/30 mb-2 mx-1"
@@ -566,7 +576,17 @@ function GiveawayCard({ giveaway, index }: { giveaway: any; index: number }) {
 }
 
 // Favorite Card Component
-function FavoriteCard({ giveaway, index }: { giveaway: any; index: number }) {
+interface FavoriteGiveaway {
+  id: number;
+  title: string;
+  prize: string;
+  entries: string;
+  image: string;
+  influencer: string;
+  gradient: string;
+}
+
+function FavoriteCard({ giveaway, index }: { giveaway: FavoriteGiveaway; index: number }) {
   return (
     <div 
       className="flex-shrink-0 w-72 bg-gray-900/70 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-purple-500 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
@@ -593,7 +613,17 @@ function FavoriteCard({ giveaway, index }: { giveaway: any; index: number }) {
 }
 
 // Last Chance Card Component
-function LastChanceCard({ giveaway, index }: { giveaway: any; index: number }) {
+interface LastChanceGiveaway {
+  id: number;
+  title: string;
+  prize: string;
+  entries: string;
+  image: string;
+  timeLeft: string;
+  gradient: string;
+}
+
+function LastChanceCard({ giveaway, index }: { giveaway: LastChanceGiveaway; index: number }) {
   return (
     <div 
       className="flex-shrink-0 w-72 bg-gray-900/70 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-purple-500 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
@@ -620,7 +650,17 @@ function LastChanceCard({ giveaway, index }: { giveaway: any; index: number }) {
 }
 
 // Recent Card Component
-function RecentCard({ giveaway, index }: { giveaway: any; index: number }) {
+interface RecentGiveaway {
+  id: number;
+  title: string;
+  prize: string;
+  entries: string;
+  image: string;
+  addedTime: string;
+  gradient: string;
+}
+
+function RecentCard({ giveaway, index }: { giveaway: RecentGiveaway; index: number }) {
   return (
     <div 
       className="flex-shrink-0 w-72 bg-gray-900/70 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-purple-500 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"

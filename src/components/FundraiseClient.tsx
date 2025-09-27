@@ -102,7 +102,7 @@ function FeaturedFundraise() {
           className="text-2xl font-bold hover:text-purple-400 transition-colors duration-300 flex items-center"
         >
           Featured Fundraise
-          <span className="ml-2 text-sm">{expanded ? '▼' : '▶'}</span>
+          <span className="ml-2 text-sm">{expanded ? &apos;▼&apos; : &apos;▶&apos;}</span>
         </button>
         
         {!expanded && (
@@ -361,7 +361,17 @@ function CommunityProjects() {
 }
 
 // Fundraise Card Component
-function FundraiseCard({ fundraise, index }: { fundraise: any; index: number }) {
+interface Fundraise {
+  id: number;
+  title: string;
+  goal: string;
+  raised: string;
+  image: string;
+  organizer: string;
+  gradient: string;
+}
+
+function FundraiseCard({ fundraise, index }: { fundraise: Fundraise; index: number }) {
   return (
     <div 
       className={`flex-shrink-0 w-full sm:w-72 h-[280px] p-3 transition-transform duration-300`}

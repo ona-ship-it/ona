@@ -26,8 +26,9 @@ export default function DiscordSignIn() {
       if (error) {
         throw error;
       }
-    } catch (error: any) {
-      setError(error.message || 'An error occurred during Discord sign-in');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred during Discord sign-in';
+      setError(errorMessage);
       console.error('Discord sign-in error:', error);
     } finally {
       setLoading(false);
@@ -48,7 +49,7 @@ export default function DiscordSignIn() {
         className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-md transition-colors"
       >
         <FaDiscord className="text-xl" />
-        <span>{loading ? 'Connecting...' : 'Continue with Discord'}</span>
+        <span>{loading ? &apos;Connecting...&apos; : &apos;Continue with Discord&apos;}</span>
       </button>
     </div>
   );
