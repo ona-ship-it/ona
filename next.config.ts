@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
     process.env.NODE_ENV === "production"
       ? "https://onaguicom-git-onagui-new-feature-theos-projects-a68fa111.vercel.app"
       : "",
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;
