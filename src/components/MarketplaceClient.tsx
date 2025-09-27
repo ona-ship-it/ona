@@ -361,7 +361,16 @@ function BestSellers() {
 }
 
 // Product Card Component
-function ProductCard({ product, index }: { product: any; index: number }) {
+interface Product {
+  id: number;
+  title: string;
+  price: string;
+  image: string;
+  seller: string;
+  rating: number;
+}
+
+function ProductCard({ product, index }: { product: Product; index: number }) {
   return (
     <div 
       className={`flex-shrink-0 w-full sm:w-80 bg-gradient-to-br ${product.gradient} p-0.5 rounded-xl overflow-hidden transition-transform duration-300 hover:scale-105`}

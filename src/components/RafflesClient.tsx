@@ -145,7 +145,16 @@ function MostPopularRaffles() {
 }
 
 // Raffle Card Component
-function RaffleCard({ raffle, index }: { raffle: any; index: number }) {
+interface Raffle {
+  id: number;
+  title: string;
+  price: string;
+  entries: string;
+  image: string;
+  timeLeft: string;
+}
+
+function RaffleCard({ raffle, index }: { raffle: Raffle; index: number }) {
   return (
     <div 
       className="flex-shrink-0 w-72 bg-gray-900/70 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-purple-500 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/30 mb-2 mx-1"
