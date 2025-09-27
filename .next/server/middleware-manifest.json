@@ -1,0 +1,33 @@
+{
+  "version": 3,
+  "middleware": {
+    "/": {
+      "files": [
+        "server/edge/chunks/temp-restore_0784af2a._.js",
+        "server/edge/chunks/[root-of-the-server]__a748ce81._.js",
+        "server/edge/chunks/turbopack-temp-restore_edge-wrapper_66982fb7.js"
+      ],
+      "name": "middleware",
+      "page": "/",
+      "matchers": [
+        {
+          "regexp": "^/.*$",
+          "originalSource": "/:path*"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "env": {
+        "__NEXT_BUILD_ID": "development",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "55EmHnWyurnb/P8M6GxAsFr4JwieO/msIuDUQBxSYcA=",
+        "__NEXT_PREVIEW_MODE_ID": "61e1fd2e39c37a24497d3a639bade4ce",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "9a488e069c0211e20ba29639488c6d6ba025c2cf9e791ba5a881d26345a1e225",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "9dd4c31fb92c1711d44fa704f8cfba840518301739a5aca84ef51999c254d966"
+      }
+    }
+  },
+  "sortedMiddleware": [
+    "/"
+  ],
+  "functions": {}
+}
