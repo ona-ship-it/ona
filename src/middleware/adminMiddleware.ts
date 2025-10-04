@@ -10,14 +10,13 @@ export function createAdminClient() {
     throw new Error('Missing Supabase environment variables.'); 
   } 
 
-  const cookieStore = cookies(); 
+  const cookieStore = cookies();
 
   const supabase = createServerClient(supabaseUrl, serviceKey, { 
     cookies: { 
       get(name: string) { 
-        // Return only the string value, not the full cookie object 
-        const cookie = cookieStore.get(name); 
-        return cookie?.value; 
+        // Handle cookies synchronously for SSR compatibility
+        return cookieStore.get(name)?.value;
       }, 
       set(name: string, value: string, options?: CookieOptions) { 
         try { 
