@@ -1,14 +1,134 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navigation from './Navigation';
 import Link from 'next/link';
 import PageTitle from './PageTitle';
+import { useSupabaseClient } from '@/lib/supabaseClient';
+import { GiveawayWithTickets } from '../types/giveaways';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import BuyTicketsModal from './BuyTicketsModal';
+import DonateModal from './DonateModal';
 
 // Client component to handle interactivity
 export default function GiveawaysClient() {
+  const [activeGiveaways, setActiveGiveaways] = useState<GiveawayWithTickets[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedGiveaway, setSelectedGiveaway] = useState<string | null>(null);
+  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+  const [isDonateModalOpen, setIsDonateModalOpen] = useState(false);
+  const [userTickets, setUserTickets] = useState<{[key: string]: number}>({});
+  const supabase = useSupabaseClient();
+  const router = useRouter();
+
+  useEffect(() => {
+    loadGiveaways();
+  }, []);
+
+  const loadGiveaways = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('giveaways')
+        .select(`
+          *,
+          tickets(*)
+        `)
+        .eq('is_active', true);
+
+      if (error) throw error;
+      setActiveGiveaways(data as GiveawayWithTickets[] || []);
+      
+      // Get user's tickets for each giveaway
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const ticketCounts: {[key: string]: number} = {};
+        
+        for (const giveaway of (data || [])) {
+          const { data: tickets, error: ticketsError } = await supabase
+            .from('onagui.tickets')
+            .select('*')
+            .eq('giveaway_id', giveaway.id)
+            .eq('user_id', user.id);
+            
+          if (!ticketsError && tickets) {
+            ticketCounts[giveaway.id] = tickets.length;
+          }
+        }
+        
+        setUserTickets(ticketCounts);
+      }
+    } catch (err) {
+      console.error('Error fetching giveaways:', err);
+      setError('Failed to load giveaways');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const joinGiveaway = async (giveawayId: string) => {
+    try {
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        router.push('/login?redirect=/giveaways');
+        return;
+      }
+
+      // Check if user already has tickets
+      const userGiveawayTickets = userTickets[giveawayId] || 0;
+      
+      if (userGiveawayTickets === 0) {
+        // First time joining - get free ticket
+        const { data, error } = await supabase.functions.invoke('buy-ticket', {
+          body: { 
+            user_id: user.id, 
+            giveaway_id: giveawayId, 
+            quantity: 1,
+            is_free: true
+          }
+        });
+
+        if (error) throw error;
+        
+        // Refresh the giveaways list
+        await loadGiveaways();
+      } else {
+        // User already has tickets - open modal to buy more
+        setSelectedGiveaway(giveawayId);
+        setIsTicketModalOpen(true);
+      }
+    } catch (err) {
+      console.error('Error joining giveaway:', err);
+      setError('Failed to join giveaway');
+    }
+  };
+  
+  const handleDonate = (giveawayId: string) => {
+    setSelectedGiveaway(giveawayId);
+    setIsDonateModalOpen(true);
+  };
+  
+  const handleTicketModalClose = () => {
+    setIsTicketModalOpen(false);
+    setSelectedGiveaway(null);
+  };
+  
+  const handleDonateModalClose = () => {
+    setIsDonateModalOpen(false);
+    setSelectedGiveaway(null);
+  };
+
+  const handleSuccess = async () => {
+    await loadGiveaways();
+    router.refresh();
+  };
+
   return (
-    <main className="min-h-screen bg-[#1a0033] text-white">
+    <main className="min-h-screen bg-[#1f2937] text-white">
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -16,10 +136,88 @@ export default function GiveawaysClient() {
           <PageTitle className="text-3xl md:text-4xl" gradient={true}>
             Active Giveaways
           </PageTitle>
-          <Link href="/fundraise" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-purple-500/30 flex items-center">
-            + create my Giveaway
+          <Link href="/giveaways/new" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-purple-500/30 flex items-center">
+            + Create Giveaway
           </Link>
         </div>
+
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+          </div>
+        ) : error ? (
+          <div className="bg-red-500 bg-opacity-20 border border-red-500 text-white p-4 rounded-lg">
+            {error}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {activeGiveaways.length > 0 ? (
+              activeGiveaways.map((giveaway) => (
+                <div key={giveaway.id} className="bg-purple-900 bg-opacity-30 rounded-xl overflow-hidden shadow-lg hover:shadow-purple-500/20 transition-all duration-300 border border-purple-500/30">
+                  <div className="relative h-48 w-full">
+                    {giveaway.photo_url ? (
+                      <Image 
+                        src={giveaway.photo_url} 
+                        alt={giveaway.description} 
+                        fill 
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-purple-800 to-indigo-800">
+                        <span className="text-5xl">🎁</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-5">
+                    <h3 className="text-xl font-semibold mb-2 text-white">{giveaway.description}</h3>
+                    <div className="flex justify-between mb-4">
+                      <div>
+                        <p className="text-purple-300 text-sm">Cash Prize</p>
+                        <p className="text-white font-bold">{giveaway.prize_amount} USDT</p>
+                      </div>
+                      <div>
+                        <p className="text-purple-300 text-sm">Ticket Price</p>
+                        <p className="text-white font-bold">1 USDT</p>
+                      </div>
+                    </div>
+                    <div className="mb-4">
+                      <p className="text-purple-300 text-sm">Total Entries</p>
+                      <p className="text-white">{giveaway.tickets_count || 0} tickets</p>
+                      {userTickets[giveaway.id] > 0 && (
+                        <p className="text-purple-300 text-sm mt-1">
+                          You have {userTickets[giveaway.id]} ticket{userTickets[giveaway.id] > 1 ? 's' : ''}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => joinGiveaway(giveaway.id)}
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-purple-500/30"
+                      >
+                        {userTickets[giveaway.id] ? 'Buy More Tickets' : 'Join Giveaway'}
+                      </button>
+                      <button
+                          onClick={() => handleDonate(giveaway.id)}
+                          className="bg-purple-800 hover:bg-onaguiGreen-dark text-white font-medium py-3 px-4 rounded-lg transition-all duration-300"
+                        >
+                          Donate
+                        </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-12">
+                <div className="text-5xl mb-4">🎁</div>
+                <h3 className="text-2xl font-semibold mb-2">No Active Giveaways</h3>
+                <p className="text-purple-300 mb-6">Be the first to create a giveaway!</p>
+                <Link href="/giveaways/new" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-purple-500/30">
+                  Create Giveaway
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
         
         {/* Most Popular Influencers Section */}
         <MostPopularInfluencers />
@@ -33,6 +231,24 @@ export default function GiveawaysClient() {
         {/* Recently Added Giveaways Section */}
         <RecentlyAddedGiveaways />
       </div>
+      
+      {selectedGiveaway && (
+        <>
+          <BuyTicketsModal
+            giveawayId={selectedGiveaway}
+            isOpen={isTicketModalOpen}
+            onClose={handleTicketModalClose}
+            onSuccess={handleSuccess}
+          />
+          
+          <DonateModal
+            giveawayId={selectedGiveaway}
+            isOpen={isDonateModalOpen}
+            onClose={handleDonateModalClose}
+            onSuccess={handleSuccess}
+          />
+        </>
+      )}
     </main>
   );
 }
@@ -130,13 +346,13 @@ function MostPopularInfluencers() {
         {!expanded && (
           <div className="flex space-x-2 items-center">
             <button 
-              className="px-3 py-1 mr-2 rounded bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300 text-sm font-medium"
+              className="px-3 py-1 mr-2 rounded bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300 text-sm font-medium"
             >
               Most Popular
             </button>
             <button 
               onClick={scrollLeft}
-              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
@@ -144,7 +360,7 @@ function MostPopularInfluencers() {
             </button>
             <button 
               onClick={scrollRight}
-              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
@@ -251,7 +467,7 @@ function FavoritesGiveaways() {
           <div className="flex space-x-2">
             <button 
               onClick={scrollLeft}
-              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
@@ -259,7 +475,7 @@ function FavoritesGiveaways() {
             </button>
             <button 
               onClick={scrollRight}
-              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
@@ -375,7 +591,7 @@ function LastChanceGiveaways() {
           <div className="flex space-x-2">
             <button 
               onClick={scrollLeft}
-              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
@@ -383,7 +599,7 @@ function LastChanceGiveaways() {
             </button>
             <button 
               onClick={scrollRight}
-              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
@@ -499,7 +715,7 @@ function RecentlyAddedGiveaways() {
           <div className="flex space-x-2">
             <button 
               onClick={scrollLeft}
-              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
@@ -507,7 +723,7 @@ function RecentlyAddedGiveaways() {
             </button>
             <button 
               onClick={scrollRight}
-              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
@@ -560,14 +776,14 @@ function GiveawayCard({ giveaway, index }: { giveaway: Giveaway; index: number }
       </div>
       <div className="p-5">
         <div className="flex justify-between items-center mb-2">
-          <span className="bg-purple-900 text-purple-100 text-xs px-2 py-1 rounded-full">
+          <span className="bg-bcgames-darkgrey text-white text-xs px-2 py-1 rounded-full">
             {giveaway.influencer}
           </span>
           <span className="text-gray-300 text-sm">{giveaway.entries} entries</span>
         </div>
         <h3 className="text-lg font-bold mb-2 line-clamp-1">{giveaway.title}</h3>
-        <p className="text-gray-300 mb-3">Prize: <span className="text-purple-400 font-semibold">{giveaway.prize}</span></p>
-        <button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+        <p className="text-gray-300 mb-3">Prize: <span className="text-bcgames-green font-semibold">{giveaway.prize}</span></p>
+        <button className="w-full bg-bcgames-green hover:bg-bcgames-green/90 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
           Enter
         </button>
       </div>
@@ -597,14 +813,14 @@ function FavoriteCard({ giveaway, index }: { giveaway: FavoriteGiveaway; index: 
       </div>
       <div className="p-4">
         <div className="flex justify-between items-center mb-2">
-          <span className="bg-yellow-900 text-yellow-100 text-xs px-2 py-1 rounded-full">
+          <span className="bg-bcgames-darkgrey text-white text-xs px-2 py-1 rounded-full">
             {giveaway.influencer}
           </span>
           <span className="text-gray-300 text-sm">{giveaway.entries} entries</span>
         </div>
         <h3 className="text-lg font-bold mb-2 line-clamp-1">{giveaway.title}</h3>
-        <p className="text-gray-300 mb-3">Prize: <span className="text-yellow-400 font-semibold">{giveaway.prize}</span></p>
-        <button className="w-full bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-700 hover:to-amber-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+        <p className="text-gray-300 mb-3">Prize: <span className="text-bcgames-green font-semibold">{giveaway.prize}</span></p>
+        <button className="w-full bg-bcgames-green hover:bg-bcgames-green/90 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
           Join
         </button>
       </div>

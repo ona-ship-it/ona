@@ -3218,8 +3218,7 @@ function AppContainer(param) {
                                             ("TURBOPACK compile-time value", 1080),
                                             ("TURBOPACK compile-time value", 1200),
                                             ("TURBOPACK compile-time value", 1920),
-                                            ("TURBOPACK compile-time value", 2048),
-                                            ("TURBOPACK compile-time value", 3840)
+                                            ("TURBOPACK compile-time value", 2048)
                                         ]),
                                         "imageSizes": ("TURBOPACK compile-time value", [
                                             ("TURBOPACK compile-time value", 16),
@@ -3228,14 +3227,15 @@ function AppContainer(param) {
                                             ("TURBOPACK compile-time value", 64),
                                             ("TURBOPACK compile-time value", 96),
                                             ("TURBOPACK compile-time value", 128),
-                                            ("TURBOPACK compile-time value", 256),
-                                            ("TURBOPACK compile-time value", 384)
+                                            ("TURBOPACK compile-time value", 256)
                                         ]),
                                         "path": ("TURBOPACK compile-time value", "/_next/image"),
                                         "loader": ("TURBOPACK compile-time value", "default"),
                                         "dangerouslyAllowSVG": ("TURBOPACK compile-time value", false),
                                         "unoptimized": ("TURBOPACK compile-time value", false),
-                                        "domains": ("TURBOPACK compile-time value", []),
+                                        "domains": ("TURBOPACK compile-time value", [
+                                            ("TURBOPACK compile-time value", "i.pravatar.cc")
+                                        ]),
                                         "remotePatterns": ("TURBOPACK compile-time value", [])
                                     }),
                                     children: children

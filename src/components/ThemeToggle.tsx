@@ -9,10 +9,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className={`rounded-full p-2 ${
-        isWhite ? 'bg-gray-200 hover:bg-gray-300' : 
-        isDarker ? 'bg-gray-800 hover:bg-gray-700' : 'bg-indigo-900/50 hover:bg-indigo-800/60'
-      }`}
+      className={`rounded-full p-2 ${isWhite ? 'bg-gray-200 hover:bg-gray-300' : isDarker ? 'bg-gray-800 hover:bg-gray-700' : 'bg-green-700/50 hover:bg-green-600/60'}`}
       aria-label="Toggle theme"
     >
       {isWhite ? (

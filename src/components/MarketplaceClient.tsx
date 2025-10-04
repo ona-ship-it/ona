@@ -7,7 +7,7 @@ import PageTitle from './PageTitle';
 // Client component to handle interactivity
 export default function MarketplaceClient() {
   return (
-    <main className="min-h-screen bg-[#1a0033] text-white">
+    <main className="min-h-screen bg-[#1f2937] text-white">
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -101,7 +101,7 @@ function FeaturedProducts() {
           onClick={toggleExpand}
           className="text-2xl font-bold hover:text-purple-400 transition-colors duration-300 flex items-center"
         >
-          Onagui's Favorites
+          Onagui&apos;s Favorites
           <span className="ml-2 text-sm">{expanded ? '▼' : '▶'}</span>
         </button>
         
@@ -109,7 +109,7 @@ function FeaturedProducts() {
           <div className="flex space-x-2">
             <button 
               onClick={scrollLeft}
-              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
@@ -117,7 +117,7 @@ function FeaturedProducts() {
             </button>
             <button 
               onClick={scrollRight}
-              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
@@ -130,7 +130,11 @@ function FeaturedProducts() {
       {expanded ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {featuredProducts.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
+            <ProductCard 
+              key={product.id} 
+              product={product} 
+              index={index} 
+            />
           ))}
         </div>
       ) : (
@@ -140,7 +144,11 @@ function FeaturedProducts() {
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {featuredProducts.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
+            <ProductCard 
+              key={product.id} 
+              product={product} 
+              index={index} 
+            />
           ))}
         </div>
       )}
@@ -215,7 +223,7 @@ function NewArrivals() {
           <div className="flex space-x-2">
             <button 
               onClick={scrollLeft}
-              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
@@ -223,7 +231,7 @@ function NewArrivals() {
             </button>
             <button 
               onClick={scrollRight}
-              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
@@ -236,8 +244,12 @@ function NewArrivals() {
       {expanded ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {newProducts.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
-          ))}
+             <ProductCard 
+               key={product.id} 
+               product={product} 
+               index={index} 
+             />
+           ))}
         </div>
       ) : (
         <div 
@@ -246,8 +258,12 @@ function NewArrivals() {
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {newProducts.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
-          ))}
+             <ProductCard 
+               key={product.id} 
+               product={product} 
+               index={index} 
+             />
+           ))}
         </div>
       )}
     </section>
@@ -321,7 +337,7 @@ function BestSellers() {
           <div className="flex space-x-2">
             <button 
               onClick={scrollLeft}
-              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
@@ -329,7 +345,7 @@ function BestSellers() {
             </button>
             <button 
               onClick={scrollRight}
-              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
@@ -342,8 +358,12 @@ function BestSellers() {
       {expanded ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {bestSellers.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
-          ))}
+             <ProductCard 
+               key={product.id} 
+               product={product} 
+               index={index} 
+             />
+           ))}
         </div>
       ) : (
         <div 
@@ -352,8 +372,12 @@ function BestSellers() {
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {bestSellers.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
-          ))}
+             <ProductCard 
+               key={product.id} 
+               product={product} 
+               index={index} 
+             />
+           ))}
         </div>
       )}
     </section>
@@ -368,6 +392,7 @@ interface Product {
   image: string;
   seller: string;
   rating: number;
+  gradient: string;
 }
 
 function ProductCard({ product, index }: { product: Product; index: number }) {

@@ -12389,7 +12389,7 @@ module.exports = __toCommonJS(src_exports);
 var import_auth_helpers_shared = __turbopack_context__.r("[project]/temp-restore/node_modules/@supabase/auth-helpers-shared/dist/index.mjs [app-client] (ecmascript)");
 var supabase;
 function createClientComponentClient() {
-    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxMzQ0MjMsImV4cCI6MjA3MzcxMDQyM30.6EIr-lABoi0HH2Tea_LpGo5rrGmXn_UQsBiseAZaua4"), options, cookieOptions, isSingleton = true } = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
+    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc0MzY4MDAsImV4cCI6MjAzMzAxMjgwMH0.SZLqryz_-XcXpWlp_tJQYKJfWgwOBV-qWbJKB9s_BgE"), options, cookieOptions, isSingleton = true } = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
     if (!supabaseUrl || !supabaseKey) {
         throw new Error("either NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY env variables or supabaseUrl and supabaseKey are required!");
     }
@@ -12459,7 +12459,7 @@ var NextServerAuthStorageAdapter = class extends import_auth_helpers_shared2.Coo
     }
 };
 function createPagesServerClient(context) {
-    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxMzQ0MjMsImV4cCI6MjA3MzcxMDQyM30.6EIr-lABoi0HH2Tea_LpGo5rrGmXn_UQsBiseAZaua4"), options, cookieOptions } = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc0MzY4MDAsImV4cCI6MjAzMzAxMjgwMH0.SZLqryz_-XcXpWlp_tJQYKJfWgwOBV-qWbJKB9s_BgE"), options, cookieOptions } = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
     var _a;
     if (!supabaseUrl || !supabaseKey) {
         throw new Error("either NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY env variables or supabaseUrl and supabaseKey are required!");
@@ -12518,7 +12518,7 @@ var NextMiddlewareAuthStorageAdapter = class extends import_auth_helpers_shared3
     }
 };
 function createMiddlewareClient(context) {
-    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxMzQ0MjMsImV4cCI6MjA3MzcxMDQyM30.6EIr-lABoi0HH2Tea_LpGo5rrGmXn_UQsBiseAZaua4"), options, cookieOptions } = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc0MzY4MDAsImV4cCI6MjAzMzAxMjgwMH0.SZLqryz_-XcXpWlp_tJQYKJfWgwOBV-qWbJKB9s_BgE"), options, cookieOptions } = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
     var _a;
     if (!supabaseUrl || !supabaseKey) {
         throw new Error("either NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY env variables or supabaseUrl and supabaseKey are required!");
@@ -12554,7 +12554,7 @@ var NextServerComponentAuthStorageAdapter = class extends import_auth_helpers_sh
     }
 };
 function createServerComponentClient(context) {
-    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxMzQ0MjMsImV4cCI6MjA3MzcxMDQyM30.6EIr-lABoi0HH2Tea_LpGo5rrGmXn_UQsBiseAZaua4"), options, cookieOptions } = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc0MzY4MDAsImV4cCI6MjAzMzAxMjgwMH0.SZLqryz_-XcXpWlp_tJQYKJfWgwOBV-qWbJKB9s_BgE"), options, cookieOptions } = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
     var _a;
     if (!supabaseUrl || !supabaseKey) {
         throw new Error("either NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY env variables or supabaseUrl and supabaseKey are required!");
@@ -12598,7 +12598,7 @@ var NextRouteHandlerAuthStorageAdapter = class extends import_auth_helpers_share
     }
 };
 function createRouteHandlerClient(context) {
-    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxMzQ0MjMsImV4cCI6MjA3MzcxMDQyM30.6EIr-lABoi0HH2Tea_LpGo5rrGmXn_UQsBiseAZaua4"), options, cookieOptions } = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc0MzY4MDAsImV4cCI6MjAzMzAxMjgwMH0.SZLqryz_-XcXpWlp_tJQYKJfWgwOBV-qWbJKB9s_BgE"), options, cookieOptions } = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
     var _a;
     if (!supabaseUrl || !supabaseKey) {
         throw new Error("either NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY env variables or supabaseUrl and supabaseKey are required!");
@@ -12621,7 +12621,7 @@ function createRouteHandlerClient(context) {
 var createServerActionClient = createRouteHandlerClient;
 // src/deprecated.ts
 function createBrowserSupabaseClient() {
-    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxMzQ0MjMsImV4cCI6MjA3MzcxMDQyM30.6EIr-lABoi0HH2Tea_LpGo5rrGmXn_UQsBiseAZaua4"), options, cookieOptions } = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
+    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc0MzY4MDAsImV4cCI6MjAzMzAxMjgwMH0.SZLqryz_-XcXpWlp_tJQYKJfWgwOBV-qWbJKB9s_BgE"), options, cookieOptions } = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
     console.warn("Please utilize the `createPagesBrowserClient` function instead of the deprecated `createBrowserSupabaseClient` function. Learn more: https://supabase.com/docs/guides/auth/auth-helpers/nextjs-pages");
     return createPagesBrowserClient({
         supabaseUrl,
@@ -12631,7 +12631,7 @@ function createBrowserSupabaseClient() {
     });
 }
 function createServerSupabaseClient(context) {
-    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxMzQ0MjMsImV4cCI6MjA3MzcxMDQyM30.6EIr-lABoi0HH2Tea_LpGo5rrGmXn_UQsBiseAZaua4"), options, cookieOptions } = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc0MzY4MDAsImV4cCI6MjAzMzAxMjgwMH0.SZLqryz_-XcXpWlp_tJQYKJfWgwOBV-qWbJKB9s_BgE"), options, cookieOptions } = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
     console.warn("Please utilize the `createPagesServerClient` function instead of the deprecated `createServerSupabaseClient` function. Learn more: https://supabase.com/docs/guides/auth/auth-helpers/nextjs-pages");
     return createPagesServerClient(context, {
         supabaseUrl,
@@ -12641,7 +12641,7 @@ function createServerSupabaseClient(context) {
     });
 }
 function createMiddlewareSupabaseClient(context) {
-    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxMzQ0MjMsImV4cCI6MjA3MzcxMDQyM30.6EIr-lABoi0HH2Tea_LpGo5rrGmXn_UQsBiseAZaua4"), options, cookieOptions } = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+    let { supabaseUrl = ("TURBOPACK compile-time value", "https://obgjsswksaotyyzydkkn.supabase.co"), supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZ2pzc3drc2FvdHl5enlka2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc0MzY4MDAsImV4cCI6MjAzMzAxMjgwMH0.SZLqryz_-XcXpWlp_tJQYKJfWgwOBV-qWbJKB9s_BgE"), options, cookieOptions } = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
     console.warn("Please utilize the `createMiddlewareClient` function instead of the deprecated `createMiddlewareSupabaseClient` function. Learn more: https://supabase.com/docs/guides/auth/auth-helpers/nextjs#middleware");
     return createMiddlewareClient(context, {
         supabaseUrl,

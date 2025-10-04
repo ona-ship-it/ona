@@ -38,7 +38,7 @@ export default function FeaturedSection({ title, linkTo, items }: FeaturedSectio
               </svg>
             </button>
           </div>
-          <Link href={linkTo} className={`text-sm font-medium ${isWhite ? 'text-indigo-600 hover:text-indigo-700' : 'text-purple-600 hover:text-purple-700'}`}>
+          <Link href={linkTo} className={`text-sm font-medium ${isWhite ? 'text-indigo-600 hover:text-indigo-700' : 'text-onaguiGreen hover:text-purple-700'}`}>
             View all
           </Link>
         </div>

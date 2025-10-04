@@ -38,9 +38,15 @@ export default function AuthButtons() {
       <div className="flex gap-2">
         <Link
           href="/login"
-          className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 transition-all duration-300"
+          className="group bg-onaguiGreen hover:bg-onaguiGreen-dark text-white font-semibold rounded-full shadow-lg flex items-center justify-center w-10 h-10 transition-all duration-300 ease-in-out overflow-hidden hover:w-28 md:hover:w-28 sm:hover:w-24 touch-manipulation relative"
+          aria-label="Sign In or Sign Up"
         >
-          Sign In / Sign Up
+          <span className="text-2xl font-extrabold transition-all duration-300 z-10 absolute left-1/2 transform -translate-x-1/2 group-hover:left-3 group-hover:translate-x-0">
+            +
+          </span>
+          <span className="opacity-0 group-hover:opacity-100 whitespace-nowrap transition-all duration-300 text-sm absolute right-3 text-right">
+            Sign up
+          </span>
         </Link>
       </div>
     );

@@ -65,10 +65,16 @@ export default function GoogleSignIn() {
   const handleSignIn = async () => { 
     try {
       setLoading(true);
+      
+      // Get the redirectTo parameter from URL if it exists
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectPath = urlParams.get('redirectTo') || '/';
+      const callbackUrl = `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectPath)}`;
+      
       const { error } = await supabase.auth.signInWithOAuth({ 
         provider: "google", 
         options: { 
-          redirectTo: "http://localhost:3000/account", // change to `https://onagui.com/account` in prod 
+          redirectTo: callbackUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -168,13 +174,9 @@ export default function GoogleSignIn() {
             {loading ? 'Signing in...' : 'Continue with Google'}
           </button>
           
-          <div className="mt-4 text-xs text-gray-400 text-center">
-            To continue, google.com will share your name, email address and profile picture with this site. See this site's <a href="/privacy" className="text-blue-400 hover:underline">privacy policy</a> and <a href="/terms" className="text-blue-400 hover:underline">Terms of Service</a>.
-          </div>
-          
           {/* Privacy notice */}
-          <div className="mt-4 text-xs text-gray-400">
-            To continue, google.com will share your name, email address and profile picture with this site. See this site's <span className="text-blue-400">privacy policy</span> and <span className="text-blue-400">Terms of Service</span>.
+          <div className="mt-4 text-xs text-gray-400 text-center">
+            To continue, google.com will share your name, email address and profile picture with this site. See this site's <a href="/privacy" className="text-[#5AFF7F] hover:underline">privacy policy</a> and <a href="/terms" className="text-[#5AFF7F] hover:underline">Terms of Service</a>.
           </div>
         </div>
       </div>

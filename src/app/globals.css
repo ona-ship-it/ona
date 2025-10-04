@@ -6,12 +6,12 @@
 }
 
 .dark {
-  --background: #1a0033;
+  --background: #1f2937;
   --foreground: #ededed;
 }
 
 html[data-theme="darker"] {
-  --background: #0a0015;
+  --background: #111827;
   --foreground: #ededed;
 }
 

@@ -66,7 +66,7 @@ export default function MarketplacePage() {
                 </div>
                 <p className={`${isDarker ? 'text-gray-300' : 'text-gray-600'} mb-4`}>Brand new Nike Air Jordan 1 Retro High OG &quot;Chicago&quot; - Size 10.</p>
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-xl text-purple-600">$899</span>
+                  <span className="font-bold text-xl text-onaguiGreen">$899</span>
                   <button className={`px-4 py-2 rounded-full ${isDarker ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} text-sm font-medium`}>
                     Add to Cart
                   </button>
@@ -181,13 +181,13 @@ export default function MarketplacePage() {
                 <input
                   type="text"
                   placeholder="Search items..."
-                  className={`pl-10 pr-4 py-2 rounded-full ${isDarker ? 'bg-gray-800 border-gray-700 text-gray-200' : 'bg-gray-100 border-gray-200'} border focus:outline-none focus:ring-2 focus:ring-purple-500 w-64`}
+                  className={`pl-10 pr-4 py-2 rounded-full ${isDarker ? 'bg-gray-800 border-gray-700 text-gray-200' : 'bg-gray-100 border-gray-200'} border focus:outline-none focus:ring-2 focus:ring-onaguiGreen w-64`}
                 />
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <select className={`rounded-full px-4 py-2 ${isDarker ? 'bg-gray-800 border-gray-700 text-gray-200' : 'bg-gray-100 border-gray-200'} border focus:outline-none focus:ring-2 focus:ring-purple-500`}>
+              <select className={`rounded-full px-4 py-2 ${isDarker ? 'bg-gray-800 border-gray-700 text-gray-200' : 'bg-gray-100 border-gray-200'} border focus:outline-none focus:ring-2 focus:ring-onaguiGreen`}>
                 <option>All Categories</option>
                 <option>Electronics</option>
                 <option>Fashion</option>
@@ -241,9 +241,9 @@ export default function MarketplacePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className={`w-10 h-10 rounded-full ${isDarker ? 'bg-purple-600 text-white' : 'bg-purple-600 text-white'}`}>1</button>
-              <button className={`w-10 h-10 rounded-full ${isDarker ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}>2</button>
-              <button className={`w-10 h-10 rounded-full ${isDarker ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}>3</button>
+              <button className={`w-10 h-10 rounded-full bg-[#5AFF7F] text-white`}>1</button>
+                <button className={`w-10 h-10 rounded-full ${isDarker ? 'bg-gray-800 hover:bg-[#5AFF7F] text-gray-300' : 'bg-gray-100 hover:bg-[#5AFF7F] text-gray-600'}`}>2</button>
+                <button className={`w-10 h-10 rounded-full ${isDarker ? 'bg-gray-800 hover:bg-[#5AFF7F] text-gray-300' : 'bg-gray-100 hover:bg-[#5AFF7F] text-gray-600'}`}>3</button>
               <button className={`p-2 rounded-full ${isDarker ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

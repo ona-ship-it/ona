@@ -13,6 +13,9 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
+  // Get the redirectTo parameter if it exists
+  const redirectTo = requestUrl.searchParams.get('redirectTo') || '/account';
+  
   // URL to redirect to after sign in process completes
-  return NextResponse.redirect(new URL('/account', request.url));
+  return NextResponse.redirect(new URL(redirectTo, request.url));
 }
