@@ -1,5 +1,19 @@
 import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
+// class-variance-authority is not installed; using a minimal stub for cva and VariantProps
+type VariantProps<T> = T extends (props: infer P) => any ? P : never;
+
+function cva(base: string, config?: { variants?: Record<string, Record<string, string>>; defaultVariants?: Record<string, string> }) {
+  return (props?: Record<string, string>) => {
+    let className = base;
+    if (config?.variants && props) {
+      for (const [key, value] of Object.entries(props)) {
+        const variantClass = config.variants[key]?.[value];
+        if (variantClass) className += " " + variantClass;
+      }
+    }
+    return className;
+  };
+}
 
 import { cn } from "@/lib/utils"
 
@@ -33,8 +47,9 @@ const buttonVariants = cva(
 )
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
   asChild?: boolean
 }
 
@@ -42,7 +57,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     return (
       <button
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant: variant, size: size }), className)}
         ref={ref}
         {...props}
       />
