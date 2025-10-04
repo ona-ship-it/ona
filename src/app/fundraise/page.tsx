@@ -141,7 +141,7 @@ export default function FundraisePage() {
                   </div>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="font-medium text-purple-600">$22,500 raised</span>
+                  <span className="font-medium text-onaguiGreen">$22,500 raised</span>
                   <span className={`${isDarker ? 'text-gray-400' : 'text-gray-500'}`}>of $50,000 goal</span>
                 </div>
               </div>
@@ -193,7 +193,7 @@ export default function FundraisePage() {
                  <input
                    type="text"
                    placeholder="Search fundraisers..."
-                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-onaguiGreen focus:border-transparent"
                  />
                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5 text-gray-400">
@@ -201,7 +201,7 @@ export default function FundraisePage() {
                    </svg>
                  </div>
                </div>
-               <select className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+               <select className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-onaguiGreen focus:border-transparent">
                  <option>All Categories</option>
                  <option>Environment</option>
                  <option>Education</option>
@@ -415,11 +415,11 @@ export default function FundraisePage() {
                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                  </svg>
                </button>
-               <button className="px-3 py-1 rounded-md mx-1 bg-purple-600 text-white">1</button>
-               <button className={`px-3 py-1 rounded-md mx-1 ${isDarker ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200'}`}>2</button>
-               <button className={`px-3 py-1 rounded-md mx-1 ${isDarker ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200'}`}>3</button>
-               <span className={`mx-1 ${isDarker ? 'text-gray-300' : ''}`}>...</span>
-               <button className={`px-3 py-1 rounded-md mx-1 ${isDarker ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200'}`}>8</button>
+               <button className="px-3 py-1 rounded-md mx-1 bg-[#5AFF7F] text-white">1</button>
+                <button className={`px-3 py-1 rounded-md mx-1 ${isDarker ? 'bg-gray-700 hover:bg-[#5AFF7F] text-gray-300' : 'bg-gray-100 hover:bg-[#5AFF7F]'}`}>2</button>
+                <button className={`px-3 py-1 rounded-md mx-1 ${isDarker ? 'bg-gray-700 hover:bg-[#5AFF7F] text-gray-300' : 'bg-gray-100 hover:bg-[#5AFF7F]'}`}>3</button>
+                <span className="mx-1">...</span>
+                <button className={`px-3 py-1 rounded-md mx-1 ${isDarker ? 'bg-gray-700 hover:bg-[#5AFF7F] text-gray-300' : 'bg-gray-100 hover:bg-[#5AFF7F]'}`}>8</button>
                <button className={`px-3 py-1 rounded-md ml-2 ${isDarker ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}>
                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke={isDarker ? 'white' : 'currentColor'} className="w-5 h-5">
                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

@@ -86,7 +86,7 @@ function ThemeToggle() {
     const { theme, toggleTheme, isDarker } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$src$2f$components$2f$ThemeContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useTheme"])();
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         onClick: toggleTheme,
-        className: "bg-purple-600 p-1.5 rounded-full shadow hover:shadow-purple-500/50 transition-all cursor-pointer",
+        className: "bg-onaguiGreen p-1.5 rounded-full shadow hover:shadow-purple-500/50 transition-all cursor-pointer",
         style: {
             backgroundColor: isDarker ? '#3a0066' : '#9333ea'
         },
@@ -448,7 +448,7 @@ function Navigation() {
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                             type: "text",
                                             placeholder: "Search...",
-                                            className: "w-8 group-hover:w-64 rounded-full border border-gray-700 bg-gray-800 py-1.5 pl-8 pr-2 text-sm text-gray-300 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all duration-300 ease-in-out"
+                                            className: "w-8 group-hover:w-64 rounded-full border border-gray-700 bg-gray-800 py-1.5 pl-8 pr-2 text-sm text-gray-300 focus:border-onaguiGreen focus:outline-none focus:ring-1 focus:ring-onaguiGreen transition-all duration-300 ease-in-out"
                                         }, void 0, false, {
                                             fileName: "[project]/temp-restore/src/components/Navigation.tsx",
                                             lineNumber: 45,
@@ -1473,7 +1473,7 @@ function FundraisePage() {
                                                         className: "flex justify-between text-sm",
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                className: "font-medium text-purple-600",
+                                                                className: "font-medium text-onaguiGreen",
                                                                 children: "$22,500 raised"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/temp-restore/src/app/fundraise/page.tsx",
@@ -1712,7 +1712,7 @@ function FundraisePage() {
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                         type: "text",
                                                         placeholder: "Search fundraisers...",
-                                                        className: "pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                        className: "pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-onaguiGreen focus:border-transparent"
                                                     }, void 0, false, {
                                                         fileName: "[project]/temp-restore/src/app/fundraise/page.tsx",
                                                         lineNumber: 193,
@@ -1753,7 +1753,7 @@ function FundraisePage() {
                                                 columnNumber: 16
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
-                                                className: "border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent",
+                                                className: "border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-onaguiGreen focus:border-transparent",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                         children: "All Categories"
@@ -2809,7 +2809,7 @@ function FundraisePage() {
                                             columnNumber: 16
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                            className: "px-3 py-1 rounded-md mx-1 bg-purple-600 text-white",
+                                            className: "px-3 py-1 rounded-md mx-1 bg-onaguiGreen text-white",
                                             children: "1"
                                         }, void 0, false, {
                                             fileName: "[project]/temp-restore/src/app/fundraise/page.tsx",

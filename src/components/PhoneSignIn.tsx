@@ -238,7 +238,7 @@ export default function PhoneSignIn() {
                 disabled={loading || !phoneNumber}
                 className={`w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors ${(loading || !phoneNumber) ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
-                {loading ? 'Sending...' : 'Send Verification Code'}
+                {loading ? "Sending..." : "Send Verification Code"}
               </button>
             </>
           ) : (
@@ -279,7 +279,7 @@ export default function PhoneSignIn() {
           )}
           
           <div className="mt-4 text-xs text-gray-400 text-center">
-            By continuing, you agree to our <a href="/privacy" className="text-blue-400 hover:underline">Privacy Policy</a> and <a href="/terms" className="text-blue-400 hover:underline">Terms of Service</a>.
+            By continuing, you agree to our <a href="/privacy" className="text-[#5AFF7F] hover:underline">Privacy Policy</a> and <a href="/terms" className="text-[#5AFF7F] hover:underline">Terms of Service</a>.
           </div>
         </div>
       </div>

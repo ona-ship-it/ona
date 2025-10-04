@@ -49,7 +49,7 @@ export default function XSignIn() {
         className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-black hover:bg-gray-800 text-white rounded-md transition-colors"
       >
         <FaXTwitter className="text-xl" />
-        <span>{loading ? &apos;Connecting...&apos; : &apos;Continue with X&apos;}</span>
+        <span>{loading ? 'Connecting...' : 'Continue with X'}</span>
       </button>
     </div>
   );

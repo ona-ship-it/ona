@@ -6,7 +6,7 @@ import PageTitle from '@/components/PageTitle';
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-[#1f2937] to-[#000000] text-white">
       <Navigation />
       <header className="bg-blue-600 dark:bg-blue-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

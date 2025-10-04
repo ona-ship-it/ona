@@ -17,7 +17,7 @@ function ThemeToggle() {
     const { theme, toggleTheme, isDarker } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$src$2f$components$2f$ThemeContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useTheme"])();
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         onClick: toggleTheme,
-        className: "bg-purple-600 p-1.5 rounded-full shadow hover:shadow-purple-500/50 transition-all cursor-pointer",
+        className: "bg-onaguiGreen p-1.5 rounded-full shadow hover:shadow-purple-500/50 transition-all cursor-pointer",
         style: {
             backgroundColor: isDarker ? '#3a0066' : '#9333ea'
         },
@@ -290,7 +290,7 @@ function Navigation() {
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                             type: "text",
                                             placeholder: "Search...",
-                                            className: "w-8 group-hover:w-64 rounded-full border border-gray-700 bg-gray-800 py-1.5 pl-8 pr-2 text-sm text-gray-300 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all duration-300 ease-in-out"
+                                            className: "w-8 group-hover:w-64 rounded-full border border-gray-700 bg-gray-800 py-1.5 pl-8 pr-2 text-sm text-gray-300 focus:border-onaguiGreen focus:outline-none focus:ring-1 focus:ring-onaguiGreen transition-all duration-300 ease-in-out"
                                         }, void 0, false, {
                                             fileName: "[project]/temp-restore/src/components/Navigation.tsx",
                                             lineNumber: 44,
@@ -981,7 +981,7 @@ function MarketplacePage() {
                                                         className: "flex justify-between items-center",
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                className: "font-bold text-xl text-purple-600",
+                                                                className: "font-bold text-xl text-onaguiGreen",
                                                                 children: "$899"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/temp-restore/src/app/marketplace/page.tsx",
@@ -1492,7 +1492,7 @@ function MarketplacePage() {
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                         type: "text",
                                                         placeholder: "Search items...",
-                                                        className: "pl-10 pr-4 py-2 rounded-full ".concat(isDarker ? 'bg-gray-800 border-gray-700 text-gray-200' : 'bg-gray-100 border-gray-200', " border focus:outline-none focus:ring-2 focus:ring-purple-500 w-64")
+                                                        className: "pl-10 pr-4 py-2 rounded-full ".concat(isDarker ? 'bg-gray-800 border-gray-700 text-gray-200' : 'bg-gray-100 border-gray-200', " border focus:outline-none focus:ring-2 focus:ring-onaguiGreen w-64")
                                                     }, void 0, false, {
                                                         fileName: "[project]/temp-restore/src/app/marketplace/page.tsx",
                                                         lineNumber: 181,
@@ -1526,7 +1526,7 @@ function MarketplacePage() {
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
-                                                className: "rounded-full px-4 py-2 ".concat(isDarker ? 'bg-gray-800 border-gray-700 text-gray-200' : 'bg-gray-100 border-gray-200', " border focus:outline-none focus:ring-2 focus:ring-purple-500"),
+                                                className: "rounded-full px-4 py-2 ".concat(isDarker ? 'bg-gray-800 border-gray-700 text-gray-200' : 'bg-gray-100 border-gray-200', " border focus:outline-none focus:ring-2 focus:ring-onaguiGreen"),
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                         children: "All Categories"
@@ -1770,7 +1770,7 @@ function MarketplacePage() {
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                            className: "w-10 h-10 rounded-full ".concat(isDarker ? 'bg-purple-600 text-white' : 'bg-purple-600 text-white'),
+                                            className: "w-10 h-10 rounded-full ".concat(isDarker ? 'bg-onaguiGreen text-white' : 'bg-onaguiGreen text-white'),
                                             children: "1"
                                         }, void 0, false, {
                                             fileName: "[project]/temp-restore/src/app/marketplace/page.tsx",

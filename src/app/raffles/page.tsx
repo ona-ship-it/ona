@@ -256,9 +256,9 @@ export default function RafflesPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className={`w-10 h-10 rounded-full ${isDarker ? 'bg-blue-600 text-white' : 'bg-blue-600 text-white'}`}>1</button>
-              <button className={`w-10 h-10 rounded-full ${isDarker ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}>2</button>
-              <button className={`w-10 h-10 rounded-full ${isDarker ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}>3</button>
+              <button className={`w-10 h-10 rounded-full bg-[#5AFF7F] text-white`}>1</button>
+                <button className={`w-10 h-10 rounded-full ${isDarker ? 'bg-gray-800 hover:bg-[#5AFF7F] text-gray-300' : 'bg-gray-100 hover:bg-[#5AFF7F] text-gray-600'}`}>2</button>
+                <button className={`w-10 h-10 rounded-full ${isDarker ? 'bg-gray-800 hover:bg-[#5AFF7F] text-gray-300' : 'bg-gray-100 hover:bg-[#5AFF7F] text-gray-600'}`}>3</button>
               <button className={`p-2 rounded-full ${isDarker ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

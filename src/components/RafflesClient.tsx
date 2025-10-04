@@ -136,9 +136,15 @@ function MostPopularRaffles() {
         className="flex overflow-x-auto space-x-6 pb-6 pt-2 px-2 scrollbar-hide"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {popularRaffles.map((raffle, index) => (
-          <RaffleCard key={raffle.id} raffle={raffle} index={index} />
-        ))}
+        {popularRaffles.map((raffle, index) => {
+  return (
+    <RaffleCard 
+      key={raffle.id} 
+      raffle={raffle} 
+      index={index} 
+    />
+  );
+})}
       </div>
     </div>
   );
@@ -152,9 +158,17 @@ interface Raffle {
   entries: string;
   image: string;
   timeLeft: string;
+  gradient: string;
+  organizer: string;
+  prize: string;
 }
 
-function RaffleCard({ raffle, index }: { raffle: Raffle; index: number }) {
+interface RaffleCardProps {
+  raffle: Raffle;
+  index: number;
+}
+
+function RaffleCard({ raffle, index }: RaffleCardProps) {
   return (
     <div 
       className="flex-shrink-0 w-72 bg-gray-900/70 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-purple-500 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/30 mb-2 mx-1"
@@ -246,7 +260,7 @@ function WeeklyRaffles() {
         <div className="flex space-x-2 items-center">
           <button 
             onClick={scrollLeft}
-            className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+            className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
@@ -254,7 +268,7 @@ function WeeklyRaffles() {
           </button>
           <button 
             onClick={scrollRight}
-            className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+            className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
@@ -268,9 +282,15 @@ function WeeklyRaffles() {
         className="flex overflow-x-auto space-x-8 pb-8 pt-4 px-4 scrollbar-hide"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {weeklyRaffles.map((raffle, index) => (
-          <RaffleCard key={raffle.id} raffle={raffle} index={index} />
-        ))}
+        {weeklyRaffles.map((raffle, index) => {
+  return (
+    <RaffleCard 
+      key={raffle.id} 
+      raffle={raffle} 
+      index={index} 
+    />
+  );
+})}
       </div>
     </section>
   );
@@ -336,7 +356,7 @@ function LimitedTimeRaffles() {
         <div className="flex space-x-2 items-center">
           <button 
             onClick={scrollLeft}
-            className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+            className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
@@ -344,7 +364,7 @@ function LimitedTimeRaffles() {
           </button>
           <button 
             onClick={scrollRight}
-            className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+            className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
@@ -359,7 +379,11 @@ function LimitedTimeRaffles() {
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {limitedRaffles.map((raffle, index) => (
-          <RaffleCard key={raffle.id} raffle={raffle} index={index} />
+          <RaffleCard 
+  key={raffle.id} 
+  raffle={raffle} 
+  index={index} 
+/>
         ))}
       </div>
     </section>
@@ -435,7 +459,7 @@ function NewRaffles() {
         <div className="flex space-x-2 items-center">
           <button 
             onClick={scrollLeft}
-            className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+            className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
@@ -443,7 +467,7 @@ function NewRaffles() {
           </button>
           <button 
             onClick={scrollRight}
-            className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700 transition-colors duration-300"
+            className="p-2 rounded-full bg-purple-800/50 hover:bg-onaguiGreen-dark transition-colors duration-300"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
@@ -457,9 +481,15 @@ function NewRaffles() {
         className="flex overflow-x-auto space-x-8 pb-8 pt-4 px-4 scrollbar-hide"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {newRaffles.map((raffle, index) => (
-          <RaffleCard key={raffle.id} raffle={raffle} index={index} />
-        ))}
+        {newRaffles.map((raffle, index) => {
+  return (
+    <RaffleCard 
+      key={raffle.id} 
+      raffle={raffle} 
+      index={index} 
+    />
+  );
+})}
       </div>
     </section>
   );

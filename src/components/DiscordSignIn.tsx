@@ -49,7 +49,7 @@ export default function DiscordSignIn() {
         className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-md transition-colors"
       >
         <FaDiscord className="text-xl" />
-        <span>{loading ? &apos;Connecting...&apos; : &apos;Continue with Discord&apos;}</span>
+        <span>{loading ? 'Connecting...' : 'Continue with Discord'}</span>
       </button>
     </div>
   );

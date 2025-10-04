@@ -38,7 +38,8 @@ function DiscordSignIn() {
                 throw error;
             }
         } catch (error) {
-            setError(error.message || 'An error occurred during Discord sign-in');
+            const errorMessage = error instanceof Error ? error.message : 'An error occurred during Discord sign-in';
+            setError(errorMessage);
             console.error('Discord sign-in error:', error);
         } finally{
             setLoading(false);
@@ -52,7 +53,7 @@ function DiscordSignIn() {
                 children: error
             }, void 0, false, {
                 fileName: "[project]/temp-restore/src/components/DiscordSignIn.tsx",
-                lineNumber: 40,
+                lineNumber: 41,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -64,26 +65,26 @@ function DiscordSignIn() {
                         className: "text-xl"
                     }, void 0, false, {
                         fileName: "[project]/temp-restore/src/components/DiscordSignIn.tsx",
-                        lineNumber: 50,
+                        lineNumber: 51,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                         children: loading ? 'Connecting...' : 'Continue with Discord'
                     }, void 0, false, {
                         fileName: "[project]/temp-restore/src/components/DiscordSignIn.tsx",
-                        lineNumber: 51,
+                        lineNumber: 52,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/temp-restore/src/components/DiscordSignIn.tsx",
-                lineNumber: 45,
+                lineNumber: 46,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/temp-restore/src/components/DiscordSignIn.tsx",
-        lineNumber: 38,
+        lineNumber: 39,
         columnNumber: 5
     }, this);
 }

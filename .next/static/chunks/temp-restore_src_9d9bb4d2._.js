@@ -106,22 +106,28 @@ __turbopack_context__.s([
     ()=>OnaguiLogo
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/temp-restore/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$src$2f$components$2f$ThemeContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/temp-restore/src/components/ThemeContext.tsx [app-client] (ecmascript)");
+;
+var _s = __turbopack_context__.k.signature();
 ;
 function OnaguiLogo(param) {
     let { className = '' } = param;
+    _s();
+    const { isWhite } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$src$2f$components$2f$ThemeContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useTheme"])();
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
         className: "flex items-center ".concat(className),
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-            className: "text-2xl uppercase font-light text-gray-100 whitespace-nowrap transition-all duration-300 hover:text-purple-300",
+            className: "text-2xl uppercase font-light whitespace-nowrap transition-all duration-300 ".concat(isWhite ? 'text-purple-900 hover:text-purple-700' : 'text-gray-100 hover:text-purple-300'),
             style: {
-                textShadow: '0 0 10px rgba(255, 255, 255, 0.3)',
-                letterSpacing: '0.15em'
+                textShadow: isWhite ? '0 2px 8px rgba(168, 85, 247, 0.3)' : '0 0 10px rgba(255, 255, 255, 0.3)',
+                letterSpacing: '0.15em',
+                fontWeight: isWhite ? '500' : '300'
             },
             onMouseEnter: (e)=>{
-                e.currentTarget.style.textShadow = '0 0 15px rgba(168, 85, 247, 0.8)';
+                e.currentTarget.style.textShadow = isWhite ? '0 4px 12px rgba(168, 85, 247, 0.6)' : '0 0 15px rgba(168, 85, 247, 0.8)';
             },
             onMouseLeave: (e)=>{
-                e.currentTarget.style.textShadow = '0 0 10px rgba(255, 255, 255, 0.3)';
+                e.currentTarget.style.textShadow = isWhite ? '0 2px 8px rgba(168, 85, 247, 0.3)' : '0 0 10px rgba(255, 255, 255, 0.3)';
             },
             children: [
                 "ON",
@@ -135,22 +141,27 @@ function OnaguiLogo(param) {
                     children: "V"
                 }, void 0, false, {
                     fileName: "[project]/temp-restore/src/components/OnaguiLogo.tsx",
-                    lineNumber: 23,
+                    lineNumber: 35,
                     columnNumber: 11
                 }, this),
                 "GUI"
             ]
         }, void 0, true, {
             fileName: "[project]/temp-restore/src/components/OnaguiLogo.tsx",
-            lineNumber: 10,
+            lineNumber: 13,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/temp-restore/src/components/OnaguiLogo.tsx",
-        lineNumber: 9,
+        lineNumber: 12,
         columnNumber: 5
     }, this);
 }
+_s(OnaguiLogo, "V+pQ71de3U6XHOR+1bdB4ZUCH6g=", false, function() {
+    return [
+        __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$src$2f$components$2f$ThemeContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useTheme"]
+    ];
+});
 _c = OnaguiLogo;
 var _c;
 __turbopack_context__.k.register(_c, "OnaguiLogo");
@@ -166,31 +177,80 @@ __turbopack_context__.s([
     ()=>AuthButtons
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/temp-restore/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2d$auth$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/temp-restore/node_modules/next-auth/react/index.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f40$supabase$2f$auth$2d$helpers$2d$nextjs$2f$dist$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/temp-restore/node_modules/@supabase/auth-helpers-nextjs/dist/index.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/temp-restore/node_modules/next/dist/client/app-dir/link.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/temp-restore/node_modules/next/navigation.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/temp-restore/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
 ;
 var _s = __turbopack_context__.k.signature();
 "use client";
 ;
 ;
+;
+;
 function AuthButtons() {
     _s();
-    const { data: session } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2d$auth$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSession"])();
+    const supabase = (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f40$supabase$2f$auth$2d$helpers$2d$nextjs$2f$dist$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createClientComponentClient"])();
+    const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
+    const [session, setSession] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "AuthButtons.useEffect": ()=>{
+            const getSession = {
+                "AuthButtons.useEffect.getSession": async ()=>{
+                    const { data } = await supabase.auth.getSession();
+                    setSession(data.session);
+                }
+            }["AuthButtons.useEffect.getSession"];
+            getSession();
+            const { data: { subscription } } = supabase.auth.onAuthStateChange({
+                "AuthButtons.useEffect": (_event, session)=>{
+                    setSession(session);
+                }
+            }["AuthButtons.useEffect"]);
+            return ({
+                "AuthButtons.useEffect": ()=>subscription.unsubscribe()
+            })["AuthButtons.useEffect"];
+        }
+    }["AuthButtons.useEffect"], [
+        supabase
+    ]);
+    const handleSignOut = async ()=>{
+        await supabase.auth.signOut();
+        router.refresh();
+    };
     if (!session) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
             className: "flex gap-2",
             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                 href: "/login",
-                className: "px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 transition-all duration-300",
-                children: "Sign In / Sign Up"
-            }, void 0, false, {
+                className: "group bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold rounded-full shadow-lg flex items-center justify-center w-10 h-10 transition-all duration-300 ease-in-out overflow-hidden hover:w-28 md:hover:w-28 sm:hover:w-24 touch-manipulation relative",
+                "aria-label": "Sign In or Sign Up",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                        className: "text-2xl font-extrabold transition-all duration-300 z-10 absolute left-1/2 transform -translate-x-1/2 group-hover:left-3 group-hover:translate-x-0",
+                        children: "+"
+                    }, void 0, false, {
+                        fileName: "[project]/temp-restore/src/components/AuthButtons.tsx",
+                        lineNumber: 44,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                        className: "opacity-0 group-hover:opacity-100 whitespace-nowrap transition-all duration-300 text-sm absolute right-3 text-right",
+                        children: "Sign up"
+                    }, void 0, false, {
+                        fileName: "[project]/temp-restore/src/components/AuthButtons.tsx",
+                        lineNumber: 47,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
                 fileName: "[project]/temp-restore/src/components/AuthButtons.tsx",
-                lineNumber: 13,
+                lineNumber: 39,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/temp-restore/src/components/AuthButtons.tsx",
-            lineNumber: 12,
+            lineNumber: 38,
             columnNumber: 7
         }, this);
     }
@@ -203,28 +263,28 @@ function AuthButtons() {
                 children: "My Account"
             }, void 0, false, {
                 fileName: "[project]/temp-restore/src/components/AuthButtons.tsx",
-                lineNumber: 25,
+                lineNumber: 57,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                onClick: ()=>(0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2d$auth$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["signOut"])(),
+                onClick: handleSignOut,
                 className: "px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700",
                 children: "Sign Out"
             }, void 0, false, {
                 fileName: "[project]/temp-restore/src/components/AuthButtons.tsx",
-                lineNumber: 31,
+                lineNumber: 63,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/temp-restore/src/components/AuthButtons.tsx",
-        lineNumber: 24,
+        lineNumber: 56,
         columnNumber: 5
     }, this);
 }
-_s(AuthButtons, "xGqsfA9Yc4bug2CeORcyTsHwvXY=", false, function() {
+_s(AuthButtons, "tvnv1FjadGN9l6MdROy2SZsUWpk=", false, function() {
     return [
-        __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2d$auth$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSession"]
+        __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"]
     ];
 });
 _c = AuthButtons;
@@ -288,7 +348,7 @@ function Navigation() {
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                         href: "/fundraise",
-                                        className: "flex items-center text-sm font-medium text-gray-200 hover:text-purple-400",
+                                        className: "flex items-center text-sm font-medium ".concat(isWhite ? 'text-gray-700 hover:text-purple-800' : 'text-gray-200 hover:text-purple-400', " transition-colors duration-200"),
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 className: "mr-1",
@@ -307,7 +367,7 @@ function Navigation() {
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                         href: "/giveaways",
-                                        className: "flex items-center text-sm font-medium text-gray-200 hover:text-purple-400",
+                                        className: "flex items-center text-sm font-medium ".concat(isWhite ? 'text-gray-700 hover:text-green-700' : 'text-gray-200 hover:text-purple-400', " transition-colors duration-200"),
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 className: "mr-1",
@@ -326,11 +386,11 @@ function Navigation() {
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                         href: "/raffles",
-                                        className: "flex items-center text-sm font-medium text-gray-200 hover:text-purple-400",
+                                        className: "flex items-center text-sm font-medium ".concat(isWhite ? 'text-gray-700 hover:text-purple-800' : 'text-gray-200 hover:text-purple-400', " transition-colors duration-200"),
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 className: "mr-1",
-                                                children: "🎲"
+                                                children: "🎟️"
                                             }, void 0, false, {
                                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
                                                 lineNumber: 32,
@@ -345,7 +405,7 @@ function Navigation() {
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                         href: "/marketplace",
-                                        className: "flex items-center text-sm font-medium text-gray-200 hover:text-purple-400",
+                                        className: "flex items-center text-sm font-medium ".concat(isWhite ? 'text-gray-700 hover:text-green-700' : 'text-gray-200 hover:text-purple-400', " transition-colors duration-200"),
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 className: "mr-1",
@@ -360,6 +420,44 @@ function Navigation() {
                                     }, void 0, true, {
                                         fileName: "[project]/temp-restore/src/components/Navigation.tsx",
                                         lineNumber: 35,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                        href: "/wallet",
+                                        className: "flex items-center text-sm font-medium ".concat(isWhite ? 'text-gray-700 hover:text-yellow-600' : 'text-gray-200 hover:text-purple-400', " transition-colors duration-200"),
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                className: "mr-1",
+                                                children: "💰"
+                                            }, void 0, false, {
+                                                fileName: "[project]/temp-restore/src/components/Navigation.tsx",
+                                                lineNumber: 40,
+                                                columnNumber: 15
+                                            }, this),
+                                            "Wallet"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/temp-restore/src/components/Navigation.tsx",
+                                        lineNumber: 39,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                        href: "/profile",
+                                        className: "flex items-center text-sm font-medium ".concat(isWhite ? 'text-gray-700 hover:text-blue-700' : 'text-gray-200 hover:text-purple-400', " transition-colors duration-200"),
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                className: "mr-1",
+                                                children: "👑"
+                                            }, void 0, false, {
+                                                fileName: "[project]/temp-restore/src/components/Navigation.tsx",
+                                                lineNumber: 44,
+                                                columnNumber: 15
+                                            }, this),
+                                            "Profile"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/temp-restore/src/components/Navigation.tsx",
+                                        lineNumber: 43,
                                         columnNumber: 13
                                     }, this)
                                 ]
@@ -385,10 +483,10 @@ function Navigation() {
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                             type: "text",
                                             placeholder: "Search...",
-                                            className: "w-8 group-hover:w-64 rounded-full border border-gray-700 bg-gray-800 py-1.5 pl-8 pr-2 text-sm text-gray-300 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all duration-300 ease-in-out"
+                                            className: "w-8 group-hover:w-64 rounded-full border border-gray-700 bg-gray-800 py-1.5 pl-8 pr-2 text-sm text-gray-300 focus:border-onaguiGreen focus:outline-none focus:ring-1 focus:ring-onaguiGreen transition-all duration-300 ease-in-out"
                                         }, void 0, false, {
                                             fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                            lineNumber: 45,
+                                            lineNumber: 53,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -405,28 +503,28 @@ function Navigation() {
                                                     d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                                                 }, void 0, false, {
                                                     fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                                    lineNumber: 52,
+                                                    lineNumber: 60,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                                lineNumber: 51,
+                                                lineNumber: 59,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                            lineNumber: 50,
+                                            lineNumber: 58,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                    lineNumber: 44,
+                                    lineNumber: 52,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                lineNumber: 43,
+                                lineNumber: 51,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -434,25 +532,25 @@ function Navigation() {
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$src$2f$components$2f$AuthButtons$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                                         fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                        lineNumber: 58,
+                                        lineNumber: 66,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "ml-2",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$src$2f$components$2f$ThemeToggle$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                                             fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                            lineNumber: 60,
+                                            lineNumber: 68,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                        lineNumber: 59,
+                                        lineNumber: 67,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                lineNumber: 57,
+                                lineNumber: 65,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -467,7 +565,7 @@ function Navigation() {
                                             children: "Open main menu"
                                         }, void 0, false, {
                                             fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                            lineNumber: 69,
+                                            lineNumber: 77,
                                             columnNumber: 15
                                         }, this),
                                         !isOpen ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
@@ -482,12 +580,12 @@ function Navigation() {
                                                 d: "M4 6h16M4 12h16M4 18h16"
                                             }, void 0, false, {
                                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                                lineNumber: 72,
+                                                lineNumber: 80,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                            lineNumber: 71,
+                                            lineNumber: 79,
                                             columnNumber: 17
                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
                                             className: "block h-6 w-6",
@@ -501,29 +599,29 @@ function Navigation() {
                                                 d: "M6 18L18 6M6 6l12 12"
                                             }, void 0, false, {
                                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                                lineNumber: 76,
+                                                lineNumber: 84,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                            lineNumber: 75,
+                                            lineNumber: 83,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                    lineNumber: 64,
+                                    lineNumber: 72,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                lineNumber: 63,
+                                lineNumber: 71,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                        lineNumber: 42,
+                        lineNumber: 50,
                         columnNumber: 9
                     }, this)
                 ]
@@ -540,84 +638,122 @@ function Navigation() {
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                 href: "/fundraise",
-                                className: "flex items-center text-gray-300 hover:text-white hover:bg-[#3a0066] block px-3 py-2 rounded-md text-base font-medium",
+                                className: "flex items-center block px-3 py-2 rounded-md text-base font-medium ".concat(isWhite ? 'text-gray-700 hover:text-purple-800 hover:bg-gray-100' : 'text-gray-300 hover:text-white hover:bg-[#3a0066]'),
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         className: "mr-2",
                                         children: "🎯"
                                     }, void 0, false, {
                                         fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                        lineNumber: 89,
+                                        lineNumber: 97,
                                         columnNumber: 15
                                     }, this),
                                     "Fundraise"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                lineNumber: 88,
+                                lineNumber: 96,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                 href: "/giveaways",
-                                className: "flex items-center text-gray-300 hover:text-white hover:bg-[#3a0066] block px-3 py-2 rounded-md text-base font-medium",
+                                className: "flex items-center block px-3 py-2 rounded-md text-base font-medium ".concat(isWhite ? 'text-gray-700 hover:text-green-700 hover:bg-gray-100' : 'text-gray-300 hover:text-white hover:bg-[#3a0066]'),
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         className: "mr-2",
                                         children: "🎁"
                                     }, void 0, false, {
                                         fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                        lineNumber: 93,
+                                        lineNumber: 101,
                                         columnNumber: 15
                                     }, this),
                                     "Giveaways"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                lineNumber: 92,
+                                lineNumber: 100,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                 href: "/raffles",
-                                className: "flex items-center text-gray-300 hover:text-white hover:bg-[#3a0066] block px-3 py-2 rounded-md text-base font-medium",
+                                className: "flex items-center block px-3 py-2 rounded-md text-base font-medium ".concat(isWhite ? 'text-gray-700 hover:text-purple-800 hover:bg-gray-100' : 'text-gray-300 hover:text-white hover:bg-[#3a0066]'),
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         className: "mr-2",
-                                        children: "🎲"
+                                        children: "🎟️"
                                     }, void 0, false, {
                                         fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                        lineNumber: 97,
+                                        lineNumber: 105,
                                         columnNumber: 13
                                     }, this),
                                     "Raffles"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                lineNumber: 96,
+                                lineNumber: 104,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                 href: "/marketplace",
-                                className: "flex items-center text-gray-300 hover:text-white hover:bg-[#3a0066] block px-3 py-2 rounded-md text-base font-medium",
+                                className: "flex items-center block px-3 py-2 rounded-md text-base font-medium ".concat(isWhite ? 'text-gray-700 hover:text-green-700 hover:bg-gray-100' : 'text-gray-300 hover:text-white hover:bg-[#3a0066]'),
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         className: "mr-2",
                                         children: "🛒"
                                     }, void 0, false, {
                                         fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                        lineNumber: 101,
+                                        lineNumber: 109,
                                         columnNumber: 13
                                     }, this),
                                     "Marketplace"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                lineNumber: 100,
+                                lineNumber: 108,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                href: "/wallet",
+                                className: "flex items-center block px-3 py-2 rounded-md text-base font-medium ".concat(isWhite ? 'text-gray-700 hover:text-yellow-600 hover:bg-gray-100' : 'text-gray-300 hover:text-white hover:bg-[#3a0066]'),
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "mr-2",
+                                        children: "💰"
+                                    }, void 0, false, {
+                                        fileName: "[project]/temp-restore/src/components/Navigation.tsx",
+                                        lineNumber: 113,
+                                        columnNumber: 13
+                                    }, this),
+                                    "Wallet"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/temp-restore/src/components/Navigation.tsx",
+                                lineNumber: 112,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                href: "/profile",
+                                className: "flex items-center block px-3 py-2 rounded-md text-base font-medium ".concat(isWhite ? 'text-gray-700 hover:text-blue-700 hover:bg-gray-100' : 'text-gray-300 hover:text-white hover:bg-[#3a0066]'),
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "mr-2",
+                                        children: "👑"
+                                    }, void 0, false, {
+                                        fileName: "[project]/temp-restore/src/components/Navigation.tsx",
+                                        lineNumber: 117,
+                                        columnNumber: 13
+                                    }, this),
+                                    "Profile"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/temp-restore/src/components/Navigation.tsx",
+                                lineNumber: 116,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                        lineNumber: 87,
+                        lineNumber: 95,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -638,17 +774,17 @@ function Navigation() {
                                                     d: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"
                                                 }, void 0, false, {
                                                     fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                                    lineNumber: 110,
+                                                    lineNumber: 126,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                                lineNumber: 109,
+                                                lineNumber: 125,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                            lineNumber: 108,
+                                            lineNumber: 124,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -658,23 +794,23 @@ function Navigation() {
                                                 children: "Guest"
                                             }, void 0, false, {
                                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                                lineNumber: 114,
+                                                lineNumber: 130,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                            lineNumber: 113,
+                                            lineNumber: 129,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                    lineNumber: 107,
+                                    lineNumber: 123,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                lineNumber: 106,
+                                lineNumber: 122,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -683,29 +819,29 @@ function Navigation() {
                                     className: "px-3 py-2",
                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$src$2f$components$2f$AuthButtons$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                                         fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                        lineNumber: 120,
+                                        lineNumber: 136,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                    lineNumber: 119,
+                                    lineNumber: 135,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                                lineNumber: 118,
+                                lineNumber: 134,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                        lineNumber: 105,
+                        lineNumber: 121,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/temp-restore/src/components/Navigation.tsx",
-                lineNumber: 86,
+                lineNumber: 94,
                 columnNumber: 9
             }, this)
         ]
@@ -751,12 +887,7 @@ const PageTitle = (param)=>{
         setTextShadow('0 0 10px rgba(255, 255, 255, 0.3)');
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-        className: "\n        ".concat(gradient ? 'bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500' : 'text-gray-100', "\n        font-light tracking-wider uppercase transition-all duration-300 hover:text-purple-300\n        ").concat(className, "\n      "),
-        style: {
-            textShadow
-        },
-        onMouseEnter: handleMouseEnter,
-        onMouseLeave: handleMouseLeave,
+        className: "\n        ".concat(gradient ? 'bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500' : 'text-gray-100', "\n        font-light tracking-wider uppercase\n        ").concat(className, "\n      "),
         children: children
     }, void 0, false, {
         fileName: "[project]/temp-restore/src/components/PageTitle.tsx",
@@ -1401,7 +1532,7 @@ function FundraisePage() {
                                                         className: "flex justify-between text-sm",
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                className: "font-medium text-purple-600",
+                                                                className: "font-medium text-onaguiGreen",
                                                                 children: "$22,500 raised"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/temp-restore/src/app/fundraise/page.tsx",
@@ -1640,7 +1771,7 @@ function FundraisePage() {
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                         type: "text",
                                                         placeholder: "Search fundraisers...",
-                                                        className: "pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                        className: "pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-onaguiGreen focus:border-transparent"
                                                     }, void 0, false, {
                                                         fileName: "[project]/temp-restore/src/app/fundraise/page.tsx",
                                                         lineNumber: 193,
@@ -1681,7 +1812,7 @@ function FundraisePage() {
                                                 columnNumber: 16
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
-                                                className: "border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent",
+                                                className: "border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-onaguiGreen focus:border-transparent",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                         children: "All Categories"
@@ -2737,7 +2868,7 @@ function FundraisePage() {
                                             columnNumber: 16
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$temp$2d$restore$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                            className: "px-3 py-1 rounded-md mx-1 bg-purple-600 text-white",
+                                            className: "px-3 py-1 rounded-md mx-1 bg-onaguiGreen text-white",
                                             children: "1"
                                         }, void 0, false, {
                                             fileName: "[project]/temp-restore/src/app/fundraise/page.tsx",
