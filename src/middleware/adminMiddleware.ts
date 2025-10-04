@@ -1,8 +1,8 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'; 
 import { cookies } from 'next/headers'; 
 
-export const createAdminClient = () => { 
-  const cookieStore = cookies(); // ✅ no await 
+export const createAdminClient = async () => { 
+  const cookieStore = await cookies(); // Now awaiting the Promise
 
   return createServerClient( 
     process.env.NEXT_PUBLIC_SUPABASE_URL!, 
@@ -33,7 +33,7 @@ export const createAdminClient = () => {
 
 // Example admin check helper 
 export async function requireAdmin(userId: string) { 
-  const supabase = createAdminClient(); 
+  const supabase = await createAdminClient(); 
   const { data, error } = await supabase 
     .from('onagui.user_roles') 
     .select('role_id') 
