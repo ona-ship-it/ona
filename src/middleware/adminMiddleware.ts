@@ -1,41 +1,65 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
-import { Database } from '@/types/supabase';
+import { createServerClient, type CookieOptions } from '@supabase/ssr'; 
+import { cookies } from 'next/headers'; 
 
-export async function adminMiddleware(request: NextRequest) {
-  const cookieStore = cookies();
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-    {
-      cookies: {
-        get(name: string) {
-          const cookie = cookieStore.then(store => store.get(name));
-          return cookie || { name, value: '' };
-        },
-      },
-    }
-  );
+// Safely initialize Supabase Admin Client (Server-side) 
+export function createAdminClient() { 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL; 
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY; 
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  if (!supabaseUrl || !serviceKey) { 
+    throw new Error('Missing Supabase environment variables.'); 
+  } 
 
-  if (!session) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
+  const cookieStore = cookies(); 
 
-  // Check if user is admin
-  const { data: profile } = await supabase
-    .from('onagui_profiles')
-    .select('onagui_type')
-    .eq('id', session.user.id)
-    .single();
+  const supabase = createServerClient(supabaseUrl, serviceKey, { 
+    cookies: { 
+      get(name: string) { 
+        // Return only the string value, not the full cookie object 
+        const cookie = cookieStore.get(name); 
+        return cookie?.value; 
+      }, 
+      set(name: string, value: string, options?: CookieOptions) { 
+        try { 
+          cookieStore.set({ name, value, ...options }); 
+        } catch (err) { 
+          console.warn('Failed to set cookie:', err); 
+        } 
+      }, 
+      remove(name: string, options?: CookieOptions) { 
+        try { 
+          cookieStore.set({ name, value: '', ...options }); 
+        } catch (err) { 
+          console.warn('Failed to remove cookie:', err); 
+        } 
+      }, 
+    }, 
+  }); 
 
-  if (!profile || profile.onagui_type !== 'admin') {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
+  return supabase; 
+} 
 
-  return NextResponse.next();
+// Example middleware usage 
+export async function requireAdmin(userId: string): Promise<boolean> { 
+  const supabase = createAdminClient(); 
+
+  const { data, error } = await supabase 
+    .from('onagui.user_roles') 
+    .select('role_id') 
+    .eq('user_id', userId) 
+    .single(); 
+
+  if (error) { 
+    console.error('Admin check failed:', error); 
+    return false; 
+  } 
+
+  // Validate admin role via roles table 
+  const { data: role } = await supabase 
+    .from('onagui.roles') 
+    .select('name') 
+    .eq('id', data.role_id) 
+    .single(); 
+
+  return role?.name === 'admin'; 
 }
