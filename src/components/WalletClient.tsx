@@ -95,6 +95,7 @@ export default function WalletClient() {
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [activeWallet, setActiveWallet] = useState<Wallet | null>(null);
+  const [showSendModal, setShowSendModal] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
 
   // Generate a deterministic wallet address based on currency and user ID
@@ -140,37 +141,51 @@ export default function WalletClient() {
             currency: 'USD',
             name: 'US Dollar',
             description: 'Regular currency you can use for purchases and withdrawals',
-            address: generateWalletAddress('USD', user.id),
+            address: '-',
             balance: wallet.fiat_balance || 0,
             icon: '💵',
-            color: 'from-green-500 to-emerald-700'
+            color: 'from-green-500 to-emerald-700',
+            type: 'fiat'
           },
           {
             currency: 'SOL',
             name: 'Solana',
             description: 'Fast blockchain with low transaction fees',
-            address: generateWalletAddress('SOL', user.id),
+            address: '0xSOL...1234',
             balance: cryptoBalances.SOL || 0,
             icon: '◎',
-            color: 'from-purple-500 to-indigo-600'
+            color: 'from-purple-500 to-indigo-600',
+            type: 'crypto'
           },
           {
             currency: 'BTC',
             name: 'Bitcoin',
             description: 'The original and most valuable cryptocurrency',
-            address: generateWalletAddress('BTC', user.id),
+            address: 'bc1q...xyz',
             balance: cryptoBalances.BTC || 0,
             icon: '₿',
-            color: 'from-orange-500 to-amber-700'
+            color: 'from-orange-500 to-amber-700',
+            type: 'crypto'
           },
           {
             currency: 'ETH',
             name: 'Ethereum',
             description: 'Popular cryptocurrency that powers many applications',
-            address: generateWalletAddress('ETH', user.id),
+            address: '0xETH...5678',
             balance: cryptoBalances.ETH || 0,
             icon: 'Ξ',
-            color: 'from-blue-500 to-cyan-700'
+            color: 'from-blue-500 to-cyan-700',
+            type: 'crypto'
+          },
+          {
+            currency: 'TICKET',
+            name: 'Raffle Tickets',
+            description: 'Tickets used to enter raffles',
+            address: '-',
+            balance: 10, // Default ticket balance
+            icon: '🎟️',
+            color: 'from-blue-500 to-cyan-700',
+            type: 'ticket'
           }
         ];
         
@@ -207,32 +222,29 @@ export default function WalletClient() {
     
     try {
       if (currency === 'USD') {
-        await addToFiatBalance(userId, amount);
+        await addToFiatBalance(supabase, userId, amount);
       } else {
-        await addToCryptoBalance(userId, currency as CryptoCurrency, amount);
+        await addToCryptoBalance(supabase, userId, currency, amount);
       }
       
       // Refresh wallet data
-      const { data } = await getUserWallet(userId);
-      if (data) {
+      const walletData = await getUserWallet(supabase, userId);
+      if (walletData) {
         const updatedWallets = wallets.map(wallet => {
           if (wallet.currency === 'USD') {
-            return { ...wallet, balance: data.fiat_balance };
-          } else if (wallet.currency === 'BTC') {
-            return { ...wallet, balance: data.btc_balance };
-          } else if (wallet.currency === 'ETH') {
-            return { ...wallet, balance: data.eth_balance };
-          } else if (wallet.currency === 'SOL') {
-            return { ...wallet, balance: data.sol_balance };
+            return { ...wallet, balance: walletData.fiat_balance };
+          } else if (walletData.crypto_balances && walletData.crypto_balances[wallet.currency]) {
+            return { ...wallet, balance: walletData.crypto_balances[wallet.currency] || 0 };
           }
           return wallet;
         });
         
         // Recalculate total value
-        let total = data.fiat_balance;
-        total += data.btc_balance * 30000;
-        total += data.eth_balance * 2000;
-        total += data.sol_balance * 100;
+        let total = walletData.fiat_balance || 0;
+        const cryptoBalances = walletData.crypto_balances || {};
+        total += (cryptoBalances.BTC || 0) * 30000;
+        total += (cryptoBalances.ETH || 0) * 2000;
+        total += (cryptoBalances.SOL || 0) * 100;
         
         setTotalValue(total);
         setWallets(updatedWallets);
@@ -260,38 +272,34 @@ export default function WalletClient() {
       
       // Process withdrawal (negative amount for withdrawal)
       if (currency === 'USD') {
-        await addToFiatBalance(userId, -amount);
+        await addToFiatBalance(supabase, userId, -amount);
       } else {
-        await addToCryptoBalance(userId, currency as CryptoCurrency, -amount);
+        await addToCryptoBalance(supabase, userId, currency, -amount);
       }
       
       // Refresh wallet data
-      const { data } = await getUserWallet(userId);
-      if (data) {
+      const walletData = await getUserWallet(supabase, userId);
+      if (walletData) {
         const updatedWallets = wallets.map(wallet => {
           if (wallet.currency === 'USD') {
-            return { ...wallet, balance: data.fiat_balance };
-          } else if (wallet.currency === 'BTC') {
-            return { ...wallet, balance: data.btc_balance };
-          } else if (wallet.currency === 'ETH') {
-            return { ...wallet, balance: data.eth_balance };
-          } else if (wallet.currency === 'SOL') {
-            return { ...wallet, balance: data.sol_balance };
+            return { ...wallet, balance: walletData.fiat_balance };
+          } else if (walletData.crypto_balances && walletData.crypto_balances[wallet.currency]) {
+            return { ...wallet, balance: walletData.crypto_balances[wallet.currency] || 0 };
           }
           return wallet;
         });
         
         // Recalculate total value
-        let total = data.fiat_balance;
-        total += data.btc_balance * 30000;
-        total += data.eth_balance * 2000;
-        total += data.sol_balance * 100;
+        let total = walletData.fiat_balance || 0;
+        const cryptoBalances = walletData.crypto_balances || {};
+        total += (cryptoBalances.BTC || 0) * 30000;
+        total += (cryptoBalances.ETH || 0) * 2000;
+        total += (cryptoBalances.SOL || 0) * 100;
         
         setTotalValue(total);
         setWallets(updatedWallets);
         
-        // Close the send modal and reset form
-        setShowSendModal(false);
+        // Reset form
         setDepositAmount('');
       }
     } catch (error) {
@@ -536,7 +544,7 @@ export default function WalletClient() {
                 <div className="flex justify-end space-x-4">
                   <button
                     onClick={() => setShowSendModal(false)}
-                    className="px-4 py-2 border rounded"
+                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
                   >
                     Cancel
                   </button>

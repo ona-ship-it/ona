@@ -6,5 +6,16 @@ export const metadata = {
 };
 
 export default function ProfilePage() {
-  return <ProfileClient />;
+  // Using mock data for now - in a real app, this would come from the database
+  const mockUser = { id: '123', email: 'user@example.com' };
+  const mockProfile = { 
+    id: '123', 
+    user_id: '123', // Added required user_id field
+    username: 'user123', 
+    full_name: 'Test User',
+    avatar_url: '/vercel.svg',
+    bio: 'This is a test profile'
+  };
+  
+  return <ProfileClient user={mockUser} profile={mockProfile} />;
 }

@@ -114,12 +114,12 @@ export default function AdminDashboard() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        giveaway.is_active
+                        giveaway.status === 'active'
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}
                     >
-                      {giveaway.is_active ? 'Active' : 'Inactive'}
+                      {giveaway.status === 'active' ? 'Active' : 'Inactive'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -127,14 +127,14 @@ export default function AdminDashboard() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
-                      onClick={() => toggleGiveawayStatus(giveaway.id, giveaway.is_active)}
+                      onClick={() => toggleGiveawayStatus(giveaway.id, giveaway.status === 'active')}
                       className={`mr-2 ${
-                        giveaway.is_active
+                        giveaway.status === 'active'
                           ? 'text-yellow-600 hover:text-yellow-900'
                           : 'text-green-600 hover:text-green-900'
                       }`}
                     >
-                      {giveaway.is_active ? 'Deactivate' : 'Activate'}
+                      {giveaway.status === 'active' ? 'Deactivate' : 'Activate'}
                     </button>
                     <Link
                       href={`/giveaways/${giveaway.id}`}

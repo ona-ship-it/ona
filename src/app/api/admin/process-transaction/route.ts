@@ -96,8 +96,8 @@ export async function POST(request: NextRequest) {
       // Try to decrypt platform key to verify admin passphrase
       const platformKey = decryptPlatformKey(adminPassphrase);
       
-      // Update transaction status to processing
-      await updateTransactionStatus(transactionId, 'processing');
+      // Update transaction status to pending while processing
+      await updateTransactionStatus(transactionId, 'pending');
       
       // For withdrawals, initiate blockchain transaction
       if (transaction.type === 'withdrawal') {
@@ -110,9 +110,8 @@ export async function POST(request: NextRequest) {
         // For demo purposes, we'll just update the status after a delay
         // In production, you would listen for blockchain confirmation
         setTimeout(async () => {
-          await updateTransactionStatus(transactionId, 'completed', {
-            txHash: `0x${Math.random().toString(16).substring(2, 42)}` // Mock tx hash
-          });
+          const txHash = `0x${Math.random().toString(16).substring(2, 42)}`; // Mock tx hash
+          await updateTransactionStatus(transactionId, 'completed', txHash);
         }, 5000);
       } else {
         // For other transaction types, just mark as completed

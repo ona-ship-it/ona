@@ -1,25 +1,19 @@
 {
   "pages": {
     "/fundraise/page": [
-      "static/chunks/d59e1_next_dist_4967e529._.js",
-      "static/chunks/temp-restore_src_app_favicon_ico_mjs_d92482af._.js",
-      "static/chunks/[root-of-the-server]__dcec778c._.css",
-      "static/chunks/temp-restore_9207586e._.js",
-      "static/chunks/temp-restore_src_app_layout_tsx_07e9c4b8._.js",
-      "static/chunks/d59e1_next_dist_client_components_builtin_global-error_b1dfe7c5.js",
-      "static/chunks/d59e1_@supabase_node-fetch_browser_705bc84d.js",
-      "static/chunks/temp-restore_src_aa0868c6._.js",
-      "static/chunks/d59e1_c00a1bc3._.js",
-      "static/chunks/temp-restore_src_app_fundraise_page_tsx_b1dfe7c5._.js",
-      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_c646c222._.js",
-      "static/chunks/d59e1_next_dist_compiled_react-dom_1b3af47e._.js",
-      "static/chunks/d59e1_next_dist_compiled_next-devtools_index_4f8ff21c.js",
-      "static/chunks/d59e1_next_dist_compiled_753bb976._.js",
-      "static/chunks/d59e1_next_dist_client_cfcd1ce7._.js",
-      "static/chunks/d59e1_next_dist_4f7e0f09._.js",
-      "static/chunks/d59e1_@swc_helpers_cjs_7903fdfb._.js",
-      "static/chunks/temp-restore_a0ff3932._.js",
-      "static/chunks/turbopack-temp-restore_dd29e7c2._.js"
+      "static/chunks/9c10884653a1b4f3.js",
+      "static/chunks/19c2fff3892dcf5c.js",
+      "static/chunks/2473c16c0c2f6b5f.css",
+      "static/chunks/fb1f5a54d9a451d3.css",
+      "static/chunks/e8e4d49db0d818f4.js",
+      "static/chunks/c4b40a035b90cb56.js",
+      "static/chunks/a18338123fc52a21.js",
+      "static/chunks/fa8cb99b5fb60c89.js",
+      "static/chunks/06fa0fcbe0a1c6e4.js",
+      "static/chunks/8c93b28839b9942c.js",
+      "static/chunks/fdc1fc4185e36f27.js",
+      "static/chunks/8be19f26353eee5e.js",
+      "static/chunks/turbopack-c632193bca15b1ef.js"
     ]
   }
 }

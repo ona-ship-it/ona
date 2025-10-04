@@ -1,16 +1,14 @@
 {
-  "[project]/temp-restore/src/components/XSignIn.tsx [app-client] (ecmascript, next/dynamic entry)": {
-    "id": "[project]/temp-restore/src/components/XSignIn.tsx [app-client] (ecmascript, next/dynamic entry)",
+  "32683": {
+    "id": 32683,
     "files": [
-      "static/chunks/temp-restore_src_components_XSignIn_tsx_a271f6d6._.js",
-      "static/chunks/temp-restore_src_components_XSignIn_tsx_9c90da1c._.js"
+      "static/chunks/b7ad0f4b0ce3954a.js"
     ]
   },
-  "[project]/temp-restore/src/components/DiscordSignIn.tsx [app-client] (ecmascript, next/dynamic entry)": {
-    "id": "[project]/temp-restore/src/components/DiscordSignIn.tsx [app-client] (ecmascript, next/dynamic entry)",
+  "45280": {
+    "id": 45280,
     "files": [
-      "static/chunks/temp-restore_src_components_DiscordSignIn_tsx_e9d8fdd8._.js",
-      "static/chunks/temp-restore_src_components_DiscordSignIn_tsx_9c90da1c._.js"
+      "static/chunks/66c6d49e11c1e845.js"
     ]
   }
 }
