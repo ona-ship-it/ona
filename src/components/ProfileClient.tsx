@@ -658,7 +658,7 @@ setProfile({
     </div>
     
     {editing && (
-          <div className={`mt-8 rounded-lg shadow-md p-6 ${isWhite ? 'bg-white' : isDarker ? 'bg-[#0c0018] border border-gray-800' : 'bg-[#2a0044] border border-[#3a0055]'}`}>
+      <div className={`mt-8 rounded-lg shadow-md p-6 ${isWhite ? 'bg-white' : isDarker ? 'bg-[#0c0018] border border-gray-800' : 'bg-[#2a0044] border border-[#3a0055]'}`}>
             <h2 className={`text-lg font-medium mb-4 ${isWhite ? 'text-gray-900' : 'text-white'}`}>Edit Profile</h2>
             
             {/* Profile Completion Indicator */}
@@ -908,7 +908,7 @@ setProfile({
               </div>
             </form>
           </div>
-        )}
+      )}
       </div>
     </div>
   );
