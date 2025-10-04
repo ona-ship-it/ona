@@ -14,7 +14,7 @@ export default function Home() {
   const { isDarker, isWhite } = useTheme();
   
   return (
-    <main className={`min-h-screen ${isWhite ? 'bg-gray-50 text-gray-900' : 'bg-gray-900 text-white'}`}>
+    <main className={`min-h-screen ${isWhite ? 'bg-gray-50 text-gray-900' : 'bg-gradient-to-b from-[#1f2937] to-[#000000] text-white'}`}>
       <Navigation />
       <SideNavbar />
       <GoogleSignIn />
@@ -32,12 +32,12 @@ export default function Home() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
           <div className="flex justify-end mb-2">
-            <button className="flex items-center rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-1 text-xs font-medium text-white hover:from-purple-700 hover:to-indigo-700 transition-all duration-300">
+            <Link href="/wallet" className="flex items-center rounded-full bg-green-500 hover:bg-green-600 px-3 py-1 text-xs font-medium text-white transition-all duration-300">
               <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
               </svg>
               Wallet / Deposit <span className="ml-1 font-bold">$0.00</span>
-            </button>
+            </Link>
           </div>
           <div className="text-center">
             <PageTitle className="text-3xl md:text-4xl mb-2" gradient={false}>
@@ -46,14 +46,55 @@ export default function Home() {
             <p className="text-sm md:text-base text-white mb-3">
               Statistically Onagui Is Your Best Chance To Win
             </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-2">
-              <Link href="/raffles" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-1 px-4 text-sm rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 flex items-center justify-center">
-                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                Create
-              </Link>
+            <div className="flex flex-col sm:flex-row justify-center gap-2 relative">
+              <div className="group">
+                <button className="bg-green-500 hover:bg-green-600 text-white font-medium py-1 px-4 text-sm rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 flex items-center justify-center">
+                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Create
+                </button>
+                
+                {/* Hover Cards Container */}
+                <div className="fixed z-[9999] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] grid grid-cols-2 gap-4">
+                  {/* Giveaways Card */}
+                  <Link href="/giveaways" className="bg-gradient-to-br from-green-500/60 to-green-700/60 backdrop-blur-md p-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-green-400/30">
+                    <div className="flex items-center mb-2">
+                      <span className="text-2xl mr-2">🎁</span>
+                      <h3 className="text-white font-bold">Giveaways</h3>
+                    </div>
+                    <p className="text-white/90 text-sm">Create exciting giveaways with customizable entry methods and automated winner selection.</p>
+                  </Link>
+                  
+                  {/* Fundraise Card */}
+                  <Link href="/fundraise" className="bg-gradient-to-br from-purple-500/60 to-purple-700/60 backdrop-blur-md p-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-onaguiGreen-light/30">
+                    <div className="flex items-center mb-2">
+                      <span className="text-2xl mr-2">🎯</span>
+                      <h3 className="text-white font-bold">Fundraise</h3>
+                    </div>
+                    <p className="text-white/90 text-sm">Launch fundraising campaigns with goals, progress tracking, and supporter recognition.</p>
+                  </Link>
+                  
+                  {/* Raffles Card */}
+                  <Link href="/raffles" className="bg-gradient-to-br from-blue-500/60 to-blue-700/60 backdrop-blur-md p-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-blue-400/30">
+                    <div className="flex items-center mb-2">
+                      <span className="text-2xl mr-2">🎟️</span>
+                      <h3 className="text-white font-bold">Raffles</h3>
+                    </div>
+                    <p className="text-white/90 text-sm">Set up raffles with ticket sales, prize tiers, and transparent drawing mechanisms.</p>
+                  </Link>
+                  
+                  {/* Marketplace Card */}
+                  <Link href="/marketplace" className="bg-gradient-to-br from-amber-500/60 to-amber-700/60 backdrop-blur-md p-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-amber-400/30">
+                    <div className="flex items-center mb-2">
+                      <span className="text-2xl mr-2">🛒</span>
+                      <h3 className="text-white font-bold">Marketplace</h3>
+                    </div>
+                    <p className="text-white/90 text-sm">Sell digital or physical products with secure payments and delivery tracking.</p>
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -248,3 +289,4 @@ export default function Home() {
     </main>
   );
 }
+

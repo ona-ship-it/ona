@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import ThemeToggle from './ThemeToggle';
 import { useTheme } from './ThemeContext';
 import OnaguiLogo from './OnaguiLogo';
 import AuthButtons from './AuthButtons';
+import ProfilePopup from './ProfilePopup';
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { isDarker, isWhite } = useTheme();
+  const profileRef = useRef<HTMLDivElement>(null);
   
   return (
     <header className={`sticky top-0 z-50 w-full border-b backdrop-blur-sm ${isWhite ? 'bg-white/90 border-gray-200' : isDarker ? 'bg-[#0a0015]/75 border-gray-800' : 'bg-[#1a0033]/75 border-[#2a0044]'}`}>
@@ -20,22 +23,35 @@ export default function Navigation() {
             <OnaguiLogo />
           </Link>
           <div className="hidden md:flex md:items-center md:space-x-6 whitespace-nowrap">
-            <Link href="/fundraise" className={`flex items-center text-sm font-medium ${isWhite ? 'text-gray-700 hover:text-purple-800' : 'text-gray-200 hover:text-purple-400'} transition-colors duration-200`}>
+            <Link href="/fundraise" className={`flex items-center text-sm font-medium ${isWhite ? 'text-gray-700 hover:text-bcgames-green' : 'text-gray-200 hover:text-bcgames-green'} transition-colors duration-200`}>
               <span className="mr-1">🎯</span>
               Fundraise
             </Link>
-            <Link href="/giveaways" className={`flex items-center text-sm font-medium ${isWhite ? 'text-gray-700 hover:text-green-700' : 'text-gray-200 hover:text-purple-400'} transition-colors duration-200`}>
+            <Link href="/giveaways" className={`flex items-center text-sm font-medium ${isWhite ? 'text-gray-700 hover:text-bcgames-green' : 'text-gray-200 hover:text-bcgames-green'} transition-colors duration-200`}>
               <span className="mr-1">🎁</span>
               Giveaways
             </Link>
-            <Link href="/raffles" className={`flex items-center text-sm font-medium ${isWhite ? 'text-gray-700 hover:text-purple-800' : 'text-gray-200 hover:text-purple-400'} transition-colors duration-200`}>
-              <span className="mr-1">🎲</span>
+            <Link href="/raffles" className={`flex items-center text-sm font-medium ${isWhite ? 'text-gray-700 hover:text-bcgames-green' : 'text-gray-200 hover:text-bcgames-green'} transition-colors duration-200`}>
+              <span className="mr-1">🎟️</span>
               Raffles
             </Link>
-            <Link href="/marketplace" className={`flex items-center text-sm font-medium ${isWhite ? 'text-gray-700 hover:text-green-700' : 'text-gray-200 hover:text-purple-400'} transition-colors duration-200`}>
+            <Link href="/marketplace" className={`flex items-center text-sm font-medium ${isWhite ? 'text-gray-700 hover:text-bcgames-green' : 'text-gray-200 hover:text-bcgames-green'} transition-colors duration-200`}>
               <span className="mr-1">🛒</span>
               Marketplace
             </Link>
+            <div 
+              ref={profileRef}
+              className="relative"
+            >
+              <button 
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className={`flex items-center text-sm font-medium ${isWhite ? 'text-gray-700 hover:text-bcgames-green' : 'text-gray-200 hover:text-bcgames-green'} transition-colors duration-200`}
+              >
+                <span className="mr-1">👑</span>
+                Profile
+              </button>
+              <ProfilePopup isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+            </div>
           </div>
         </div>
         {/* Right section - Search, Create, Sign in */}
@@ -45,7 +61,7 @@ export default function Navigation() {
               <input
                 type="text"
                 placeholder="Search..."
-                className="w-8 group-hover:w-64 rounded-full border border-gray-700 bg-gray-800 py-1.5 pl-8 pr-2 text-sm text-gray-300 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all duration-300 ease-in-out"
+                className="w-8 group-hover:w-64 rounded-full border border-gray-700 bg-gray-800 py-1.5 pl-8 pr-2 text-sm text-gray-300 focus:border-onaguiGreen focus:outline-none focus:ring-1 focus:ring-onaguiGreen transition-all duration-300 ease-in-out"
               />
               <div className="absolute inset-y-0 left-0 flex items-center pl-2">
                 <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -54,6 +70,7 @@ export default function Navigation() {
               </div>
             </div>
           </div>
+
           <div className="flex items-center">
             <AuthButtons />
             <div className="ml-2">
@@ -94,13 +111,20 @@ export default function Navigation() {
               Giveaways
             </Link>
           <Link href="/raffles" className={`flex items-center block px-3 py-2 rounded-md text-base font-medium ${isWhite ? 'text-gray-700 hover:text-purple-800 hover:bg-gray-100' : 'text-gray-300 hover:text-white hover:bg-[#3a0066]'}`}>
-            <span className="mr-2">🎲</span>
+            <span className="mr-2">🎟️</span>
             Raffles
           </Link>
           <Link href="/marketplace" className={`flex items-center block px-3 py-2 rounded-md text-base font-medium ${isWhite ? 'text-gray-700 hover:text-green-700 hover:bg-gray-100' : 'text-gray-300 hover:text-white hover:bg-[#3a0066]'}`}>
             <span className="mr-2">🛒</span>
             Marketplace
           </Link>
+          <button 
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            className={`flex items-center block px-3 py-2 rounded-md text-base font-medium ${isWhite ? 'text-gray-700 hover:text-blue-700 hover:bg-gray-100' : 'text-gray-300 hover:text-white hover:bg-[#3a0066]'}`}
+          >
+            <span className="mr-2">👑</span>
+            Profile
+          </button>
         </div>
         <div className="pt-4 pb-3 border-t border-gray-700">
           <div className="flex items-center justify-between px-5">
