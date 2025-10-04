@@ -11,7 +11,8 @@ export async function adminMiddleware(request: NextRequest) {
     {
       cookies: {
         get(name: string) {
-          return cookieStore.get(name)?.value;
+          const cookie = cookieStore.then(store => store.get(name));
+          return cookie || { name, value: '' };
         },
       },
     }

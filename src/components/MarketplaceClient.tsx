@@ -132,7 +132,10 @@ function FeaturedProducts() {
           {featuredProducts.map((product, index) => (
             <ProductCard 
               key={product.id} 
-              product={product} 
+              product={{
+                ...product,
+                rating: parseFloat(product.rating) // Convert string rating to number
+              }} 
               index={index} 
             />
           ))}
@@ -144,10 +147,13 @@ function FeaturedProducts() {
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {featuredProducts.map((product, index) => (
-            <ProductCard 
-              key={product.id} 
-              product={product} 
-              index={index} 
+            <ProductCard
+              key={product.id}
+              product={{
+                ...product,
+                rating: parseFloat(product.rating) // Convert string rating to number
+              }}
+              index={index}
             />
           ))}
         </div>
@@ -244,11 +250,14 @@ function NewArrivals() {
       {expanded ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {newProducts.map((product, index) => (
-             <ProductCard 
-               key={product.id} 
-               product={product} 
-               index={index} 
-             />
+             <ProductCard
+                key={product.id}
+                product={{
+                  ...product,
+                  rating: parseFloat(product.rating) // Convert string rating to number
+                }}
+                index={index}
+              />
            ))}
         </div>
       ) : (
@@ -258,11 +267,14 @@ function NewArrivals() {
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {newProducts.map((product, index) => (
-             <ProductCard 
-               key={product.id} 
-               product={product} 
-               index={index} 
-             />
+             <ProductCard
+                key={product.id}
+                product={{
+                  ...product,
+                  rating: parseFloat(product.rating) // Convert string rating to number
+                }}
+                index={index}
+              />
            ))}
         </div>
       )}
@@ -360,7 +372,10 @@ function BestSellers() {
           {bestSellers.map((product, index) => (
              <ProductCard 
                key={product.id} 
-               product={product} 
+               product={{
+                 ...product,
+                 rating: parseFloat(product.rating) // Convert string rating to number
+               }} 
                index={index} 
              />
            ))}
@@ -374,7 +389,10 @@ function BestSellers() {
           {bestSellers.map((product, index) => (
              <ProductCard 
                key={product.id} 
-               product={product} 
+               product={{
+                 ...product,
+                 rating: parseFloat(product.rating) // Convert string rating to number
+               }} 
                index={index} 
              />
            ))}

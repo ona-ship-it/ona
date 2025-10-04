@@ -1,6 +1,8 @@
 var R=require("../../chunks/[turbopack]_runtime.js")("server/app/favicon.ico/route.js")
-R.c("server/chunks/d59e1_next_e14749f7._.js")
-R.c("server/chunks/[root-of-the-server]__88bcbc56._.js")
-R.m("[project]/temp-restore/.next-internal/server/app/favicon.ico/route/actions.js [app-rsc] (server actions loader, ecmascript)")
-R.m("[project]/temp-restore/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/temp-restore/src/app/favicon--route-entry.js [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)")
-module.exports=R.m("[project]/temp-restore/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/temp-restore/src/app/favicon--route-entry.js [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)").exports
+R.c("server/chunks/[root-of-the-server]__d74b1123._.js")
+R.c("server/chunks/d59e1_next_dist_39f69533._.js")
+R.c("server/chunks/d59e1_next_dist_0b50d2a7._.js")
+R.c("server/chunks/d59e1_next_64c0155d._.js")
+R.m(43405)
+R.m(25351)
+module.exports=R.m(25351).exports

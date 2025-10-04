@@ -1,15 +1,12 @@
 {
   "pages": {
     "/favicon.ico/route": [
-      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_c646c222._.js",
-      "static/chunks/d59e1_next_dist_compiled_react-dom_1b3af47e._.js",
-      "static/chunks/d59e1_next_dist_compiled_next-devtools_index_4f8ff21c.js",
-      "static/chunks/d59e1_next_dist_compiled_753bb976._.js",
-      "static/chunks/d59e1_next_dist_client_cfcd1ce7._.js",
-      "static/chunks/d59e1_next_dist_4f7e0f09._.js",
-      "static/chunks/d59e1_@swc_helpers_cjs_7903fdfb._.js",
-      "static/chunks/temp-restore_a0ff3932._.js",
-      "static/chunks/turbopack-temp-restore_dd29e7c2._.js"
+      "static/chunks/fa8cb99b5fb60c89.js",
+      "static/chunks/06fa0fcbe0a1c6e4.js",
+      "static/chunks/8c93b28839b9942c.js",
+      "static/chunks/fdc1fc4185e36f27.js",
+      "static/chunks/8be19f26353eee5e.js",
+      "static/chunks/turbopack-c632193bca15b1ef.js"
     ]
   }
 }

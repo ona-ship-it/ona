@@ -138,10 +138,14 @@ function MostPopularRaffles() {
       >
         {popularRaffles.map((raffle, index) => {
   return (
-    <RaffleCard 
-      key={raffle.id} 
-      raffle={raffle} 
-      index={index} 
+    <RaffleCard
+      key={raffle.id}
+      raffle={{
+        ...raffle,
+        price: "$10.00", // Adding missing price property
+        timeLeft: "2 days" // Adding missing timeLeft property
+      }}
+      index={index}
     />
   );
 })}
@@ -161,6 +165,18 @@ interface Raffle {
   gradient: string;
   organizer: string;
   prize: string;
+}
+
+interface Raffle {
+  id: number;
+  title: string;
+  prize: string;
+  entries: string;
+  image: string;
+  organizer: string;
+  gradient: string;
+  price: string;
+  timeLeft: string;
 }
 
 interface RaffleCardProps {
@@ -284,10 +300,14 @@ function WeeklyRaffles() {
       >
         {weeklyRaffles.map((raffle, index) => {
   return (
-    <RaffleCard 
-      key={raffle.id} 
-      raffle={raffle} 
-      index={index} 
+    <RaffleCard
+      key={raffle.id}
+      raffle={{
+        ...raffle,
+        price: "$10.00", // Adding missing price property
+        timeLeft: "2 days" // Adding missing timeLeft property
+      }}
+      index={index}
     />
   );
 })}
@@ -379,11 +399,15 @@ function LimitedTimeRaffles() {
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {limitedRaffles.map((raffle, index) => (
-          <RaffleCard 
-  key={raffle.id} 
-  raffle={raffle} 
-  index={index} 
-/>
+          <RaffleCard
+      key={raffle.id}
+      raffle={{
+        ...raffle,
+        price: "$10.00", // Adding missing price property
+        timeLeft: "2 days" // Adding missing timeLeft property
+      }}
+      index={index}
+    />
         ))}
       </div>
     </section>
@@ -483,10 +507,14 @@ function NewRaffles() {
       >
         {newRaffles.map((raffle, index) => {
   return (
-    <RaffleCard 
-      key={raffle.id} 
-      raffle={raffle} 
-      index={index} 
+    <RaffleCard
+      key={raffle.id}
+      raffle={{
+        ...raffle,
+        price: "$10.00", // Adding missing price property
+        timeLeft: "2 days" // Adding missing timeLeft property
+      }}
+      index={index}
     />
   );
 })}

@@ -149,7 +149,7 @@ export default function WalletPage() {
     
     // Update balances
     const ticketAmount = freeTickets.find(t => t.id === ticketId)?.amount || 0;
-    setBalances(prev => ({
+    setBalances((prev: any) => ({
       ...prev,
       tickets_balance: (prev.tickets_balance || 0) + ticketAmount
     }));
