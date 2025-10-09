@@ -70,7 +70,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({
       <div className="text-center text-white">
         {isLogin ? (
           <p>
-            Don't have an account?{' '}
+            Don&#39;t have an account?{' '}
             <Link href="/signup" className="text-pink-400 hover:underline">
               Sign Up
             </Link>

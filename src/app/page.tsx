@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import Link from "next/link";
 import Navigation from '../components/Navigation';
-import SideNavbar from '../components/SideNavbar';
 import PageTitle from '@/components/PageTitle';
 import FeaturedSection from '@/components/FeaturedSection';
 import GoogleSignIn from '@/components/GoogleSignIn';
@@ -14,13 +13,12 @@ export default function Home() {
   const { isDarker, isWhite } = useTheme();
   
   return (
-    <main className={`min-h-screen ${isWhite ? 'bg-gray-50 text-gray-900' : 'bg-gradient-to-b from-[#1f2937] to-[#000000] text-white'}`}>
+    <main className={`min-h-screen ${isWhite ? 'bg-gray-50 text-gray-900' : 'dark:bg-gray-900 bg-gradient-to-b from-[#1f2937] to-[#000000] text-white'}`}>
       <Navigation />
-      <SideNavbar />
       <GoogleSignIn />
       
-      {/* Main content with padding for side navbar */}
-      <div className="pl-16">
+      {/* Main content */}
+      <div>
         {/* Hero Section */}
         <div className="relative overflow-hidden">
         {/* Animated background elements */}
@@ -40,10 +38,18 @@ export default function Home() {
             </Link>
           </div>
           <div className="text-center">
-            <PageTitle className="text-3xl md:text-4xl mb-2" gradient={false}>
-            ON<span style={{ display: 'inline-block', transform: 'rotate(180deg) scaleX(-1)', verticalAlign: 'baseline' }}>V</span>GUI
-          </PageTitle>
-            <p className="text-sm md:text-base text-white mb-3">
+            <h1 className="text-adaptive text-3xl md:text-4xl mb-2">
+              <span 
+                className="uppercase font-light dark:font-normal whitespace-nowrap transition-all duration-300 text-purple-900 dark:text-gray-100 hover:text-purple-700 dark:hover:text-purple-300"
+                style={{ 
+                  textShadow: '0 2px 8px rgba(168, 85, 247, 0.3)',
+                  letterSpacing: '0.15em'
+                }}
+              >
+                ON<span style={{ display: 'inline-block', transform: 'rotate(180deg) scaleX(-1)', verticalAlign: 'text-top', marginTop: '-4px' }}>V</span>GUI
+              </span>
+            </h1>
+            <p className="text-adaptive-secondary text-sm md:text-base mb-3">
               Statistically Onagui Is Your Best Chance To Win
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-2 relative">
@@ -281,7 +287,7 @@ export default function Home() {
       </div>
       
       {/* Simple Footer */}
-      <footer className={`${isWhite ? 'bg-gray-50 text-gray-600' : 'bg-gray-900 text-gray-400'} py-12 px-4 sm:px-6 lg:px-8 pl-16`}>
+      <footer className={`${isWhite ? 'bg-gray-50 text-gray-600' : 'bg-gray-900 text-gray-400'} py-12 px-4 sm:px-6 lg:px-8`}>
         <div className="max-w-7xl mx-auto text-center">
           <p>© {new Date().getFullYear()} Onagui. All rights reserved.</p>
         </div>

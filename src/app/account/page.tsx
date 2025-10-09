@@ -1,17 +1,19 @@
 "use client";
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import type { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 
 export default function AccountPage() {
   const supabase = createClientComponentClient();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data, error }) => {
-      if (!error) setUser(data.user);
+      if (error) return;
+      setUser(data.user ?? null);
     });
-  }, []);
+  }, [supabase]);
 
   if (!user) return <p>Please sign in to view your account.</p>;
 

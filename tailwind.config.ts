@@ -1,15 +1,23 @@
 import type { Config } from "tailwindcss";
-import plugin from 'tailwindcss/plugin';
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    screens: {
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+    },
     extend: {
       colors: {
+        darkest: '#0b0d17', // Dark navbar color
+        darkAccent: '#141622', // Lighter shade for hover or depth
         primary: {
           50: "#f9fafb",
           100: "#f3f4f6",
@@ -69,7 +77,6 @@ const config: Config = {
       },
     },
   },
-  darkMode: "class",
   plugins: [],
 };
 

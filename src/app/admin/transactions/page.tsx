@@ -4,10 +4,23 @@ import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 
+type TransactionType = 'deposit' | 'withdrawal' | 'transfer' | string;
+type TransactionStatus = 'pending' | 'processing' | 'approved' | 'rejected' | string;
+
+interface AdminTransaction {
+  id: string;
+  user_id: string;
+  type: TransactionType;
+  amount: number;
+  currency: string;
+  status: TransactionStatus;
+  created_at: string;
+}
+
 export default function AdminTransactions() {
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<AdminTransaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTx, setSelectedTx] = useState<any>(null);
+  const [selectedTx, setSelectedTx] = useState<AdminTransaction | null>(null);
   const [adminPassphrase, setAdminPassphrase] = useState('');
   const [secondApprover, setSecondApprover] = useState('');
   const [error, setError] = useState('');
@@ -46,7 +59,7 @@ export default function AdminTransactions() {
       if (error) {
         console.error('Error fetching transactions:', error);
       } else {
-        setTransactions(data || []);
+        setTransactions((data ?? []) as AdminTransaction[]);
       }
       
       setLoading(false);
@@ -56,7 +69,7 @@ export default function AdminTransactions() {
     fetchTransactions();
   }, [supabase, router]);
   
-  const handleApprove = async (tx: any) => {
+  const handleApprove = async (tx: AdminTransaction) => {
     setSelectedTx(tx);
   };
   
@@ -117,14 +130,15 @@ export default function AdminTransactions() {
         }
       });
       
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
   
-  const handleReject = async (tx: any) => {
+  const handleReject = async (tx: AdminTransaction) => {
     if (!confirm('Are you sure you want to reject this transaction?')) {
       return;
     }
@@ -157,8 +171,9 @@ export default function AdminTransactions() {
         }
       });
       
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -200,7 +215,7 @@ export default function AdminTransactions() {
               </tr>
             </thead>
             <tbody>
-              {transactions.map((tx) => (
+              {transactions.map((tx: AdminTransaction) => (
                 <tr key={tx.id}>
                   <td className="py-2 px-4 border-b">{tx.id.substring(0, 8)}...</td>
                   <td className="py-2 px-4 border-b">{tx.user_id.substring(0, 8)}...</td>

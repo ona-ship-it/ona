@@ -1,12 +1,10 @@
 {
   "pages": {
     "/signup/page": [
-      "static/chunks/9c10884653a1b4f3.js",
+      "static/chunks/6ee73049db0c1c1a.js",
       "static/chunks/19c2fff3892dcf5c.js",
-      "static/chunks/2473c16c0c2f6b5f.css",
-      "static/chunks/fb1f5a54d9a451d3.css",
-      "static/chunks/e8e4d49db0d818f4.js",
-      "static/chunks/bc4435d228c71e57.js",
+      "static/chunks/d78f230d89f071f1.css",
+      "static/chunks/e90f07dd4f20df50.js",
       "static/chunks/a18338123fc52a21.js",
       "static/chunks/f2585e24d1220ac8.js",
       "static/chunks/351312a52445155f.js",

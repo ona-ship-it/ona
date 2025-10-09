@@ -3,12 +3,10 @@
 import { useState } from 'react';
 import { FaXTwitter } from 'react-icons/fa6';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { useRouter } from 'next/navigation';
 
 export default function XSignIn() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const supabase = createClientComponentClient();
 
   const handleSignIn = async () => {
@@ -16,7 +14,7 @@ export default function XSignIn() {
       setLoading(true);
       setError(null);
       
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'twitter',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,

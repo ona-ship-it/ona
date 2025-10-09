@@ -2,7 +2,6 @@
  
 import { useEffect, useState } from "react"; 
 import { useSupabaseClient } from "@/lib/supabaseClient"; 
-import { Loader2 } from "lucide-react"; 
  
 type Giveaway = { 
   id: string; 
@@ -35,7 +34,7 @@ export default function GiveawaysPage() {
   async function fetchGiveaways() { 
     setLoading(true); 
     const { data, error } = await supabase 
-      .from("onagui.giveaways") 
+      .from("giveaways") 
       .select("*") 
       .in("status", ["active"]) 
       .order("created_at", { ascending: false }); 
@@ -52,7 +51,7 @@ export default function GiveawaysPage() {
   async function joinFree(giveawayId: string) { 
     // Free ticket flow: insert a free ticket row via an RPC or direct insert (RLS allows buyer insert) 
     try { 
-      const { data, error } = await supabase.from("onagui.tickets").insert([ 
+      const { data, error } = await supabase.from("tickets").insert([ 
         { 
           giveaway_id: giveawayId, 
           owner_id: (await supabase.auth.getUser()).data.user?.id, 
@@ -152,10 +151,37 @@ export default function GiveawaysPage() {
   } 
 
   if (loading) { 
-    return ( 
-      <div className="flex h-[60vh] items-center justify-center"> 
-        <Loader2 className="animate-spin text-primary" size={40} /> 
-      </div> 
+    return (
+      <div className="p-6 max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold mb-4">Active Giveaways 🎉</h1>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="border rounded-xl p-4 bg-white dark:bg-gray-900 shadow-sm">
+              <div className="w-full h-44 bg-gray-200 dark:bg-gray-800 rounded-md mb-3 animate-pulse" />
+              <div className="h-5 w-2/3 bg-gray-200 dark:bg-gray-800 rounded mb-2 animate-pulse" />
+              <div className="h-4 w-full bg-gray-200 dark:bg-gray-800 rounded mb-3 animate-pulse" />
+              <div className="mt-3 flex items-center justify-between">
+                <div>
+                  <div className="h-3 w-20 bg-gray-200 dark:bg-gray-800 rounded mb-1 animate-pulse" />
+                  <div className="h-6 w-24 bg-gray-200 dark:bg-gray-800 rounded mb-1 animate-pulse" />
+                  <div className="h-3 w-28 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="h-9 w-28 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+                  <div className="h-9 w-40 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+                </div>
+              </div>
+              <div className="mt-3">
+                <div className="h-3 w-40 bg-gray-200 dark:bg-gray-800 rounded mb-2 animate-pulse" />
+                <div className="flex gap-2 mt-2">
+                  <div className="h-8 flex-1 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+                  <div className="h-8 w-24 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     ); 
   } 
 
@@ -166,17 +192,17 @@ export default function GiveawaysPage() {
         <p className="text-muted-foreground">No active giveaways yet.</p> 
       )} 
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6"> 
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-6"> 
         {giveaways.map((g) => ( 
           <div 
             key={g.id} 
-            className="border rounded-xl p-4 shadow-sm bg-white dark:bg-gray-900" 
+            className="group border rounded-xl p-4 bg-white dark:bg-gray-900 shadow-md hover:shadow-lg transition-all duration-300 ease-out hover:-translate-y-0.5" 
           > 
             {g.media_url && ( 
               <img 
                 src={g.media_url} 
                 alt={g.title || "giveaway media"} 
-                className="w-full h-44 object-cover rounded-md mb-3" 
+                className="w-full h-44 object-cover rounded-md mb-3 transition-transform duration-300 ease-out group-hover:scale-[1.02]" 
               /> 
             )} 
             <h2 className="text-lg font-semibold mb-1"> 
@@ -198,24 +224,24 @@ export default function GiveawaysPage() {
                 </div> 
               </div> 
 
-              <div className="flex flex-col gap-2"> 
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3"> 
                 <button 
                   onClick={() => joinFree(g.id)} 
-                  className="px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200" 
+                  className="px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors duration-200 active:scale-95 shadow-sm hover:shadow-md" 
                 > 
                   Claim Free Ticket 
                 </button> 
-
+ 
                 <button 
                   onClick={() => buyTicket(g.id, 1)} 
                   disabled={buyingId === g.id} 
-                  className="px-3 py-2 rounded-md bg-onaguiGreen text-white hover:bg-onaguiGreen-dark" 
+                  className="px-3 py-2 rounded-md bg-onaguiGreen text-white hover:bg-onaguiGreen-dark transition-all duration-200 active:scale-95 shadow-md hover:shadow-lg" 
                 > 
                   {buyingId === g.id ? "Processing..." : "Buy 1 Ticket (1 USDT)"} 
                 </button> 
               </div> 
             </div> 
-
+ 
             <div className="mt-3"> 
               <label className="text-xs text-gray-500">Donate to pool (USDT)</label> 
               <div className="flex gap-2 mt-2"> 
@@ -227,11 +253,11 @@ export default function GiveawaysPage() {
                   onChange={(e) => 
                     setDonationAmounts((s) => ({ ...s, [g.id]: e.target.value })) 
                   } 
-                  className="flex-1 border rounded px-2 py-1" 
+                  className="flex-1 border rounded px-2 py-1 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500/40" 
                 /> 
                 <button 
                   onClick={() => donate(g.id)} 
-                  className="px-3 py-1 rounded-md bg-amber-500 text-white" 
+                  className="px-3 py-1 rounded-md bg-amber-500 text-white hover:bg-amber-600 transition-colors duration-200 active:scale-95 shadow-sm hover:shadow-md" 
                 > 
                   Donate 
                 </button> 

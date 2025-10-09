@@ -164,7 +164,7 @@ export default function PhoneSignIn() {
           </div>
           <button 
             onClick={() => setVisible(false)}
-            className="text-gray-400 hover:text-white"
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -182,7 +182,7 @@ export default function PhoneSignIn() {
           {!showVerification ? (
             <>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-300 mb-1">Phone Number</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone Number</label>
                 <div className="flex">
                   {/* Country code dropdown */}
                   <div className="relative">
@@ -229,7 +229,7 @@ export default function PhoneSignIn() {
                   />
                 </div>
                 <p className="mt-1 text-xs text-gray-400">
-                  We'll send a verification code to this number
+                  We&#39;ll send a verification code to this number
                 </p>
               </div>
               

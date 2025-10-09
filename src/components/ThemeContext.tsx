@@ -23,10 +23,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Load saved theme from localStorage on initial render
   useEffect(() => {
-    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as Theme;
-    if (savedTheme && (savedTheme === 'white' || savedTheme === 'dark' || savedTheme === 'darker')) {
-      setTheme(savedTheme);
-    }
+    // Force dark mode for now
+    setTheme('dark');
+    document.documentElement.classList.add('dark');
+    
+    // Uncomment this when you want to restore saved theme functionality
+    // const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as Theme;
+    // if (savedTheme && (savedTheme === 'white' || savedTheme === 'dark' || savedTheme === 'darker')) {
+    //   setTheme(savedTheme);
+    // }
   }, []);
 
   const toggleTheme = () => {

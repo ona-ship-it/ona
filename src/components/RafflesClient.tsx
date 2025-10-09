@@ -1,6 +1,4 @@
 'use client';
-
-import { useState } from 'react';
 import Navigation from './Navigation';
 import PageTitle from './PageTitle';
 
@@ -37,11 +35,7 @@ export default function RafflesClient() {
 
 // Most Popular Raffles Section with horizontal scrolling
 function MostPopularRaffles() {
-  const [expanded, setExpanded] = useState(false);
   
-  const toggleExpand = () => {
-    setExpanded(!expanded);
-  };
   
   const scrollLeft = () => {
     const container = document.getElementById('popular-raffles-scroll');
@@ -155,17 +149,7 @@ function MostPopularRaffles() {
 }
 
 // Raffle Card Component
-interface Raffle {
-  id: number;
-  title: string;
-  price: string;
-  entries: string;
-  image: string;
-  timeLeft: string;
-  gradient: string;
-  organizer: string;
-  prize: string;
-}
+ 
 
 interface Raffle {
   id: number;
@@ -198,10 +182,10 @@ function RaffleCard({ raffle, index }: RaffleCardProps) {
           <span className="bg-purple-900 text-purple-100 text-xs px-2 py-1 rounded-full">
             {raffle.organizer}
           </span>
-          <span className="text-gray-300 text-sm">{raffle.entries} entries</span>
+          <span className="text-gray-600 dark:text-gray-300 text-sm">{raffle.entries} entries</span>
         </div>
         <h3 className="text-lg font-bold mb-2 line-clamp-1">{raffle.title}</h3>
-        <p className="text-gray-300 mb-3">Prize: <span className="text-purple-400 font-semibold">{raffle.prize}</span></p>
+        <p className="text-gray-600 dark:text-gray-300 mb-3">Prize: <span className="text-purple-400 font-semibold">{raffle.prize}</span></p>
       </div>
     </div>
   );
@@ -209,11 +193,7 @@ function RaffleCard({ raffle, index }: RaffleCardProps) {
 
 // Weekly Raffles Section
 function WeeklyRaffles() {
-  const [expanded, setExpanded] = useState(false);
   
-  const toggleExpand = () => {
-    setExpanded(!expanded);
-  };
   
   const scrollLeft = () => {
     const container = document.getElementById('weekly-raffles-scroll');
@@ -318,11 +298,7 @@ function WeeklyRaffles() {
 
 // Limited Time Raffles Section
 function LimitedTimeRaffles() {
-  const [expanded, setExpanded] = useState(false);
   
-  const toggleExpand = () => {
-    setExpanded(!expanded);
-  };
   
   const scrollLeft = () => {
     const container = document.getElementById('limited-raffles-scroll');
@@ -416,11 +392,7 @@ function LimitedTimeRaffles() {
 
 // New Raffles Section
 function NewRaffles() {
-  const [expanded, setExpanded] = useState(false);
   
-  const toggleExpand = () => {
-    setExpanded(!expanded);
-  };
   
   const scrollLeft = () => {
     const container = document.getElementById('new-raffles-scroll');

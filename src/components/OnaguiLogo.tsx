@@ -11,25 +11,16 @@ export default function OnaguiLogo({ className = '' }: OnaguiLogoProps) {
   return (
     <h1 className={`flex items-center ${className}`}>
       <span 
-        className={`text-2xl uppercase font-light whitespace-nowrap transition-all duration-300 ${
-          isWhite ? 'text-purple-900 hover:text-purple-700' : 'text-gray-100 hover:text-purple-300'
-        }`}
+        className="text-2xl uppercase font-light dark:font-normal whitespace-nowrap transition-all duration-300 text-purple-900 dark:text-gray-100 hover:text-purple-700 dark:hover:text-purple-300"
         style={{ 
-          textShadow: isWhite 
-            ? '0 2px 8px rgba(168, 85, 247, 0.3)' 
-            : '0 0 10px rgba(255, 255, 255, 0.3)',
-          letterSpacing: '0.15em',
-          fontWeight: isWhite ? '500' : '300'
+          textShadow: '0 2px 8px rgba(168, 85, 247, 0.3)',
+          letterSpacing: '0.15em'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.textShadow = isWhite
-            ? '0 4px 12px rgba(168, 85, 247, 0.6)'
-            : '0 0 15px rgba(168, 85, 247, 0.8)';
+          e.currentTarget.style.textShadow = '0 4px 12px rgba(168, 85, 247, 0.6)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.textShadow = isWhite
-            ? '0 2px 8px rgba(168, 85, 247, 0.3)'
-            : '0 0 10px rgba(255, 255, 255, 0.3)';
+          e.currentTarget.style.textShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
         }}
       >
         ON<span style={{ display: 'inline-block', transform: 'rotate(180deg) scaleX(-1)', verticalAlign: 'text-top', marginTop: '-4px' }}>V</span>GUI

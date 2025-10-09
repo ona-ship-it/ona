@@ -39,7 +39,7 @@ export default function AboutPage() {
           <div>
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Our Mission</h2>
             <p className="text-gray-600 dark:text-gray-300 mb-4">
-              At Onagui, we're dedicated to building innovative web solutions that help businesses and individuals achieve their goals online.
+              At Onagui, we&apos;re dedicated to building innovative web solutions that help businesses and individuals achieve their goals online.
             </p>
             <p className="text-gray-600 dark:text-gray-300 mb-4">
               Our platform combines cutting-edge technology with beautiful design to create seamless digital experiences that delight users and drive results.
@@ -84,7 +84,7 @@ export default function AboutPage() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Innovation</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                We constantly push the boundaries of what's possible, embracing new technologies and creative solutions to complex problems.
+                We constantly push the boundaries of what&apos;s possible, embracing new technologies and creative solutions to complex problems.
               </p>
             </div>
             <div className="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-sm">
@@ -133,7 +133,7 @@ export default function AboutPage() {
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">John Smith</h3>
               <p className="text-blue-600 dark:text-blue-400 mb-4">CTO</p>
               <p className="text-gray-600 dark:text-gray-300">
-                John oversees our technical direction and ensures we're using the latest technologies.
+                John oversees our technical direction and ensures we&apos;re using the latest technologies.
               </p>
             </div>
           </div>

@@ -323,6 +323,103 @@ export interface Database {
           created_at?: string
         }
       }
+      giveaways: {
+        Row: {
+          id: string
+          creator_id: string | null
+          title: string | null
+          description: string | null
+          prize_amount: number
+          prize_pool_usdt: number | null
+          ticket_price: number | null
+          photo_url: string | null
+          media_url: string | null
+          ends_at: string | null
+          status: 'draft' | 'active' | 'completed' | 'cancelled'
+          is_active: boolean | null
+          escrow_amount: number | null
+          tickets_count: number | null
+          winner_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          creator_id?: string | null
+          title?: string | null
+          description?: string | null
+          prize_amount: number
+          prize_pool_usdt?: number | null
+          ticket_price?: number | null
+          photo_url?: string | null
+          media_url?: string | null
+          ends_at?: string | null
+          status: 'draft' | 'active' | 'completed' | 'cancelled'
+          is_active?: boolean | null
+          escrow_amount?: number | null
+          tickets_count?: number | null
+          winner_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          creator_id?: string | null
+          title?: string | null
+          description?: string | null
+          prize_amount?: number
+          prize_pool_usdt?: number | null
+          ticket_price?: number | null
+          photo_url?: string | null
+          media_url?: string | null
+          ends_at?: string | null
+          status?: 'draft' | 'active' | 'completed' | 'cancelled'
+          is_active?: boolean | null
+          escrow_amount?: number | null
+          tickets_count?: number | null
+          winner_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      tickets: {
+        Row: {
+          id: string
+          user_id: string
+          raffle_id: string | null
+          giveaway_id: string | null
+          ticket_number: number | null
+          purchase_transaction_id: string | null
+          status: 'pending' | 'completed' | 'refunded'
+          is_free: boolean | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          raffle_id?: string | null
+          giveaway_id?: string | null
+          ticket_number?: number | null
+          purchase_transaction_id?: string | null
+          status?: 'pending' | 'completed' | 'refunded'
+          is_free?: boolean | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          raffle_id?: string | null
+          giveaway_id?: string | null
+          ticket_number?: number | null
+          purchase_transaction_id?: string | null
+          status?: 'pending' | 'completed' | 'refunded'
+          is_free?: boolean | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

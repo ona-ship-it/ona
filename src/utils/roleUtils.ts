@@ -156,7 +156,8 @@ export async function getUserRoles(): Promise<AppRole[]> {
   }
   
   // Extract role names from the result and filter to only include valid app roles
-  const roles = data.map(item => (item.roles as any).name);
+  type UserRoleRow = { roles: { name: string } };
+  const roles = (data as UserRoleRow[]).map(item => item.roles.name);
   return roles.filter(role => 
     role === 'user' || 
     role === 'subscriber' || 

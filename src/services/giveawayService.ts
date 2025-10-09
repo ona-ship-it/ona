@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '../types/supabase';
 import { Giveaway, GiveawayWithTickets, Ticket, BuyTicketPayload, DonateToPoolPayload } from '../types/giveaways';
 
 // Create a Supabase client
-const supabase = createClient(
+const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 );
@@ -48,7 +49,7 @@ export async function fetchGiveawayById(id: string): Promise<GiveawayWithTickets
 export const createGiveaway = async (giveaway: Omit<Giveaway, 'id' | 'created_at' | 'updated_at'>): Promise<Giveaway> => {
   
   const { data, error } = await supabase
-    .from('onagui.giveaways')
+    .from('giveaways')
     .insert(giveaway)
     .select()
     .single();
@@ -69,7 +70,7 @@ export async function activateGiveaway(id: string): Promise<Giveaway> {
   
   // First get the giveaway to check prize amount
   const { data: giveaway, error: fetchError } = await supabase
-    .from('onagui.giveaways')
+    .from('giveaways')
     .select('*')
     .eq('id', id)
     .single();
@@ -137,10 +138,10 @@ export async function getUserTickets(giveawayId: string): Promise<Ticket[]> {
   }
   
   const { data, error } = await supabase
-    .from('onagui.tickets')
+    .from('tickets')
     .select('*')
     .eq('giveaway_id', giveawayId)
-    .eq('owner_id', user.id);
+    .eq('user_id', user.id);
     
   if (error) {
     throw error;
@@ -150,7 +151,7 @@ export async function getUserTickets(giveawayId: string): Promise<Ticket[]> {
 }
 
 // Trigger winner selection for a giveaway
-export async function triggerPickWinner(giveawayId: string): Promise<any> {
+export async function triggerPickWinner(giveawayId: string): Promise<{ success: boolean; message?: string } | null> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
@@ -165,11 +166,11 @@ export async function triggerPickWinner(giveawayId: string): Promise<any> {
     throw error;
   }
   
-  return data;
+  return (data as { success: boolean; message?: string } | null);
 }
 
 // Payout to winner
-export async function payoutWinner(giveawayId: string): Promise<any> {
+export async function payoutWinner(giveawayId: string): Promise<{ success: boolean; message?: string } | null> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
@@ -184,5 +185,5 @@ export async function payoutWinner(giveawayId: string): Promise<any> {
     throw error;
   }
   
-  return data;
+  return (data as { success: boolean; message?: string } | null);
 }

@@ -1,5 +1,5 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import type { Database } from '../types/supabase';
+import type { Database, Json } from '../types/supabase';
 
 export type UserRank = Database['public']['Tables']['ranks']['Row'];
 export type UserAchievement = Database['public']['Tables']['achievements']['Row'];
@@ -75,7 +75,7 @@ export class ProfileService {
       return [];
     }
     
-    return data.map((item: any) => item.achievements) || [];
+    return (data?.map((item: Database['public']['Tables']['user_achievements']['Row'] & { achievements: UserAchievement }) => item.achievements) ?? []);
   }
 
   /**
@@ -157,7 +157,7 @@ export class ProfileService {
   /**
    * Log user activity
    */
-  async logActivity(userId: string, action: string, metadata?: any): Promise<boolean> {
+  async logActivity(userId: string, action: string, metadata?: Json): Promise<boolean> {
     const { error } = await this.supabase
       .from('activities')
       .insert({
@@ -205,7 +205,7 @@ export class ProfileService {
       return false;
     }
     
-    const updates: any = {};
+    const updates: Partial<UserWallet> = {};
     
     if (tickets !== undefined) {
       updates.balance_tickets = tickets;

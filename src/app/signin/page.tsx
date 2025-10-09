@@ -122,7 +122,7 @@ export default function SignIn() {
               
               <div className="mt-6">
                 <p className={`text-center text-sm ${isWhite ? 'text-gray-600' : 'text-gray-400'}`}>
-                  Don't have an account?{' '}
+                  Don&#39;t have an account?{' '}
                   <Link href="/signup" className={`font-medium ${isWhite ? 'text-onaguiGreen hover:text-onaguiGreen-dark' : 'text-purple-400 hover:text-purple-300'}`}>
                     Sign up
                   </Link>

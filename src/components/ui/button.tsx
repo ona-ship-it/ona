@@ -1,6 +1,5 @@
 import * as React from "react"
-// class-variance-authority is not installed; using a minimal stub for cva and VariantProps
-type VariantProps<T> = T extends (props: infer P) => any ? P : never;
+// class-variance-authority is not installed; using a minimal stub for cva
 
 function cva(base: string, config?: { variants?: Record<string, Record<string, string>>; defaultVariants?: Record<string, string> }) {
   return (props?: Record<string, string>) => {
@@ -54,7 +53,7 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "default", size = "default", asChild = false, ...props }, ref) => {
+  ({ className, variant = "default", size = "default", ...props }, ref) => {
     return (
       <button
         className={cn(buttonVariants({ variant, size }), className)}

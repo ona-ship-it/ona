@@ -1,4 +1,5 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import type { Database, Json } from '../types/supabase';
 import crypto from 'crypto';
 
 // Interface for platform wallet
@@ -19,7 +20,7 @@ export interface Transaction {
   currency: string;
   status: 'pending' | 'completed' | 'failed';
   tx_hash?: string;
-  metadata?: any;
+  metadata?: Json;
   created_at: string;
 }
 
@@ -67,7 +68,7 @@ export function decryptPrivateKey(encryptedData: string, passphrase: string): st
  * Get the platform wallet for a specific currency
  */
 export async function getPlatformWallet(currency: string = 'USDT'): Promise<PlatformWallet | null> {
-  const supabase = createClientComponentClient();
+  const supabase = createClientComponentClient<Database>();
   
   const { data, error } = await supabase
     .from('platform_wallets')
@@ -93,7 +94,7 @@ export async function createPlatformWallet(
   privateKey: string,
   passphrase: string
 ): Promise<PlatformWallet | null> {
-  const supabase = createClientComponentClient();
+  const supabase = createClientComponentClient<Database>();
   
   // Encrypt the private key
   const encryptedKey = encryptPrivateKey(privateKey, passphrase);
@@ -126,9 +127,9 @@ export async function recordTransaction(
   currency: string,
   status: 'pending' | 'completed' | 'failed' = 'pending',
   txHash?: string,
-  metadata?: any
+  metadata?: Json
 ): Promise<Transaction | null> {
-  const supabase = createClientComponentClient();
+  const supabase = createClientComponentClient<Database>();
   
   const { data, error } = await supabase
     .from('transactions')
@@ -160,7 +161,7 @@ export async function updateTransactionStatus(
   status: 'pending' | 'completed' | 'failed',
   txHash?: string
 ): Promise<boolean> {
-  const supabase = createClientComponentClient();
+  const supabase = createClientComponentClient<Database>();
   
   const { error } = await supabase
     .from('transactions')
@@ -182,7 +183,7 @@ export async function updateTransactionStatus(
  * Get user transactions
  */
 export async function getUserTransactions(userId: string): Promise<Transaction[]> {
-  const supabase = createClientComponentClient();
+  const supabase = createClientComponentClient<Database>();
   
   const { data, error } = await supabase
     .from('transactions')

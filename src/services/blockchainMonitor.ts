@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '../types/supabase';
 import { recordTransaction, updateTransactionStatus, getTransactionByHash } from '../utils/transactionLedger';
 import { getPlatformWallet } from '../utils/platformWallet';
 
@@ -21,6 +22,21 @@ interface TronTransaction {
   data?: string; // For memo/reference code
 }
 
+interface TronGridTrc20Tx {
+  transaction_id: string;
+  block_number: number;
+  block_timestamp: number;
+  token_info: {
+    address: string;
+    symbol: string;
+    decimals: number;
+  };
+  to: string;
+  from: string;
+  value: string;
+  data?: string;
+}
+
 /**
  * Monitor the blockchain for incoming deposits to the platform wallet
  * This should be run as a background worker/cron job
@@ -28,7 +44,7 @@ interface TronTransaction {
 export async function monitorBlockchain() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey);
   
   try {
     // Get the platform wallet address for USDT
@@ -71,10 +87,10 @@ async function fetchTronTransactions(address: string): Promise<TronTransaction[]
       throw new Error(`TronGrid API error: ${response.status}`);
     }
     
-    const data = await response.json();
+    const data: { data: TronGridTrc20Tx[] } = await response.json();
     
     // Transform the data into our transaction format
-    return data.data.map((tx: any) => ({
+    return data.data.map((tx: TronGridTrc20Tx) => ({
       txID: tx.transaction_id,
       blockNumber: tx.block_number,
       blockTimestamp: tx.block_timestamp,
@@ -95,7 +111,7 @@ async function fetchTronTransactions(address: string): Promise<TronTransaction[]
 /**
  * Process a transaction and update the ledger
  */
-async function processTransaction(supabase: any, tx: TronTransaction, platformAddress: string) {
+async function processTransaction(supabase: import('@supabase/supabase-js').SupabaseClient<Database>, tx: TronTransaction, platformAddress: string) {
   try {
     // Check if this transaction is a deposit to our platform wallet
     if (tx.toAddress !== platformAddress || tx.tokenName !== 'USDT' || !tx.confirmed) {

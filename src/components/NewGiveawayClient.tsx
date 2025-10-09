@@ -119,7 +119,7 @@ export default function NewGiveawayClient() {
       
       // Insert new giveaway
       const { data, error } = await supabase
-        .from('onagui.giveaways')
+        .from('giveaways')
         .insert({
           creator_id: user.id,
           title: formData.title,

@@ -10,9 +10,14 @@ interface ProfilePopupProps {
   onClose: () => void;
 }
 
+type SupabaseUser = {
+  id: string;
+  email: string | null;
+};
+
 export default function ProfilePopup({ isOpen, onClose }: ProfilePopupProps) {
   const { isDarker, isWhite } = useTheme();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const popupRef = useRef<HTMLDivElement>(null);
   const supabase = createClientComponentClient();
 
@@ -21,7 +26,8 @@ export default function ProfilePopup({ isOpen, onClose }: ProfilePopupProps) {
     const getUser = async () => {
       const { data } = await supabase.auth.getUser();
       if (data?.user) {
-        setUser(data.user);
+        // Cast minimal fields used to avoid any
+        setUser({ id: data.user.id, email: data.user.email ?? null });
       }
     };
     

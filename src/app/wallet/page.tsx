@@ -60,7 +60,7 @@ export default function WalletPage() {
     {
       id: "2",
       title: "Regular Withdrawals",
-      description: "Don't keep large amounts in your wallet. Withdraw regularly to your secure wallet.",
+      description: "Don&amp;#39;t keep large amounts in your wallet. Withdraw regularly to your secure wallet.",
       icon: "💰"
     },
     {
@@ -473,7 +473,7 @@ export default function WalletPage() {
                     <span className="text-2xl">👥</span>
                   </div>
                   <p className="text-sm text-gray-400 mb-3">
-                    Earn 5% of your friends' deposits when they sign up with your code.
+                    Earn 5% of your friends&#39; deposits when they sign up with your code.
                   </p>
                   <button className="w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-colors duration-300">
                     Get Referral Link
@@ -507,7 +507,7 @@ export default function WalletPage() {
                   {transactions.filter(tx => tx.type === "earn").map((tx) => (
                     <div key={tx.id} className="border rounded-xl p-3 flex items-center justify-between">
                       <div>
-                        <p className="font-medium">{tx.description || "Reward"}</p>
+                        <p className="font-medium">{tx.description || 'Reward'}</p>
                         <p className="text-xs text-gray-500">
                           {new Date(tx.created_at).toLocaleString()}
                         </p>
@@ -613,7 +613,7 @@ export default function WalletPage() {
                 </h3>
                 <ul className="text-sm text-gray-700 space-y-2">
                   <li>• Send only ETH to this deposit address</li>
-                  <li>• Ensure you're using the Ethereum (ERC20) network</li>
+                  <li>• Ensure you&amp;#39;re using the Ethereum (ERC20) network</li>
                   <li>• Minimum deposit: 0.01 ETH</li>
                   <li>• Deposits typically confirm within 30 minutes</li>
                 </ul>

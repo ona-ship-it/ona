@@ -1,49 +1,66 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Providers from "./providers";
-import SideNavbar from "@/components/SideNavbar";
+'use client'; 
+ 
+import { useEffect, useState } from 'react'; 
+import { ThemeProvider } from '@/components/ThemeContext';
+import Sidebar from '@/components/Sidebar';
+import './globals.css'; 
+ 
+export default function RootLayout({ children }: { children: React.ReactNode }) { 
+  const [mounted, setMounted] = useState(false); 
+ 
+  useEffect(() => { 
+    // mark client mount so DOM operations are safe 
+    setMounted(true); 
+  }, []); 
+ 
+  const toggleSidebar = () => { 
+    if (!mounted) return; 
+    document.documentElement.classList.toggle('sidebar-open'); 
+  }; 
+ 
+  return ( 
+    <html lang="en" suppressHydrationWarning> 
+      <body className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"> 
+        <ThemeProvider>
+          {/* Desktop sidebar */}
+          <Sidebar />
+          {/* Mobile top bar (only visible on small screens) */} 
+          <header className="sm:hidden fixed top-0 left-0 w-full z-40 flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 border-b dark:border-gray-700"> 
+            <button 
+              onClick={toggleSidebar} 
+              aria-label="Open menu" 
+              className="p-2 rounded-md focus:outline-none" 
+            > 
+              <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"> 
+                <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /> 
+              </svg> 
+            </button> 
+  
+            <div className="flex items-center gap-3"> 
+              {/* Theme toggle button using next-themes */}
+              <button 
+                onClick={() => {
+                  const html = document.documentElement;
+                  const isDark = html.classList.contains('dark');
+                  if (isDark) {
+                    html.classList.remove('dark');
+                  } else {
+                    html.classList.add('dark');
+                  }
+                  console.log('Toggled theme:', isDark ? 'light' : 'dark');
+                }}
+                className="p-2 rounded-md bg-gray-200 dark:bg-gray-700"
+              >
+                Toggle Theme
+              </button>
+            </div>
+          </header>
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "Onagui",
-  description: "Onagui platform for raffles, giveaways, and more",
-  icons: [
-    { rel: 'icon', url: '/favicon.ico' },
-    { rel: 'apple-touch-icon', url: '/onagui_icon_clean_180x180.png' },
-    { rel: 'icon', url: '/onagui_icon_clean_32x32.png', sizes: '32x32', type: 'image/png' },
-    { rel: 'icon', url: '/onagui_icon_clean_16x16.png', sizes: '16x16', type: 'image/png' },
-  ],
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en" className="dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Providers>
-          <div className="flex min-h-screen">
-            <SideNavbar />
-            <main className="flex-1 pl-16">
-              {children}
-            </main>
-          </div>
-        </Providers>
-      </body>
-    </html>
-  );
+          <main className="pt-16 sm:pt-0 min-h-screen transition-all duration-300" style={{ marginLeft: 'var(--sidebar-width, 0px)' }}>
+            {children}
+          </main>
+        </ThemeProvider>
+      </body> 
+    </html> 
+  ); 
 }

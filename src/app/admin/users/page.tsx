@@ -5,10 +5,27 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Database } from '@/types/supabase';
 import { useRouter } from 'next/navigation';
 
+interface OnaguiProfile {
+  id: string;
+  email: string;
+  onagui_type: string | null;
+  created_at: string;
+}
+
+interface UserRoleRecord {
+  user_id: string;
+  role_id: string;
+  roles?: { name?: string } | null;
+}
+
+interface AdminUser extends OnaguiProfile {
+  roles: string[];
+}
+
 export default function AdminUsersPage() {
   const supabase = createClientComponentClient<Database>();
   const router = useRouter();
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
@@ -40,10 +57,11 @@ export default function AdminUsersPage() {
         if (rolesError) throw rolesError;
 
         // Map roles to users
-        const usersWithRoles = profiles.map((profile: any) => {
-          const roles = userRoles
-            .filter((role: any) => role.user_id === profile.id)
-            .map((role: any) => role.roles?.name);
+        const usersWithRoles: AdminUser[] = (profiles ?? []).map((profile: OnaguiProfile) => {
+          const roles = (userRoles ?? [])
+            .filter((role: UserRoleRecord) => role.user_id === profile.id)
+            .map((role: UserRoleRecord) => role.roles?.name)
+            .filter((name): name is string => !!name);
           
           return {
             ...profile,
@@ -52,9 +70,10 @@ export default function AdminUsersPage() {
         });
 
         setUsers(usersWithRoles);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error fetching users:', error);
-        setError(error.message);
+        const message = error instanceof Error ? error.message : String(error);
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -122,7 +141,7 @@ export default function AdminUsersPage() {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
+            {users.map((user: AdminUser) => (
               <tr key={user.id} className={user.email === 'richtheocrypto@gmail.com' ? 'bg-blue-50' : ''}>
                 <td className="px-4 py-2 border">{user.id}</td>
                 <td className="px-4 py-2 border">{user.email}</td>

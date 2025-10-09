@@ -300,11 +300,11 @@ export default function FundraisePage() {
                      </svg>
                    </div>
                    <div className="ml-3">
-                     <h3 className={`font-bold ${isDarker ? 'text-white' : 'text-gray-800'}`}>Women's Health Initiative</h3>
+                     <h3 className={`font-bold ${isDarker ? 'text-white' : 'text-gray-800'}`}>Women&#39;s Health Initiative</h3>
                      <p className={`text-xs ${isDarker ? 'text-gray-400' : 'text-gray-500'}`}>by Health Forward</p>
                    </div>
                  </div>
-                 <p className={`text-sm ${isDarker ? 'text-gray-300' : 'text-gray-600'} mb-3`}>Supporting women's health services in developing regions.</p>
+                 <p className={`text-sm ${isDarker ? 'text-gray-300' : 'text-gray-600'} mb-3`}>Supporting women&#39;s health services in developing regions.</p>
                  <div className="mb-1">
                    <div className={`h-2 w-full ${isDarker ? 'bg-gray-700' : 'bg-gray-200'} rounded-full overflow-hidden`}>
                      <div className="h-full bg-gradient-to-r from-pink-400 to-pink-600 rounded-full" style={{ width: '75%' }}></div>

@@ -424,7 +424,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
           <div className="text-4xl mr-3">{product.image}</div>
           <div>
             <h3 className="font-bold text-lg">{product.title}</h3>
-            <p className="text-sm text-gray-300">{product.seller}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">{product.seller}</p>
           </div>
         </div>
         

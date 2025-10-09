@@ -20,6 +20,7 @@ export default function GiveawaysClient() {
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isDonateModalOpen, setIsDonateModalOpen] = useState(false);
   const [userTickets, setUserTickets] = useState<{[key: string]: number}>({});
+  const [uploadingIds, setUploadingIds] = useState<{[key: string]: boolean}>({});
   const supabase = useSupabaseClient();
   const router = useRouter();
 
@@ -48,7 +49,7 @@ export default function GiveawaysClient() {
         
         for (const giveaway of (data || [])) {
           const { data: tickets, error: ticketsError } = await supabase
-            .from('onagui.tickets')
+            .from('tickets')
             .select('*')
             .eq('giveaway_id', giveaway.id)
             .eq('user_id', user.id);
@@ -120,6 +121,72 @@ export default function GiveawaysClient() {
   const handleDonateModalClose = () => {
     setIsDonateModalOpen(false);
     setSelectedGiveaway(null);
+  };
+
+  const triggerFileInput = (giveawayId: string) => {
+    const input = document.getElementById(`upload-input-${giveawayId}`) as HTMLInputElement | null;
+    if (input) input.click();
+  };
+
+  const handleCardPhotoUpload = async (giveawayId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0]) return;
+    const file = e.target.files[0];
+
+    if (!file.type.startsWith('image/')) {
+      setError('Please upload an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size must be less than 5MB');
+      return;
+    }
+
+    try {
+      setUploadingIds(prev => ({ ...prev, [giveawayId]: true }));
+      setError(null);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/login?redirect=/giveaways');
+        return;
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${giveawayId}-${Date.now()}.${fileExt}`;
+      const filePath = `giveaway-photos/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('public')
+        .upload(filePath, file, { cacheControl: '3600', upsert: false });
+      if (uploadError) throw uploadError;
+
+      const { data: publicData } = supabase.storage
+        .from('public')
+        .getPublicUrl(filePath);
+
+      const publicUrl = publicData.publicUrl;
+
+      // Update public giveaways table
+      await supabase
+        .from('giveaways')
+        .update({ photo_url: publicUrl, media_url: publicUrl })
+        .eq('id', giveawayId);
+
+      await loadGiveaways();
+    } catch (err: any) {
+      console.error('Error uploading giveaway photo:', err);
+      setError(err.message || 'Failed to upload photo');
+    } finally {
+      setUploadingIds(prev => ({ ...prev, [giveawayId]: false }));
+      const input = document.getElementById(`upload-input-${giveawayId}`) as HTMLInputElement | null;
+      if (input) input.value = '';
+    }
+  };
+
+  const handleDriveImport = (giveawayId: string) => {
+    // Placeholder for upcoming Google Drive integration
+    setError('Google Drive import is coming soon.');
+    console.log('Drive import coming soon for giveaway:', giveawayId);
   };
 
   const handleSuccess = async () => {
@@ -202,6 +269,27 @@ export default function GiveawaysClient() {
                         >
                           Donate
                         </button>
+                      {/* Upload controls */}
+                      <input
+                        id={`upload-input-${giveaway.id}`}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleCardPhotoUpload(giveaway.id, e)}
+                      />
+                      <button
+                        onClick={() => triggerFileInput(giveaway.id)}
+                        className="bg-purple-700 hover:bg-purple-600 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300"
+                        disabled={!!uploadingIds[giveaway.id]}
+                      >
+                        {uploadingIds[giveaway.id] ? 'Uploading...' : 'Upload Photo'}
+                      </button>
+                      <button
+                        onClick={() => handleDriveImport(giveaway.id)}
+                        className="bg-indigo-700 hover:bg-indigo-600 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300"
+                      >
+                        Import from Drive
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -779,10 +867,10 @@ function GiveawayCard({ giveaway, index }: { giveaway: Giveaway; index: number }
           <span className="bg-bcgames-darkgrey text-white text-xs px-2 py-1 rounded-full">
             {giveaway.influencer}
           </span>
-          <span className="text-gray-300 text-sm">{giveaway.entries} entries</span>
+          <span className="text-gray-600 dark:text-gray-300 text-sm">{giveaway.entries} entries</span>
         </div>
         <h3 className="text-lg font-bold mb-2 line-clamp-1">{giveaway.title}</h3>
-        <p className="text-gray-300 mb-3">Prize: <span className="text-bcgames-green font-semibold">{giveaway.prize}</span></p>
+        <p className="text-gray-600 dark:text-gray-300 mb-3">Prize: <span className="text-bcgames-green font-semibold">{giveaway.prize}</span></p>
         <button className="w-full bg-bcgames-green hover:bg-bcgames-green/90 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
           Enter
         </button>

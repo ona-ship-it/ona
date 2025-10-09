@@ -1,5 +1,5 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import type { Database } from '../types/supabase';
+import type { Database, Json } from '../types/supabase';
 
 export interface LedgerTransaction {
   id: string;
@@ -9,7 +9,7 @@ export interface LedgerTransaction {
   currency: string;
   status: 'pending' | 'completed' | 'failed';
   tx_hash?: string;
-  metadata?: any;
+  metadata?: Json;
   created_at: string;
   updated_at: string;
 }
@@ -24,7 +24,7 @@ export async function recordTransaction(
   currency: string,
   status: 'pending' | 'completed' | 'failed' = 'pending',
   txHash?: string,
-  metadata?: any
+  metadata?: Json
 ): Promise<LedgerTransaction | null> {
   const supabase = createClientComponentClient<Database>();
   

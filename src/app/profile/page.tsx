@@ -1,4 +1,5 @@
 import ProfileClient from '@/components/ProfileClient';
+import Comments from '@/components/Comments';
 
 export const metadata = {
   title: 'Profile | ONAGUI',
@@ -17,5 +18,12 @@ export default function ProfilePage() {
     bio: 'This is a test profile'
   };
   
-  return <ProfileClient user={mockUser} profile={mockProfile} />;
+  return (
+    <>
+      <ProfileClient user={mockUser} profile={mockProfile} />
+      <div className="container mx-auto px-4">
+        <Comments targetType="profile" targetId={mockProfile.id} />
+      </div>
+    </>
+  );
 }

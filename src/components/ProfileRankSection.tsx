@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { UserRankBadge } from './UserRankBadge';
 import { UserAchievements } from './UserAchievements';
 import { UserBadges } from './UserBadges';
-import { profileService } from '@/services/profileService';
+import { profileService, UserRank, UserAchievement, UserBadge } from '@/services/profileService';
 
 interface ProfileRankSectionProps {
   userId: string;
@@ -10,9 +10,9 @@ interface ProfileRankSectionProps {
 
 export function ProfileRankSection({ userId }: ProfileRankSectionProps) {
   const [loading, setLoading] = useState(true);
-  const [rank, setRank] = useState<any>(null);
-  const [achievements, setAchievements] = useState<any[]>([]);
-  const [badges, setBadges] = useState<any[]>([]);
+  const [rank, setRank] = useState<UserRank | null>(null);
+  const [achievements, setAchievements] = useState<UserAchievement[]>([]);
+  const [badges, setBadges] = useState<UserBadge[]>([]);
 
   useEffect(() => {
     async function loadProfileData() {

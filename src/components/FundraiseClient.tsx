@@ -385,7 +385,7 @@ function FundraiseCard({ fundraise, index }: { fundraise: Fundraise; index: numb
             <div className="text-4xl mr-3">{fundraise.image}</div>
             <div>
               <h3 className="font-bold text-lg">{fundraise.title}</h3>
-              <p className="text-sm text-gray-300">{fundraise.organizer}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{fundraise.organizer}</p>
             </div>
           </div>
           

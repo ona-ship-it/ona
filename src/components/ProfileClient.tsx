@@ -1,15 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import PageTitle from './PageTitle';
+import { useState } from 'react';
 import { useTheme } from '../lib/ThemeContext';
-import Link from 'next/link';
-import Image from 'next/image';
-import AchievementBadge from './AchievementBadge';
-import { getUserBadges } from '../utils/badgeData';
-import mockProfiles from '../utils/mockProfiles';
-import { ProfileRankSection } from './ProfileRankSection';
 
 // Rest of the file content remains the same, only fixing the editing section
 // This is a partial file with just the problematic section fixed
@@ -29,15 +21,15 @@ interface Profile {
 }
 
 export default function ProfileClient({ 
-  user, 
-  profile 
+  user: _user, 
+  profile: _profile 
 }: { 
   user: User; 
   profile: Profile 
 }) {
   // Assume all the existing state and functions are here
   const [editing, setEditing] = useState(false);
-  const { isWhite, isDarker } = useTheme();
+  const { isWhite } = useTheme();
   
   return (
     <div className="container mx-auto px-4 py-8">

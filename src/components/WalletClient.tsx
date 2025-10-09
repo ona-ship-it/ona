@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { getUserWallet, WalletData, addToCryptoBalance, addToFiatBalance } from '../utils/walletUtils';
-import { ArrowDownCircleIcon, ArrowUpCircleIcon, TicketIcon, CurrencyDollarIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { getUserWallet, addToCryptoBalance, addToFiatBalance } from '../utils/walletUtils';
 
 interface Wallet {
   currency: string;
@@ -16,15 +15,7 @@ interface Wallet {
   type: 'ticket' | 'fiat' | 'crypto';
 }
 
-interface Transaction {
-  id: string;
-  date: Date;
-  type: 'deposit' | 'withdrawal' | 'ticket';
-  amount: number;
-  currency: string;
-  status: 'completed' | 'pending' | 'failed';
-  description: string;
-}
+//
 
 // Tooltip component for educational explanations
 const Tooltip = ({ text, children }: { text: string; children: React.ReactNode }) => {
@@ -43,74 +34,23 @@ const Tooltip = ({ text, children }: { text: string; children: React.ReactNode }
   );
 };
 
-// Card component for wallet balances
-const BalanceCard = ({ wallet, onDeposit, onWithdraw }: { 
-  wallet: Wallet, 
-  onDeposit: () => void, 
-  onWithdraw: () => void 
-}) => {
-  return (
-    <div className={`bg-gradient-to-br ${wallet.color} rounded-xl p-5 text-white shadow-lg transition-all hover:shadow-xl`}>
-      <div className="flex justify-between items-center mb-4">
-        <div className="text-2xl font-bold">{wallet.icon} {wallet.name}</div>
-        <Tooltip text={wallet.description}>
-          <div className="bg-white bg-opacity-20 rounded-full p-1 cursor-help">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        </Tooltip>
-      </div>
-      <div className="mb-4">
-        <div className="text-sm opacity-80">Balance</div>
-        <div className="text-3xl font-bold">{wallet.balance.toLocaleString()} {wallet.currency}</div>
-      </div>
-      <div className="flex space-x-2">
-        <button 
-          onClick={onDeposit}
-          className="flex-1 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg py-2 px-3 flex items-center justify-center space-x-1 transition-colors"
-        >
-          <ArrowDownCircleIcon className="h-5 w-5" />
-          <span>Deposit</span>
-        </button>
-        <button 
-          onClick={onWithdraw}
-          className="flex-1 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg py-2 px-3 flex items-center justify-center space-x-1 transition-colors"
-        >
-          <ArrowUpCircleIcon className="h-5 w-5" />
-          <span>Withdraw</span>
-        </button>
-      </div>
-    </div>
-  );
-};
+
 
 export default function WalletClient() {
   const supabase = createClientComponentClient();
   const [wallets, setWallets] = useState<Wallet[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  // Removed unused transactions state
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [totalValue, setTotalValue] = useState(0);
   const [showDepositModal, setShowDepositModal] = useState(false);
-  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  // Removed unused withdraw modal state
   const [activeWallet, setActiveWallet] = useState<Wallet | null>(null);
   const [showSendModal, setShowSendModal] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
 
   // Generate a deterministic wallet address based on currency and user ID
-  function generateWalletAddress(currency: string, userId: string): string {
-    // This is a simplified example - in a real app, you would use proper crypto libraries
-    const hash = Array.from(userId + currency).reduce(
-      (hash, char) => ((hash << 5) - hash) + char.charCodeAt(0), 0
-    );
-    const address = Math.abs(hash).toString(16).padStart(40, '0');
-    
-    if (currency === 'SOL') return `Sol${address.substring(0, 32)}`;
-    if (currency === 'BTC') return `bc1${address.substring(0, 38)}`;
-    if (currency === 'ETH') return `0x${address.substring(0, 40)}`;
-    return `USD${address.substring(0, 16)}`;
-  };
+  // Removed unused generateWalletAddress helper
 
   useEffect(() => {
     const fetchWalletData = async () => {
@@ -432,22 +372,22 @@ export default function WalletClient() {
               <div>
                 <h3 className="text-lg font-semibold mb-2">What is a blockchain?</h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  A blockchain is a digital ledger that records all transactions. It's secure, 
+                  A blockchain is a digital ledger that records all transactions. It&#39;s secure, 
                   transparent, and not controlled by any single entity.
                 </p>
               </div>
               <div>
                 <h3 className="text-lg font-semibold mb-2">How do I send crypto?</h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Click the "Send" button, enter the recipient's wallet address and the amount 
+                  Click the &quot;Send&quot; button, enter the recipient&#39;s wallet address and the amount 
                   you want to send, then confirm the transaction.
                 </p>
               </div>
               <div>
                 <h3 className="text-lg font-semibold mb-2">How do I receive crypto?</h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Click the "Receive" button and share your wallet address with the sender. 
-                  Once they send the funds, they'll appear in your wallet.
+                  Click the &quot;Receive&quot; button and share your wallet address with the sender. 
+                  Once they send the funds, they&#39;ll appear in your wallet.
                 </p>
               </div>
             </div>
@@ -519,9 +459,9 @@ export default function WalletClient() {
                     className="w-full p-2 border rounded"
                     placeholder={`Enter ${activeWallet.currency} address`}
                   />
-                  <p className="text-sm text-gray-500 mt-1">
-                    Make sure you're sending to the correct address type for {activeWallet.currency}
-                  </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Make sure you&#39;re sending to the correct address type for {activeWallet.currency}
+                    </p>
                 </div>
                 
                 <div className="mb-4">

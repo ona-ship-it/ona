@@ -29,7 +29,7 @@ export default function ViewProfilePage() {
   }, [selectedProfile]);
 
   return (
-    <div className={`min-h-screen ${isWhite ? 'bg-gray-50' : isDarker ? 'bg-[#0a0015]' : 'bg-gradient-to-b from-[#1f2937] to-[#000000] text-white'}`}>
+    <div className={`min-h-screen ${isWhite ? 'bg-gray-50' : isDarker ? 'dark:bg-gray-900 bg-[#0a0015]' : 'dark:bg-gray-900 bg-gradient-to-b from-[#1f2937] to-[#000000] text-white'}`}>
       <Navigation />
       <div className="container mx-auto px-4 py-8">
         <PageTitle>View Profile</PageTitle>

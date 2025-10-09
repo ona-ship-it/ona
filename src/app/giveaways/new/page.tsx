@@ -163,7 +163,7 @@ export default function NewGiveawayPage() {
     try { 
       setLoading(true); 
       const { error } = await supabase 
-        .from("onagui.giveaways") 
+        .from("giveaways") 
         .update({ status: "active" }) 
         .eq("id", giveawayId); 
   

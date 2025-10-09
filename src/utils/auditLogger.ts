@@ -1,9 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Database, Json } from '../types/supabase';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey);
 
 /**
  * Log an audit event
@@ -15,7 +16,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 export async function logAuditEvent(
   userId: string,
   action: string,
-  details: any
+  details: Json
 ): Promise<void> {
   try {
     await supabase.from('audit_logs').insert({
@@ -53,7 +54,7 @@ export async function logTransactionEvent(
   userId: string,
   transactionId: string,
   action: string,
-  details: any
+  details: Json
 ): Promise<void> {
   return logAuditEvent(userId, `transaction_${action}`, {
     transaction_id: transactionId,
@@ -71,7 +72,7 @@ export async function logTransactionEvent(
 export async function logAdminAction(
   adminId: string,
   action: string,
-  details: any
+  details: Json
 ): Promise<void> {
   return logAuditEvent(adminId, `admin_${action}`, details);
 }
@@ -86,7 +87,7 @@ export async function logAdminAction(
 export async function logSecurityEvent(
   userId: string | null,
   action: string,
-  details: any
+  details: Json
 ): Promise<void> {
   return logAuditEvent(userId || 'system', `security_${action}`, details);
 }

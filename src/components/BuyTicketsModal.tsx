@@ -89,7 +89,7 @@ export default function BuyTicketsModal({ giveawayId, isOpen, onClose, onSuccess
             <h4 className="font-semibold mb-2">Information</h4>
             <ul className="text-sm text-purple-300 space-y-2">
               <li>• Each ticket costs 1 USDT</li>
-              <li>• Your tickets are private - only you can see how many you've purchased</li>
+              <li>• Your tickets are private - only you can see how many you&#39;ve purchased</li>
               <li>• The more tickets you have, the higher your chances of winning</li>
             </ul>
           </div>
