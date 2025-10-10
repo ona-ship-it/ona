@@ -7,7 +7,7 @@ export default function Giveaways() {
     <div className="min-h-screen bg-black text-white">
       <Head>
         <title>ONAGUI - Giveaways</title>
-        <meta name="description" content="Explore and enter exciting giveaways on ONAGUI" />
+        <meta name="description" content="Discover exciting giveaways on ONAGUI" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -28,40 +28,76 @@ export default function Giveaways() {
               <span className="mr-1">🎯</span> Raffles
             </Link>
             <Link href="/marketplace" className="flex items-center text-gray-300 hover:text-white transition-colors">
-              <span className="mr-1">🛍️</span> Marketplace
+              <span className="mr-1">🛒</span> Marketplace
             </Link>
           </div>
         </div>
-        <div className="hidden md:flex space-x-4">
-          <Link href="/login" className="px-4 py-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white rounded-lg font-bold shadow-md hover:shadow-lg transition-all">Sign In</Link>
-        </div>
       </nav>
 
-      {/* Page Content */}
-      <main className="container mx-auto px-6 pt-28">
-        <section className="mb-10">
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Giveaways</h1>
-          <p className="text-gray-300">Discover and participate in giveaways to win exciting prizes.</p>
-        </section>
+      {/* Hero Section */}
+      <header className="pt-28 pb-12 px-6 text-center">
+        <h1 className="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          Latest Giveaways
+        </h1>
+        <p className="text-gray-400 max-w-2xl mx-auto">
+          Enter community giveaways and win exclusive rewards. New drops weekly.
+        </p>
+      </header>
 
-        {/* Placeholder content to be replaced with dynamic giveaways later */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-white bg-opacity-10 rounded-xl p-6 shadow-xl border border-white border-opacity-20">
-            <h2 className="text-2xl font-bold mb-2 text-white">Sample Giveaway</h2>
-            <p className="text-white opacity-80">Stay tuned for live giveaways. This is a placeholder.</p>
-            <button className="mt-4 bg-white text-indigo-600 px-4 py-2 rounded-full text-sm font-bold hover:bg-opacity-90 transition-all">
-              Learn More
-            </button>
-          </div>
-          <div className="bg-white bg-opacity-10 rounded-xl p-6 shadow-xl border border-white border-opacity-20">
-            <h2 className="text-2xl font-bold mb-2 text-white">Featured Giveaway</h2>
-            <p className="text-white opacity-80">Check back soon for featured giveaways.</p>
-            <button className="mt-4 bg-white text-pink-600 px-4 py-2 rounded-full text-sm font-bold hover:bg-opacity-90 transition-all">
-              Explore
-            </button>
-          </div>
+      {/* Giveaways Grid */}
+      <main className="px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            {
+              title: 'Creator Bundle',
+              description: 'Mic, headphones, and audio interface for content creators.',
+              cta: 'Enter Giveaway',
+            },
+            {
+              title: 'Art Pack',
+              description: 'Digital drawing tablet and pro brushes set.',
+              cta: 'Enter Giveaway',
+            },
+            {
+              title: 'Streamer Kit',
+              description: 'HD webcam, ring light, and green screen.',
+              cta: 'Enter Giveaway',
+            },
+          ].map((g, i) => (
+            <div
+              key={i}
+              className="bg-gray-900 rounded-xl overflow-hidden border border-gray-800 hover:border-purple-500 transition-all"
+            >
+              <div className="h-40 bg-gradient-to-r from-purple-900 to-indigo-900" />
+              <div className="p-6">
+                <h3 className="text-xl font-bold mb-2">{g.title}</h3>
+                <p className="text-gray-400 mb-4">{g.description}</p>
+                <button className="bg-purple-600 hover:bg-purple-700 text-white text-sm py-2 px-4 rounded-md transition-colors">
+                  {g.cta}
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="mt-24 pt-8 border-t border-gray-800">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="text-xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-4 md:mb-0">
+              ONAGUI
+            </div>
+            <div className="flex space-x-6">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">About</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Terms</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Contact</a>
+            </div>
+          </div>
+          <div className="mt-6 text-center text-gray-500 text-sm">© 2025 ONAGUI. All rights reserved.</div>
+        </div>
+      </footer>
     </div>
   );
 }

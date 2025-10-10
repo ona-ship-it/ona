@@ -3,12 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['vercel.com'],
+    domains: ['vercel.com', 'onaguicom-git-onagui-new-feature-theos-projects-a68fa111.vercel.app'],
     formats: ['image/avif', 'image/webp'],
   },
   poweredByHeader: false,
-  // Serve assets from the current host (no cross-origin prefix)
-  // basePath intentionally left default
+  basePath: '',
 };
 
 export default nextConfig;
