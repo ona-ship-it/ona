@@ -1,0 +1,20 @@
+rules:
+  - id: react-dangerous-html
+    pattern: "dangerouslySetInnerHTML"
+    message: "Avoid dangerouslySetInnerHTML unless content is sanitized"
+    languages: [javascript, typescript]
+    severity: ERROR
+
+  - id: eval-usage
+    pattern: "eval(...)"
+    message: "Avoid eval"
+    languages: [javascript, typescript]
+    severity: ERROR
+
+  - id: unsanitized-template
+    pattern-either:
+      - pattern: "new Function($X)"
+      - pattern: "setInnerHTML($X)"
+    message: "Possible injection via dynamic code"
+    languages: [javascript, typescript]
+    severity: ERROR
