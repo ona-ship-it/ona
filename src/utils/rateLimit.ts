@@ -1,9 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// Lazily initialize Supabase inside the function to avoid build-time env errors
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  // Prefer service role; fallback to anon key if available to avoid hard failure
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  if (!url || !key) {
+    return null;
+  }
+  return createClient(url, key);
+}
 
 /**
  * Simple rate limiting implementation using Supabase
@@ -17,6 +23,11 @@ export async function rateLimit(
   action: string,
   limit: number
 ): Promise<boolean> {
+  const supabase = getSupabaseClient();
+  // If Supabase is not configured, skip rate limiting gracefully
+  if (!supabase) {
+    return false;
+  }
   const now = new Date();
   const oneMinuteAgo = new Date(now.getTime() - 60 * 1000);
   

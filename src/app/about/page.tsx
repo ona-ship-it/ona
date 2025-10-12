@@ -4,6 +4,7 @@ import Image from 'next/image';
 
 import Navigation from '../../components/Navigation';
 import PageTitle from '@/components/PageTitle';
+export const dynamic = 'force-dynamic';
 
 export default function AboutPage() {
   return (

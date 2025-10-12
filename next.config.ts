@@ -4,10 +4,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   basePath: "",
-  assetPrefix:
-    process.env.NODE_ENV === "production"
-      ? "https://onaguicom-git-onagui-new-feature-theos-projects-a68fa111.vercel.app"
-      : "",
+  // Do not override assetPrefix; let Vercel serve static assets from deployment domain
+  assetPrefix: undefined,
   eslint: {
     ignoreDuringBuilds: true,
   },
