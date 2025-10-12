@@ -11,19 +11,22 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@sentry/nextjs": "^10.19.0",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.58.0",
+    "@tailwindcss/postcss": "^4",
+    "@vercel/analytics": "^1.5.0",
+    "@vercel/speed-insights": "^1.2.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.22",
     "lucide-react": "^0.544.0",
     "next": "15.5.3",
-    "react": "19.2.0",
+    "react": "^19.2.0",
     "react-dom": "19.2.0",
     "react-icons": "^5.5.0",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4",
-    "@tailwindcss/postcss": "^4"
+    "tailwindcss": "^4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -33,7 +36,6 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.3",
     "stylelint": "^16.25.0",
-    
     "typescript": "^5"
   }
 }
