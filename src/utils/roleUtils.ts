@@ -1,5 +1,5 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Database } from '../types/supabase';
+import { Database } from '@/types/supabase';
 
 /**
  * App-level role types for business logic
@@ -78,7 +78,10 @@ export async function hasRole(roleName: AppRole): Promise<boolean> {
   // Fallback to the new relation syntax if app_users lookup fails
   const { data, error } = await supabase
     .from('user_roles')
-    .select('roles!inner(name)')
+    .select(`
+      *,
+      roles!inner(name)
+    `)
     .eq('user_id', session.user.id)
     .eq('roles.name', roleName)
     .single();
@@ -156,8 +159,7 @@ export async function getUserRoles(): Promise<AppRole[]> {
   }
   
   // Extract role names from the result and filter to only include valid app roles
-  type UserRoleRow = { roles: { name: string } };
-  const roles = (data as UserRoleRow[]).map(item => item.roles.name);
+  const roles = data.map(item => (item.roles as any).name);
   return roles.filter(role => 
     role === 'user' || 
     role === 'subscriber' || 

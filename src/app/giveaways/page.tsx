@@ -225,12 +225,20 @@ export default function GiveawaysPage() {
               </div> 
 
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3"> 
-                <button 
-                  onClick={() => joinFree(g.id)} 
-                  className="px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors duration-200 active:scale-95 shadow-sm hover:shadow-md" 
-                > 
-                  Claim Free Ticket 
-                </button> 
+                <button
+                  onClick={() => joinFree(g.id)}
+                  className="relative px-4 py-2 rounded-md bg-transparent text-green-300 font-bold tracking-wide transition-all duration-300 active:scale-95"
+                >
+                  <span className="relative z-10 drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]">Claim Free Ticket</span>
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-0 rounded-md ring-1 ring-green-400/50"
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -inset-1 rounded-md opacity-0 group-hover:opacity-100 blur-md bg-green-400/30"
+                  />
+                </button>
  
                 <button 
                   onClick={() => buyTicket(g.id, 1)} 

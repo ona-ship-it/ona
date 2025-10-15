@@ -2,39 +2,21 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  poweredByHeader: false,
-  basePath: "",
-  assetPrefix:
-    process.env.NODE_ENV === "production"
-      ? "https://onaguicom-git-onagui-new-feature-theos-projects-a68fa111.vercel.app"
-      : "",
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
-  typedRoutes: false,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   turbopack: {
     root: __dirname,
   },
   images: {
-    domains: [
-      "vercel.com",
-      "onaguicom-git-onagui-new-feature-theos-projects-a68fa111.vercel.app",
-      "i.pravatar.cc",
-    ],
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**.supabase.co",
-        pathname: "/storage/v1/object/public/**",
-      },
-    ],
+    domains: ["vercel.com"],
     formats: ["image/avif", "image/webp"],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256],
   },
+  poweredByHeader: false,
+  basePath: "",
 };
 
 export default nextConfig;
