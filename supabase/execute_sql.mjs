@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '..', '.env.local') });
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -23,8 +23,11 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function executeSQL() {
   try {
-    // Read the SQL file
-    const sqlFilePath = path.join(__dirname, 'mock_users.sql');
+    // Get SQL file path from command line argument or use default
+    const sqlFileName = process.argv[2] || 'mock_users.sql';
+    const sqlFilePath = path.isAbsolute(sqlFileName) 
+      ? sqlFileName 
+      : path.join(__dirname, '..', sqlFileName);
     const sqlContent = fs.readFileSync(sqlFilePath, 'utf8');
 
     // Split the SQL content into individual statements

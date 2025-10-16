@@ -1,10 +1,11 @@
 "use client"; 
   
-import { useState } from "react"; 
+import { useState, useEffect } from "react"; 
 import { useSupabaseClient } from "@/lib/supabaseClient"; 
 import { useRouter } from "next/navigation"; 
 import Navigation from "@/components/Navigation";
 import PageTitle from "@/components/PageTitle";
+import { isAdmin } from "@/utils/roleUtils";
   
 export default function NewGiveawayPage() { 
   const supabase = useSupabaseClient(); 
@@ -15,12 +16,29 @@ export default function NewGiveawayPage() {
   const [mediaUrl, setMediaUrl] = useState(""); 
   const [loading, setLoading] = useState(false);
   const [photo, setPhoto] = useState<File | null>(null);
+  const [userIsAdmin, setUserIsAdmin] = useState(false);
+  const [activateImmediately, setActivateImmediately] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string>("");
   const [photoError, setPhotoError] = useState<string>("");
   const [photoLoading, setPhotoLoading] = useState(false);
   
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  
+  // Check if user is admin on component mount
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const adminStatus = await isAdmin();
+        setUserIsAdmin(adminStatus);
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setUserIsAdmin(false);
+      }
+    };
+    
+    checkAdminStatus();
+  }, []);
   
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     // Clear previous errors
@@ -130,7 +148,10 @@ export default function NewGiveawayPage() {
         setPhotoLoading(false);
       }
   
-      // Create giveaway as draft 
+      // Determine initial status based on admin privileges and user choice
+      const initialStatus = (userIsAdmin && activateImmediately) ? "active" : "draft";
+      
+      // Create giveaway 
       const { data, error } = await supabase.from("giveaways").insert([ 
         { 
           creator_id: userId, 
@@ -140,7 +161,8 @@ export default function NewGiveawayPage() {
           prize_amount: prize, 
           prize_pool_usdt: prize, 
           ticket_price: 1, 
-          status: "draft", 
+          status: initialStatus, 
+          is_active: userIsAdmin && activateImmediately, // Immediately active for admin bypass
           ends_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // default 7 days 
         }, 
       ]); 
@@ -148,7 +170,13 @@ export default function NewGiveawayPage() {
       if (error) throw error; 
   
       const created = data?.[0];
-      alert("Giveaway created as draft. Activate it to lock escrow."); 
+      
+      if (userIsAdmin && activateImmediately) {
+        alert("Giveaway created and activated immediately (admin privilege - no escrow required).");
+      } else {
+        alert("Giveaway created as draft. Activate it to lock escrow.");
+      }
+      
       router.push(`/giveaways`); 
     } catch (err: any) { 
       console.error(err); 
@@ -162,13 +190,33 @@ export default function NewGiveawayPage() {
     // set status to 'active' — DB trigger should escrow the prize if wallet is funded 
     try { 
       setLoading(true); 
+      
+      // Check if user is admin for bypass privileges
+      const adminStatus = await isAdmin();
+      
+      const updateData: any = { 
+        status: "active",
+        is_active: true
+      };
+      
+      // If admin, bypass escrow by setting escrow_amount to 0
+      if (adminStatus) {
+        updateData.escrow_amount = 0;
+      }
+      
       const { error } = await supabase 
         .from("giveaways") 
-        .update({ status: "active" }) 
+        .update(updateData) 
         .eq("id", giveawayId); 
   
       if (error) throw error; 
-      alert("Giveaway activated — prize escrowed if funds available."); 
+      
+      if (adminStatus) {
+        alert("Giveaway activated with admin privileges — no escrow required.");
+      } else {
+        alert("Giveaway activated — prize escrowed if funds available.");
+      }
+      
       router.push("/giveaways"); 
     } catch (err: any) { 
       console.error(err); 
@@ -276,6 +324,30 @@ export default function NewGiveawayPage() {
               </div> 
             </div> 
     
+            {/* Admin immediate activation option */}
+            {userIsAdmin && (
+              <div className="bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-500/50 rounded-lg p-4">
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="activateImmediately"
+                    checked={activateImmediately}
+                    onChange={(e) => setActivateImmediately(e.target.checked)}
+                    className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                  />
+                  <label htmlFor="activateImmediately" className="text-sm font-medium text-green-300">
+                    <span className="flex items-center space-x-2">
+                      <span>🔓</span>
+                      <span>Activate immediately (Admin privilege - bypass escrow)</span>
+                    </span>
+                  </label>
+                </div>
+                <p className="text-xs text-green-400 mt-2 ml-7">
+                  As an admin, you can activate giveaways immediately without escrow requirements.
+                </p>
+              </div>
+            )}
+    
             <div className="flex flex-col gap-3"> 
               {photoLoading && (
                 <div id="upload-status" className="text-center text-purple-300 py-2">
@@ -287,7 +359,7 @@ export default function NewGiveawayPage() {
                 disabled={loading || photoLoading} 
                 className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-purple-500/30"
               > 
-                {loading ? "Creating..." : "Create Draft"} 
+                {loading ? "Creating..." : (userIsAdmin && activateImmediately ? "Create & Activate" : "Create Draft")} 
               </button> 
             </div> 
           </form> 
