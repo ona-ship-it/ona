@@ -77,7 +77,7 @@ export async function hasRole(roleName: AppRole): Promise<boolean> {
   
   // Fallback to the new relation syntax if app_users lookup fails
   const { data, error } = await supabase
-    .from('user_roles')
+    .from('onagui.user_roles')
     .select(`
       *,
       roles!inner(name)
@@ -150,7 +150,7 @@ export async function getUserRoles(): Promise<AppRole[]> {
   
   // Fallback to the original role lookup if app_users lookup fails
   const { data, error } = await supabase
-    .from('user_roles')
+    .from('onagui.user_roles')
     .select('roles(name)')
     .eq('user_id', session.user.id);
   

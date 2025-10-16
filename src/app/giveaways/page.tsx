@@ -199,11 +199,18 @@ export default function GiveawaysPage() {
             className="group border rounded-xl p-4 bg-white dark:bg-gray-900 shadow-md hover:shadow-lg transition-all duration-300 ease-out hover:-translate-y-0.5" 
           > 
             {g.media_url && ( 
-              <img 
-                src={g.media_url} 
-                alt={g.title || "giveaway media"} 
-                className="w-full h-44 object-cover rounded-md mb-3 transition-transform duration-300 ease-out group-hover:scale-[1.02]" 
-              /> 
+              <div className="relative w-full mb-3 overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800" style={{ paddingBottom: '75%' }}>
+                <img 
+                  src={g.media_url} 
+                  alt={g.title || "giveaway media"} 
+                  className="absolute inset-0 w-full h-full object-contain transition-transform duration-300 ease-out group-hover:scale-[1.02]" 
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.parentElement!.innerHTML = '<div class="absolute inset-0 flex items-center justify-center text-gray-400"><svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path></svg></div>';
+                  }}
+                /> 
+              </div>
             )} 
             <h2 className="text-lg font-semibold mb-1"> 
               {g.title || "Giveaway"} 

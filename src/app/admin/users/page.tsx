@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Database } from '@/types/supabase';
 import { useRouter } from 'next/navigation';
+import { fetchAdminUsers } from '../admin-actions';
 
 interface OnaguiProfile {
   id: string;
@@ -42,33 +43,8 @@ export default function AdminUsersPage() {
       try {
         setLoading(true);
         
-        // Get all users with their profiles
-        const { data: profiles, error: profilesError } = await supabase
-          .from('onagui_profiles')
-          .select('*');
-        
-        if (profilesError) throw profilesError;
-
-        // Get user roles
-        const { data: userRoles, error: rolesError } = await supabase
-          .from('user_roles')
-          .select('user_id, role_id, roles(name)');
-        
-        if (rolesError) throw rolesError;
-
-        // Map roles to users
-        const usersWithRoles: AdminUser[] = (profiles ?? []).map((profile: OnaguiProfile) => {
-          const roles = (userRoles ?? [])
-            .filter((role: UserRoleRecord) => role.user_id === profile.id)
-            .map((role: UserRoleRecord) => role.roles?.name)
-            .filter((name): name is string => !!name);
-          
-          return {
-            ...profile,
-            roles: roles || []
-          };
-        });
-
+        // Use secure Server Action to fetch admin users
+        const usersWithRoles = await fetchAdminUsers();
         setUsers(usersWithRoles);
       } catch (error: unknown) {
         console.error('Error fetching users:', error);
