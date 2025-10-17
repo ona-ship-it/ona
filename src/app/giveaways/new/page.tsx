@@ -117,7 +117,7 @@ export default function NewGiveawayPage() {
         
         const fileExt = photo.name.split('.').pop();
         const fileName = `${userId}-${Date.now()}.${fileExt}`;
-        const filePath = `giveaway-photos/${fileName}`;
+        const filePath = `giveaway-photos/${userId}/${fileName}`;
         
         // Show upload progress message
         const uploadStatusEl = document.getElementById('upload-status');
