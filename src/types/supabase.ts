@@ -43,6 +43,20 @@ export interface Database {
           assigned_at?: string
         }
       }
+  }
+  onagui: {
+    Tables: {
+
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
       ranks: {
         Row: {
           code: string
@@ -64,38 +78,6 @@ export interface Database {
           description?: string | null
           requirements?: Json | null
           badge_icon?: string | null
-        }
-      }
-      app_users: {
-        Row: {
-          id: string
-          email: string | null
-          username: string | null
-          profile_image: string | null
-          current_rank: string
-          reputation_points: number
-          created_at: string
-          last_active_at: string | null
-        }
-        Insert: {
-          id?: string
-          email?: string | null
-          username?: string | null
-          profile_image?: string | null
-          current_rank?: string
-          reputation_points?: number
-          created_at?: string
-          last_active_at?: string | null
-        }
-        Update: {
-          id?: string
-          email?: string | null
-          username?: string | null
-          profile_image?: string | null
-          current_rank?: string
-          reputation_points?: number
-          created_at?: string
-          last_active_at?: string | null
         }
       }
       achievements: {
@@ -425,10 +407,120 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      sync_user_to_app_users: {
+        Args: {
+          p_id: string
+          p_email: string
+          p_username: string
+        }
+        Returns: {
+          id: string
+          email: string
+          username: string
+          created_at: string
+        }
+      }
     }
     Enums: {
       onagui_user_type: 'new_user' | 'subscriber' | 'onagui_user' | 'powered' | 'vip' | 'admin'
+    }
+  }
+  onagui: {
+    Tables: {
+      app_users: {
+        Row: {
+          id: string
+          email: string | null
+          username: string | null
+          profile_image: string | null
+          current_rank: string
+          reputation_points: number
+          onagui_type: Database['public']['Enums']['onagui_user_type']
+          created_at: string
+          updated_at: string
+          last_active_at: string | null
+        }
+        Insert: {
+          id: string
+          email?: string | null
+          username?: string | null
+          profile_image?: string | null
+          current_rank?: string
+          reputation_points?: number
+          onagui_type?: Database['public']['Enums']['onagui_user_type']
+          created_at?: string
+          updated_at?: string
+          last_active_at?: string | null
+        }
+        Update: {
+          id?: string
+          email?: string | null
+          username?: string | null
+          profile_image?: string | null
+          current_rank?: string
+          reputation_points?: number
+          onagui_type?: Database['public']['Enums']['onagui_user_type']
+          created_at?: string
+          updated_at?: string
+          last_active_at?: string | null
+        }
+      }
+      roles: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          created_at?: string
+        }
+      }
+      user_roles: {
+        Row: {
+          id: string
+          user_id: string
+          role_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          role_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          role_id?: string
+          created_at?: string
+        }
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_moderator: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+    }
+    Enums: {
+      [_ in never]: never
     }
   }
 }

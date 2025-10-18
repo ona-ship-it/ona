@@ -8,34 +8,60 @@ import { Database } from '@/types/supabase';
 export type AppRole = 'user' | 'subscriber' | 'influencer' | 'admin';
 
 /**
- * Lookup a user's role from the app_users table
+ * Lookup a user's role from the secured onagui.app_users table
  * @param userId The user ID to lookup
  * @returns Promise<AppRole | null> The user's role or null if not found
  */
 export async function lookupUserRole(userId: string): Promise<AppRole | null> {
   const supabase = createClientComponentClient<Database>();
   
-  // Get the user from app_users table
-  const { data, error } = await supabase
-    .from('app_users')
-    .select('*')
-    .eq('id', userId)
-    .single();
-  
-  if (error || !data) {
-    console.error('Error looking up user role:', error);
+  try {
+    // Get the user from secured onagui.app_users table
+    // This will respect RLS policies - users can only see their own data unless they're admin/moderator
+    const { data, error } = await supabase
+      .schema('onagui')
+      .from('app_users')
+      .select('current_rank, onagui_type')
+      .eq('id', userId)
+      .single();
+    
+    if (error) {
+      console.error('Error looking up user role:', error);
+      
+      // Fallback: Check if user has admin/moderator role via onagui.user_roles
+      const { data: roleData, error: roleError } = await supabase
+        .schema('onagui')
+        .from('user_roles')
+        .select(`
+          roles!inner(name)
+        `)
+        .eq('user_id', userId)
+        .in('roles.name', ['admin', 'moderator'])
+        .limit(1);
+      
+      if (!roleError && roleData && roleData.length > 0) {
+        const roleName = (roleData[0] as any).roles.name;
+        return roleName === 'admin' ? 'admin' : 'influencer'; // Map moderator to influencer
+      }
+      
+      return null;
+    }
+    
+    if (!data) {
+      return null;
+    }
+    
+    // Map the user's rank to an app role
+    const rank = data.current_rank;
+    
+    if (rank === 'admin') return 'admin';
+    if (rank === 'influencer') return 'influencer';
+    if (rank === 'subscriber') return 'subscriber';
+    return 'user'; // Default role
+  } catch (error) {
+    console.error('Unexpected error in lookupUserRole:', error);
     return null;
   }
-  
-  // Map the user's rank to an app role
-  // This assumes that the current_rank field in app_users corresponds to role names
-  // You may need to adjust this mapping based on your data model
-  const rank = data.current_rank;
-  
-  if (rank === 'admin') return 'admin';
-  if (rank === 'influencer') return 'influencer';
-  if (rank === 'subscriber') return 'subscriber';
-  return 'user'; // Default role
 }
 
 /**
