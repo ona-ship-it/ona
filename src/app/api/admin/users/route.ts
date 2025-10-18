@@ -22,8 +22,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
     }
 
-    // Fetch all users from auth.users with their app_users data and roles
+    // Fetch all users from secured onagui.app_users table
+    // Admin users can see all users due to RLS policies
     const { data: users, error: usersError } = await supabase
+      .schema('onagui')
       .from('app_users')
       .select(`
         id,
@@ -31,12 +33,13 @@ export async function GET(request: NextRequest) {
         username,
         current_rank,
         reputation_points,
+        onagui_type,
         created_at,
         updated_at
       `);
 
     if (usersError) {
-      console.error('Error fetching users:', usersError);
+      console.error('Error fetching users from onagui.app_users:', usersError);
       return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
     }
 
@@ -44,7 +47,8 @@ export async function GET(request: NextRequest) {
     const usersWithRoles = await Promise.all(
       (users || []).map(async (user) => {
         const { data: userRoles, error: rolesError } = await supabase
-          .from('onagui.user_roles')
+          .schema('onagui')
+          .from('user_roles')
           .select(`
             roles!inner(name)
           `)
@@ -64,7 +68,7 @@ export async function GET(request: NextRequest) {
           id: user.id,
           email: user.email,
           username: user.username,
-          onagui_type: 'signed_in', // Default type for app users
+          onagui_type: user.onagui_type || 'signed_in',
           current_rank: user.current_rank,
           reputation_points: user.reputation_points,
           roles: roles,

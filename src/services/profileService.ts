@@ -33,6 +33,7 @@ export class ProfileService {
    */
   async getUserRank(userId: string): Promise<UserRank | null> {
     const { data: user, error: userError } = await this.supabase
+      .schema('onagui')
       .from('app_users')
       .select('current_rank')
       .eq('id', userId)
@@ -100,6 +101,7 @@ export class ProfileService {
    */
   async updateUserRank(userId: string, rankCode: string): Promise<boolean> {
     const { error } = await this.supabase
+      .schema('onagui')
       .from('app_users')
       .update({ current_rank: rankCode })
       .eq('id', userId);
