@@ -1,36 +1,31 @@
 'use server'
 
 import { createAdminSupabaseClient } from '@/utils/supabase/server-admin'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 
 export async function checkAdminStatus() {
   try {
     // Get the current user from the session
-    const supabase = createServerComponentClient({ cookies })
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
       return { isAdmin: false, error: 'Not authenticated' }
     }
 
-    // Use admin client to check user admin status in app_users table
+    // Use admin client to get full user details including metadata
     const adminSupabase = await createAdminSupabaseClient()
     
-    // Check if user has admin rank in app_users table
-    const { data: appUser, error: appUserError } = await adminSupabase
-      .from('app_users')
-      .select('current_rank')
-      .eq('id', user.id)
-      .single()
+    // Get user details with metadata to check admin status
+    const { data: fullUser, error: userError } = await adminSupabase.auth.admin.getUserById(user.id)
 
-    if (appUserError) {
-      console.error('Error checking user admin status:', appUserError)
-      return { isAdmin: false, error: 'Failed to check admin status' }
+    if (userError || !fullUser.user) {
+      console.error('Error getting user details:', userError)
+      return { isAdmin: false, error: 'Failed to get user details' }
     }
 
-    // Check if user has admin rank
-    const isAdmin = appUser?.current_rank === 'admin'
+    // Check if user has admin status in metadata
+    const isAdmin = fullUser.user.user_metadata?.is_admin === true
 
     return { 
       isAdmin, 

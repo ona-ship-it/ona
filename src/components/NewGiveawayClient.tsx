@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navigation from './Navigation';
 import PageTitle from './PageTitle';
+import WalletBalance from './WalletBalance';
 import { useSupabaseClient } from '@/lib/supabaseClient';
 import { CreateGiveawayPayload } from '../types/giveaways';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
 
 export default function NewGiveawayClient() {
   const [formData, setFormData] = useState<CreateGiveawayPayload & {
@@ -26,12 +27,14 @@ export default function NewGiveawayClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [fiatBalance, setFiatBalance] = useState<number | null>(null);
+  const [ticketBalance, setTicketBalance] = useState<number | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const router = useRouter();
   const supabase = useSupabaseClient();
 
-  // Fetch user wallet balance and admin status on component mount
+  // Fetch user admin status on component mount
   useEffect(() => {
     async function fetchUserData() {
       try {
@@ -42,6 +45,8 @@ export default function NewGiveawayClient() {
           return;
         }
         
+        setUser(user);
+        
         // Check if user is admin
         const { data: adminData } = await supabase
           .from('user_roles')
@@ -51,19 +56,6 @@ export default function NewGiveawayClient() {
           .single();
           
         setIsAdmin(!!adminData);
-        
-        // Fetch user wallet balance from your wallet service
-        const { data, error } = await supabase
-          .from('onagui.wallets')
-          .select('balance')
-          .eq('user_id', user.id)
-          .single();
-          
-        if (error) throw error;
-        
-        if (data) {
-          setWalletBalance(data.balance);
-        }
       } catch (err) {
         console.error('Error fetching user data:', err);
         setError('Failed to load user data');
@@ -72,6 +64,12 @@ export default function NewGiveawayClient() {
     
     fetchUserData();
   }, [router, supabase]);
+
+  // Handle wallet balance updates from WalletBalance component
+  const handleWalletBalanceUpdate = (fiat: number, tickets: number) => {
+    setFiatBalance(fiat);
+    setTicketBalance(tickets);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -118,9 +116,9 @@ export default function NewGiveawayClient() {
         throw new Error('End date must be in the future');
       }
       
-      // For non-admin users, check wallet balance
-      if (!isAdmin && walletBalance !== null && formData.prize_amount > walletBalance) {
-        throw new Error(`Insufficient wallet balance. You need ${formData.prize_amount} USDT but have ${walletBalance.toFixed(2)} USDT`);
+      // For non-admin users, check fiat wallet balance
+      if (!isAdmin && fiatBalance !== null && formData.prize_amount > fiatBalance) {
+        throw new Error(`Insufficient wallet balance. You need ${formData.prize_amount} USDT but have ${fiatBalance.toFixed(2)} USDT`);
       }
       
       // Get current user
@@ -289,7 +287,7 @@ export default function NewGiveawayClient() {
       const filePath = `giveaway-photos/${fileName}`;
       
       const { error: uploadError } = await supabase.storage
-        .from('public')
+        .from('giveaways')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
@@ -299,7 +297,7 @@ export default function NewGiveawayClient() {
       
       // Get public URL
       const { data } = supabase.storage
-        .from('public')
+        .from('giveaways')
         .getPublicUrl(filePath);
         
       setFormData(prev => ({
@@ -401,10 +399,41 @@ export default function NewGiveawayClient() {
                       <span className="text-purple-300">USDT</span>
                     </div>
                   </div>
-                  {walletBalance !== null && !isAdmin && (
-                    <p className="text-sm text-purple-300 mt-1">
-                      Your wallet balance: {walletBalance.toFixed(2)} USDT
-                    </p>
+                  {user && (
+                    <WalletBalance 
+                      userId={user.id} 
+                      onBalanceUpdate={handleWalletBalanceUpdate}
+                      className="mt-2"
+                      showTickets={false}
+                    />
+                  )}
+                  {fiatBalance !== null && !isAdmin && formData.prize_amount > 0 && (
+                    <div className={`mt-2 p-3 rounded-lg border ${
+                      fiatBalance >= formData.prize_amount 
+                        ? 'bg-green-500 bg-opacity-20 border-green-500' 
+                        : 'bg-red-500 bg-opacity-20 border-red-500'
+                    }`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        {fiatBalance >= formData.prize_amount ? (
+                          <CheckCircle className="w-4 h-4 text-green-400" />
+                        ) : (
+                          <AlertTriangle className="w-4 h-4 text-red-400" />
+                        )}
+                        <span className={`text-sm font-medium ${
+                          fiatBalance >= formData.prize_amount ? 'text-green-300' : 'text-red-300'
+                        }`}>
+                          {fiatBalance >= formData.prize_amount ? 'Sufficient Funds' : 'Insufficient Funds'}
+                        </span>
+                      </div>
+                      <p className={`text-sm ${
+                        fiatBalance >= formData.prize_amount ? 'text-green-200' : 'text-red-200'
+                      }`}>
+                        {fiatBalance >= formData.prize_amount 
+                          ? `✓ ${formData.prize_amount} USDT will be locked in escrow when activated.`
+                          : `✗ You need ${(formData.prize_amount - fiatBalance).toFixed(2)} more USDT to create this giveaway.`
+                        }
+                      </p>
+                    </div>
                   )}
                   {isAdmin && (
                     <p className="text-sm text-green-300 mt-1">

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
 import { useTheme } from '../../components/ThemeContext';
+import { FcGoogle } from 'react-icons/fc';
+import { createClient } from '@/utils/supabase/client';
 
 export default function SignInClient() {
   const [email, setEmail] = useState('');
@@ -37,6 +39,25 @@ export default function SignInClient() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSignIn = async () => {
+    const supabase = createClient();
+    
+    // Call the signInWithOAuth method with the 'google' provider
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        // The redirectTo path must be one of your authorized redirect URIs
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      console.error('Google sign-in error:', error.message);
+      setError('Error signing in with Google. Check console for details.');
+    }
+    // Supabase redirects the user to Google login, then back to /auth/callback
   };
 
   return (
@@ -134,6 +155,20 @@ export default function SignInClient() {
                   </button>
                 </div>
               </form>
+              
+              <div className="mt-4">
+                <button
+                  onClick={handleGoogleSignIn}
+                  className={`w-full flex items-center justify-center p-3 text-sm font-medium border rounded-lg transition duration-150 ${
+                    isWhite 
+                      ? 'border-gray-300 hover:bg-gray-50 text-gray-700' 
+                      : 'border-gray-600 hover:bg-gray-700 text-gray-300'
+                  }`}
+                >
+                  <FcGoogle className="w-5 h-5 mr-3" />
+                  Sign in with Google
+                </button>
+              </div>
               
               <div className="mt-6">
                 <p className={`text-center text-sm ${isWhite ? 'text-gray-600' : 'text-gray-400'}`}>
