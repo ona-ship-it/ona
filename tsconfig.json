@@ -36,6 +36,14 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "extensions/**/*",
+    "binaries/**/*",
+    "sdks/**/*",
+    "ona-production/**/*",
+    "onagui/**/*",
+    "onagui-*/**/*",
+    "supabase/**/*",
+    "temp-restore/**/*"
   ]
 }

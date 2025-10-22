@@ -16,7 +16,7 @@ interface RecentGiveaway {
   title: string
   status: string
   created_at: string
-  auth_users: { email: string } | null
+  creator_id: string
 }
 
 export default function AdminPage() {
@@ -217,7 +217,7 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <div className="text-sm text-gray-500">
-                      Created by {giveaway.auth_users?.email || 'Unknown'} • Status: {giveaway.status}
+                      Creator ID: {giveaway.creator_id || 'Unknown'} • Status: {giveaway.status}
                     </div>
                   </li>
                 ))}

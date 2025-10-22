@@ -31,8 +31,8 @@ export default async function AccountPage() {
   }
 
   // Fetch Profile Info (if needed)
-  const { data: profile } = await supabase
-    .from('profiles')
+  const { data: profile }: { data: { email: string; user_id: string } | null } = await supabase
+    .from('onagui_profiles')
     .select('email, user_id')
     .eq('user_id', user.id)
     .single();

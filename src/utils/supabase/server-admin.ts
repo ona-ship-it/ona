@@ -2,6 +2,7 @@
 
 // This client is for server-side code ONLY and should NEVER be exposed to the browser.
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/supabase';
 
 // Get environment variables
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -17,7 +18,7 @@ if (!supabaseServiceRoleKey || !supabaseUrl) {
  * WARNING: Use only in secure, server-side environments (Server Actions, Route Handlers).
  */
 export async function createAdminSupabaseClient() {
-  const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+  const supabase = createClient<Database>(supabaseUrl!, supabaseServiceRoleKey!, {
     auth: {
       // Prevents the client from trying to use cookies/session info
       persistSession: false,

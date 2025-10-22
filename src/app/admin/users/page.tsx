@@ -37,15 +37,21 @@ export default function AdminUsersPage() {
             {
               id: 'preview-user-1',
               email: 'user@example.com',
+              full_name: 'Preview User',
+              avatar_url: null,
               current_rank: 'user',
               created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
               role_name: 'user',
             },
             {
               id: 'preview-admin',
               email: 'richtheocrypto@gmail.com',
+              full_name: 'Admin User',
+              avatar_url: null,
               current_rank: 'admin',
               created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
               role_name: 'admin',
             },
           ];

@@ -35,18 +35,22 @@ export async function createGiveaway(formData: FormData) {
   }
 
   // 4. Insert data into the database
-  const { data, error } = await supabase.from('giveaways').insert({
-    title,
-    description,
-    ticket_price,
-    prize_amount,
-    prize_pool_usdt: prize_amount, // Initial prize pool equals the prize amount
-    ends_at,
-    photo_url,
-    creator_id: user.id,
-    status: 'active', // Admin giveaways are active by default
-    escrow_amount: 0, // Admin bypass escrow
-  }).select().single();
+  const { data, error } = await (supabase as any)
+    .from('giveaways')
+    .insert({
+      title,
+      description,
+      ticket_price,
+      prize_amount,
+      prize_pool_usdt: prize_amount, // Initial prize pool equals the prize amount
+      ends_at,
+      photo_url,
+      creator_id: user.id,
+      status: 'active', // Admin giveaways are active by default
+      escrow_amount: 0, // Admin bypass escrow
+    })
+    .select()
+    .single();
 
   if (error) {
     console.error('Database insertion error:', error);

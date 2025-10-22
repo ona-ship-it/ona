@@ -1,8 +1,10 @@
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+'use client';
 
-import ContactClient from './ContactClient';
-
-export default function Page() {
-  return <ContactClient />;
+export default function ContactPage() {
+  return (
+    <div className="p-10 text-center">
+      <h1 className="text-3xl font-semibold mb-2">Contact Us</h1>
+      <p className="text-gray-500">We'll get back to you soon!</p>
+    </div>
+  );
 }

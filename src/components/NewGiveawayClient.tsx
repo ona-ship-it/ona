@@ -325,9 +325,7 @@ export default function NewGiveawayClient() {
       <Navigation />
       
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <PageTitle className="text-3xl md:text-4xl mb-8" gradient={true}>
-          Create New Giveaway
-        </PageTitle>
+        <PageTitle title="Create New Giveaway" className="text-3xl md:text-4xl mb-8" />
         
         {success ? (
           <div className="bg-green-500 bg-opacity-20 border border-green-500 text-white p-6 rounded-lg text-center">

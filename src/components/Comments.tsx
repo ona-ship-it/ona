@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { Session } from "@supabase/supabase-js";
-import { useTheme } from "@/lib/ThemeContext";
+import { useTheme } from "@/components/ThemeContext";
 import Link from "next/link";
 import { ProfileService } from "@/services/profileService";
 

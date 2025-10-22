@@ -66,8 +66,8 @@ export async function GET(request: NextRequest) {
   }
 
   const { data: userRoles, error: rolesError } = await service
-    .from('user_roles')
-    .select('user_id, role_id, roles(name)');
+    .from('admin_user_roles')
+    .select('user_id, role_id, admin_roles(name)');
 
   if (rolesError) {
     return NextResponse.json({ error: rolesError.message }, { status: 500 });
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
   const users = (profiles ?? []).map((profile: any) => {
     const roles = (userRoles ?? [])
       .filter((role: any) => role.user_id === profile.id)
-      .map((role: any) => role.roles?.name)
+      .map((role: any) => role.admin_roles?.name)
       .filter((name: any) => !!name);
     return { ...profile, roles: roles || [] };
   });
