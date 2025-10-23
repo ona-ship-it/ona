@@ -4,9 +4,17 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
 import { User } from '@supabase/supabase-js';
 import { handleAuthError } from '@/utils/authUtils';
+import type { Database } from '@/types/supabase';
   
 export default function GoogleSignIn() { 
-  const supabase = createClientComponentClient();
+  const supabase = createClientComponentClient<Database>({
+    cookieOptions: {
+      path: '/',
+      domain: process.env.NODE_ENV === 'production' ? '.onagui.com' : undefined,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    }
+  });
   const [visible, setVisible] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);

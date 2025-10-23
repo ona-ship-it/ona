@@ -6,7 +6,6 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
 import { useTheme } from '../../components/ThemeContext';
 import { FcGoogle } from 'react-icons/fc';
-import { createClient } from '@/utils/supabase/client';
 
 export default function SignInClient() {
   const [email, setEmail] = useState('');
@@ -42,7 +41,6 @@ export default function SignInClient() {
   };
 
   const handleGoogleSignIn = async () => {
-    const supabase = createClient();
     
     // Call the signInWithOAuth method with the 'google' provider
     const { error } = await supabase.auth.signInWithOAuth({

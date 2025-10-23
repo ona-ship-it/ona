@@ -5,9 +5,17 @@ import { Session } from '@supabase/supabase-js';
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import type { Database } from '@/types/supabase';
 
 export default function AuthButtons() {
-  const supabase = createClientComponentClient();
+  const supabase = createClientComponentClient<Database>({
+    cookieOptions: {
+      path: '/',
+      domain: process.env.NODE_ENV === 'production' ? '.onagui.com' : undefined,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    }
+  });
   const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
 

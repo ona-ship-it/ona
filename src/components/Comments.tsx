@@ -19,7 +19,14 @@ export type CommentTargetType = "profile" | "post";
 
 export function Comments({ targetId, targetType }: { targetId: string; targetType: CommentTargetType }) {
   const { isDarker, isWhite } = useTheme();
-  const supabase = useMemo(() => createClientComponentClient(), []);
+  const supabase = useMemo(() => createClientComponentClient<Database>({
+    cookieOptions: {
+      path: '/',
+      domain: process.env.NODE_ENV === 'production' ? '.onagui.com' : undefined,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    }
+  }), []);
   const [session, setSession] = useState<Session | null>(null);
   const [canPost, setCanPost] = useState<boolean>(false);
   const [loadingAuth, setLoadingAuth] = useState<boolean>(true);

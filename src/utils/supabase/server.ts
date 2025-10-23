@@ -5,6 +5,15 @@ import type { Database } from '@/types/supabase'
 export async function createClient() {
   const cookieStore = await cookies()
 
+  // Configure cookie options for production domain
+  const getDefaultCookieOptions = (options: CookieOptions = {}): CookieOptions => ({
+    ...options,
+    domain: process.env.NODE_ENV === 'production' ? '.onagui.com' : options.domain,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    httpOnly: false, // Allow client-side access for auth tokens
+  });
+
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -15,7 +24,8 @@ export async function createClient() {
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
-            cookieStore.set({ name, value, ...options })
+            const cookieOptions = getDefaultCookieOptions(options);
+            cookieStore.set({ name, value, ...cookieOptions })
           } catch (error) {
             // The `set` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing
@@ -24,7 +34,8 @@ export async function createClient() {
         },
         remove(name: string, options: CookieOptions) {
           try {
-            cookieStore.set({ name, value: '', ...options })
+            const cookieOptions = getDefaultCookieOptions(options);
+            cookieStore.set({ name, value: '', ...cookieOptions })
           } catch (error) {
             // The `delete` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing

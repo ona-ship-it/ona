@@ -1,5 +1,16 @@
 // Authentication utility functions for handling token issues
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import type { Database } from '@/types/supabase';
+
+// Helper function to create Supabase client with proper cookie configuration
+const createSupabaseClient = () => createClientComponentClient<Database>({
+  cookieOptions: {
+    path: '/',
+    domain: process.env.NODE_ENV === 'production' ? '.onagui.com' : undefined,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  }
+});
 
 /**
  * Clear all authentication tokens and reset auth state
@@ -7,7 +18,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
  */
 export async function clearAuthTokens() {
   try {
-    const supabase = createClientComponentClient();
+    const supabase = createSupabaseClient();
     
     // Sign out from Supabase (this clears server-side session)
     await supabase.auth.signOut();
@@ -39,7 +50,7 @@ export async function clearAuthTokens() {
  */
 export async function validateSession() {
   try {
-    const supabase = createClientComponentClient();
+    const supabase = createSupabaseClient();
     const { data, error } = await supabase.auth.getSession();
     
     if (error) {
@@ -59,7 +70,7 @@ export async function validateSession() {
  */
 export async function refreshSession() {
   try {
-    const supabase = createClientComponentClient();
+    const supabase = createSupabaseClient();
     const { data, error } = await supabase.auth.refreshSession();
     
     if (error) {

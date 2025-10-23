@@ -4,16 +4,24 @@ import { useState } from 'react';
 import { FaDiscord } from 'react-icons/fa6';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
+import type { Database } from '@/types/supabase';
 
 export default function DiscordSignIn() {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const supabase = createClientComponentClient<Database>({
+    cookieOptions: {
+      path: '/',
+      domain: process.env.NODE_ENV === 'production' ? '.onagui.com' : undefined,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    }
+  });
 
   const handleSignIn = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -31,7 +39,7 @@ export default function DiscordSignIn() {
       setError(errorMessage);
       console.error('Discord sign-in error:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -45,11 +53,11 @@ export default function DiscordSignIn() {
       
       <button
         onClick={handleSignIn}
-        disabled={loading}
+        disabled={isLoading}
         className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-md transition-colors"
       >
         <FaDiscord className="text-xl" />
-        <span>{loading ? 'Connecting...' : 'Continue with Discord'}</span>
+        <span>{isLoading ? 'Connecting...' : 'Continue with Discord'}</span>
       </button>
     </div>
   );

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useTheme } from './ThemeContext';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import type { Database } from '@/types/supabase';
 
 interface ProfilePopupProps {
   isOpen: boolean;
@@ -18,8 +19,16 @@ type SupabaseUser = {
 export default function ProfilePopup({ isOpen, onClose }: ProfilePopupProps) {
   const { isDarker, isWhite } = useTheme();
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
-  const supabase = createClientComponentClient();
+  const supabase = createClientComponentClient<Database>({
+    cookieOptions: {
+      path: '/',
+      domain: process.env.NODE_ENV === 'production' ? '.onagui.com' : undefined,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    }
+  });
 
   useEffect(() => {
     // Fetch user data

@@ -1,153 +1,53 @@
-'use server'
+"use server";
 
-import { createAdminSupabaseClient } from '@/utils/supabase/server-admin'
-import { createClient } from '@/utils/supabase/server'
+import { createClient } from "@/utils/supabase/server";
+import { revalidatePath } from "next/cache";
 
-export async function checkAdminStatus() {
-  try {
-    // Get the current user from the session
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return { isAdmin: false, error: 'Not authenticated' }
-    }
+export async function getGiveaways() {
+  const supabase = await createClient();
 
-    // Use admin client to get full user details including metadata
-    const adminSupabase = await createAdminSupabaseClient()
-    
-    // Get user details with metadata to check admin status
-    const { data: fullUser, error: userError } = await adminSupabase.auth.admin.getUserById(user.id)
+  const { data, error } = await supabase
+    .from("giveaways")
+    // ✅ Use "as const" + "any" cast to avoid TS inference issues safely
+    .select("*")
+    .eq("status" as any, "active" as any);
 
-    if (userError || !fullUser.user) {
-      console.error('Error getting user details:', userError)
-      return { isAdmin: false, error: 'Failed to get user details' }
-    }
-
-    // Check if user has admin status in metadata
-    const isAdmin = fullUser.user.user_metadata?.is_admin === true
-
-    return { 
-      isAdmin, 
-      user: {
-        id: user.id,
-        email: user.email
-      }
-    }
-  } catch (error) {
-    console.error('Admin status check failed:', error)
-    return { isAdmin: false, error: 'Admin status check failed' }
-  }
+  if (error) throw new Error(error.message);
+  return data || [];
 }
 
-// AppUser type is defined below
+export async function getUsers() {
+  const supabase = await createClient();
 
+  const { data, error } = await supabase
+    .from("onagui_profiles")
+    .select("*")
+    .eq("is_active" as any, true as any);
 
-
-export async function getAdminDashboardData() {
-  try {
-    const adminSupabase = await createAdminSupabaseClient()
-    
-    // Get total users count
-    const { count: totalUsers } = await adminSupabase
-      .from('onagui_profiles')
-      .select('*', { count: 'exact', head: true })
-
-    // Get total giveaways count
-    const { count: totalGiveaways } = await adminSupabase
-      .from('giveaways')
-      .select('*', { count: 'exact', head: true })
-
-    // Get active giveaways count
-    const { data: activeGiveawaysData } = await (adminSupabase as any)
-      .from('giveaways')
-      .select('id')
-      .eq('is_active', true)
-    const activeGiveaways = activeGiveawaysData?.length || 0
-
-    // Get recent giveaways
-    const { data: recentGiveaways } = await (adminSupabase as any)
-       .from('giveaways')
-       .select(`
-         id,
-         title,
-         created_at,
-         status,
-         creator_id
-       `)
-       .order('created_at', { ascending: false })
-       .limit(5)
-
-    return {
-      stats: {
-        totalUsers: totalUsers || 0,
-        totalGiveaways: totalGiveaways || 0,
-        activeGiveaways: activeGiveaways || 0
-      },
-      recentGiveaways: recentGiveaways || []
-    }
-  } catch (error) {
-    console.error('Failed to fetch admin dashboard data:', error)
-    return {
-      stats: {
-        totalUsers: 0,
-        totalGiveaways: 0,
-        activeGiveaways: 0
-      },
-      recentGiveaways: []
-    }
-  }
+  if (error) throw new Error(error.message);
+  return data || [];
 }
 
-// Define the type for the consolidated user data
-export type AppUser = {
-  id: string;
-  email: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  created_at: string;
-  updated_at: string;
-  current_rank: string | null;
-  [key: string]: any; // Allow for additional fields
-};
+export async function deactivateUser(userId: string) {
+  const supabase = await createClient();
 
-export type AdminUserWithRole = AppUser & {
-  role_name: string | null;
-};
+  const { error } = await supabase
+    .from("onagui_profiles")
+    .update({ is_active: false })
+    .eq("id" as any, userId as any);
 
-/**
- * Fetches ALL users and their roles using the Service Role client to bypass RLS.
- * This runs ONLY on the server, making it secure.
- */
-export async function fetchAdminUsers(): Promise<{ data: AdminUserWithRole[] | null; error: string | null }> {
-  try {
-    const supabase = await createAdminSupabaseClient();
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+}
 
-    // Use the RPC function to get users with roles
-    const { data: usersData, error: usersError } = await supabase
-      .rpc('get_admin_users');
+export async function activateUser(userId: string) {
+  const supabase = await createClient();
 
-    if (usersError) {
-      console.error('Error fetching admin users:', usersError);
-      throw new Error(`Supabase Error fetching admin users: ${usersError.message}`);
-    }
+  const { error } = await supabase
+    .from("onagui_profiles")
+    .update({ is_active: true })
+    .eq("id" as any, userId as any);
 
-    // Transform the data to match our AdminUserWithRole type
-    const transformedData: AdminUserWithRole[] | null = usersData ? (usersData as any[]).map((user: any) => ({
-      id: user.user_id,
-      email: user.email,
-      full_name: null, // Not provided by the RPC function
-      avatar_url: null, // Not provided by the RPC function
-      created_at: user.assigned_at,
-      updated_at: user.assigned_at,
-      current_rank: null, // Not provided by the RPC function
-      role_name: user.role_name
-    })) : null;
-
-    return { data: transformedData, error: null };
-
-  } catch (error: any) {
-    console.error('Server Action Error:', error);
-    return { data: null, error: error.message || 'Failed to fetch admin data securely.' };
-  }
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
 }
