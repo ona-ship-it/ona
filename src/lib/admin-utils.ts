@@ -138,18 +138,8 @@ export async function verifyAdminAccess(userId?: string): Promise<AdminCheckResu
           };
         }
         
-        // Secondary check: onagui_type for backward compatibility
-        const isAdminByType = profile.onagui_type === 'admin';
-        
-        if (isAdminByType) {
-          console.log(`✅ [AdminUtils] Admin access granted via onagui_type: ${userId}`);
-          return {
-            isAdmin: true,
-            userId,
-            email: userEmail,
-            source: 'profile_check'
-          };
-        }
+        // Note: onagui_type enum doesn't include 'admin' as a valid value
+        // Admin status is determined by the is_admin flag only
       }
 
       if (profileError) {
@@ -238,11 +228,8 @@ export async function isAdminForMiddleware(userId: string, userEmail?: string): 
           return true;
         }
         
-        // Fallback to onagui_type for backward compatibility
-        if (profile.onagui_type === 'admin') {
-          console.log(`✅ [AdminUtils] Middleware admin access via onagui_type: ${userId}`);
-          return true;
-        }
+        // Note: onagui_type enum doesn't include 'admin' as a valid value
+        // Admin status is determined by the is_admin flag only
       }
     } catch (profileError) {
       console.warn(`⚠️ [AdminUtils] Middleware profile check error:`, profileError);
@@ -315,7 +302,7 @@ export async function getAdminStatusDebug(userId?: string): Promise<{
   emergencyEmails: string[];
   checks: {
     emergency: boolean;
-    rpc: { success: boolean; result?: boolean; error?: any };
+    rpc: { success: boolean; result?: boolean | null; error?: any };
     profile: { success: boolean; result?: any; error?: any };
     roles: { success: boolean; result?: any; error?: any };
   };
@@ -334,40 +321,52 @@ export async function getAdminStatusDebug(userId?: string): Promise<{
   // Run all checks individually for debugging
   const checks = {
     emergency: userEmail ? EMERGENCY_ADMIN_EMAILS.includes(userEmail) : false,
-    rpc: { success: false, result: undefined, error: undefined },
-    profile: { success: false, result: undefined, error: undefined },
-    roles: { success: false, result: undefined, error: undefined }
+    rpc: { success: false, result: undefined as boolean | null | undefined, error: undefined as any },
+    profile: { success: false, result: undefined as any, error: undefined as any },
+    roles: { success: false, result: undefined as any, error: undefined as any }
   };
 
   // RPC check
   try {
-    const { data, error } = await supabase.rpc('is_admin_user', { user_uuid: userId });
-    checks.rpc = { success: !error, result: data, error };
+    if (userId) {
+      const { data, error } = await supabase.rpc('is_admin_user', { user_uuid: userId });
+      checks.rpc = { success: !error, result: data, error };
+    } else {
+      checks.rpc = { success: false, result: false, error: 'No user ID available' };
+    }
   } catch (err) {
-    checks.rpc = { success: false, error: err };
+    checks.rpc = { success: false, result: undefined, error: err };
   }
 
   // Profile check
   try {
-    const { data, error } = await supabase
-      .from('onagui_profiles')
-      .select('onagui_type')
-      .eq('id', userId!)
-      .single();
-    checks.profile = { success: !error, result: data, error };
+    if (userId) {
+      const { data, error } = await supabase
+        .from('onagui_profiles')
+        .select('onagui_type')
+        .eq('id', userId)
+        .single();
+      checks.profile = { success: !error, result: data, error };
+    } else {
+      checks.profile = { success: false, result: undefined, error: 'No user ID available' };
+    }
   } catch (err) {
-    checks.profile = { success: false, error: err };
+    checks.profile = { success: false, result: undefined, error: err };
   }
 
   // Role check
   try {
-    const { data, error } = await supabase
-      .from('onagui.user_roles')
-      .select('roles:onagui.roles(name)')
-      .eq('user_id', userId!);
-    checks.roles = { success: !error, result: data, error };
+    if (userId) {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('roles(name)')
+        .eq('user_id', userId);
+      checks.roles = { success: !error, result: data, error };
+    } else {
+      checks.roles = { success: false, result: undefined, error: 'No user ID available' };
+    }
   } catch (err) {
-    checks.roles = { success: false, error: err };
+    checks.roles = { success: false, result: undefined, error: err };
   }
 
   const adminCheck = await verifyAdminAccess(userId);

@@ -66,16 +66,19 @@ export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
           .from('onagui_profiles')
           .select('is_admin, onagui_type')
           .eq('id', session.user.id)
-          .single();
+          .single() as { 
+            data: { is_admin: boolean; onagui_type: string | null } | null; 
+            error: any 
+          };
 
-        if (profileError) {
+        if (profileError || !profileData) {
           console.error('❌ [AdminAuthGuard] Profile check error:', profileError);
-          setDebugInfo(`Profile error: ${profileError.message}`);
+          setDebugInfo(`Profile error: ${profileError?.message || 'No profile data'}`);
           
           // Try RPC fallback
           try {
             const { data: rpcResult, error: rpcError } = await supabase
-              .rpc('is_admin_user', { user_uuid: session.user.id });
+              .rpc('is_admin_user');
             
             if (!rpcError && rpcResult === true) {
               console.log(`✅ [AdminAuthGuard] Admin access via RPC fallback`);
@@ -95,27 +98,24 @@ export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
         let isAdminUser = false;
         let adminSource = '';
 
-        if (profileData?.is_admin === true) {
+        if (profileData.is_admin === true) {
           isAdminUser = true;
           adminSource = 'is_admin column';
         } 
-        // Priority 2: Check onagui_type for backward compatibility
-        else if (profileData?.onagui_type === 'admin') {
-          isAdminUser = true;
-          adminSource = 'onagui_type enum';
-        }
+        // Note: onagui_type enum doesn't include 'admin' as a valid value
+        // Admin status is determined by the is_admin flag only
 
-        console.log(`🔍 [AdminAuthGuard] Admin check result: ${isAdminUser} via ${adminSource} (is_admin: ${profileData?.is_admin}, onagui_type: ${profileData?.onagui_type})`);
+        console.log(`🔍 [AdminAuthGuard] Admin check result: ${isAdminUser} via ${adminSource} (is_admin: ${profileData.is_admin}, onagui_type: ${profileData.onagui_type})`);
         
         if (!isAdminUser) {
           console.log('🚫 [AdminAuthGuard] User is not admin, redirecting to home');
-          setDebugInfo(`Not admin: is_admin = ${profileData?.is_admin}, onagui_type = ${profileData?.onagui_type}`);
+          setDebugInfo(`Not admin: is_admin = ${profileData.is_admin}, onagui_type = ${profileData.onagui_type}`);
           router.push('/');
           return;
         }
 
         setIsAdmin(true);
-        setDebugInfo(`Admin access granted via ${adminSource}: is_admin = ${profileData?.is_admin}, onagui_type = ${profileData?.onagui_type}`);
+        setDebugInfo(`Admin access granted via ${adminSource}: is_admin = ${profileData.is_admin}, onagui_type = ${profileData.onagui_type}`);
         console.log('✅ [AdminAuthGuard] Admin access granted');
         
       } catch (error) {

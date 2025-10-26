@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { fetchAdminUsers, AdminUserWithRole } from '../actions';
 
@@ -12,7 +12,7 @@ interface AdminUser {
   roles: string[];
 }
 
-export default function AdminUsersPage() {
+function AdminUsersContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [users, setUsers] = useState<AdminUserWithRole[]>([]);
@@ -37,22 +37,18 @@ export default function AdminUsersPage() {
             {
               id: 'preview-user-1',
               email: 'user@example.com',
-              full_name: 'Preview User',
-              avatar_url: null,
-              current_rank: 'user',
+              onagui_type: 'user',
               created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              role_name: 'user',
+              is_admin: false,
+              roles: ['user'],
             },
             {
               id: 'preview-admin',
               email: 'richtheocrypto@gmail.com',
-              full_name: 'Admin User',
-              avatar_url: null,
-              current_rank: 'admin',
+              onagui_type: 'admin',
               created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              role_name: 'admin',
+              is_admin: true,
+              roles: ['admin'],
             },
           ];
           setUsers(mockUsers);
@@ -128,9 +124,9 @@ export default function AdminUsersPage() {
               <tr key={user.id} className={user.email === 'richtheocrypto@gmail.com' ? 'bg-blue-50' : ''}>
                 <td className="px-4 py-2 border text-black">{user.id}</td>
                 <td className="px-4 py-2 border text-black">{user.email}</td>
-                <td className="px-4 py-2 border text-black">{user.current_rank || 'user'}</td>
+                <td className="px-4 py-2 border text-black">{user.onagui_type || 'user'}</td>
                 <td className="px-4 py-2 border text-black">
-                  {user.role_name || 'user'}
+                  {user.roles.join(', ') || 'user'}
                   {user.email === 'richtheocrypto@gmail.com' && (
                     <span className="ml-2 text-xs bg-blue-500 text-white px-2 py-1 rounded">Admin</span>
                   )}
@@ -167,5 +163,22 @@ export default function AdminUsersPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="p-8 text-black">
+      <h1 className="text-2xl font-bold mb-4 text-black">User Management</h1>
+      <p className="text-black">Loading...</p>
+    </div>
+  );
+}
+
+export default function AdminUsersPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <AdminUsersContent />
+    </Suspense>
   );
 }

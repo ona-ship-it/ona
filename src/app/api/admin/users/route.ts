@@ -79,12 +79,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: rolesError.message }, { status: 500 });
     }
 
+    // Get all auth users to include email information
+    const { data: authUsers, error: authError } = await service.auth.admin.listUsers();
+    
+    if (authError) {
+      return NextResponse.json({ error: authError.message }, { status: 500 });
+    }
+
     const users = (profiles ?? []).map((profile: any) => {
       const roles = (userRoles ?? [])
         .filter((role: any) => role.user_id === profile.id)
         .map((role: any) => role.admin_roles?.name)
         .filter((name: any) => !!name);
-      return { ...profile, roles: roles || [] };
+      
+      // Find corresponding auth user to get email
+      const authUser = authUsers.users.find((user: any) => user.id === profile.id);
+      
+      return { 
+        ...profile, 
+        email: authUser?.email || 'No email found',
+        roles: roles || [] 
+      };
     });
 
     return NextResponse.json({ users });

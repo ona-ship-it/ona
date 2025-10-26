@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Navigation from './Navigation';
 import PageTitle from './PageTitle';
 import WalletBalance from './WalletBalance';
-import { useSupabaseClient } from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { CreateGiveawayPayload } from '../types/giveaways';
 import { Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
 
@@ -32,7 +32,6 @@ export default function NewGiveawayClient() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
-  const supabase = useSupabaseClient();
 
   // Fetch user admin status on component mount
   useEffect(() => {

@@ -28,7 +28,7 @@ export async function requireAdminAccess() {
   // Get user profile to check admin status
   const { data: profile, error: profileError } = await supabase
     .from('onagui_profiles')
-    .select('onagui_type')
+    .select('onagui_type, is_admin')
     .eq('id', session.user.id)
     .single();
 
@@ -36,8 +36,8 @@ export async function requireAdminAccess() {
   const { data: isAdmin, error: adminCheckError } = await supabase
     .rpc('is_admin_user', { user_uuid: session.user.id });
 
-  // Check admin status from profile or RPC function
-  const hasAdminAccess = profile?.onagui_type === 'admin' || isAdmin;
+  // Check admin status from is_admin flag or RPC function
+  const hasAdminAccess = profile?.is_admin === true || isAdmin;
 
   if (!hasAdminAccess || adminCheckError) {
     redirect('/');

@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSupabaseClient } from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { Wallet, Plus, Search, RefreshCw } from 'lucide-react';
 
 interface User {
   id: string;
-  email: string;
+  email: string | null;
   balance?: number;
 }
 
@@ -17,31 +17,39 @@ export function AdminWalletManager() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const supabase = useSupabaseClient();
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
       // Fetch users with their wallet balances
       const { data: usersData, error: usersError } = await supabase
-        .from('users')
+        .from('app_users')
         .select('id, email')
         .limit(50);
 
       if (usersError) throw usersError;
 
-      // Fetch wallet balances for these users
-      const userIds = usersData?.map(u => u.id) || [];
-      const { data: walletsData } = await supabase
-        .from('wallets')
-        .select('user_id, balance')
-        .in('user_id', userIds);
-
-      // Combine user data with wallet balances
-      const usersWithBalances = usersData?.map(user => ({
-        ...user,
-        balance: walletsData?.find(w => w.user_id === user.id)?.balance || 0
-      })) || [];
+      // For each user, ensure they have a wallet and get balance
+      const usersWithBalances = await Promise.all(
+        usersData?.map(async (user) => {
+          try {
+            // Ensure user has a wallet
+            await supabase.rpc('ensure_user_wallet', { user_uuid: user.id });
+            
+            // For now, set balance to 0 - we can implement wallet balance fetching later
+            return {
+              ...user,
+              balance: 0
+            };
+          } catch (error) {
+            console.warn(`Could not process wallet for user ${user.id}:`, error);
+            return {
+              ...user,
+              balance: 0
+            };
+          }
+        }) || []
+      );
 
       setUsers(usersWithBalances);
     } catch (error: any) {
@@ -84,7 +92,7 @@ export function AdminWalletManager() {
   };
 
   const filteredUsers = users.filter(user => 
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) || false
   );
 
   const selectedUserData = users.find(u => u.id === selectedUser);

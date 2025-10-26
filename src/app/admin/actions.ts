@@ -9,7 +9,7 @@ export interface AdminUserWithRole {
   onagui_type: string | null;
   created_at: string;
   is_admin: boolean;
-  is_active: boolean;
+  roles: string[];
 }
 
 export async function getGiveaways() {
@@ -37,48 +37,22 @@ export async function getUsers() {
   return data || [];
 }
 
-export async function deactivateUser(userId: string) {
-  const supabase = await createClient();
 
-  const { error } = await supabase
-    .from("onagui_profiles")
-    .update({ is_active: false })
-    .eq("id" as any, userId as any);
-
-  if (error) throw new Error(error.message);
-  revalidatePath("/admin");
-}
 
 export async function fetchAdminUsers(): Promise<{ data: AdminUserWithRole[] | null; error: string | null }> {
   try {
-    const supabase = await createClient();
-
-    const { data, error } = await supabase
-      .from("onagui_profiles")
-      .select("id, email, onagui_type, created_at, is_admin, is_active")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Supabase error:", error);
-      return { data: null, error: error.message };
+    const response = await fetch('/api/admin/users');
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { data: null, error: errorData.error || 'Failed to fetch users' };
     }
 
-    return { data: data as AdminUserWithRole[], error: null };
+    const { users } = await response.json();
+    return { data: users as AdminUserWithRole[], error: null };
   } catch (error) {
     console.error("fetchAdminUsers error:", error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred';
     return { data: null, error: message };
   }
-}
-
-export async function activateUser(userId: string) {
-  const supabase = await createClient();
-
-  const { error } = await supabase
-    .from("onagui_profiles")
-    .update({ is_active: true })
-    .eq("id" as any, userId as any);
-
-  if (error) throw new Error(error.message);
-  revalidatePath("/admin");
 }
