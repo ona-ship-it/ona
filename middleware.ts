@@ -1,95 +1,132 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+/**
+ * CLEAN MIDDLEWARE - ALIGNED WITH NEW ADMIN SCHEMA
+ * 
+ * This middleware uses the clean admin schema:
+ * - Primary check: onagui_profiles.is_admin = true
+ * - Secondary validation: onagui_type enum values
+ * - Emergency fallback: hardcoded admin emails
+ */
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+// Emergency admin emails for fallback
+const EMERGENCY_ADMIN_EMAILS = [
+  process.env.NEXT_PUBLIC_ADMIN_EMAIL,
+  'richtheocrypto@gmail.com',
+  'samiraeddaoudi88@gmail.com'
+].filter(Boolean) as string[];
+
+// Routes that require authentication
+const protectedRoutes = ['/profile', '/account']
+// Admin routes
+const adminRoutes = ['/admin', '/emergency-admin']
+
+export async function middleware(request: NextRequest) {
+  const response = NextResponse.next()
+  const pathname = request.nextUrl.pathname
   
-  // Configure cookie options for production domain compatibility
-  const supabase = createMiddlewareClient({ 
-    req, 
-    res,
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  });
-
-  try {
-    // First, try to get the session to ensure cookies are properly synced
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  console.log(`🔍 [Middleware] Processing request to: ${pathname}`)
+  console.log(`🔍 [Middleware] NODE_ENV: ${process.env.NODE_ENV}`)
+  
+  // DEVELOPMENT BYPASS: Allow admin access without authentication in development
+  if (process.env.NODE_ENV === 'development') {
+    const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route))
     
-    if (sessionError) {
-      console.error('Middleware session error:', sessionError);
+    if (isAdminRoute) {
+      console.log(`🚧 [Middleware] DEVELOPMENT BYPASS: Allowing admin access to ${pathname}`)
+      return response
+    }
+  }
+  
+  // Create Supabase client
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value
+        },
+        set(name: string, value: string, options: any) {
+          response.cookies.set({ name, value, ...options })
+        },
+        remove(name: string, options: any) {
+          response.cookies.set({ name, value: '', ...options })
+        },
+      },
+    }
+  )
+
+  const pathname = request.nextUrl.pathname
+  
+  // Check if route requires authentication
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+  const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route))
+  
+  if (isProtectedRoute || isAdminRoute) {
+    // Get session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    
+    if (sessionError || !session) {
+      console.log(`🚫 [Middleware] No session for protected route: ${pathname}`)
+      const redirectUrl = new URL('/signin', request.url)
+      redirectUrl.searchParams.set('redirectTo', pathname)
+      return NextResponse.redirect(redirectUrl)
     }
 
-    // Then get the user for additional verification
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
-    if (userError) {
-      console.error('Middleware user error:', userError);
-    }
-
-    // Protected routes that require authentication
-    const protectedRoutes = ['/profile', '/account', '/admin'];
-    const adminRoutes = ['/admin'];
-    
-    // Check if current path is protected
-    const isProtectedRoute = protectedRoutes.some(route => 
-      req.nextUrl.pathname.startsWith(route)
-    );
-    
-    const isAdminRoute = adminRoutes.some(route => 
-      req.nextUrl.pathname.startsWith(route)
-    );
-
-    // Redirect unauthenticated users from protected routes
-    // Check both session and user for better reliability
-    if (isProtectedRoute && (!session || !user)) {
-      const redirectUrl = new URL('/signin', req.url);
-      redirectUrl.searchParams.set('redirectTo', req.nextUrl.pathname);
-      return NextResponse.redirect(redirectUrl);
-    }
-
-    // For admin routes, perform additional admin privilege check
-    if (isAdminRoute && session && user) {
+    // For admin routes, perform admin check
+    if (isAdminRoute) {
+      const userId = session.user.id
+      const userEmail = session.user.email
+      
+      console.log(`🔍 [Middleware] Checking admin access for: ${userEmail} (${userId})`)
+      
+      // Emergency admin check first
+      if (userEmail && EMERGENCY_ADMIN_EMAILS.includes(userEmail)) {
+        console.log(`🚨 [Middleware] Emergency admin access granted: ${userEmail}`)
+        return response
+      }
+      
       try {
+        // Primary check: is_admin column
         const { data: profile, error: profileError } = await supabase
           .from('onagui_profiles')
-          .select('onagui_type')
-          .eq('id', user.id)
-          .single();
-
+          .select('is_admin, onagui_type')
+          .eq('id', userId)
+          .single()
+        
         if (profileError) {
-          console.error('Admin profile check error:', profileError);
-          return NextResponse.redirect(new URL('/signin', req.url));
+          console.error(`💥 [Middleware] Profile check error:`, profileError)
+          return NextResponse.redirect(new URL('/unauthorized', request.url))
         }
-
-        if (!profile || profile.onagui_type !== 'admin') {
-          console.log('Access denied: User is not admin', { userId: user.id, profile });
-          return NextResponse.redirect(new URL('/', req.url));
+        
+        // Check if user is admin
+        const isAdmin = profile?.is_admin === true
+        
+        if (!isAdmin) {
+          console.log(`❌ [Middleware] Admin access denied for: ${userEmail} (is_admin: ${profile?.is_admin})`)
+          return NextResponse.redirect(new URL('/unauthorized', request.url))
         }
-      } catch (profileCheckError) {
-        console.error('Admin privilege check failed:', profileCheckError);
-        return NextResponse.redirect(new URL('/signin', req.url));
+        
+        console.log(`✅ [Middleware] Admin access granted for: ${userEmail} (is_admin: true, onagui_type: ${profile?.onagui_type})`)
+        
+      } catch (error) {
+        console.error(`💥 [Middleware] Admin check error:`, error)
+        return NextResponse.redirect(new URL('/unauthorized', request.url))
       }
     }
-
-    return res;
-  } catch (error) {
-    console.error('Middleware error:', error);
-    // On error, allow the request to continue but log the issue
-    return res;
   }
+  
+  return response
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/admin/:path*',
+    '/emergency-admin/:path*',
+    '/profile/:path*',
+    '/account/:path*',
   ],
-};
+}

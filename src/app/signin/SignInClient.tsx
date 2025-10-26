@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { signInWithGoogle } from '@/lib/oauth-utils';
 import Link from 'next/link';
 import { useTheme } from '../../components/ThemeContext';
 import { FcGoogle } from 'react-icons/fc';
@@ -10,52 +11,82 @@ import { FcGoogle } from 'react-icons/fc';
 export default function SignInClient() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const router = useRouter();
   const supabase = createClientComponentClient();
   const { isWhite, isDarker } = useTheme();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
+    setIsLoading(true);
+    
+    console.log('🔐 Attempting sign in for:', email);
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    if (error) {
+      console.error('❌ Sign in failed:', error);
+      setAuthError(error.message);
+      setIsLoading(false);
+      return;
+    }
 
-      if (error) {
-        throw error;
-      }
-
-      router.push('/');
-      router.refresh();
-    } catch (error: any) {
-      setError(error.message || 'An error occurred during sign in');
-    } finally {
-      setLoading(false);
+    if (data.user) {
+      console.log('✅ Sign in successful:', data.user.email);
+      console.log('⏳ Starting 3-second countdown for session propagation...');
+      
+      // Show countdown to user
+      let secondsLeft = 3;
+      setCountdown(secondsLeft);
+      
+      const countdownInterval = setInterval(() => {
+        secondsLeft--;
+        setCountdown(secondsLeft);
+        if (secondsLeft <= 0) {
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
+      
+      // ✅ CRITICAL: 3-second delay for complete cookie propagation
+      setTimeout(() => {
+        clearInterval(countdownInterval);
+        const redirectTo = new URLSearchParams(window.location.search).get('redirectTo');
+        const finalDestination = email === 'richtheocrypto@gmail.com' 
+          ? '/admin' 
+          : (redirectTo || '/account');
+        
+        console.log('🎯 Performing HARD redirect to:', finalDestination);
+        console.log('🕒 Redirecting at:', new Date().toISOString());
+        
+        // Force complete page reload with fresh cookies
+        window.location.assign(finalDestination);
+      }, 3000); // ⚠️ Increased to 3 seconds for full cookie propagation
     }
   };
 
   const handleGoogleSignIn = async () => {
+    console.log('Starting Google OAuth');
     
-    // Call the signInWithOAuth method with the 'google' provider
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        // The redirectTo path must be one of your authorized redirect URIs
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      console.error('Google sign-in error:', error.message);
-      setError('Error signing in with Google. Check console for details.');
+    try {
+      // Get redirectTo parameter from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTo = urlParams.get('redirectTo');
+      
+      const result = await signInWithGoogle(redirectTo || '/account');
+      
+      if (!result.success) {
+        setAuthError(result.error || 'Google sign-in failed');
+      }
+    } catch (error) {
+      setAuthError('An error occurred during Google sign-in');
+      console.error('Google sign-in error:', error);
     }
-    // Supabase redirects the user to Google login, then back to /auth/callback
   };
 
   return (
@@ -72,9 +103,9 @@ export default function SignInClient() {
             <div className="p-6">
               <h2 className={`text-2xl font-bold mb-6 ${isWhite ? 'text-gray-900' : 'text-white'}`}>Welcome Back</h2>
               
-              {error && (
+              {authError && (
                 <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                  {error}
+                  {authError}
                 </div>
               )}
               
@@ -180,6 +211,30 @@ export default function SignInClient() {
           </div>
         </div>
       </div>
+      
+      {/* Loading overlay with countdown */}
+      {isLoading && (
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          backgroundColor: 'rgba(0,0,0,0.8)', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          color: 'white', 
+          zIndex: 1000 
+        }}>
+          <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>🔄 Setting up your session...</h2>
+          <p style={{ fontSize: '18px', marginBottom: '8px' }}>Redirecting in {countdown} seconds</p>
+          <p style={{ fontSize: '14px', marginTop: '10px', textAlign: 'center', maxWidth: '300px' }}>
+            This ensures your admin access works properly
+          </p>
+        </div>
+      )}
     </div>
   );
 }

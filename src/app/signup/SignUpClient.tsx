@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { signInWithGoogle } from '@/lib/oauth-utils';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
+import { FcGoogle } from 'react-icons/fc';
 
 export default function SignUpClient() {
   const [email, setEmail] = useState('');
@@ -35,23 +37,56 @@ export default function SignUpClient() {
     }
 
     try {
+      // Sign up the user without email confirmation
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
       });
 
       if (error) {
         setError(error.message);
       } else if (data.user) {
-        setMessage('Check your email for the confirmation link!');
+        // Immediately try to sign in the user
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signInError) {
+          setError('Account created but sign-in failed. Please try signing in manually.');
+        } else if (signInData.user) {
+          setMessage('Account created successfully! Redirecting...');
+          
+          // Check if this is the admin user and redirect accordingly
+          if (email === 'richtheocrypto@gmail.com') {
+            setTimeout(() => {
+              window.location.replace('/admin');
+            }, 1000);
+          } else {
+            setTimeout(() => {
+              window.location.replace('/account');
+            }, 1000);
+          }
+        }
       }
     } catch (err) {
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    try {
+      setError(null);
+      
+      const result = await signInWithGoogle('/account');
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Google sign up failed');
+      }
+    } catch (error: any) {
+      setError(error.message || 'An error occurred during Google sign up');
     }
   };
 
@@ -129,6 +164,23 @@ export default function SignUpClient() {
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-600"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-gray-900 text-gray-400">Or continue with</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleGoogleSignUp}
+            className="w-full flex items-center justify-center p-3 text-sm font-medium border border-gray-600 rounded-lg hover:bg-gray-800 transition duration-150 text-gray-300"
+          >
+            <FcGoogle className="w-5 h-5 mr-3" />
+            Sign up with Google
+          </button>
           
           <div className="text-center text-white">
             <p>

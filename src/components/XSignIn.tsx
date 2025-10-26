@@ -2,42 +2,32 @@
 
 import { useState } from 'react';
 import { FaXTwitter } from 'react-icons/fa6';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import type { Database } from '@/types/supabase';
+import { signInWithTwitter } from '@/lib/oauth-utils';
 
 export default function XSignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientComponentClient<Database>({
-    cookieOptions: {
-      path: '/',
-      domain: process.env.NODE_ENV === 'production' ? '.onagui.com' : undefined,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    }
-  });
 
   const handleSignIn = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
       
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'twitter',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
+      // Get redirectTo parameter from URL if it exists
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTo = urlParams.get('redirectTo');
+      
+      const result = await signInWithTwitter(redirectTo || '/');
 
-      if (error) {
-        throw error;
+      if (!result.success) {
+        throw new Error(result.error || 'X sign-in failed');
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An error occurred during X sign-in';
       setError(errorMessage);
       console.error('X sign-in error:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -51,11 +41,11 @@ export default function XSignIn() {
       
       <button
         onClick={handleSignIn}
-        disabled={loading}
+        disabled={isLoading}
         className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-black hover:bg-gray-800 text-white rounded-md transition-colors"
       >
         <FaXTwitter className="text-xl" />
-        <span>{loading ? 'Connecting...' : 'Continue with X'}</span>
+        <span>{isLoading ? 'Connecting...' : 'Continue with X'}</span>
       </button>
     </div>
   );

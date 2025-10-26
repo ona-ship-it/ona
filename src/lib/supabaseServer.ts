@@ -21,19 +21,31 @@ export async function requireAdminAccess() {
   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
   
   if (sessionError || !session) {
-    redirect('/signin');
+    // Preserve the admin redirect when redirecting to signin
+    redirect('/signin?redirectTo=%2Fadmin');
   }
 
-  // Check if user has admin privileges using the is_admin_user RPC function
+  // Get user profile to check admin status
+  const { data: profile, error: profileError } = await supabase
+    .from('onagui_profiles')
+    .select('onagui_type')
+    .eq('id', session.user.id)
+    .single();
+
+  // Check if user has admin privileges using the is_admin_user RPC function as fallback
   const { data: isAdmin, error: adminCheckError } = await supabase
     .rpc('is_admin_user', { user_uuid: session.user.id });
 
-  if (adminCheckError || !isAdmin) {
+  // Check admin status from profile or RPC function
+  const hasAdminAccess = profile?.onagui_type === 'admin' || isAdmin;
+
+  if (!hasAdminAccess || adminCheckError) {
     redirect('/');
   }
 
   return {
     session,
+    profile,
     supabase
   };
 }

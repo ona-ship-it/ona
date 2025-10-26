@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { User } from '@supabase/supabase-js';
 import { handleAuthError } from '@/utils/authUtils';
 import type { Database } from '@/types/supabase';
+import { signInWithGoogle } from "@/lib/oauth-utils";
   
 export default function GoogleSignIn() { 
   const supabase = createClientComponentClient<Database>({
@@ -76,29 +77,17 @@ export default function GoogleSignIn() {
     }
   }, [visible, supabase.auth]);
   
-  const handleSignIn = async () => { 
+  const handleSignIn = async () => {
     try {
       setLoading(true);
+      setError(null);
       
-      // Get the redirectTo parameter from URL if it exists
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirectPath = urlParams.get('redirectTo') || '/';
-      const callbackUrl = `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectPath)}`;
+      // Use standardized OAuth utility
+      const result = await signInWithGoogle();
       
-      const { error } = await supabase.auth.signInWithOAuth({ 
-        provider: "google", 
-        options: { 
-          redirectTo: callbackUrl,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        }, 
-      }); 
-      
-      if (error) { 
-        throw error;
-      } 
+      if (!result.success) {
+        throw new Error(result.error || 'Google sign-in failed');
+      }
     } catch (err) {
       console.error("Google sign-in error:", err);
       setError(err instanceof Error ? err.message : 'Sign-in failed');
