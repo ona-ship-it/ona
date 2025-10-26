@@ -58,8 +58,6 @@ export async function middleware(request: NextRequest) {
       },
     }
   )
-
-  const pathname = request.nextUrl.pathname
   
   // Check if route requires authentication
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
