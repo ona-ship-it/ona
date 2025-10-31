@@ -55,17 +55,39 @@ export default function SignUpClient() {
         if (signInError) {
           setError('Account created but sign-in failed. Please try signing in manually.');
         } else if (signInData.user) {
+          setMessage('Account created successfully! Setting up your wallet...');
+          
+          // Generate crypto wallet for the new user
+          try {
+            const walletResponse = await fetch('/api/wallet/generate-crypto', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ userId: signInData.user.id }),
+            });
+
+            if (!walletResponse.ok) {
+              console.warn('Failed to generate crypto wallet, but user account was created successfully');
+            } else {
+              console.log('Crypto wallet generated successfully');
+            }
+          } catch (walletError) {
+            console.warn('Error generating crypto wallet:', walletError);
+            // Don't block the signup flow if wallet generation fails
+          }
+
           setMessage('Account created successfully! Redirecting...');
           
           // Check if this is the admin user and redirect accordingly
           if (email === 'richtheocrypto@gmail.com') {
             setTimeout(() => {
               window.location.replace('/admin');
-            }, 1000);
+            }, 1500);
           } else {
             setTimeout(() => {
               window.location.replace('/account');
-            }, 1000);
+            }, 1500);
           }
         }
       }

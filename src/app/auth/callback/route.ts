@@ -73,6 +73,43 @@ export async function GET(request: NextRequest) {
     } catch (profileError) {
       console.warn('⚠️ Profile check failed:', profileError);
     }
+
+    // 🔐 CRYPTO WALLET GENERATION - Generate wallet for OAuth signups
+    try {
+      console.log('🔐 Checking if user needs crypto wallet generation...');
+      
+      // Check if user already has a crypto wallet
+      const { data: existingWallet } = await supabase
+        .from('user_crypto_wallets')
+        .select('id')
+        .eq('user_id', validUser.id)
+        .limit(1);
+      
+      if (!existingWallet || existingWallet.length === 0) {
+        console.log('🚀 Generating crypto wallet for OAuth user:', validUser.id);
+        
+        // Call the wallet generation API
+        const walletResponse = await fetch(`${request.nextUrl.origin}/api/wallet/generate-crypto`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId: validUser.id }),
+        });
+        
+        if (walletResponse.ok) {
+          const walletData = await walletResponse.json();
+          console.log('✅ Crypto wallet generated successfully for OAuth user');
+        } else {
+          console.warn('⚠️ Crypto wallet generation failed for OAuth user, but continuing...');
+        }
+      } else {
+        console.log('✅ User already has crypto wallet, skipping generation');
+      }
+    } catch (walletError) {
+      console.warn('⚠️ Crypto wallet generation error (non-blocking):', walletError);
+      // Don't block the auth flow if wallet generation fails
+    }
     
     // 🚨 ENHANCED ADMIN DETECTION - Using new schema
     const userEmail = validUser.email;

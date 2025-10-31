@@ -26,12 +26,12 @@ BEGIN
     SELECT 1 FROM pg_proc WHERE proname = 'update_updated_at_column'
   ) THEN
     CREATE OR REPLACE FUNCTION update_updated_at_column()
-    RETURNS TRIGGER AS $$
+    RETURNS TRIGGER AS $func$
     BEGIN
        NEW.updated_at = NOW();
        RETURN NEW;
     END;
-    $$ LANGUAGE plpgsql;
+    $func$ LANGUAGE plpgsql;
   END IF;
 END $$;
 
@@ -55,11 +55,18 @@ ALTER TABLE public.tickets
 
 -- Backfill giveaway_id from legacy raffle_id if present
 -- Note: This assumes raffle_id maps to giveaways.id
-UPDATE public.tickets SET giveaway_id = raffle_id WHERE giveaway_id IS NULL;
+-- UPDATE public.tickets SET giveaway_id = raffle_id WHERE giveaway_id IS NULL;
 
 -- Add FK and index for giveaway_id
-ALTER TABLE public.tickets
-  ADD CONSTRAINT tickets_giveaway_id_fkey FOREIGN KEY (giveaway_id) REFERENCES public.giveaways(id) ON DELETE CASCADE;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'tickets_giveaway_id_fkey'
+  ) THEN
+    ALTER TABLE public.tickets
+      ADD CONSTRAINT tickets_giveaway_id_fkey FOREIGN KEY (giveaway_id) REFERENCES public.giveaways(id) ON DELETE CASCADE;
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_tickets_giveaway_user ON public.tickets(giveaway_id, user_id);
 
@@ -67,11 +74,13 @@ CREATE INDEX IF NOT EXISTS idx_tickets_giveaway_user ON public.tickets(giveaway_
 ALTER TABLE public.giveaways ENABLE ROW LEVEL SECURITY;
 
 -- Everyone can view giveaways
-CREATE POLICY IF NOT EXISTS view_giveaways ON public.giveaways
+DROP POLICY IF EXISTS view_giveaways ON public.giveaways;
+CREATE POLICY view_giveaways ON public.giveaways
   FOR SELECT USING (true);
 
 -- Only admins (from onagui.user_roles) can manage giveaways
-CREATE POLICY IF NOT EXISTS manage_giveaways ON public.giveaways
+DROP POLICY IF EXISTS manage_giveaways ON public.giveaways;
+CREATE POLICY manage_giveaways ON public.giveaways
   FOR ALL
   USING (
     EXISTS (
