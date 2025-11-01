@@ -130,7 +130,7 @@ async function handleCreateWithdrawal(
       return res.status(400).json({
         error: 'Validation error',
         message: 'Invalid request data',
-        details: error.errors.map(err => ({
+        details: error.issues.map(err => ({
           field: err.path.join('.'),
           message: err.message
         }))
@@ -230,7 +230,7 @@ async function handleGetWithdrawals(
       return res.status(400).json({
         error: 'Validation error',
         message: 'Invalid query parameters',
-        details: error.errors.map(err => ({
+        details: error.issues.map(err => ({
           field: err.path.join('.'),
           message: err.message
         }))
@@ -284,7 +284,7 @@ async function handleCancelWithdrawal(
       return res.status(400).json({
         error: 'Validation error',
         message: 'Invalid request data',
-        details: error.errors.map(err => ({
+        details: error.issues.map(err => ({
           field: err.path.join('.'),
           message: err.message
         }))

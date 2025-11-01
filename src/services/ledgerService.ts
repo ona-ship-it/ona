@@ -3,14 +3,14 @@ import crypto from 'crypto';
 
 export interface LedgerEntry {
   id: string;
-  userId: string;
+  user_id: string;
   amount: number;
   currency: string;
-  type: 'credit' | 'debit' | 'transfer' | 'deposit' | 'withdrawal';
-  reference?: string;
-  relatedUser?: string;
-  status: string;
-  createdAt: string;
+  transaction_type: string;
+  description: string | null;
+  reference_id: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface UserBalance {
@@ -49,8 +49,8 @@ export async function getUserBalance(
   try {
     const { data, error } = await supabase
       .rpc('get_user_balance', {
-        p_user_id: userId,
-        p_currency: currency
+        user_uuid: userId,
+        currency_filter: currency
       });
 
     if (error) {
@@ -121,9 +121,8 @@ export async function createLedgerEntry(
         user_id: userId,
         amount,
         currency,
-        type,
-        reference,
-        status: 'posted'
+        transaction_type: type,
+        reference_id: reference
       })
       .select()
       .single();
@@ -181,14 +180,14 @@ export async function performTransfer(transferRequest: TransferRequest): Promise
       throw new Error('Duplicate transaction detected');
     }
 
-    // Use the atomic transfer function from the database
+    // Use the transfer funds function from the database
     const { data, error } = await supabase
-      .rpc('atomic_transfer', {
-        p_from_user_id: fromUserId,
-        p_to_user_id: toUserId,
-        p_amount: amount,
-        p_currency: currency,
-        p_reference: finalIdempotencyKey
+      .rpc('transfer_funds', {
+        from_user_uuid: fromUserId,
+        to_user_uuid: toUserId,
+        amount: amount,
+        currency_param: currency,
+        description_param: finalIdempotencyKey
       });
 
     if (error) {

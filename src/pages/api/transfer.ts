@@ -110,7 +110,7 @@ async function handleTransfer(req: NextApiRequest, res: NextApiResponse<Transfer
     if (!validationResult.success) {
       return res.status(400).json({
         success: false,
-        error: `Validation error: ${validationResult.error.errors.map(e => e.message).join(', ')}`,
+        error: `Validation error: ${validationResult.error.issues.map(e => e.message).join(', ')}`,
         code: 'VALIDATION_ERROR'
       });
     }

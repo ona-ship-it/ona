@@ -134,21 +134,21 @@ export class OnChainMonitor {
         return;
       }
 
-      const addressSet = new Set(wallets.map(w => w.address.toLowerCase()));
+      const addressSet = new Set(wallets.map((w: any) => w.address.toLowerCase()));
 
       // Get Transfer events for USDT contract
       const filter = this.usdtContract.filters.Transfer();
       const events = await this.usdtContract.queryFilter(filter, fromBlock, toBlock);
 
       for (const event of events) {
-        if (!event.args) continue;
+        if (!('args' in event) || !event.args) continue;
 
         const [from, to, value] = event.args;
         const toAddress = to.toLowerCase();
 
         // Check if this transfer is to one of our monitored addresses
         if (addressSet.has(toAddress)) {
-          const wallet = wallets.find(w => w.address.toLowerCase() === toAddress);
+          const wallet = wallets.find((w: any) => w.address.toLowerCase() === toAddress);
           if (!wallet) continue;
 
           const txHash = event.transactionHash;
@@ -338,9 +338,9 @@ export class OnChainMonitor {
       lastProcessedBlock: this.lastProcessedBlock,
       blocksBehind: currentBlock - this.lastProcessedBlock,
       totalDeposits: deposits?.length || 0,
-      pendingDeposits: deposits?.filter(d => d.status === 'pending').length || 0,
-      confirmedDeposits: deposits?.filter(d => d.status === 'completed').length || 0,
-      totalAmount: deposits?.reduce((sum, d) => sum + (d.amount || 0), 0) || 0
+      pendingDeposits: deposits?.filter((d: any) => d.status === 'pending').length || 0,
+      confirmedDeposits: deposits?.filter((d: any) => d.status === 'completed').length || 0,
+      totalAmount: deposits?.reduce((sum: number, d: any) => sum + (d.amount || 0), 0) || 0
     };
 
     return stats;

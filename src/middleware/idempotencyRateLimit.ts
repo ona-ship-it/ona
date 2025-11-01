@@ -433,3 +433,46 @@ export const rateLimitUtils = {
     };
   }
 };
+
+/**
+ * Combined function to check both rate limiting and idempotency
+ * This function is used by the API routes that were calling the non-existent checkIdempotencyAndRateLimit
+ */
+export async function checkIdempotencyAndRateLimit(
+  req: any,
+  res: any,
+  operation: keyof typeof RATE_LIMITS,
+  userId: string
+): Promise<{ allowed: boolean; error?: string; response?: any }> {
+  // Get idempotency key from headers
+  const idempotencyKey = req.headers['idempotency-key'] || req.headers['x-idempotency-key'];
+  
+  // Check rate limiting first
+  const rateLimitResult = checkRateLimit(userId, operation);
+  if (!rateLimitResult.allowed) {
+    return {
+      allowed: false,
+      error: 'Rate limit exceeded'
+    };
+  }
+  
+  // Check idempotency if key is provided
+  if (idempotencyKey) {
+    const idempotencyResult = checkIdempotency(idempotencyKey, userId);
+    if (idempotencyResult.error) {
+      return {
+        allowed: false,
+        error: idempotencyResult.error
+      };
+    }
+    
+    if (idempotencyResult.isReplay && idempotencyResult.response) {
+      return {
+        allowed: false,
+        response: idempotencyResult.response
+      };
+    }
+  }
+  
+  return { allowed: true };
+}

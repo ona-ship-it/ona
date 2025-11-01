@@ -6,7 +6,7 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getWalletServiceManager } from '../../../services/walletServiceManager';
-import { withIdempotencyAndRateLimit } from '../../../middleware/idempotencyRateLimit';
+import { withIdempotencyAndRateLimit, checkIdempotencyAndRateLimit, storeIdempotencyResponse } from '../../../middleware/idempotencyRateLimit';
 import { ethers } from 'ethers';
 
 interface WithdrawResponse {
@@ -94,8 +94,8 @@ export default async function handler(
     }
 
     // Return cached response if exists
-    if (rateLimitResult.cachedResponse) {
-      return res.status(200).json(rateLimitResult.cachedResponse);
+    if (rateLimitResult.response) {
+      return res.status(200).json(rateLimitResult.response);
     }
 
     // Get wallet service manager
@@ -137,9 +137,10 @@ export default async function handler(
       }
     };
 
-    // Cache the response
-    if (rateLimitResult.storeResponse) {
-      await rateLimitResult.storeResponse(response);
+    // Cache the response for idempotency
+    const idempotencyKey = req.headers['idempotency-key'] || req.headers['x-idempotency-key'];
+    if (idempotencyKey) {
+      storeIdempotencyResponse(idempotencyKey as string, userId, response);
     }
 
     return res.status(201).json(response);

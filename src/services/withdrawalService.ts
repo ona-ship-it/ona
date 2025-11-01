@@ -83,7 +83,7 @@ export async function createWithdrawalRequest(
 
     // Check for duplicate idempotency key
     const { data: existing } = await supabase
-      .from('withdrawals')
+      .from('withdrawal_requests')
       .select('id')
       .eq('idempotency_key', idempotencyKey)
       .single();
@@ -112,13 +112,12 @@ export async function createWithdrawalRequest(
 
     // Create withdrawal request
     const { data, error } = await supabase
-      .from('withdrawals')
+      .from('withdrawal_requests')
       .insert({
         user_id: userId,
-        amount: amount.toString(),
+        amount: amount,
         currency,
         to_address: toAddress,
-        network,
         status: 'pending',
         idempotency_key: idempotencyKey
       })
@@ -141,18 +140,18 @@ export async function createWithdrawalRequest(
     return {
       id: data.id,
       userId: data.user_id,
-      amount: parseFloat(data.amount),
+      amount: data.amount,
       currency: data.currency,
       toAddress: data.to_address,
-      network: data.network,
-      status: data.status,
-      idempotencyKey: data.idempotency_key,
-      txHash: data.tx_hash,
-      gasUsed: data.gas_used,
-      gasFee: data.gas_fee ? parseFloat(data.gas_fee) : undefined,
-      errorMessage: data.error_message,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at
+      network: network, // Use the parameter value since it's not stored in DB
+      status: data.status as 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled',
+      idempotencyKey: data.idempotency_key || '',
+      txHash: data.tx_hash || undefined,
+      gasUsed: undefined, // Not stored in DB yet
+      gasFee: undefined, // Not stored in DB yet
+      errorMessage: undefined, // Not stored in DB yet
+      createdAt: data.created_at || new Date().toISOString(),
+      updatedAt: data.updated_at || new Date().toISOString()
     };
   } catch (error) {
     throw new Error(`Withdrawal request creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -184,7 +183,7 @@ export async function updateWithdrawalRequest(
     if (updates.errorMessage !== undefined) updateData.error_message = updates.errorMessage;
 
     const { data, error } = await supabase
-      .from('withdrawals')
+      .from('withdrawal_requests')
       .update(updateData)
       .eq('id', withdrawalId)
       .select()
@@ -197,18 +196,18 @@ export async function updateWithdrawalRequest(
     return {
       id: data.id,
       userId: data.user_id,
-      amount: parseFloat(data.amount),
+      amount: data.amount,
       currency: data.currency,
       toAddress: data.to_address,
-      network: data.network,
-      status: data.status,
-      idempotencyKey: data.idempotency_key,
-      txHash: data.tx_hash,
-      gasUsed: data.gas_used,
-      gasFee: data.gas_fee ? parseFloat(data.gas_fee) : undefined,
-      errorMessage: data.error_message,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at
+      network: 'ethereum', // Default network since not stored in DB
+      status: data.status as 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled',
+      idempotencyKey: data.idempotency_key || '',
+      txHash: data.tx_hash || undefined,
+      gasUsed: undefined, // Not stored in DB yet
+      gasFee: undefined, // Not stored in DB yet
+      errorMessage: undefined, // Not stored in DB yet
+      createdAt: data.created_at || new Date().toISOString(),
+      updatedAt: data.updated_at || new Date().toISOString()
     };
   } catch (error) {
     throw new Error(`Withdrawal update failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -227,7 +226,7 @@ export async function getPendingWithdrawals(
 ): Promise<WithdrawalRequest[]> {
   try {
     let query = supabase
-      .from('withdrawals')
+      .from('withdrawal_requests')
       .select('*')
       .eq('status', 'pending')
       .order('created_at', { ascending: true })
@@ -246,18 +245,18 @@ export async function getPendingWithdrawals(
     return data.map(withdrawal => ({
       id: withdrawal.id,
       userId: withdrawal.user_id,
-      amount: parseFloat(withdrawal.amount),
+      amount: withdrawal.amount,
       currency: withdrawal.currency,
       toAddress: withdrawal.to_address,
-      network: withdrawal.network,
-      status: withdrawal.status,
-      idempotencyKey: withdrawal.idempotency_key,
-      txHash: withdrawal.tx_hash,
-      gasUsed: withdrawal.gas_used,
-      gasFee: withdrawal.gas_fee ? parseFloat(withdrawal.gas_fee) : undefined,
-      errorMessage: withdrawal.error_message,
-      createdAt: withdrawal.created_at,
-      updatedAt: withdrawal.updated_at
+      network: 'ethereum', // Default network since not stored in DB
+      status: withdrawal.status as 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled',
+      idempotencyKey: withdrawal.idempotency_key || '',
+      txHash: withdrawal.tx_hash || undefined,
+      gasUsed: undefined, // Not stored in DB yet
+      gasFee: undefined, // Not stored in DB yet
+      errorMessage: undefined, // Not stored in DB yet
+      createdAt: withdrawal.created_at || new Date().toISOString(),
+      updatedAt: withdrawal.updated_at || new Date().toISOString()
     }));
   } catch (error) {
     throw new Error(`Pending withdrawals retrieval failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -278,7 +277,7 @@ export async function getUserWithdrawals(
 ): Promise<WithdrawalRequest[]> {
   try {
     const { data, error } = await supabase
-      .from('withdrawals')
+      .from('withdrawal_requests')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
@@ -291,18 +290,18 @@ export async function getUserWithdrawals(
     return data.map(withdrawal => ({
       id: withdrawal.id,
       userId: withdrawal.user_id,
-      amount: parseFloat(withdrawal.amount),
+      amount: withdrawal.amount,
       currency: withdrawal.currency,
       toAddress: withdrawal.to_address,
-      network: withdrawal.network,
-      status: withdrawal.status,
-      idempotencyKey: withdrawal.idempotency_key,
-      txHash: withdrawal.tx_hash,
-      gasUsed: withdrawal.gas_used,
-      gasFee: withdrawal.gas_fee ? parseFloat(withdrawal.gas_fee) : undefined,
-      errorMessage: withdrawal.error_message,
-      createdAt: withdrawal.created_at,
-      updatedAt: withdrawal.updated_at
+      network: 'ethereum', // Default network since not stored in DB
+      status: withdrawal.status as 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled',
+      idempotencyKey: withdrawal.idempotency_key || '',
+      txHash: withdrawal.tx_hash || undefined,
+      gasUsed: undefined, // Not stored in DB yet
+      gasFee: undefined, // Not stored in DB yet
+      errorMessage: undefined, // Not stored in DB yet
+      createdAt: withdrawal.created_at || new Date().toISOString(),
+      updatedAt: withdrawal.updated_at || new Date().toISOString()
     }));
   } catch (error) {
     throw new Error(`User withdrawals retrieval failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -318,7 +317,7 @@ export async function processWithdrawal(withdrawalId: string): Promise<Withdrawa
   try {
     // Get withdrawal request
     const { data: withdrawal, error } = await supabase
-      .from('withdrawals')
+      .from('withdrawal_requests')
       .select('*')
       .eq('id', withdrawalId)
       .eq('status', 'pending')
@@ -335,7 +334,7 @@ export async function processWithdrawal(withdrawalId: string): Promise<Withdrawa
     // Update status to processing
     await updateWithdrawalRequest(withdrawalId, { status: 'processing' });
 
-    const network = withdrawal.network;
+    const network = 'ethereum'; // Default network since not stored in DB
     const config = HOT_WALLET_CONFIG[network as keyof typeof HOT_WALLET_CONFIG];
 
     if (!config || !config.privateKey) {
@@ -364,7 +363,7 @@ export async function processWithdrawal(withdrawalId: string): Promise<Withdrawa
 
     // Check hot wallet balance
     const hotWalletBalance = await tokenContract.balanceOf(hotWallet.address);
-    const requiredAmount = ethers.parseUnits(withdrawal.amount, 6); // USDT has 6 decimals
+    const requiredAmount = ethers.parseUnits(withdrawal.amount.toString(), 6); // USDT has 6 decimals
 
     if (hotWalletBalance < requiredAmount) {
       await updateWithdrawalRequest(withdrawalId, {
@@ -462,7 +461,7 @@ export async function cancelWithdrawal(
   try {
     // Get withdrawal request
     const { data: withdrawal, error } = await supabase
-      .from('withdrawals')
+      .from('withdrawal_requests')
       .select('*')
       .eq('id', withdrawalId)
       .eq('user_id', userId)
@@ -481,7 +480,7 @@ export async function cancelWithdrawal(
     // Reverse the debit ledger entry (credit back the amount)
     await createLedgerEntry(
       userId,
-      parseFloat(withdrawal.amount),
+      withdrawal.amount,
       'credit',
       withdrawal.currency,
       withdrawalId

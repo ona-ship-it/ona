@@ -89,7 +89,6 @@ export class ReconciliationMonitor {
       console.log('Starting nightly reconciliation...');
       await this.performReconciliation();
     }, {
-      scheduled: true,
       timezone: 'UTC'
     });
     
@@ -97,7 +96,6 @@ export class ReconciliationMonitor {
     this.monitoringJob = cron.schedule('*/5 * * * *', async () => {
       await this.performMonitoringChecks();
     }, {
-      scheduled: true,
       timezone: 'UTC'
     });
     
@@ -282,7 +280,7 @@ export class ReconciliationMonitor {
    */
   private async checkPendingWithdrawals(): Promise<void> {
     const { data, error } = await this.supabase
-      .from('withdrawals')
+      .from('withdrawal_requests')
       .select('amount')
       .eq('status', 'pending');
     
@@ -291,7 +289,7 @@ export class ReconciliationMonitor {
     }
     
     const count = data?.length || 0;
-    const totalAmount = data?.reduce((sum, w) => sum + Number(w.amount), 0) || 0;
+    const totalAmount = data?.reduce((sum: number, w: any) => sum + Number(w.amount), 0) || 0;
     
     if (count >= this.ALERT_THRESHOLDS.PENDING_WITHDRAWALS_COUNT ||
         totalAmount >= Number(this.ALERT_THRESHOLDS.PENDING_WITHDRAWALS_AMOUNT)) {
@@ -311,7 +309,7 @@ export class ReconciliationMonitor {
    */
   private async checkFailedWithdrawals(): Promise<void> {
     const { data, error } = await this.supabase
-      .from('withdrawals')
+      .from('withdrawal_requests')
       .select('amount, created_at')
       .eq('status', 'failed')
       .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
@@ -321,7 +319,7 @@ export class ReconciliationMonitor {
     }
     
     const count = data?.length || 0;
-    const totalAmount = data?.reduce((sum, w) => sum + Number(w.amount), 0) || 0;
+    const totalAmount = data?.reduce((sum: number, w: any) => sum + Number(w.amount), 0) || 0;
     
     if (count >= this.ALERT_THRESHOLDS.FAILED_WITHDRAWALS_COUNT) {
       await this.sendAlert({
@@ -472,13 +470,13 @@ export class ReconciliationMonitor {
       
       // Get pending withdrawals
       const { data: pendingWithdrawals } = await this.supabase
-        .from('withdrawals')
+        .from('withdrawal_requests')
         .select('amount')
         .eq('status', 'pending');
       
       // Get failed withdrawals (last 24h)
       const { data: failedWithdrawals } = await this.supabase
-        .from('withdrawals')
+        .from('withdrawal_requests')
         .select('amount')
         .eq('status', 'failed')
         .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
@@ -491,9 +489,9 @@ export class ReconciliationMonitor {
         .limit(1);
       
       const pendingCount = pendingWithdrawals?.length || 0;
-      const pendingAmount = pendingWithdrawals?.reduce((sum, w) => sum + Number(w.amount), 0) || 0;
+      const pendingAmount = pendingWithdrawals?.reduce((sum: number, w: any) => sum + Number(w.amount), 0) || 0;
       const failedCount = failedWithdrawals?.length || 0;
-      const failedAmount = failedWithdrawals?.reduce((sum, w) => sum + Number(w.amount), 0) || 0;
+      const failedAmount = failedWithdrawals?.reduce((sum: number, w: any) => sum + Number(w.amount), 0) || 0;
       
       // Determine system health
       let systemHealth: 'healthy' | 'warning' | 'critical' = 'healthy';
@@ -539,7 +537,7 @@ export class ReconciliationMonitor {
       throw new Error(`Failed to get reconciliation history: ${error.message}`);
     }
     
-    return data?.map(row => ({
+    return data?.map((row: any) => ({
       address: row.wallet_address,
       userId: row.user_id,
       ledgerBalance: row.ledger_balance,

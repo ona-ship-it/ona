@@ -38,15 +38,26 @@ export function WalletServicesProvider({ children }: WalletServicesProviderProps
       
       if (response.ok) {
         const healthData = await response.json();
-        setIsInitialized(healthData.overall === 'healthy');
+        
+        // Consider services initialized if they're healthy or in warning state (starting up)
+        const isHealthy = healthData.overall === 'healthy';
+        const isStartingUp = healthData.overall === 'warning';
+        
+        setIsInitialized(isHealthy);
+        
+        if (isStartingUp) {
+          setError(healthData.message || 'Wallet services are starting up...');
+        } else if (healthData.overall === 'critical') {
+          setError(healthData.error || 'Wallet services are experiencing critical issues');
+        }
       } else {
         setIsInitialized(false);
-        setError('Wallet services are not responding');
+        setError(`Wallet services are not responding (HTTP ${response.status})`);
       }
     } catch (err) {
       console.error('Error checking wallet services:', err);
       setIsInitialized(false);
-      setError('Failed to connect to wallet services');
+      setError('Failed to connect to wallet services - check if the server is running');
     } finally {
       setIsLoading(false);
     }

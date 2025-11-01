@@ -7,7 +7,7 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getWalletServiceManager } from '../../../services/walletServiceManager';
-import { withIdempotencyAndRateLimit } from '../../../middleware/idempotencyRateLimit';
+import { withIdempotencyAndRateLimit, checkIdempotencyAndRateLimit } from '../../../middleware/idempotencyRateLimit';
 
 interface BalanceResponse {
   success: boolean;

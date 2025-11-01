@@ -104,7 +104,7 @@ export class WithdrawalWorker {
     try {
       // Get pending withdrawals
       const { data: withdrawals, error } = await this.supabase
-        .from('withdrawals')
+        .from('withdrawal_requests')
         .select('*')
         .eq('status', 'pending')
         .order('created_at', { ascending: true })
@@ -213,7 +213,7 @@ export class WithdrawalWorker {
     status: 'pending' | 'processing' | 'completed' | 'failed'
   ): Promise<void> {
     const { error } = await this.supabase
-      .from('withdrawals')
+      .from('withdrawal_requests')
       .update({ 
         status,
         updated_at: new Date().toISOString()
@@ -230,7 +230,7 @@ export class WithdrawalWorker {
    */
   private async markWithdrawalFailed(withdrawalId: string, reason: string): Promise<void> {
     const { error } = await this.supabase
-      .from('withdrawals')
+      .from('withdrawal_requests')
       .update({ 
         status: 'failed',
         failure_reason: reason,
@@ -290,7 +290,7 @@ export class WithdrawalWorker {
   async processWithdrawalManually(withdrawalId: string): Promise<boolean> {
     try {
       const { data: withdrawal, error } = await this.supabase
-        .from('withdrawals')
+        .from('withdrawal_requests')
         .select('*')
         .eq('id', withdrawalId)
         .single();

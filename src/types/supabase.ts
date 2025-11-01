@@ -507,6 +507,288 @@ export type Database = {
           },
         ]
       }
+      ledger: {
+        Row: {
+          id: string
+          user_id: string
+          amount: number
+          currency: string
+          transaction_type: string
+          description: string | null
+          reference_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          amount: number
+          currency: string
+          transaction_type: string
+          description?: string | null
+          reference_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          amount?: number
+          currency?: string
+          transaction_type?: string
+          description?: string | null
+          reference_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crypto_wallets: {
+        Row: {
+          id: string
+          user_id: string
+          network: string
+          address: string
+          encrypted_private_key: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          network: string
+          address: string
+          encrypted_private_key?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          network?: string
+          address?: string
+          encrypted_private_key?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crypto_wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deposit_transactions: {
+        Row: {
+          id: string
+          user_id: string | null
+          network: string
+          tx_hash: string
+          from_address: string | null
+          to_address: string | null
+          amount: number
+          currency: string
+          confirmations: number | null
+          status: string | null
+          metadata: Json | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          network: string
+          tx_hash: string
+          from_address?: string | null
+          to_address?: string | null
+          amount: number
+          currency: string
+          confirmations?: number | null
+          status?: string | null
+          metadata?: Json | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          network?: string
+          tx_hash?: string
+          from_address?: string | null
+          to_address?: string | null
+          amount?: number
+          currency?: string
+          confirmations?: number | null
+          status?: string | null
+          metadata?: Json | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposit_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_wallets: {
+        Row: {
+          id: string
+          user_id: string
+          network: string
+          address: string
+          encrypted_private_key: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          network: string
+          address: string
+          encrypted_private_key?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          network?: string
+          address?: string
+          encrypted_private_key?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      withdrawal_requests: {
+        Row: {
+          id: string
+          user_id: string
+          amount: number
+          currency: string
+          to_address: string
+          status: string
+          tx_hash: string | null
+          idempotency_key: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          amount: number
+          currency?: string
+          to_address: string
+          status?: string
+          tx_hash?: string | null
+          idempotency_key?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          amount?: number
+          currency?: string
+          to_address?: string
+          status?: string
+          tx_hash?: string | null
+          idempotency_key?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawal_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deposit_scan_status: {
+        Row: {
+          id: string
+          network: string
+          last_scanned_block: number | null
+          last_scanned_tx: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          network: string
+          last_scanned_block?: number | null
+          last_scanned_tx?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          network?: string
+          last_scanned_block?: number | null
+          last_scanned_tx?: string | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      wallets: {
+        Row: {
+          id: string
+          user_id: string
+          balance_fiat: number
+          balance_tickets: number
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          balance_fiat?: number
+          balance_tickets?: number
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          balance_fiat?: number
+          balance_tickets?: number
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "auth.users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       admin_roles: {
@@ -589,6 +871,40 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      get_user_balance:
+        | { Args: { user_uuid: string }; Returns: number }
+        | { Args: { user_uuid: string; currency_filter: string }; Returns: number }
+      get_user_balances: {
+        Args: { user_uuid: string }
+        Returns: { currency: string; balance: number }[]
+      }
+      check_user_balance: {
+        Args: { user_uuid: string; required_amount: number; currency_filter: string }
+        Returns: boolean
+      }
+      transfer_funds: {
+        Args: { 
+          from_user_uuid: string
+          to_user_uuid: string
+          amount: number
+          currency_param: string
+          description_param: string
+        }
+        Returns: boolean
+      }
+      process_deposit: {
+        Args: {
+          user_uuid: string
+          amount: number
+          currency_param: string
+          description_param: string
+        }
+        Returns: boolean
+      }
+      get_user_transactions: {
+        Args: { user_uuid: string; limit_count: number }
+        Returns: Database["public"]["Tables"]["ledger"]["Row"][]
       }
     }
     Enums: {

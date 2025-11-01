@@ -68,7 +68,11 @@ function createProvider(network: string): ethers.JsonRpcProvider {
  * @param provider - Ethers provider
  * @returns Token contract instance
  */
-function createTokenContract(network: string, provider: ethers.JsonRpcProvider): ethers.Contract {
+function createTokenContract(network: string, provider: ethers.JsonRpcProvider): ethers.Contract & {
+  balanceOf: (owner: string) => Promise<bigint>;
+  transfer: (to: string, amount: bigint) => Promise<ethers.ContractTransactionResponse>;
+  decimals: () => Promise<number>;
+} {
   const contractAddress = TOKEN_CONTRACTS[network as keyof typeof TOKEN_CONTRACTS];
   if (!contractAddress) {
     throw new Error(`USDT contract not configured for network: ${network}`);
@@ -82,7 +86,11 @@ function createTokenContract(network: string, provider: ethers.JsonRpcProvider):
     'event Transfer(address indexed from, address indexed to, uint256 value)'
   ];
 
-  return new ethers.Contract(contractAddress, abi, provider);
+  return new ethers.Contract(contractAddress, abi, provider) as ethers.Contract & {
+    balanceOf: (owner: string) => Promise<bigint>;
+    transfer: (to: string, amount: bigint) => Promise<ethers.ContractTransactionResponse>;
+    decimals: () => Promise<number>;
+  };
 }
 
 /**
@@ -110,12 +118,12 @@ export async function recordDepositTransaction(depositData: {
         tx_hash: depositData.txHash,
         from_address: depositData.fromAddress,
         to_address: depositData.toAddress,
-        amount: depositData.amount,
+        amount: parseFloat(depositData.amount),
         currency: depositData.currency,
         network: depositData.network,
-        block_number: depositData.blockNumber,
         confirmations: depositData.confirmations,
-        status: depositData.status
+        status: depositData.status,
+        metadata: { blockNumber: depositData.blockNumber }
       })
       .select()
       .single();
@@ -124,20 +132,24 @@ export async function recordDepositTransaction(depositData: {
       throw new Error(`Failed to record deposit transaction: ${error.message}`);
     }
 
+    if (!data.user_id) {
+      throw new Error('Deposit transaction must have a valid user_id');
+    }
+
     return {
       id: data.id,
       userId: data.user_id,
       txHash: data.tx_hash,
-      fromAddress: data.from_address,
-      toAddress: data.to_address,
-      amount: data.amount,
+      fromAddress: data.from_address || '',
+      toAddress: data.to_address || '',
+      amount: data.amount.toString(),
       currency: data.currency,
       network: data.network,
-      blockNumber: data.block_number,
-      confirmations: data.confirmations,
-      status: data.status,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at
+      blockNumber: (data.metadata as any)?.blockNumber || 0,
+      confirmations: data.confirmations || 0,
+      status: (data.status as 'pending' | 'confirmed' | 'processed' | 'failed') || 'pending',
+      createdAt: data.created_at || '',
+      updatedAt: data.updated_at || ''
     };
   } catch (error) {
     throw new Error(`Deposit recording failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -162,7 +174,17 @@ export async function updateDepositTransaction(
     const updateData: any = {};
     if (updates.confirmations !== undefined) updateData.confirmations = updates.confirmations;
     if (updates.status !== undefined) updateData.status = updates.status;
-    if (updates.blockNumber !== undefined) updateData.block_number = updates.blockNumber;
+    if (updates.blockNumber !== undefined) {
+      // Get current metadata and update blockNumber
+      const { data: currentData } = await supabase
+        .from('deposit_transactions')
+        .select('metadata')
+        .eq('tx_hash', txHash)
+        .single();
+      
+      const currentMetadata = (currentData?.metadata as any) || {};
+      updateData.metadata = { ...currentMetadata, blockNumber: updates.blockNumber };
+    }
 
     const { data, error } = await supabase
       .from('deposit_transactions')
@@ -175,20 +197,24 @@ export async function updateDepositTransaction(
       throw new Error(`Failed to update deposit transaction: ${error.message}`);
     }
 
+    if (!data.user_id) {
+      throw new Error('Deposit transaction must have a valid user_id');
+    }
+
     return {
       id: data.id,
       userId: data.user_id,
       txHash: data.tx_hash,
-      fromAddress: data.from_address,
-      toAddress: data.to_address,
-      amount: data.amount,
+      fromAddress: data.from_address || '',
+      toAddress: data.to_address || '',
+      amount: data.amount?.toString() || '0',
       currency: data.currency,
       network: data.network,
-      blockNumber: data.block_number,
-      confirmations: data.confirmations,
-      status: data.status,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at
+      blockNumber: (data.metadata as any)?.blockNumber || 0,
+      confirmations: data.confirmations || 0,
+      status: (data.status as 'pending' | 'confirmed' | 'processed' | 'failed') || 'pending',
+      createdAt: data.created_at || '',
+      updatedAt: data.updated_at || ''
     };
   } catch (error) {
     throw new Error(`Deposit update failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -257,7 +283,8 @@ export async function scanForDeposits(
     const deposits: DepositTransaction[] = [];
 
     for (const event of events) {
-      if (!event.args) continue;
+      // Check if this is an EventLog with args
+      if (!('args' in event) || !event.args) continue;
 
       const [from, to, value] = event.args;
       const toAddress = to.toLowerCase();
@@ -325,7 +352,16 @@ export async function processConfirmedDeposit(txHash: string): Promise<DepositPr
       };
     }
 
-    const amount = parseFloat(deposit.amount);
+    const amount = typeof deposit.amount === 'string' ? parseFloat(deposit.amount) : deposit.amount;
+
+    if (!deposit.user_id) {
+      return {
+        success: false,
+        txHash,
+        amount: 0,
+        error: 'Deposit has no associated user ID'
+      };
+    }
 
     // Validate balance increase against user limits
     const balanceValidation = await validateBalanceIncrease(
@@ -403,21 +439,27 @@ export async function getPendingDeposits(
       throw new Error(`Failed to get pending deposits: ${error.message}`);
     }
 
-    return data.map(deposit => ({
-      id: deposit.id,
-      userId: deposit.user_id,
-      txHash: deposit.tx_hash,
-      fromAddress: deposit.from_address,
-      toAddress: deposit.to_address,
-      amount: deposit.amount,
-      currency: deposit.currency,
-      network: deposit.network,
-      blockNumber: deposit.block_number,
-      confirmations: deposit.confirmations,
-      status: deposit.status,
-      createdAt: deposit.created_at,
-      updatedAt: deposit.updated_at
-    }));
+    return data.map(deposit => {
+      if (!deposit.user_id) {
+        throw new Error('Deposit has no associated user ID');
+      }
+      
+      return {
+        id: deposit.id,
+        userId: deposit.user_id,
+        txHash: deposit.tx_hash || '',
+        fromAddress: deposit.from_address || '',
+        toAddress: deposit.to_address || '',
+        amount: typeof deposit.amount === 'string' ? deposit.amount : deposit.amount.toString(),
+        currency: deposit.currency || '',
+        network: deposit.network || '',
+        blockNumber: (deposit.metadata as any)?.blockNumber || 0,
+        confirmations: deposit.confirmations || 0,
+        status: (deposit.status as 'pending' | 'confirmed' | 'processed' | 'failed') || 'pending',
+        createdAt: deposit.created_at || '',
+        updatedAt: deposit.updated_at || ''
+      };
+    });
   } catch (error) {
     throw new Error(`Pending deposits retrieval failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
@@ -458,7 +500,14 @@ export async function sweepUserWallets(
         // Only sweep if balance is significant (> 1 USDT)
         if (balanceFormatted > 1) {
           // Decrypt private key
-          const privateKey = decryptPrivateKey(wallet.encrypted_private_key);
+          const walletPassphrase = process.env.WALLET_PASSPHRASE;
+          if (!walletPassphrase) {
+            throw new Error('WALLET_PASSPHRASE environment variable is required');
+          }
+          if (!wallet.encrypted_private_key) {
+            throw new Error('Wallet has no encrypted private key');
+          }
+          const privateKey = decryptPrivateKey(wallet.encrypted_private_key, walletPassphrase);
           const userWallet = new ethers.Wallet(privateKey, provider);
 
           // Check ETH balance for gas
@@ -473,7 +522,7 @@ export async function sweepUserWallets(
           }
 
           // Create token contract with user's wallet
-          const userTokenContract = tokenContract.connect(userWallet);
+          const userTokenContract = tokenContract.connect(userWallet) as typeof tokenContract;
 
           // Transfer tokens to hot wallet
           const tx = await userTokenContract.transfer(hotWalletAddress, balance);
@@ -519,7 +568,10 @@ export async function updateDepositConfirmations(network: string): Promise<numbe
     const requiredConfirmations = CONFIRMATION_REQUIREMENTS[network as keyof typeof CONFIRMATION_REQUIREMENTS];
 
     for (const deposit of deposits) {
-      const confirmations = currentBlock - deposit.block_number;
+      // Extract block number from metadata
+      const metadata = deposit.metadata as any;
+      const blockNumber = metadata?.blockNumber || 0;
+      const confirmations = currentBlock - blockNumber;
       
       if (confirmations !== deposit.confirmations) {
         const newStatus = confirmations >= requiredConfirmations ? 'confirmed' : 'pending';

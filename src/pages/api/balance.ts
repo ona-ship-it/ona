@@ -61,8 +61,8 @@ async function handleGetBalance(req: NextApiRequest, res: NextApiResponse<Balanc
 
     // Platform balances
     const platformBalances = {
-      fiat: platformWallet?.balanceFiat || 0,
-      tickets: platformWallet?.balanceTickets || 0
+      fiat: platformWallet?.balance_fiat || 0,
+      tickets: platformWallet?.balance_tickets || 0
     };
 
     // Calculate total balances (crypto + platform fiat for USD equivalent)

@@ -48,11 +48,7 @@ export default function NewGiveawayClient() {
         
         // Check if user is admin
         const { data: adminData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .single();
+          .rpc('is_admin_user', { user_uuid: user.id });
           
         setIsAdmin(!!adminData);
       } catch (err) {

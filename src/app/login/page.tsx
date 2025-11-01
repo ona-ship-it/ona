@@ -9,7 +9,7 @@ function LoginContent() {
   
   useEffect(() => {
     // Redirect to signin page with any query parameters preserved
-    const redirectTo = searchParams.get('redirectTo');
+    const redirectTo = searchParams?.get('redirectTo');
     const signinUrl = redirectTo ? `/signin?redirectTo=${encodeURIComponent(redirectTo)}` : '/signin';
     router.replace(signinUrl);
   }, [router, searchParams]);

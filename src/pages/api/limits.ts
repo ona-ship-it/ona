@@ -49,13 +49,10 @@ async function validateAdminAuth(req: NextApiRequest): Promise<string> {
   const userId = await validateAuth(req);
 
   // Check if user has admin role
-  const { data: profile, error } = await supabase
-    .from('app_users')
-    .select('role')
-    .eq('user_id', userId)
-    .single();
+  const { data: isAdmin, error } = await supabase
+    .rpc('is_admin_user', { user_uuid: userId });
 
-  if (error || !profile || profile.role !== 'admin') {
+  if (error || !isAdmin) {
     throw new Error('Admin access required');
   }
 
@@ -138,7 +135,7 @@ async function handleGetLimits(
 
     // Get current balance from ledger
     const { data: balanceData, error: balanceError } = await supabase
-      .rpc('get_user_balance', { p_user_id: finalUserId, p_currency: 'USDT' });
+      .rpc('get_user_balance', { user_uuid: finalUserId, currency_filter: 'USDT' });
 
     if (balanceError) {
       console.error('Error getting balance:', balanceError);
@@ -150,22 +147,22 @@ async function handleGetLimits(
       success: true,
       data: {
         limits: {
-          maxBalance: parseFloat(limits.max_balance),
-          maxTransactionAmount: parseFloat(limits.max_transaction_amount),
-          dailyTransferLimit: parseFloat(limits.daily_transfer_limit),
-          dailyWithdrawalLimit: parseFloat(limits.daily_withdrawal_limit)
+          maxBalance: limits.maxBalance,
+          maxTransactionAmount: limits.maxTransactionAmount,
+          dailyTransferLimit: limits.dailyTransferLimit,
+          dailyWithdrawalLimit: limits.dailyWithdrawalLimit
         },
         remaining: {
           dailyTransferLimit: remaining.dailyTransferLimit,
           dailyWithdrawalLimit: remaining.dailyWithdrawalLimit,
-          balanceCapacity: Math.max(0, parseFloat(limits.max_balance) - currentBalance)
+          balanceCapacity: Math.max(0, limits.maxBalance - currentBalance)
         },
         current: {
           balance: currentBalance,
           dailyTransferUsed: remaining.dailyTransferUsed,
           dailyWithdrawalUsed: remaining.dailyWithdrawalUsed
         },
-        updatedAt: limits.updated_at
+        updatedAt: limits.updatedAt
       },
       message: 'User limits retrieved successfully'
     });
@@ -231,10 +228,10 @@ async function handleUpdateLimits(
 
     // Update limits
     const updatedLimits = await updateUserLimits(targetUserId, {
-      max_balance: validatedData.maxBalance,
-      max_transaction_amount: validatedData.maxTransactionAmount,
-      daily_transfer_limit: validatedData.dailyTransferLimit,
-      daily_withdrawal_limit: validatedData.dailyWithdrawalLimit
+      maxBalance: validatedData.maxBalance,
+      maxTransactionAmount: validatedData.maxTransactionAmount,
+      dailyTransferLimit: validatedData.dailyTransferLimit,
+      dailyWithdrawalLimit: validatedData.dailyWithdrawalLimit
     });
 
     res.status(200).json({
@@ -242,12 +239,12 @@ async function handleUpdateLimits(
       data: {
         userId: targetUserId,
         limits: {
-          maxBalance: parseFloat(updatedLimits.max_balance),
-          maxTransactionAmount: parseFloat(updatedLimits.max_transaction_amount),
-          dailyTransferLimit: parseFloat(updatedLimits.daily_transfer_limit),
-          dailyWithdrawalLimit: parseFloat(updatedLimits.daily_withdrawal_limit)
+          maxBalance: updatedLimits.maxBalance,
+          maxTransactionAmount: updatedLimits.maxTransactionAmount,
+          dailyTransferLimit: updatedLimits.dailyTransferLimit,
+          dailyWithdrawalLimit: updatedLimits.dailyWithdrawalLimit
         },
-        updatedAt: updatedLimits.updated_at
+        updatedAt: updatedLimits.updatedAt
       },
       message: 'User limits updated successfully'
     });
@@ -258,7 +255,7 @@ async function handleUpdateLimits(
       return res.status(400).json({
         error: 'Validation error',
         message: 'Invalid limit values',
-        details: error.errors.map(err => ({
+        details: error.issues.map(err => ({
           field: err.path.join('.'),
           message: err.message
         }))
@@ -288,19 +285,18 @@ async function handleValidateTransfer(
     // Validate the transfer against limits
     const validation = await validateTransferLimits(
       userId,
+      validatedData.recipientId || '',
       validatedData.amount,
-      validatedData.currency,
-      validatedData.recipientId
+      validatedData.currency
     );
 
-    if (validation.valid) {
+    if (validation.isValid) {
       res.status(200).json({
         success: true,
         data: {
           valid: true,
           amount: validatedData.amount,
-          currency: validatedData.currency,
-          remainingLimits: validation.remainingLimits
+          currency: validatedData.currency
         },
         message: 'Transfer validation passed'
       });
@@ -311,10 +307,10 @@ async function handleValidateTransfer(
           valid: false,
           amount: validatedData.amount,
           currency: validatedData.currency,
-          violations: validation.violations
+          reason: validation.reason
         },
         error: 'Transfer validation failed',
-        message: validation.violations.join(', ')
+        message: validation.reason || 'Transfer validation failed'
       });
     }
   } catch (error) {
@@ -324,7 +320,7 @@ async function handleValidateTransfer(
       return res.status(400).json({
         error: 'Validation error',
         message: 'Invalid transfer data',
-        details: error.errors.map(err => ({
+        details: error.issues.map(err => ({
           field: err.path.join('.'),
           message: err.message
         }))

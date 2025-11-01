@@ -3,6 +3,9 @@ import crypto from 'crypto';
 import { encryptPrivateKey, decryptPrivateKey, deriveDeterministicSeed } from '../utils/encryption';
 import { supabase } from '../lib/supabaseClient';
 
+// Re-export encryption utilities for use by other services
+export { decryptPrivateKey };
+
 export interface WalletCreationResult {
   address: string;
   encryptedPrivateKey: string;
@@ -11,19 +14,21 @@ export interface WalletCreationResult {
 
 export interface UserWallet {
   id: string;
-  userId: string;
+  user_id: string;
   network: string;
   address: string;
-  encryptedPrivateKey: string;
-  createdAt: string;
+  encrypted_private_key: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export interface PlatformWallet {
   id: string;
-  userId: string;
-  balanceFiat: number;
-  balanceTickets: number;
-  createdAt: string;
+  user_id: string;
+  balance_fiat: number;
+  balance_tickets: number;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 /**
@@ -219,8 +224,12 @@ export async function decryptUserPrivateKey(
       throw new Error(`No crypto wallet found for user ${userId} on ${network}`);
     }
 
+    if (!wallet.encrypted_private_key) {
+      throw new Error(`No encrypted private key found for user ${userId} on ${network}`);
+    }
+
     // Decrypt the private key
-    const privateKey = decryptPrivateKey(wallet.encryptedPrivateKey, walletPassphrase);
+    const privateKey = decryptPrivateKey(wallet.encrypted_private_key, walletPassphrase);
     
     return privateKey;
   } catch (error) {

@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabaseClient';
 import { getUserBalance } from './ledgerService';
 
 export interface UserLimits {
@@ -47,33 +47,18 @@ export async function getUserLimits(
   currency: string = 'USDT'
 ): Promise<UserLimits> {
   try {
-    const { data, error } = await supabase
-      .from('user_limits')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('currency', currency)
-      .single();
-
-    if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
-      throw new Error(`Failed to get user limits: ${error.message}`);
-    }
-
-    // Return existing limits or create default limits
-    if (data) {
-      return {
-        userId: data.user_id,
-        maxBalance: parseFloat(data.max_balance),
-        maxTransactionAmount: parseFloat(data.max_transaction_amount),
-        dailyTransferLimit: parseFloat(data.daily_transfer_limit),
-        dailyWithdrawalLimit: parseFloat(data.daily_withdrawal_limit),
-        currency: data.currency,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at
-      };
-    }
-
-    // Create default limits for user
-    return await createUserLimits(userId, currency);
+    // Since user_limits table doesn't exist, return default limits
+    // TODO: Implement user_limits table in database if custom limits are needed
+    return {
+      userId,
+      maxBalance: DEFAULT_LIMITS.maxBalance,
+      maxTransactionAmount: DEFAULT_LIMITS.maxTransactionAmount,
+      dailyTransferLimit: DEFAULT_LIMITS.dailyTransferLimit,
+      dailyWithdrawalLimit: DEFAULT_LIMITS.dailyWithdrawalLimit,
+      currency,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
   } catch (error) {
     throw new Error(`User limits retrieval failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
@@ -90,32 +75,17 @@ export async function createUserLimits(
   currency: string = 'USDT'
 ): Promise<UserLimits> {
   try {
-    const { data, error } = await supabase
-      .from('user_limits')
-      .insert({
-        user_id: userId,
-        max_balance: DEFAULT_LIMITS.maxBalance,
-        max_transaction_amount: DEFAULT_LIMITS.maxTransactionAmount,
-        daily_transfer_limit: DEFAULT_LIMITS.dailyTransferLimit,
-        daily_withdrawal_limit: DEFAULT_LIMITS.dailyWithdrawalLimit,
-        currency
-      })
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Failed to create user limits: ${error.message}`);
-    }
-
+    // Since user_limits table doesn't exist, return default limits
+    // TODO: Implement user_limits table in database if custom limits are needed
     return {
-      userId: data.user_id,
-      maxBalance: parseFloat(data.max_balance),
-      maxTransactionAmount: parseFloat(data.max_transaction_amount),
-      dailyTransferLimit: parseFloat(data.daily_transfer_limit),
-      dailyWithdrawalLimit: parseFloat(data.daily_withdrawal_limit),
-      currency: data.currency,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at
+      userId,
+      maxBalance: DEFAULT_LIMITS.maxBalance,
+      maxTransactionAmount: DEFAULT_LIMITS.maxTransactionAmount,
+      dailyTransferLimit: DEFAULT_LIMITS.dailyTransferLimit,
+      dailyWithdrawalLimit: DEFAULT_LIMITS.dailyWithdrawalLimit,
+      currency,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
   } catch (error) {
     throw new Error(`User limits creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -135,34 +105,17 @@ export async function updateUserLimits(
   currency: string = 'USDT'
 ): Promise<UserLimits> {
   try {
-    const updateData: any = {};
-    
-    if (limits.maxBalance !== undefined) updateData.max_balance = limits.maxBalance;
-    if (limits.maxTransactionAmount !== undefined) updateData.max_transaction_amount = limits.maxTransactionAmount;
-    if (limits.dailyTransferLimit !== undefined) updateData.daily_transfer_limit = limits.dailyTransferLimit;
-    if (limits.dailyWithdrawalLimit !== undefined) updateData.daily_withdrawal_limit = limits.dailyWithdrawalLimit;
-
-    const { data, error } = await supabase
-      .from('user_limits')
-      .update(updateData)
-      .eq('user_id', userId)
-      .eq('currency', currency)
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Failed to update user limits: ${error.message}`);
-    }
-
+    // Since user_limits table doesn't exist, return default limits with any provided overrides
+    // TODO: Implement user_limits table in database if custom limits are needed
     return {
-      userId: data.user_id,
-      maxBalance: parseFloat(data.max_balance),
-      maxTransactionAmount: parseFloat(data.max_transaction_amount),
-      dailyTransferLimit: parseFloat(data.daily_transfer_limit),
-      dailyWithdrawalLimit: parseFloat(data.daily_withdrawal_limit),
-      currency: data.currency,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at
+      userId,
+      maxBalance: limits.maxBalance ?? DEFAULT_LIMITS.maxBalance,
+      maxTransactionAmount: limits.maxTransactionAmount ?? DEFAULT_LIMITS.maxTransactionAmount,
+      dailyTransferLimit: limits.dailyTransferLimit ?? DEFAULT_LIMITS.dailyTransferLimit,
+      dailyWithdrawalLimit: limits.dailyWithdrawalLimit ?? DEFAULT_LIMITS.dailyWithdrawalLimit,
+      currency,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
   } catch (error) {
     throw new Error(`User limits update failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -283,8 +236,8 @@ export async function getDailyUsage(
     }
 
     // Calculate totals (convert negative amounts to positive)
-    const transferAmount = transferData.reduce((sum, entry) => sum + Math.abs(parseFloat(entry.amount.toString())), 0);
-    const withdrawalAmount = withdrawalData.reduce((sum, entry) => sum + Math.abs(parseFloat(entry.amount.toString())), 0);
+    const transferAmount = transferData.reduce((sum: number, entry: any) => sum + Math.abs(parseFloat(entry.amount.toString())), 0);
+    const withdrawalAmount = withdrawalData.reduce((sum: number, entry: any) => sum + Math.abs(parseFloat(entry.amount.toString())), 0);
 
     return {
       userId,
