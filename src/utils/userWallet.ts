@@ -2,13 +2,13 @@ import { Keypair } from "@solana/web3.js";
 import { encryptPrivateKey } from "./encryption";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
-
 export async function createUserWallet(userId: string) {
   try {
+    // Initialize Supabase client at runtime to avoid build-time errors
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
     // Generate Solana keypair
     const keypair = Keypair.generate();
     const address = keypair.publicKey.toBase58();

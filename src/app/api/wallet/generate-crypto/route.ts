@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createUserWallet } from '@/utils/userWallet';
 
-// Initialize Supabase client with service role key for admin operations
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function POST(request: NextRequest) {
   try {
+    // Initialize Supabase client at runtime to avoid build-time errors
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
     const { userId } = await request.json();
 
     if (!userId) {
@@ -64,6 +63,12 @@ export async function POST(request: NextRequest) {
 // GET endpoint to check wallet status
 export async function GET(request: NextRequest) {
   try {
+    // Initialize Supabase client at runtime to avoid build-time errors
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 

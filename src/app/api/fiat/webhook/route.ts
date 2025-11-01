@@ -2,18 +2,18 @@ import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2025-10-29.clover" });
-
-// Initialize Supabase client with service role key for webhook operations
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 // Example static rate. Later, you can fetch live rate via CoinGecko API if desired.
 const USDT_RATE = 1.00; // 1 USD = 1 USDT (for MVP simplicity)
 
 export async function POST(req: Request) {
+  // Initialize Stripe client at runtime to avoid build-time errors
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2025-10-29.clover" });
+
+  // Initialize Supabase client with service role key for webhook operations
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
   const sig = req.headers.get("stripe-signature")!;
   const body = await req.text();
 
