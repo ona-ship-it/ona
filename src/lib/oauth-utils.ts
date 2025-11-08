@@ -81,11 +81,17 @@ function buildCallbackUrl(redirectTo?: string): string {
  * Create Supabase client with standardized cookie options
  */
 function createStandardizedSupabaseClient() {
+  // Make cookie domain configurable to avoid breaking OAuth on different deploy domains
+  const cookieDomain = process.env.NEXT_PUBLIC_COOKIE_DOMAIN || undefined;
+  const secureCookies = process.env.NEXT_PUBLIC_COOKIE_SECURE
+    ? process.env.NEXT_PUBLIC_COOKIE_SECURE === 'true'
+    : process.env.NODE_ENV === 'production';
+
   return createClientComponentClient<Database>({
     cookieOptions: {
       path: '/',
-      domain: process.env.NODE_ENV === 'production' ? '.onagui.com' : undefined,
-      secure: process.env.NODE_ENV === 'production',
+      domain: cookieDomain,
+      secure: secureCookies,
       sameSite: 'lax',
     }
   });

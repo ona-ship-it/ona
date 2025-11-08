@@ -10,5 +10,12 @@ export async function GET() {
     return NextResponse.json({ error: 'No user session found' }, { status: 401 });
   }
 
-  return NextResponse.json({ user });
+  // Include the DB profile row to keep frontend and backend in sync
+  const { data: profile } = await (supabase as any)
+    .from('onagui_profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  return NextResponse.json({ user, profile });
 }

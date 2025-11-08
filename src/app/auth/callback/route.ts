@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import EmailService from '@/lib/emailService';
 
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
@@ -72,6 +73,19 @@ export async function GET(request: NextRequest) {
       console.log('📋 Profile check:', profileCheck ? 'Found' : 'Not found');
     } catch (profileError) {
       console.warn('⚠️ Profile check failed:', profileError);
+    }
+
+    // 📧 Send welcome email (non-blocking) for OAuth signups
+    try {
+      const toEmail = validUser.email;
+      const fullName = (validUser.user_metadata as any)?.full_name || (validUser.user_metadata as any)?.name || undefined;
+      if (toEmail) {
+        EmailService.sendWelcomeEmail(toEmail, fullName)
+          .then((ok) => console.log(`📧 Welcome email ${ok ? 'sent' : 'failed'} to ${toEmail}`))
+          .catch((err) => console.warn('⚠️ Welcome email error:', err));
+      }
+    } catch (emailErr) {
+      console.warn('⚠️ Welcome email exception:', emailErr);
     }
 
     // 🔐 CRYPTO WALLET GENERATION - Generate wallet for OAuth signups
