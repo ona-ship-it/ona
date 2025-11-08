@@ -1,1 +1,2 @@
 0000000000000000000000000000000000000000 10028ba85d086f27c9b8a9f3092acde3ba614bf2 Your Name <user@example.com> 1762628493 +0100	branch: Created from HEAD
+10028ba85d086f27c9b8a9f3092acde3ba614bf2 929b16584edcaae4b1861afba2f2f0ccf2aaca06 Your Name <user@example.com> 1762628527 +0100	commit: Profile page fixes: link top nav to /profile; add production /profile route alias; show provider avatar in ProfilePopup by default with fallback to initials

@@ -1,0 +1,1 @@
+Profile page fixes: link top nav to /profile; add production /profile route alias; show provider avatar in ProfilePopup by default with fallback to initials

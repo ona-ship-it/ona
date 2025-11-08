@@ -11,3 +11,6 @@
 [branch "signup"]
 	remote = origin
 	merge = refs/heads/signup
+[branch "profile-nav-pfp"]
+	remote = origin
+	merge = refs/heads/profile-nav-pfp

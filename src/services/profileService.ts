@@ -1,11 +1,12 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import type { Database, Json } from '../types/supabase';
 
-export type UserRank = Database['public']['Tables']['ranks']['Row'];
-export type UserAchievement = Database['public']['Tables']['achievements']['Row'];
-export type UserBadge = Database['public']['Tables']['user_badges']['Row'];
-export type UserProfile = Database['public']['Tables']['onagui_profiles']['Row'];
-export type UserWallet = Database['public']['Tables']['wallets']['Row'];
+// Use the correct 'onagui' schema types to match the database
+export type UserRank = Database['onagui']['Tables']['ranks']['Row'];
+export type UserAchievement = Database['onagui']['Tables']['achievements']['Row'];
+export type UserBadge = Database['onagui']['Tables']['user_badges']['Row'];
+export type UserProfile = Database['onagui']['Tables']['onagui_profiles']['Row'];
+export type UserWallet = Database['onagui']['Tables']['wallets']['Row'];
 
 export class ProfileService {
   private supabase = createClientComponentClient<Database>();
@@ -15,6 +16,7 @@ export class ProfileService {
    */
   async getUserProfile(userId: string): Promise<UserProfile | null> {
     const { data, error } = await this.supabase
+      .schema('onagui')
       .from('onagui_profiles')
       .select('*')
       .eq('id', userId)
@@ -45,6 +47,7 @@ export class ProfileService {
     }
     
     const { data: rank, error: rankError } = await this.supabase
+      .schema('onagui')
       .from('ranks')
       .select('*')
       .eq('code', user.current_rank)
@@ -63,6 +66,7 @@ export class ProfileService {
    */
   async getUserAchievements(userId: string): Promise<UserAchievement[]> {
     const { data, error } = await this.supabase
+      .schema('onagui')
       .from('user_achievements')
       .select(`
         achievement_id,
@@ -76,7 +80,12 @@ export class ProfileService {
       return [];
     }
     
-    return (data?.map((item: Database['public']['Tables']['user_achievements']['Row'] & { achievements: UserAchievement }) => item.achievements) ?? []);
+    return (
+      data?.map(
+        (item: Database['onagui']['Tables']['user_achievements']['Row'] & { achievements: UserAchievement }) =>
+          item.achievements
+      ) ?? []
+    );
   }
 
   /**
@@ -84,6 +93,7 @@ export class ProfileService {
    */
   async getUserBadges(userId: string): Promise<UserBadge[]> {
     const { data, error } = await this.supabase
+      .schema('onagui')
       .from('user_badges')
       .select('*')
       .eq('user_id', userId);
@@ -119,6 +129,7 @@ export class ProfileService {
    */
   async awardAchievement(userId: string, achievementId: string): Promise<boolean> {
     const { error } = await this.supabase
+      .schema('onagui')
       .from('user_achievements')
       .insert({
         user_id: userId,
@@ -139,6 +150,7 @@ export class ProfileService {
    */
   async awardBadge(userId: string, badgeCode: string, badgeName: string, icon?: string): Promise<boolean> {
     const { error } = await this.supabase
+      .schema('onagui')
       .from('user_badges')
       .insert({
         user_id: userId,
@@ -161,6 +173,7 @@ export class ProfileService {
    */
   async logActivity(userId: string, action: string, metadata?: Json): Promise<boolean> {
     const { error } = await this.supabase
+      .schema('onagui')
       .from('activities')
       .insert({
         user_id: userId,
@@ -182,6 +195,7 @@ export class ProfileService {
    */
   async getUserWallet(userId: string): Promise<UserWallet | null> {
     const { data, error } = await this.supabase
+      .schema('onagui')
       .from('wallets')
       .select('*')
       .eq('user_id', userId)
@@ -223,6 +237,7 @@ export class ProfileService {
     }
     
     const { error } = await this.supabase
+      .schema('onagui')
       .from('wallets')
       .update(updates)
       .eq('user_id', userId);
