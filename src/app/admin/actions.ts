@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 export interface AdminUserWithRole {
   id: string;
@@ -41,7 +42,14 @@ export async function getUsers() {
 
 export async function fetchAdminUsers(): Promise<{ data: AdminUserWithRole[] | null; error: string | null }> {
   try {
-    const response = await fetch('/api/admin/users');
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.getAll().map(c => `${c.name}=${c.value}`).join('; ');
+    const response = await fetch(`${baseUrl}/api/admin/users`, {
+      headers: {
+        cookie: cookieHeader,
+      },
+    });
     
     if (!response.ok) {
       const errorData = await response.json();

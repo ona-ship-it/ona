@@ -45,6 +45,79 @@ export class WalletServiceManager {
   }
 
   /**
+   * Update service status in database
+   */
+  private async updateServiceStatus(
+    serviceName: string, 
+    status: 'initializing' | 'running' | 'error' | 'stopped',
+    errorMessage?: string,
+    metadata?: any
+  ): Promise<void> {
+    try {
+      const { error } = await this.supabase.rpc('update_service_status', {
+        p_service_name: serviceName,
+        p_status: status,
+        p_error_message: errorMessage || null,
+        p_metadata: metadata || null
+      });
+
+      if (error) {
+        console.error(`❌ Failed to update service status for ${serviceName}:`, error);
+      }
+    } catch (error) {
+      console.error(`❌ Database error updating service status for ${serviceName}:`, error);
+    }
+  }
+
+  /**
+   * Get service status from database
+   */
+  private async getServiceStatusFromDB(): Promise<ServiceStatus[]> {
+    try {
+      const { data, error } = await this.supabase
+        .from('service_status')
+        .select('*')
+        .order('service_name');
+
+      if (error) {
+        console.error('❌ Failed to get service status from database:', error);
+        return [];
+      }
+
+      return (data || []).map((row: any) => ({
+        name: row.service_name,
+        status: row.status === 'running' ? 'running' : 
+                row.status === 'error' ? 'error' : 'stopped',
+        lastActivity: row.last_activity ? new Date(row.last_activity) : undefined,
+        error: row.error_message
+      }));
+    } catch (error) {
+      console.error('❌ Database error getting service status:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Create health snapshot in database
+   */
+  private async createHealthSnapshot(
+    overallStatus: 'healthy' | 'degraded' | 'unhealthy',
+    services: ServiceStatus[],
+    metrics: any,
+    alertsCount: number = 0
+  ): Promise<void> {
+    try {
+      const { error } = await this.supabase.rpc('create_health_snapshot');
+      
+      if (error) {
+        console.error('❌ Failed to create health snapshot:', error);
+      }
+    } catch (error) {
+      console.error('❌ Database error creating health snapshot:', error);
+    }
+  }
+
+  /**
    * Initialize all wallet services
    */
   async initialize(): Promise<void> {
@@ -56,7 +129,8 @@ export class WalletServiceManager {
     try {
       console.log('🚀 Initializing wallet services...');
 
-      // Initialize Hot Wallet Service
+      // Initialize Hot Wallet Service (critical)
+      await this.updateServiceStatus('Hot Wallet Service', 'initializing');
       const hotWalletConfig = {
         network: this.config.networkName === 'ethereum' ? 'mainnet' : 'sepolia' as 'mainnet' | 'sepolia',
         rpcUrl: this.config.rpcUrl,
@@ -66,40 +140,73 @@ export class WalletServiceManager {
         gasLimit: '21000',
         maxGasPrice: '50' // 50 gwei
       };
-      this.hotWalletService = new HotWalletService(hotWalletConfig);
-      await this.hotWalletService.initialize();
-      this.services.set('hotWallet', this.hotWalletService);
-      console.log('✅ Hot Wallet Service initialized');
+      
+      try {
+        this.hotWalletService = new HotWalletService(hotWalletConfig);
+        await this.hotWalletService.initialize();
+        this.services.set('hotWallet', this.hotWalletService);
+        await this.updateServiceStatus('Hot Wallet Service', 'running');
+        console.log('✅ Hot Wallet Service initialized');
+      } catch (error) {
+        await this.updateServiceStatus('Hot Wallet Service', 'error', 
+          error instanceof Error ? error.message : 'Unknown error');
+        throw error;
+      }
 
-      // Initialize On-Chain Monitor
-      this.onChainMonitor = new OnChainMonitor(
-        this.config.rpcUrl,
-        this.config.usdtContractAddress,
-        this.supabase
-      );
-      await this.onChainMonitor.initialize();
-      this.services.set('onChainMonitor', this.onChainMonitor);
-      console.log('✅ On-Chain Monitor initialized');
+      // Initialize On-Chain Monitor (non-critical)
+      await this.updateServiceStatus('On-Chain Monitor', 'initializing');
+      try {
+        this.onChainMonitor = new OnChainMonitor(
+          this.config.rpcUrl,
+          this.config.supabaseUrl,
+          this.config.supabaseServiceKey,
+          this.config.networkName !== 'ethereum'
+        );
+        await this.onChainMonitor.initialize();
+        this.services.set('onChainMonitor', this.onChainMonitor);
+        await this.updateServiceStatus('On-Chain Monitor', 'running');
+        console.log('✅ On-Chain Monitor initialized');
+      } catch (err) {
+        await this.updateServiceStatus('On-Chain Monitor', 'error', 
+          err instanceof Error ? err.message : 'Unknown error');
+        console.warn('⚠️  On-Chain Monitor initialization skipped due to error:', err);
+      }
 
-      // Initialize Withdrawal Worker
-      this.withdrawalWorker = new WithdrawalWorker(
-        this.config.supabaseUrl,
-        this.config.supabaseServiceKey,
-        hotWalletConfig
-      );
-      await this.withdrawalWorker.initialize();
-      this.services.set('withdrawalWorker', this.withdrawalWorker);
-      console.log('✅ Withdrawal Worker initialized');
+      // Initialize Withdrawal Worker (non-critical)
+      await this.updateServiceStatus('Withdrawal Worker', 'initializing');
+      try {
+        this.withdrawalWorker = new WithdrawalWorker(
+          this.config.supabaseUrl,
+          this.config.supabaseServiceKey,
+          hotWalletConfig
+        );
+        await this.withdrawalWorker.initialize();
+        this.services.set('withdrawalWorker', this.withdrawalWorker);
+        await this.updateServiceStatus('Withdrawal Worker', 'running');
+        console.log('✅ Withdrawal Worker initialized');
+      } catch (err) {
+        await this.updateServiceStatus('Withdrawal Worker', 'error', 
+          err instanceof Error ? err.message : 'Unknown error');
+        console.warn('⚠️  Withdrawal Worker initialization skipped due to error:', err);
+      }
 
-      // Initialize Reconciliation Monitor
-      this.reconciliationMonitor = new ReconciliationMonitor(
-        this.config.supabaseUrl,
-        this.config.supabaseServiceKey,
-        this.config.rpcUrl,
-        this.config.usdtContractAddress
-      );
-      this.services.set('reconciliationMonitor', this.reconciliationMonitor);
-      console.log('✅ Reconciliation Monitor initialized');
+      // Initialize Reconciliation Monitor (non-critical)
+      await this.updateServiceStatus('Reconciliation Monitor', 'initializing');
+      try {
+        this.reconciliationMonitor = new ReconciliationMonitor(
+          this.config.supabaseUrl,
+          this.config.supabaseServiceKey,
+          this.config.rpcUrl,
+          this.config.usdtContractAddress
+        );
+        this.services.set('reconciliationMonitor', this.reconciliationMonitor);
+        await this.updateServiceStatus('Reconciliation Monitor', 'running');
+        console.log('✅ Reconciliation Monitor initialized');
+      } catch (err) {
+        await this.updateServiceStatus('Reconciliation Monitor', 'error', 
+          err instanceof Error ? err.message : 'Unknown error');
+        console.warn('⚠️  Reconciliation Monitor initialization skipped due to error:', err);
+      }
 
       this.isInitialized = true;
       console.log('🎉 All wallet services initialized successfully');
@@ -181,6 +288,15 @@ export class WalletServiceManager {
    * Get status of all services
    */
   async getServiceStatus(): Promise<ServiceStatus[]> {
+    // Try to get status from database first
+    const dbStatuses = await this.getServiceStatusFromDB();
+    
+    // If we have database statuses, use them
+    if (dbStatuses.length > 0) {
+      return dbStatuses;
+    }
+
+    // Fallback to in-memory status checking
     const statuses: ServiceStatus[] = [];
 
     try {
@@ -189,45 +305,59 @@ export class WalletServiceManager {
         try {
           // Test if the service is working by getting the address
           const address = this.hotWalletService.getAddress();
-          statuses.push({
+          const status = {
             name: 'Hot Wallet Service',
-            status: address ? 'running' : 'stopped',
+            status: address ? 'running' : 'stopped' as 'running' | 'stopped' | 'error',
             lastActivity: new Date()
-          });
+          };
+          statuses.push(status);
+          
+          // Update database with current status
+          await this.updateServiceStatus('Hot Wallet Service', status.status);
         } catch (error) {
-          statuses.push({
+          const status = {
             name: 'Hot Wallet Service',
-            status: 'error',
+            status: 'error' as 'running' | 'stopped' | 'error',
             error: error instanceof Error ? error.message : 'Unknown error'
-          });
+          };
+          statuses.push(status);
+          
+          // Update database with error status
+          await this.updateServiceStatus('Hot Wallet Service', 'error', status.error);
         }
       }
 
       // On-Chain Monitor Status
       if (this.onChainMonitor) {
-        statuses.push({
+        const status = {
           name: 'On-Chain Monitor',
-          status: 'running',
+          status: 'running' as 'running' | 'stopped' | 'error',
           lastActivity: new Date()
-        });
+        };
+        statuses.push(status);
+        await this.updateServiceStatus('On-Chain Monitor', 'running');
       }
 
       // Withdrawal Worker Status
       if (this.withdrawalWorker) {
-        statuses.push({
+        const status = {
           name: 'Withdrawal Worker',
-          status: 'running',
+          status: 'running' as 'running' | 'stopped' | 'error',
           lastActivity: new Date()
-        });
+        };
+        statuses.push(status);
+        await this.updateServiceStatus('Withdrawal Worker', 'running');
       }
 
       // Reconciliation Monitor Status
       if (this.reconciliationMonitor) {
-        statuses.push({
+        const status = {
           name: 'Reconciliation Monitor',
-          status: 'running',
+          status: 'running' as 'running' | 'stopped' | 'error',
           lastActivity: new Date()
-        });
+        };
+        statuses.push(status);
+        await this.updateServiceStatus('Reconciliation Monitor', 'running');
       }
 
     } catch (error) {
@@ -271,6 +401,15 @@ export class WalletServiceManager {
       } else if (runningServices < totalServices || (alerts?.length || 0) > 0) {
         overall = 'warning';
       }
+
+      // Create health snapshot in database
+      await this.createHealthSnapshot(
+        overall === 'healthy' ? 'healthy' : 
+        overall === 'warning' ? 'degraded' : 'unhealthy',
+        services,
+        metrics,
+        alerts?.length || 0
+      );
 
       return {
         overall,

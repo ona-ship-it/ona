@@ -56,7 +56,7 @@ function AdminUsersContent() {
           return;
         }
 
-        // *** NEW: Call the secure Server Action ***
+        // Fetch users via Server Action
         const { data: usersWithRoles, error } = await fetchAdminUsers();
 
         if (error) {
@@ -65,6 +65,17 @@ function AdminUsersContent() {
 
         if (usersWithRoles) {
           setUsers(usersWithRoles);
+          // Audit admin page view
+          try {
+            await fetch('/api/admin/audit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'view', page: '/admin/users' }),
+            });
+          } catch (auditErr) {
+            // Non-blocking: log and continue
+            console.warn('Admin audit failed:', auditErr);
+          }
         }
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'An unknown error occurred.';

@@ -50,6 +50,7 @@ Create `.env.local` file:
 # Application
 NODE_ENV=production
 NEXT_PUBLIC_APP_URL=https://your-domain.com
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
 
 # Supabase
 SUPABASE_URL=your-supabase-url
@@ -496,3 +497,4 @@ For deployment issues or questions:
 - **Security Issues**: security@your-domain.com
 - **Emergency**: +1-XXX-XXX-XXXX
 - **Incident Response**: incident@your-domain.com
+> Server-side fetches to internal APIs must use absolute URLs (resolved via `NEXT_PUBLIC_SITE_URL`, falling back to `http://localhost:3000` in development). When a server function calls internal APIs, forward cookies (`next/headers` `cookies()`) so the session is preserved.

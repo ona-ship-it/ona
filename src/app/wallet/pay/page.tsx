@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { toast } from 'sonner';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -19,7 +20,7 @@ function CheckoutForm() {
       confirmParams: { return_url: "http://localhost:3000/wallet" },
     });
 
-    if (error) alert(error.message);
+    if (error) toast.error(error.message || 'Payment failed');
     setLoading(false);
   };
 

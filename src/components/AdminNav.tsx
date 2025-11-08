@@ -5,34 +5,28 @@ import { usePathname } from 'next/navigation';
 
 export default function AdminNav() {
   const pathname = usePathname();
-  
-  const navItems = [
-    { name: 'Dashboard', href: '/admin' },
-    { name: 'Giveaways', href: '/giveaways' },
-    { name: 'Users', href: '/admin/users' },
-    { name: 'Create Giveaway', href: '/admin/giveaway/new' },
-    { name: 'Back to Site', href: '/' },
+  const items = [
+    { href: '/admin/dashboard', label: 'Dashboard' },
+    { href: '/admin/users', label: 'Users' },
+    { href: '/admin/audit', label: 'Audit' },
+    { href: '/admin/giveaways/review', label: 'Giveaway Review' },
   ];
 
   return (
-    <nav className="bg-gray-800 text-white p-4">
-      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
-        <div className="text-xl font-bold mb-4 md:mb-0">Admin Panel</div>
-        <div className="flex space-x-4">
-          {navItems.map((item) => (
+    <nav className="bg-white border-b">
+      <div className="container mx-auto px-4 py-3 flex gap-4">
+        {items.map((item) => {
+          const active = pathname?.startsWith(item.href);
+          return (
             <Link
               key={item.href}
               href={item.href}
-              className={`px-3 py-2 rounded-md text-sm font-medium ${
-                pathname === item.href
-                  ? 'bg-gray-900 text-white'
-                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-              }`}
+              className={`text-sm px-3 py-1 rounded ${active ? 'bg-gray-200 font-medium' : 'hover:bg-gray-100'}`}
             >
-              {item.name}
+              {item.label}
             </Link>
-          ))}
-        </div>
+          );
+        })}
       </div>
     </nav>
   );

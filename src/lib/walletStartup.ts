@@ -137,8 +137,12 @@ function validateConfig(config: WalletStartupConfig): void {
   }
 
   // Validate private key format (basic check)
-  if (!config.hotWalletPrivateKey.startsWith('0x') || config.hotWalletPrivateKey.length !== 66) {
-    throw new Error('Invalid hot wallet private key format');
+  // Accept either plain private key (0x...) or encrypted format (iv:authTag:encrypted)
+  const isPlainKey = config.hotWalletPrivateKey.startsWith('0x') && config.hotWalletPrivateKey.length === 66;
+  const isEncryptedKey = config.hotWalletPrivateKey.split(':').length === 3;
+  
+  if (!isPlainKey && !isEncryptedKey) {
+    throw new Error('Invalid hot wallet private key format - must be either plain (0x...) or encrypted (iv:authTag:encrypted)');
   }
 
   // Validate contract address format (basic check)
@@ -151,15 +155,17 @@ function validateConfig(config: WalletStartupConfig): void {
  * Create configuration from environment variables
  */
 export function createConfigFromEnv(): WalletStartupConfig {
+  const isTestnet = !!process.env.TESTNET_RPC_URL;
+
   return {
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
-    rpcUrl: process.env.RPC_URL || '',
-    usdtContractAddress: process.env.USDT_CONTRACT_ADDRESS || '',
-    hotWalletPrivateKey: process.env.HOT_WALLET_PRIVATE_KEY || '',
-    encryptionKey: process.env.ENCRYPTION_KEY || '',
-    networkName: process.env.NETWORK_NAME || 'ethereum',
-    chainId: parseInt(process.env.CHAIN_ID || '1'),
+    rpcUrl: process.env.RPC_URL || process.env.ETHEREUM_RPC_URL || process.env.TESTNET_RPC_URL || '',
+    usdtContractAddress: process.env.USDT_CONTRACT_ADDRESS || process.env.TESTNET_USDT_ADDRESS || '',
+    hotWalletPrivateKey: process.env.HOT_WALLET_PRIVATE_KEY || process.env.TESTNET_HOT_WALLET_PRIVATE_KEY || '',
+    encryptionKey: process.env.ENCRYPTION_KEY || process.env.WALLET_ENCRYPTION_KEY || '',
+    networkName: process.env.NETWORK_NAME || (isTestnet ? 'sepolia' : 'ethereum'),
+    chainId: parseInt(process.env.CHAIN_ID || (isTestnet ? '11155111' : '1')),
     autoStart: process.env.WALLET_AUTO_START !== 'false'
   };
 }

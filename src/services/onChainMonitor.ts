@@ -61,17 +61,26 @@ export class OnChainMonitor {
         .eq('network', this.isTestnet ? 'sepolia' : 'mainnet')
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
-        throw error;
-      }
-
-      if (data) {
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No rows found — proceed to initialize with recent block and persist
+          const currentBlock = await this.provider.getBlockNumber();
+          this.lastProcessedBlock = Math.max(0, currentBlock - 100);
+          await this.updateLastProcessedBlock(this.lastProcessedBlock);
+        } else if (error.code === 'PGRST205') {
+          // Table missing — continue without persistence
+          const currentBlock = await this.provider.getBlockNumber();
+          this.lastProcessedBlock = Math.max(0, currentBlock - 100);
+          console.warn("monitor_state table missing; proceeding without persistence");
+        } else {
+          throw error;
+        }
+      } else if (data) {
         this.lastProcessedBlock = data.last_processed_block;
       } else {
         // Start from current block minus 100 blocks for safety
         const currentBlock = await this.provider.getBlockNumber();
         this.lastProcessedBlock = Math.max(0, currentBlock - 100);
-        
         // Save initial state
         await this.updateLastProcessedBlock(this.lastProcessedBlock);
       }
@@ -316,7 +325,12 @@ export class OnChainMonitor {
       });
 
     if (error) {
-      throw error;
+      // If table is missing, continue without persistence
+      if ((error as any).code === 'PGRST205') {
+        console.warn('monitor_state table missing during upsert; skipping persistence');
+      } else {
+        throw error;
+      }
     }
 
     this.lastProcessedBlock = blockNumber;

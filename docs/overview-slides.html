@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Architecture Overview — Slides & PNG Export</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #111827;
+        --text: #e5e7eb;
+        --muted: #9ca3af;
+        --accent: #60a5fa;
+        --btn: #2563eb;
+      }
+      html, body { height: 100%; }
+      body {
+        margin: 0; padding: 0; background: var(--bg); color: var(--text);
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      }
+      header { padding: 20px; border-bottom: 1px solid #1f2937; }
+      h1 { font-size: 20px; margin: 0; }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+      .controls { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0 20px; }
+      button, a.button {
+        background: var(--btn); color: white; border: none; border-radius: 8px;
+        padding: 10px 14px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      }
+      button:hover, a.button:hover { filter: brightness(1.1); }
+      .panel { background: var(--panel); border: 1px solid #1f2937; border-radius: 12px; padding: 16px; }
+      .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+      .slide { background: #0b1220; border: 1px solid #1f2937; border-radius: 12px; padding: 16px; }
+      .slide h2 { margin: 0 0 8px; font-size: 18px; }
+      .muted { color: var(--muted); }
+      img#diagram { width: 100%; max-height: 70vh; object-fit: contain; background: #0b1220; border-radius: 8px; border: 1px solid #1f2937; }
+      img#png-preview { width: 100%; max-height: 70vh; object-fit: contain; background: #0b1220; border-radius: 8px; border: 1px solid #1f2937; }
+      footer { padding: 20px; color: var(--muted); text-align: center; }
+      code { background: #0b1220; padding: 2px 6px; border-radius: 6px; border: 1px solid #1f2937; }
+    </style>
+  </head>
+  <body>
+    <header class="wrap">
+      <h1>Architecture Overview — Diagram, PNG Export, and Short Slides</h1>
+      <p class="muted">A single HTML file you can open locally, view the SVG, and download a PNG.</p>
+    </header>
+
+    <main class="wrap">
+      <div class="panel">
+        <div class="controls">
+          <button id="generate-btn" type="button">Generate PNG from SVG</button>
+          <a id="download-link" class="button" href="#" style="display:none" download="architecture-overview.png">Download PNG</a>
+        </div>
+        <div class="grid">
+          <div class="slide">
+            <h2>Diagram (SVG)</h2>
+            <p class="muted">This loads the existing <code>docs/architecture-overview.svg</code> file for quick viewing.</p>
+            <img id="diagram" src="architecture-overview.svg" alt="Architecture Overview SVG" />
+          </div>
+          <div class="slide">
+            <h2>PNG Preview</h2>
+            <p class="muted">Click “Generate PNG” to render the SVG to PNG here, then use “Download PNG”.</p>
+            <img id="png-preview" alt="PNG Preview" />
+          </div>
+        </div>
+      </div>
+
+      <div class="grid" style="margin-top: 20px;">
+        <div class="slide">
+          <h2>What This Is</h2>
+          <p>
+            A single, portable HTML file that acts as a mini slide deck and includes a one-click PNG export of the diagram.
+            No external dependencies or build steps are needed. Just open this file in any modern browser.
+          </p>
+        </div>
+
+        <div class="slide">
+          <h2>How To Use</h2>
+          <ul>
+            <li>Open <code>docs/overview-slides.html</code> in your browser (double‑click from Explorer/Finder).</li>
+            <li>Press <strong>Generate PNG</strong> to render the SVG into a PNG preview below.</li>
+            <li>Click <strong>Download PNG</strong> to save <code>architecture-overview.png</code> locally.</li>
+          </ul>
+          <p class="muted">Tip: You can also print this page as PDF to share a simple slide deck.</p>
+        </div>
+
+        <div class="slide">
+          <h2>Slide: Platform Overview</h2>
+          <p>
+            The platform lets users join giveaways and manage wallets, while admins control giveaway status and review activity.
+            Access is enforced using Supabase Auth and Postgres Row Level Security (RLS).
+          </p>
+        </div>
+
+        <div class="slide">
+          <h2>Slide: Core Building Blocks</h2>
+          <ul>
+            <li><strong>Users & Profiles:</strong> People who sign in and participate.</li>
+            <li><strong>Admins:</strong> Approve, publish, and pause giveaways.</li>
+            <li><strong>Giveaways:</strong> Draft → Active → Paused lifecycle; public visibility when active.</li>
+            <li><strong>Wallets:</strong> User‑scoped balances, deposits, withdrawals; RLS ensures privacy.</li>
+            <li><strong>Auth & RLS:</strong> Tokens identify the user; DB policies restrict rows.</li>
+          </ul>
+        </div>
+
+        <div class="slide">
+          <h2>Slide: Admin Status API</h2>
+          <p>
+            Admins update giveaway status via <code>POST /api/admin/giveaways/status</code> with validation (UUID + status enum).
+            Changes are recorded for auditability: who did what and when.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>Local file · No build required · Works offline</p>
+    </footer>
+
+    <script>
+      async function fetchSvgText() {
+        const resp = await fetch('architecture-overview.svg');
+        if (!resp.ok) throw new Error('Failed to load architecture-overview.svg');
+        return await resp.text();
+      }
+
+      function svgTextToDataUrl(svgText) {
+        // Normalize and encode the SVG content for a safe data URL
+        const normalized = svgText
+          .replace(/\r/g, '')
+          .replace(/\n/g, '')
+          .replace(/\t/g, ' ');
+        const encoded = encodeURIComponent(normalized)
+          .replace(/%20/g, ' ');
+        return `data:image/svg+xml;charset=utf-8,${encoded}`;
+      }
+
+      function getSvgDimensions(svgText, fallbackWidth = 1600, fallbackHeight = 900) {
+        // Try viewBox first, then width/height attributes
+        const vb = svgText.match(/viewBox="([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)"/);
+        if (vb) {
+          const width = Math.ceil(parseFloat(vb[3]));
+          const height = Math.ceil(parseFloat(vb[4]));
+          if (width > 0 && height > 0) return { width, height };
+        }
+        const w = svgText.match(/width="([\d.]+)"/);
+        const h = svgText.match(/height="([\d.]+)"/);
+        if (w && h) {
+          const width = Math.ceil(parseFloat(w[1]));
+          const height = Math.ceil(parseFloat(h[1]));
+          if (width > 0 && height > 0) return { width, height };
+        }
+        return { width: fallbackWidth, height: fallbackHeight };
+      }
+
+      async function generatePng() {
+        try {
+          const svgText = await fetchSvgText();
+          const dataUrl = svgTextToDataUrl(svgText);
+          const dims = getSvgDimensions(svgText);
+
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = dims.width;
+            canvas.height = dims.height;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            const pngUrl = canvas.toDataURL('image/png');
+            const preview = document.getElementById('png-preview');
+            preview.src = pngUrl;
+
+            const dl = document.getElementById('download-link');
+            dl.href = pngUrl;
+            dl.download = 'architecture-overview.png';
+            dl.style.display = 'inline-flex';
+          };
+          img.onerror = (e) => {
+            console.error('SVG render error', e);
+            alert('Unable to render the SVG to PNG. See console for details.');
+          };
+          img.src = dataUrl;
+        } catch (err) {
+          console.error(err);
+          alert('Failed to load the SVG. Make sure this file sits next to architecture-overview.svg.');
+        }
+      }
+
+      document.getElementById('generate-btn').addEventListener('click', generatePng);
+    </script>
+  </body>
+  </html>

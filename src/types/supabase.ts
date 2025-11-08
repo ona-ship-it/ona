@@ -131,6 +131,12 @@ export type Database = {
           photo_url: string | null
           prize_amount: number
           prize_pool_usdt: number | null
+          donation_split_platform: number | null
+          donation_split_creator: number | null
+          donation_split_prize: number | null
+          donation_pool_usdt: number | null
+          creator_earnings_usdt: number | null
+          platform_earnings_usdt: number | null
           status: string
           ticket_price: number | null
           tickets_count: number | null
@@ -151,6 +157,12 @@ export type Database = {
           photo_url?: string | null
           prize_amount: number
           prize_pool_usdt?: number | null
+          donation_split_platform?: number | null
+          donation_split_creator?: number | null
+          donation_split_prize?: number | null
+          donation_pool_usdt?: number | null
+          creator_earnings_usdt?: number | null
+          platform_earnings_usdt?: number | null
           status: string
           ticket_price?: number | null
           tickets_count?: number | null
@@ -171,6 +183,12 @@ export type Database = {
           photo_url?: string | null
           prize_amount?: number
           prize_pool_usdt?: number | null
+          donation_split_platform?: number | null
+          donation_split_creator?: number | null
+          donation_split_prize?: number | null
+          donation_pool_usdt?: number | null
+          creator_earnings_usdt?: number | null
+          platform_earnings_usdt?: number | null
           status?: string
           ticket_price?: number | null
           tickets_count?: number | null
@@ -179,6 +197,105 @@ export type Database = {
           winner_id?: string | null
         }
         Relationships: []
+      }
+      giveaway_audit: {
+        Row: {
+          id: string
+          giveaway_id: string
+          action: string
+          actor_id: string | null
+          target_id: string | null
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          giveaway_id: string
+          action: string
+          actor_id?: string | null
+          target_id?: string | null
+          note?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          giveaway_id?: string
+          action?: string
+          actor_id?: string | null
+          target_id?: string | null
+          note?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'giveaway_audit_giveaway_id_fkey'
+            columns: ['giveaway_id']
+            isOneToOne: false
+            referencedRelation: 'giveaways'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'giveaway_audit_actor_id_fkey'
+            columns: ['actor_id']
+            isOneToOne: false
+            referencedRelation: 'onagui_profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      giveaway_contributions: {
+        Row: {
+          id: string
+          giveaway_id: string
+          user_id: string
+          amount: number
+          currency: string
+          note: string | null
+          split_platform: number | null
+          split_creator: number | null
+          split_prize: number | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          giveaway_id: string
+          user_id: string
+          amount: number
+          currency?: string
+          note?: string | null
+          split_platform: number
+          split_creator: number
+          split_prize: number
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          giveaway_id?: string
+          user_id?: string
+          amount?: number
+          currency?: string
+          note?: string | null
+          split_platform?: number
+          split_creator?: number
+          split_prize?: number
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "giveaway_contributions_giveaway_id_fkey"
+            columns: ["giveaway_id"]
+            isOneToOne: false
+            referencedRelation: "giveaways"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "giveaway_contributions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "auth.users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       onagui_profiles: {
         Row: {
@@ -789,6 +906,50 @@ export type Database = {
           },
         ]
       }
+      wallet_transactions: {
+        Row: {
+          id: string
+          user_id: string
+          amount_usd: number
+          type: string
+          reason: string | null
+          reference_id: string | null
+          balance_after: number | null
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          amount_usd: number
+          type: string
+          reason?: string | null
+          reference_id?: string | null
+          balance_after?: number | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          amount_usd?: number
+          type?: string
+          reason?: string | null
+          reference_id?: string | null
+          balance_after?: number | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "auth.users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       admin_roles: {
@@ -862,6 +1023,18 @@ export type Database = {
         Args: { giveaway_id: string; winner_user_id: string }
         Returns: boolean
       }
+      pick_giveaway_winner: {
+        Args: { giveaway_id: string }
+        Returns: string
+      }
+      finalize_giveaway_winner: {
+        Args: { giveaway_id: string }
+        Returns: boolean
+      }
+      repick_giveaway_winner: {
+        Args: { giveaway_id: string }
+        Returns: string
+      }
       sync_user_to_app_users: {
         Args: { p_email: string; p_id: string; p_username: string }
         Returns: Database["public"]["Tables"]["app_users"]["Row"]
@@ -905,6 +1078,26 @@ export type Database = {
       get_user_transactions: {
         Args: { user_uuid: string; limit_count: number }
         Returns: Database["public"]["Tables"]["ledger"]["Row"][]
+      }
+      apply_giveaway_donation: {
+        Args: {
+          p_giveaway_id: string
+          p_user_id: string
+          p_amount: number
+          p_currency?: string
+          p_note?: string | null
+          p_override_split_platform?: number | null
+          p_override_split_creator?: number | null
+          p_override_split_prize?: number | null
+        }
+        Returns: {
+          pool_amount: number
+          creator_amount: number
+          platform_amount: number
+          donation_pool_total: number
+          creator_earnings_total: number
+          platform_earnings_total: number
+        }[]
       }
     }
     Enums: {
@@ -1051,3 +1244,14 @@ export const Constants = {
     },
   },
 } as const
+
+// Admin & Types Hardening: public interface for giveaway audit entries
+export interface GiveawayAudit {
+  id: string
+  giveaway_id: string
+  action: string
+  actor_id?: string | null
+  target_id?: string | null
+  note?: string | null
+  created_at: string
+}

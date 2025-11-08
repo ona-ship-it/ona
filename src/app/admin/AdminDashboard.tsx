@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useState } from 'react';
 
 interface DashboardStats {
   totalUsers: number;
@@ -11,10 +12,10 @@ interface DashboardStats {
 
 interface RecentGiveaway {
   id: string;
-  title: string;
+  title: string | null;
   status: string;
-  created_at: string;
-  creator_id: string;
+  created_at: string | null;
+  creator_id: string | null;
 }
 
 interface AdminDashboardProps {
@@ -28,10 +29,32 @@ interface AdminDashboardProps {
 export default function AdminDashboard({ userEmail, dashboardData }: AdminDashboardProps) {
   const router = useRouter();
   const supabase = createClientComponentClient();
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push('/');
+  };
+
+  const toggleStatus = async (id: string, currentStatus: string) => {
+    setUpdatingId(id);
+    setActionError(null);
+    try {
+      const action = currentStatus === 'active' ? 'unpublish' : 'publish';
+      const res = await fetch('/api/admin/giveaways/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ giveawayId: id, action }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to update status');
+      router.refresh();
+    } catch (err: any) {
+      setActionError(err.message);
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   return (
@@ -190,14 +213,36 @@ export default function AdminDashboard({ userEmail, dashboardData }: AdminDashbo
                 {dashboardData.recentGiveaways.map((giveaway) => (
                   <li key={giveaway.id} className="px-6 py-4">
                     <div className="flex items-center justify-between">
-                      <div className="text-sm font-medium text-gray-900">{giveaway.title}</div>
+                      <div className="text-sm font-medium text-gray-900">{giveaway.title || 'Untitled'}</div>
                       <div className="text-sm text-gray-500">
-                        {new Date(giveaway.created_at).toLocaleDateString()}
+                        {giveaway.created_at ? new Date(giveaway.created_at).toLocaleDateString() : '-'}
                       </div>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      Creator ID: {giveaway.creator_id || 'Unknown'} • Status: {giveaway.status}
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="text-sm text-gray-500">
+                        Creator ID: {giveaway.creator_id || 'Unknown'} • Status: {giveaway.status}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleStatus(giveaway.id, giveaway.status)}
+                          disabled={updatingId === giveaway.id}
+                          className={`px-3 py-1 rounded text-white ${
+                            giveaway.status === 'active'
+                              ? 'bg-yellow-600 hover:bg-yellow-700'
+                              : 'bg-green-600 hover:bg-green-700'
+                          } ${updatingId === giveaway.id ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        >
+                          {updatingId === giveaway.id
+                            ? 'Updating…'
+                            : giveaway.status === 'active'
+                              ? 'Unpublish'
+                              : 'Publish'}
+                        </button>
+                      </div>
                     </div>
+                    {actionError && (
+                      <div className="mt-2 text-sm text-red-600">{actionError}</div>
+                    )}
                   </li>
                 ))}
               </ul>

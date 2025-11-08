@@ -6,8 +6,8 @@ import { createClient } from "@supabase/supabase-js";
 const USDT_RATE = 1.00; // 1 USD = 1 USDT (for MVP simplicity)
 
 export async function POST(req: Request) {
-  // Initialize Stripe client at runtime to avoid build-time errors
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2025-10-29.clover" });
+  // Initialize Stripe client; rely on account's default API version for compatibility
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
   // Initialize Supabase client with service role key for webhook operations
   const supabase = createClient(

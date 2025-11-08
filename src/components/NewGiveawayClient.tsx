@@ -8,6 +8,7 @@ import WalletBalance from './WalletBalance';
 import { supabase } from '@/lib/supabaseClient';
 import { CreateGiveawayPayload } from '../types/giveaways';
 import { Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useAdmin } from '@/context/AdminContext';
 
 export default function NewGiveawayClient() {
   const [formData, setFormData] = useState<CreateGiveawayPayload & {
@@ -29,7 +30,7 @@ export default function NewGiveawayClient() {
   const [success, setSuccess] = useState(false);
   const [fiatBalance, setFiatBalance] = useState<number | null>(null);
   const [ticketBalance, setTicketBalance] = useState<number | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin, loading: adminLoading } = useAdmin();
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
@@ -45,12 +46,6 @@ export default function NewGiveawayClient() {
         }
         
         setUser(user);
-        
-        // Check if user is admin
-        const { data: adminData } = await supabase
-          .rpc('is_admin_user', { user_uuid: user.id });
-          
-        setIsAdmin(!!adminData);
       } catch (err) {
         console.error('Error fetching user data:', err);
         setError('Failed to load user data');

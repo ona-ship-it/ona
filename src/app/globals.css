@@ -100,3 +100,83 @@ main {
     text-wrap: balance;
   }
 }
+
+/* =============================
+   Admin Monochrome Dark Theme (matches Profile gray)
+   ============================= */
+:root {
+  --admin-bg: #111827;            /* gray-900 page background */
+  --admin-surface: #1f2937;       /* gray-800 cards/nav/table surface */
+  --admin-border: #374151;        /* gray-700 borders and separators */
+  --admin-text: #e5e7eb;          /* gray-200 primary text */
+  --admin-text-muted: #9ca3af;    /* gray-400 secondary text */
+  --admin-accent: #60a5fa;        /* blue-400 accent for links */
+}
+
+.admin-theme {
+  background-color: var(--admin-bg);
+  color: var(--admin-text);
+  min-height: 100vh;
+}
+
+.admin-theme a { color: var(--admin-accent); }
+.admin-theme a:hover { color: #93c5fd; }
+
+/* Top nav bars */
+.admin-theme nav {
+  background-color: var(--admin-surface);
+  color: var(--admin-text);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+/* Admin tabs bar */
+.admin-theme .border-b { border-color: var(--admin-border) !important; }
+
+/* Override light utility classes within admin */
+.admin-theme .bg-white { background-color: var(--admin-surface) !important; }
+.admin-theme .bg-gray-100 { background-color: var(--admin-surface) !important; }
+.admin-theme .bg-gray-50 { background-color: var(--admin-surface) !important; }
+.admin-theme .border-gray-200 { border-color: var(--admin-border) !important; }
+.admin-theme .divide-gray-200 { --tw-divide-opacity: 1; border-color: var(--admin-border) !important; }
+.admin-theme .text-black { color: var(--admin-text) !important; }
+.admin-theme .text-gray-900 { color: var(--admin-text) !important; }
+.admin-theme .text-gray-600,
+.admin-theme .text-gray-500,
+.admin-theme .text-muted-foreground { color: var(--admin-text-muted) !important; }
+
+/* Admin label and notices (neutralized to gray) */
+.admin-theme .bg-blue-100 { background-color: #1f2937 !important; color: var(--admin-text-muted) !important; }
+.admin-theme .bg-yellow-100 { background-color: #1f2937 !important; color: var(--admin-text) !important; }
+
+/* Tables */
+.admin-theme table {
+  background-color: var(--admin-surface) !important;
+  border-color: var(--admin-border) !important;
+  color: var(--admin-text);
+}
+.admin-theme thead tr { background-color: #1f2937 !important; }
+.admin-theme th, .admin-theme td { border-color: var(--admin-border) !important; }
+.admin-theme tbody tr:hover { background-color: #2d3748 !important; }
+
+/* Zebra striping for readability */
+.admin-theme tbody tr:nth-child(odd) {
+  background-color: #1f2937 !important; /* gray-800 surface */
+}
+.admin-theme tbody tr:nth-child(even) {
+  background-color: #111827 !important; /* gray-900 base */
+}
+
+/* Cards and containers */
+.admin-theme .container { color: var(--admin-text); }
+.admin-theme .card, .admin-theme .shadow, .admin-theme .rounded, .admin-theme .rounded-lg, .admin-theme .rounded-xl {
+  background-color: var(--admin-surface) !important;
+  color: var(--admin-text);
+}
+
+/* Buttons (basic override for neutral variants) */
+.admin-theme .btn,
+.admin-theme button {
+  border-color: var(--admin-border);
+}
+.admin-theme button.bg-gray-100 { background-color: #4b5563 !important; color: var(--admin-text) !important; }
+.admin-theme button:hover { filter: brightness(1.08); }

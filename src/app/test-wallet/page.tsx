@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { toast } from 'sonner';
 
 export default function TestWalletPage() {
   const [user, setUser] = useState<any>(null);
@@ -115,7 +116,7 @@ export default function TestWalletPage() {
       
       if (response.ok) {
         console.log('Limits data:', data);
-        alert('Limits fetched successfully - check console');
+        toast.success('Limits fetched successfully — check console');
       } else {
         setError(data.error || 'Failed to fetch limits');
       }

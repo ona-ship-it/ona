@@ -219,6 +219,45 @@ curl -X POST $TESTNET_RPC_URL \
   -d '{"jsonrpc":"2.0","method":"eth_getTransactionByHash","params":["0x..."],"id":1}'
 ```
 
+## 🔐 Admin API Gating (Standardized)
+
+Admin access is standardized across UI and API layers:
+
+- UI pages (e.g., `/admin/*`):
+  - Unauthenticated users → `302` redirect to `/signin?redirectTo=%2Fadmin`.
+  - Authenticated non-admin → `302` redirect to `/`.
+  - Admin users → normal page render.
+
+- API routes (e.g., `/api/admin/*`):
+  - Unauthenticated or non-admin → `401` JSON `{ ok: false, error: 'unauthorized' }`.
+  - Admin users → normal JSON responses.
+
+### Testing Admin Gating
+
+Run the integration script:
+
+```bash
+node scripts/test-middleware-and-is-admin.mjs
+```
+
+Expected outputs:
+
+- `GET /api/auth/is-admin` without auth → Status `200`, body `{ ok:false, isAdmin:false }`.
+- `GET /admin` in development → Status `200` (middleware UI bypass).
+- `GET /api/admin/giveaways` without auth → Status `401` unauthorized.
+
+Implementation details:
+
+- `src/lib/supabaseServer.ts`
+  - `requireAdminAccess()` for UI (redirects non-admins).
+  - `checkAdminAccess()` for API checks (no redirects).
+  - `ensureAdminApiAccess()` used by admin API routes.
+
+- Admin API routes updated to return `401` for unauthorized access:
+  - `src/app/api/admin/giveaways/route.ts`
+  - `src/app/api/admin/giveaways/audit/route.ts`
+
+
 ## 🚨 Test Alerts
 
 The system monitors for:

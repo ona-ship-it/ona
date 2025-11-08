@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { createGiveaway } from './actions';
+import { toast } from 'sonner';
 
 interface FieldErrors {
   title?: string;
@@ -213,7 +214,7 @@ export default function AdminNewGiveawayPage() {
       
       // Show success message
       setError('');
-      alert('Giveaway created successfully!');
+      toast.success('Giveaway created successfully!');
       
     } catch (err: any) {
       console.error('Error creating giveaway:', err);

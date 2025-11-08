@@ -54,7 +54,13 @@ export function WalletServicesProvider({ children }: WalletServicesProviderProps
         setIsInitialized(false);
         setError(`Wallet services are not responding (HTTP ${response.status})`);
       }
-    } catch (err) {
+    } catch (err: any) {
+      // In dev with Fast Refresh, fetches can be aborted mid-flight
+      const isAbort = err?.name === 'AbortError' || /ERR_ABORTED/i.test(String(err?.message));
+      if (isAbort) {
+        // Ignore aborted requests; a subsequent refresh will succeed
+        return;
+      }
       console.error('Error checking wallet services:', err);
       setIsInitialized(false);
       setError('Failed to connect to wallet services - check if the server is running');
