@@ -14,6 +14,8 @@ export default function SignUpClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -77,18 +79,26 @@ export default function SignUpClient() {
             // Don't block the signup flow if wallet generation fails
           }
 
-          setMessage('Account created successfully! Redirecting...');
-          
-          // Check if this is the admin user and redirect accordingly
-          if (email === 'richtheocrypto@gmail.com') {
-            setTimeout(() => {
-              window.location.replace('/admin');
-            }, 1500);
-          } else {
-            setTimeout(() => {
-              window.location.replace('/account');
-            }, 1500);
-          }
+          setMessage('Account created successfully! Finalizing your session...');
+
+          // Session propagation countdown (align with signin page: 3 seconds)
+          let secondsLeft = 3;
+          setIsLoading(true);
+          setCountdown(secondsLeft);
+          const countdownInterval = setInterval(() => {
+            secondsLeft--;
+            setCountdown(secondsLeft);
+            if (secondsLeft <= 0) {
+              clearInterval(countdownInterval);
+            }
+          }, 1000);
+
+          // Hard redirect after delay to ensure middleware sees the session
+          setTimeout(() => {
+            clearInterval(countdownInterval);
+            const finalDestination = email === 'richtheocrypto@gmail.com' ? '/admin' : '/account';
+            window.location.assign(finalDestination);
+          }, 3000);
         }
       }
     } catch (err) {
@@ -217,6 +227,30 @@ export default function SignUpClient() {
           </div>
         </div>
       </div>
+
+      {/* Loading overlay with countdown */}
+      {isLoading && (
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          backgroundColor: 'rgba(0,0,0,0.8)', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          color: 'white', 
+          zIndex: 1000 
+        }}>
+          <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>🔄 Finalizing your session...</h2>
+          <p style={{ fontSize: '18px', marginBottom: '8px' }}>Redirecting in {countdown} seconds</p>
+          <p style={{ fontSize: '14px', marginTop: '10px', textAlign: 'center', maxWidth: '300px' }}>
+            This ensures your account page loads correctly
+          </p>
+        </div>
+      )}
     </main>
   );
 }
