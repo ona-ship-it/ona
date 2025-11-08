@@ -39,70 +39,21 @@ export default function SignUpClient() {
     }
 
     try {
-      // Sign up the user without email confirmation
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+      // Request a verification email via server-side generateLink
+      const res = await fetch('/api/send-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
       });
 
-      if (error) {
-        setError(error.message);
-      } else if (data.user) {
-        // Immediately try to sign in the user
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (signInError) {
-          setError('Account created but sign-in failed. Please try signing in manually.');
-        } else if (signInData.user) {
-          setMessage('Account created successfully! Setting up your wallet...');
-          
-          // Generate crypto wallet for the new user
-          try {
-            const walletResponse = await fetch('/api/wallet/generate-crypto', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ userId: signInData.user.id }),
-            });
-
-            if (!walletResponse.ok) {
-              console.warn('Failed to generate crypto wallet, but user account was created successfully');
-            } else {
-              console.log('Crypto wallet generated successfully');
-            }
-          } catch (walletError) {
-            console.warn('Error generating crypto wallet:', walletError);
-            // Don't block the signup flow if wallet generation fails
-          }
-
-          setMessage('Account created successfully! Finalizing your session...');
-
-          // Session propagation countdown (align with signin page: 3 seconds)
-          let secondsLeft = 3;
-          setIsLoading(true);
-          setCountdown(secondsLeft);
-          const countdownInterval = setInterval(() => {
-            secondsLeft--;
-            setCountdown(secondsLeft);
-            if (secondsLeft <= 0) {
-              clearInterval(countdownInterval);
-            }
-          }, 1000);
-
-          // Hard redirect after delay to ensure middleware sees the session
-          setTimeout(() => {
-            clearInterval(countdownInterval);
-            const finalDestination = email === 'richtheocrypto@gmail.com' ? '/admin' : '/account';
-            window.location.assign(finalDestination);
-          }, 3000);
-        }
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || 'Failed to send verification email');
       }
-    } catch (err) {
-      setError('An unexpected error occurred');
+
+      setMessage('Verification email sent! Please check your inbox to complete signup.');
+    } catch (err: any) {
+      setError(err?.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }

@@ -32,7 +32,35 @@ export default function SignInClient() {
 
     if (error) {
       console.error('❌ Sign in failed:', error);
-      setAuthError(error.message);
+      const message = error.message || '';
+      
+      // If Supabase throws a database grant error, attempt a passwordless magic-link fallback
+      if (message.toLowerCase().includes('database error')) {
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirectTo = urlParams.get('redirectTo') || '/account';
+          
+          const res = await fetch('/api/auth/magic-link', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, redirectTo })
+          });
+          const data = await res.json();
+          
+          if (res.ok && data?.url) {
+            // Use Supabase-generated action link to complete sign-in
+            window.location.href = data.url as string;
+            return;
+          }
+          throw new Error(data?.error || 'Magic link fallback failed');
+        } catch (fallbackErr: any) {
+          setAuthError(`Database error granting user. Passwordless fallback also failed: ${fallbackErr?.message || 'unknown error'}`);
+          setIsLoading(false);
+          return;
+        }
+      }
+      
+      setAuthError(message);
       setIsLoading(false);
       return;
     }
