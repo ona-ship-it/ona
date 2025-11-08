@@ -133,12 +133,17 @@ export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log(`🔄 [AdminAuthGuard] Auth state change: ${event}`);
-        if (event === 'SIGNED_OUT' || !session) {
+        if (event === 'SIGNED_OUT') {
+          // Only redirect on explicit sign-out, not transient null session
           router.push('/signin');
-        } else if (event === 'SIGNED_IN') {
-          // Re-check admin status when user signs in
+          return;
+        }
+        if (event === 'SIGNED_IN') {
+          // Allow cookie/session propagation before re-checking admin access
+          await new Promise((resolve) => setTimeout(resolve, 2000));
           checkAuth();
         }
+        // For other events (TOKEN_REFRESHED, USER_UPDATED, PASSWORD_RECOVERY), do nothing
       }
     );
 
