@@ -1,0 +1,12 @@
+# pack-refs with: peeled fully-peeled sorted 
+bc195f3827a223335508a3b5bfda05c244d89679 refs/remotes/origin/dependabot/npm_and_yarn/eslint-config-next-15.5.4
+633e818e894245f7735a7ce26551920b1da81edd refs/remotes/origin/dependabot/npm_and_yarn/next-15.5.4
+b37a3f2a4f5c9c8f5741dd60485136c1ef232439 refs/remotes/origin/dependabot/npm_and_yarn/react-19.1.1
+585ea99a9ad43de35b75e7ac026f075c003f4dde refs/remotes/origin/dependabot/npm_and_yarn/react-dom-19.1.1
+893bb3c8a54031ad97c6b507789c1551b6f32a4d refs/remotes/origin/dependabot/npm_and_yarn/types/node-24.5.2
+10028ba85d086f27c9b8a9f3092acde3ba614bf2 refs/remotes/origin/fundraise-page
+10028ba85d086f27c9b8a9f3092acde3ba614bf2 refs/remotes/origin/main
+dcd099e75d18e94776c36439aae716d3c6d27eaf refs/remotes/origin/master
+e41a2d3438b8968c472e4040c710d2c408974e9d refs/remotes/origin/onagui-new-feature
+10028ba85d086f27c9b8a9f3092acde3ba614bf2 refs/remotes/origin/signup
+bd01092b3818e913c042f2a0173828b4dacf5b29 refs/remotes/origin/test/ci-cd-pipeline
