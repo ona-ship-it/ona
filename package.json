@@ -18,7 +18,8 @@
     "dev:full": "concurrently \"npm run dev\" \"npm run wallet:start\"",
     "admin:test-giveaway": "node scripts/run-admin-giveaway-tests.mjs",
     "admin:test-giveaway:publish": "node scripts/run-admin-giveaway-tests.mjs --action publish",
-    "admin:test-giveaway:unpublish": "node scripts/run-admin-giveaway-tests.mjs --action unpublish"
+    "admin:test-giveaway:unpublish": "node scripts/run-admin-giveaway-tests.mjs --action unpublish",
+    "db:apply-sql": "powershell -ExecutionPolicy Bypass -File scripts\\apply-sql.ps1"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.7",
