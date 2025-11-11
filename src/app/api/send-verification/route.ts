@@ -29,30 +29,96 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate verification link (simplified - always use signup for now)
+    // Generate verification link with graceful fallback for existing users
     let linkData;
     try {
       console.log('Generating link with email:', email);
-      console.log('Redirect URL:', `${process.env.NEXT_PUBLIC_SITE_URL}/verify?email=${encodeURIComponent(email)}`);
-      
-      const { data, error } = await supabase.auth.admin.generateLink({
+      // Unify flow: after confirmation, redirect to /auth/callback to exchange code for session
+      const postConfirmRedirect = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirectTo=%2Faccount`;
+      console.log('Redirect URL:', postConfirmRedirect);
+
+      // Attempt signup link first
+      const signupResp = await supabase.auth.admin.generateLink({
         type: 'signup',
-        email: email,
-        password: password,
-        options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/verify?email=${encodeURIComponent(email)}`
-        }
+        email,
+        password,
+        options: { redirectTo: postConfirmRedirect }
       });
 
-      if (error) {
-        console.error('Supabase generateLink error:', error);
-        throw error;
+      if (signupResp.error) {
+        const err: any = signupResp.error;
+        console.error('Supabase generateLink error:', {
+          name: err?.name,
+          code: err?.code,
+          status: err?.status,
+          message: err?.message,
+          timeUTC: new Date().toISOString(),
+        });
+
+        // If the user already exists, fall back to a magic link
+        if (err?.code === 'email_exists' || err?.status === 422) {
+          console.warn('User already exists; falling back to magiclink');
+          const magicResp = await supabase.auth.admin.generateLink({
+            type: 'magiclink',
+            email,
+            options: { redirectTo: postConfirmRedirect }
+          });
+          if (magicResp.error) {
+            const mErr: any = magicResp.error;
+            console.warn('Magiclink with redirect failed, trying without redirect', {
+              name: mErr?.name,
+              code: mErr?.code,
+              status: mErr?.status,
+              message: mErr?.message,
+            });
+
+            // Try magiclink without redirect option
+            const magicNoRedirect = await supabase.auth.admin.generateLink({
+              type: 'magiclink',
+              email,
+            });
+            if (magicNoRedirect.error) {
+              const m2Err: any = magicNoRedirect.error;
+              console.warn('Magiclink without redirect failed, attempting recovery link', {
+                name: m2Err?.name,
+                code: m2Err?.code,
+                status: m2Err?.status,
+                message: m2Err?.message,
+              });
+              // Fallback: recovery link for existing user (password reset-based login)
+              const recoveryResp = await supabase.auth.admin.generateLink({
+                type: 'recovery',
+                email,
+                options: { redirectTo: postConfirmRedirect }
+              });
+              if (recoveryResp.error) {
+                throw recoveryResp.error;
+              }
+              linkData = recoveryResp.data;
+              console.log('Recovery link generated successfully:', linkData);
+            } else {
+              linkData = magicNoRedirect.data;
+              console.log('Magic link (no redirect) generated successfully:', linkData);
+            }
+          } else {
+            linkData = magicResp.data;
+            console.log('Magic link generated successfully:', linkData);
+          }
+        } else {
+          throw err;
+        }
+      } else {
+        linkData = signupResp.data;
+        console.log('Signup link generated successfully:', linkData);
       }
-      
-      linkData = data;
-      console.log('Link generated successfully:', linkData);
-    } catch (linkError) {
-      console.error('Error generating verification link:', linkError);
+    } catch (linkError: any) {
+      console.error('Error generating verification link:', {
+        name: linkError?.name,
+        code: linkError?.code,
+        status: linkError?.status,
+        message: linkError?.message,
+        timeUTC: new Date().toISOString(),
+      });
       return NextResponse.json(
         { error: 'Failed to generate verification link' },
         { status: 500 }
