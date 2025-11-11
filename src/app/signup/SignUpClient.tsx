@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { signInWithGoogle } from '@/lib/oauth-utils';
 import { useRouter } from 'next/navigation';
-import Navigation from '@/components/Navigation';
 import { FcGoogle } from 'react-icons/fc';
 
 export default function SignUpClient() {
@@ -75,7 +74,6 @@ export default function SignUpClient() {
 
   return (
     <main className="min-h-screen bg-gray-800 text-white">
-      <Navigation />
       
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] p-6">
         <div className="w-full max-w-md p-8 space-y-6 bg-gray-900 rounded-lg shadow-xl">

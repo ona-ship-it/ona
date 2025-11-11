@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Navigation from './Navigation';
 import PageTitle from './PageTitle';
 import WalletBalance from './WalletBalance';
 import { supabase } from '@/lib/supabaseClient';
@@ -41,7 +40,7 @@ export default function NewGiveawayClient() {
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
-          router.push('/login?redirect=/giveaways/new');
+          router.push('/signin?redirectTo=/giveaways/new');
           return;
         }
         
@@ -115,7 +114,7 @@ export default function NewGiveawayClient() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        router.push('/login?redirect=/giveaways/new');
+        router.push('/signin?redirectTo=/giveaways/new');
         return;
       }
       
@@ -196,7 +195,7 @@ export default function NewGiveawayClient() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        router.push('/login?redirect=/giveaways/new');
+        router.push('/signin?redirectTo=/giveaways/new');
         return;
       }
       
@@ -312,7 +311,6 @@ export default function NewGiveawayClient() {
 
   return (
     <main className="min-h-screen bg-[#1a0033] text-white">
-      <Navigation />
       
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <PageTitle title="Create New Giveaway" className="text-3xl md:text-4xl mb-8" />

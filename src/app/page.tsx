@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import Link from "next/link";
-import Navigation from '../components/Navigation';
 import PageTitle from '@/components/PageTitle';
 import FeaturedSection from '@/components/FeaturedSection';
 import GoogleSignIn from '@/components/GoogleSignIn';
@@ -14,7 +13,6 @@ export default function Home() {
   
   return (
     <main className={`min-h-screen ${isWhite ? 'bg-gray-50 text-gray-900' : 'dark:bg-gray-900 bg-gradient-to-b from-[#1f2937] to-[#000000] text-white'}`}>
-      <Navigation />
       <GoogleSignIn />
       
       {/* Main content */}

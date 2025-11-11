@@ -1,17 +1,41 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTheme } from './ThemeContext';
 import ThemeToggle from './ThemeToggle';
 import OnaguiLogo from './OnaguiLogo';
-import AuthButtons from './AuthButtons';
+// Removed AuthButtons; account actions move to sidebar/settings
 import ProfilePopup from './ProfilePopup';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { Loader2 } from 'lucide-react';
 
 export default function Navigation() {
   const { isWhite, isDarker } = useTheme();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const { user, loading, supabase } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    console.debug('[NAV] auth state changed:', {
+      loading,
+      user: user ? { id: user.id, email: user.email } : user,
+    });
+  }, [loading, user]);
+
+  useEffect(() => {
+    // derive avatar URL from user metadata when available
+    const meta = (user?.user_metadata || {}) as Record<string, any>;
+    const googleAvatar = meta.picture || meta.avatar_url || meta.picture_url;
+    let providerAvatar = googleAvatar || null;
+    if (providerAvatar && typeof providerAvatar === 'string' && providerAvatar.includes('googleusercontent.com')) {
+      providerAvatar = `/api/proxy-image?url=${encodeURIComponent(providerAvatar)}`;
+    }
+    setAvatarUrl(user ? (providerAvatar || '/default-avatar.svg') : null);
+  }, [user]);
 
   return (
     <nav className={`sticky top-0 z-50 ${
@@ -88,7 +112,52 @@ export default function Navigation() {
           {/* Right side controls */}
           <div className="flex items-center space-x-4">
             <ThemeToggle />
-            <AuthButtons />
+            {/* Loading spinner while session resolves */}
+            {loading && (
+              <Loader2 className={isWhite ? 'text-gray-700 animate-spin' : 'text-gray-300 animate-spin'} />
+            )}
+            {/* Sign In CTA when signed out */}
+            {!loading && !user && (
+              <Link
+                href="/signin"
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 shadow-sm ${
+                  isWhite
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-md hover:brightness-105'
+                    : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-md hover:brightness-110'
+                }`}
+                prefetch={false}
+                aria-label="Sign in to your account"
+                title="Sign In"
+              >
+                Sign In
+              </Link>
+            )}
+            {/* Notifications bell placeholder to match target UI */}
+            {!loading && !!user && (
+              <button
+                aria-label="Notifications"
+                className={`p-2 rounded-full ${isWhite ? 'text-gray-700 hover:text-purple-600' : 'text-gray-300 hover:text-purple-400'}`}
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+              </button>
+            )}
+            {/* Avatar when signed in */}
+            {!loading && !!user && (
+              <button
+                onClick={() => router.push('/profile')}
+                className={`w-9 h-9 rounded-full overflow-hidden border transition-all duration-200 ${
+                  isWhite
+                    ? 'border-gray-300 ring-2 ring-purple-500/40 hover:ring-purple-500'
+                    : 'border-[#2a0044] ring-2 ring-purple-400/40 hover:ring-purple-400'
+                } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                aria-label="Open profile"
+                title="Profile"
+              >
+                <img src={avatarUrl || '/default-avatar.svg'} alt="avatar" className="w-full h-full object-cover" />
+              </button>
+            )}
             
             {/* Mobile menu button */}
             <button
