@@ -38,6 +38,13 @@ serve(async (req) => {
     if (req.method === 'POST') {
       const { userId, email, username, metadata }: SyncUserRequest = await req.json()
 
+      console.log('[sync-user-registration] Signup user payload:', {
+        userId,
+        email,
+        username,
+        metadataType: metadata ? typeof metadata : 'undefined',
+      })
+
       if (!userId || !email) {
         return new Response(
           JSON.stringify({ error: 'userId and email are required' }),
@@ -49,47 +56,68 @@ serve(async (req) => {
       }
 
       // Check if user already exists in onagui.app_users
-      const { data: existingUser, error: checkError } = await supabase
-        .from('app_users')
-        .select('id, email')
-        .eq('id', userId)
-        .single()
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError
+      let existingUser: any | null = null
+      try {
+        const { data, error: checkError } = await supabase
+          .from('app_users')
+          .select('id, email, username')
+          .eq('id', userId)
+          .single()
+        if (checkError && checkError.code !== 'PGRST116') {
+          console.error('[sync-user-registration] Existing user check failed:', checkError)
+          throw checkError
+        }
+        existingUser = data || null
+      } catch (e) {
+        console.error('[sync-user-registration] Error checking existing user for id=%s:', userId, e)
+        throw e
       }
 
       let result;
       
       if (existingUser) {
         // Update existing user
-        const { data, error } = await supabase
-          .from('app_users')
-          .update({
-            email,
-            username: username || existingUser.username || email.split('@')[0],
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', userId)
-          .select()
-
-        if (error) throw error
-        result = { action: 'updated', user: data[0] }
+        try {
+          const { data, error } = await supabase
+            .from('app_users')
+            .update({
+              email,
+              username: username || existingUser.username || email.split('@')[0],
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', userId)
+            .select()
+          if (error) {
+            console.error('[sync-user-registration] Update failed for user_id=%s:', userId, error)
+            throw error
+          }
+          result = { action: 'updated', user: data![0] }
+        } catch (e) {
+          console.error('[sync-user-registration] Exception during update for user_id=%s:', userId, e)
+          throw e
+        }
       } else {
         // Create new user in onagui.app_users
-        const { data, error } = await supabase
-          .from('app_users')
-          .insert({
-            id: userId,
-            email,
-            username: username || email.split('@')[0],
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          })
-          .select()
-
-        if (error) throw error
-        result = { action: 'created', user: data[0] }
+        try {
+          const { data, error } = await supabase
+            .from('app_users')
+            .insert({
+              id: userId,
+              email,
+              username: username || email.split('@')[0],
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .select()
+          if (error) {
+            console.error('[sync-user-registration] Insert failed for user_id=%s:', userId, error)
+            throw error
+          }
+          result = { action: 'created', user: data![0] }
+        } catch (e) {
+          console.error('[sync-user-registration] Exception during insert for user_id=%s:', userId, e)
+          throw e
+        }
       }
 
       return new Response(

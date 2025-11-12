@@ -43,7 +43,7 @@ export default function FreeClaimBanner({ giveawayId, show = true }: Props) {
     }
   };
 
-  const loginUrl = `/login?redirect=/giveaways/${giveawayId}%3Fclaim%3Dfree`;
+  const loginUrl = `/signin?redirectTo=/giveaways/${giveawayId}%3Fclaim%3Dfree`;
   const signupUrl = `/signup?redirect=/giveaways/${giveawayId}%3Fclaim%3Dfree`;
 
   if (!show) return null;

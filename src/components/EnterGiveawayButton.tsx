@@ -34,7 +34,7 @@ export default function EnterGiveawayButton({ giveawayId, ticketPrice = 0, title
     const { data } = await supabase.auth.getSession();
     const isSignedIn = !!data.session?.user;
     if (!isSignedIn) {
-      router.push(`/login?next=/giveaways/${giveawayId}`);
+      router.push(`/signin?redirectTo=/giveaways/${giveawayId}`);
       return;
     }
     setOpen(true);

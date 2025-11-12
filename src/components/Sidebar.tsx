@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from "next/navigation";
 import type { ComponentType } from "react";
 
 type NavItem = {
@@ -94,6 +96,7 @@ const IconHandshake = ({ className = "" }) => (
 const navItems: NavItem[] = [
   { label: "Home", href: "/", icon: IconHome },
   { label: "My Profile", href: "/profile", icon: IconUser },
+  { label: "My Account", href: "/account", icon: IconUser },
   { label: "Giveaways", href: "/giveaways", icon: IconGift },
   { label: "Fundraise", href: "/fundraise", icon: IconTarget },
   { label: "Raffles", href: "/raffles", icon: IconChart },
@@ -106,6 +109,8 @@ const navItems: NavItem[] = [
 
 export default function Sidebar() {
   const [expanded, setExpanded] = useState(false);
+  const supabase = createClientComponentClient();
+  const router = useRouter();
 
   // Initialize from localStorage on mount
   useEffect(() => {
@@ -175,9 +180,16 @@ export default function Sidebar() {
           </ul>
         </nav>
 
-        {/* Footer */}
-        <div className="p-3 border-t border-gray-800 text-xs text-gray-400">
+        {/* Footer: Sign Out action moved from navbar */}
+        <div className="p-3 border-t border-gray-800 text-xs text-gray-400 flex items-center justify-between">
           {expanded ? <span>v1.0 • Dark Mode</span> : <span className="block text-center">•</span>}
+          <button
+            onClick={async () => { await supabase.auth.signOut(); router.push('/'); }}
+            className="ml-2 px-3 py-1 text-xs rounded-md bg-red-600 text-white hover:bg-red-700"
+            aria-label="Sign Out"
+          >
+            Sign Out
+          </button>
         </div>
       </div>
     </aside>
