@@ -25,12 +25,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { id: giveawayId } = await params;
 
-  // check giveaway active
+  // Fetch giveaway status and donation split fields to record in contributions
   const { data: g, error: gErr } = await supabase
     .from('giveaways')
-    .select('id,status')
+    .select('id,status,donation_split_platform,donation_split_creator,donation_split_prize')
     .eq('id', giveawayId)
-    .single<{ id: string; status: string }>();
+    .single<{
+      id: string;
+      status: string;
+      donation_split_platform: number | null;
+      donation_split_creator: number | null;
+      donation_split_prize: number | null;
+    }>();
   if (gErr) {
     console.error('giveaway fetch error', gErr);
     return NextResponse.json({ success: false, error: 'Failed to fetch giveaway' }, { status: 500 });
@@ -39,30 +45,38 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ success: false, error: 'Not active' }, { status: 400 });
   }
 
-  // check existing free ticket
-  const { data: existing, error: exErr } = await supabase
-    .from('tickets')
-    .select('id')
-    .eq('giveaway_id', giveawayId)
-    .eq('user_id', user.id)
-    .eq('is_free', true)
-    .limit(1);
-  if (exErr) {
-    console.error('existing ticket check error', exErr);
-    return NextResponse.json({ success: false, error: 'Failed to check tickets' }, { status: 500 });
+  // Normalize splits; fallback to full prize allocation for claims if missing
+  const sp = typeof g.donation_split_platform === 'number' ? Number(g.donation_split_platform) : null;
+  const sc = typeof g.donation_split_creator === 'number' ? Number(g.donation_split_creator) : null;
+  const sz = typeof g.donation_split_prize === 'number' ? Number(g.donation_split_prize) : null;
+  let split_platform = sp ?? 0.0;
+  let split_creator = sc ?? 0.0;
+  let split_prize = sz ?? 1.0;
+  const sum = split_platform + split_creator + split_prize;
+  if (Math.abs(sum - 1.0) > 1e-4) {
+    // Rebalance to default claim distribution (all to prize)
+    split_platform = 0.0;
+    split_creator = 0.0;
+    split_prize = 1.0;
   }
 
-  if (existing && existing.length) {
-    return NextResponse.json({ success: true, already: true });
-  }
-
-  // insert ticket (unique index may enforce single free ticket per user)
+  // Insert into contributions as a free claim
   const { error } = await (supabase as any)
-    .from('tickets')
-    .insert({ giveaway_id: giveawayId, user_id: user.id, is_free: true, quantity: 1 });
+    .from('giveaway_contributions')
+    .insert({
+      giveaway_id: giveawayId,
+      user_id: user.id,
+      kind: 'claim',
+      amount: 0,
+      currency: 'USDT',
+      note: 'Free claim',
+      split_platform,
+      split_creator,
+      split_prize,
+    });
   if (error) {
-    console.error('ticket insert error', error);
-    // On conflict of unique free ticket, return already=true
+    console.error('contribution insert error', error);
+    // Handle unique partial index violation gracefully
     const msg = String(error.message || '').toLowerCase();
     if (msg.includes('duplicate') || msg.includes('unique')) {
       return NextResponse.json({ success: true, already: true });

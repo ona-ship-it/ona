@@ -66,6 +66,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { data: contrib, error } = await (supabase as any)
     .from('giveaway_contributions')
     .insert({
+      kind: 'donation',
       giveaway_id: giveawayId,
       user_id: user.id,
       amount,
