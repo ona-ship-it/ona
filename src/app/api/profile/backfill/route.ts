@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureAdminApiAccess } from '@/lib/supabaseServer';
+import type { Database } from '@/types/supabase';
 
 // Admin-only: backfill avatar_url, username, and full_name in onagui_profiles
 // using data from auth.users metadata. Requires SUPABASE_SERVICE_ROLE_KEY.
@@ -16,7 +17,7 @@ export async function POST(_req: NextRequest) {
   }
 
   const { createClient } = await import('@supabase/supabase-js');
-  const service = createClient(url, key, {
+  const service = createClient<Database>(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 

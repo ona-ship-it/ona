@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/supabase';
 import { ethers } from 'ethers';
 
 // USDT contract address on Ethereum mainnet
@@ -45,7 +46,7 @@ export class OnChainMonitor {
     const contractAddress = isTestnet ? USDT_SEPOLIA_ADDRESS : USDT_CONTRACT_ADDRESS;
     this.usdtContract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
     
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    this.supabase = createClient<Database>(supabaseUrl, supabaseKey);
     this.lastProcessedBlock = 0;
   }
 

@@ -1,4 +1,5 @@
 import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/supabase';
 
 // Server-side Supabase client using the Service Role key.
 // This client bypasses RLS and must ONLY be used on the server.
@@ -6,7 +7,7 @@ import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/
 // - NEXT_PUBLIC_SUPABASE_URL
 // - SUPABASE_SERVICE_ROLE_KEY
 
-export default function createClient(): SupabaseClient {
+export default function createClient(): SupabaseClient<Database> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -17,7 +18,7 @@ export default function createClient(): SupabaseClient {
     throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable');
   }
 
-  return createSupabaseClient(url, serviceRoleKey, {
+  return createSupabaseClient<Database>(url, serviceRoleKey, {
     auth: {
       // Do not persist server-side sessions
       persistSession: false,

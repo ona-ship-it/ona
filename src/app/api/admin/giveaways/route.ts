@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
 
         const { error: upErr } = await supabase
           .from('giveaways')
-          .update<Database['public']['Tables']['giveaways']['Update']>({ temp_winner_id: ticket.user_id, updated_at: new Date().toISOString() })
+          .update({ temp_winner_id: ticket.user_id, updated_at: new Date().toISOString() })
           .eq('id', giveawayId);
 
         if (upErr) {
@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
 
         const { error: upErr2 } = await supabase
           .from('giveaways')
-          .update<Database['public']['Tables']['giveaways']['Update']>({ winner_id: g.temp_winner_id, status: 'completed', escrow_status: 'released', updated_at: new Date().toISOString() })
+          .update({ winner_id: g.temp_winner_id, status: 'completed', escrow_status: 'released', updated_at: new Date().toISOString() })
           .eq('id', giveawayId);
 
         if (upErr2) {
@@ -213,7 +213,7 @@ export async function POST(request: NextRequest) {
         // Fallback: clear temp and pick first ticket holder again
         await supabase
           .from('giveaways')
-          .update<Database['public']['Tables']['giveaways']['Update']>({ temp_winner_id: null, updated_at: new Date().toISOString() })
+          .update({ temp_winner_id: null, updated_at: new Date().toISOString() })
           .eq('id', giveawayId);
 
         const { data: ticket2, error: tErr2 } = await supabase
@@ -229,7 +229,7 @@ export async function POST(request: NextRequest) {
 
         const { error: upErr3 } = await supabase
           .from('giveaways')
-          .update<Database['public']['Tables']['giveaways']['Update']>({ temp_winner_id: ticket2.user_id, updated_at: new Date().toISOString() })
+          .update({ temp_winner_id: ticket2.user_id, updated_at: new Date().toISOString() })
           .eq('id', giveawayId);
 
         if (upErr3) {
@@ -252,7 +252,7 @@ export async function POST(request: NextRequest) {
 
         const { error: cancelError } = await supabase
           .from('giveaways')
-          .update<Database['public']['Tables']['giveaways']['Update']>({ 
+          .update({ 
             status: 'cancelled',
             updated_at: new Date().toISOString()
           })

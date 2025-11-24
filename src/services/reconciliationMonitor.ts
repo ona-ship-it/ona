@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/supabase';
 import { ethers } from 'ethers';
 import cron from 'node-cron';
 
@@ -63,7 +64,7 @@ export class ReconciliationMonitor {
     rpcUrl: string,
     usdtContractAddress: string
   ) {
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    this.supabase = createClient<Database>(supabaseUrl, supabaseKey);
     this.provider = new ethers.JsonRpcProvider(rpcUrl);
     this.usdtContract = new ethers.Contract(
       usdtContractAddress,

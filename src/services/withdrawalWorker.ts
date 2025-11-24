@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/supabase';
 import { HotWalletService, HotWalletConfig, WithdrawalRequest, TransactionResult } from './hotWallet';
 import cron from 'node-cron';
 
@@ -28,7 +29,7 @@ export class WithdrawalWorker {
     supabaseKey: string,
     hotWalletConfig: HotWalletConfig
   ) {
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    this.supabase = createClient<Database>(supabaseUrl, supabaseKey);
     this.hotWallet = new HotWalletService(hotWalletConfig);
   }
 

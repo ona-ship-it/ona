@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/supabase';
 import { createRouteSupabase } from '@/lib/supabaseServer';
 import { checkRateLimit } from '@/middleware/idempotencyRateLimit';
 
@@ -23,7 +24,7 @@ export const GET = async (request: NextRequest) => {
         return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
       }
 
-      const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+      const serviceClient = createClient<Database>(supabaseUrl, supabaseServiceKey);
 
       const { data, error } = await serviceClient
         .from('wallets')

@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@/types/supabase";
 
 // Example static rate. Later, you can fetch live rate via CoinGecko API if desired.
 const USDT_RATE = 1.00; // 1 USD = 1 USDT (for MVP simplicity)
@@ -10,7 +11,7 @@ export async function POST(req: Request) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
   // Initialize Supabase client with service role key for webhook operations
-  const supabase = createClient(
+  const supabase = createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
