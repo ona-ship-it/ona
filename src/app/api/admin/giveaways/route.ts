@@ -4,7 +4,6 @@ import { cookies } from 'next/headers';
 import { ensureAdminApiAccess } from '@/lib/supabaseServer';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
-import type { Database } from '@/types/supabase';
 
 export async function GET(request: NextRequest) {
   try {
