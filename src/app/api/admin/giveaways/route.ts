@@ -119,8 +119,8 @@ export async function POST(request: Request) {
         tickets_count: typeof body.tickets_count === 'number' ? body.tickets_count : undefined,
       };
 
-      // Build Partial update payload to avoid TS 'never' inference at compile time.
-      const updatePayload: Partial<Database['public']['Tables']['giveaways']['Update']> = {
+      // Build Partial update payload based on full Row shape to avoid TS narrowing to 'never'.
+      const updatePayload: Partial<Database['public']['Tables']['giveaways']['Row']> = {
         ...allowed,
         updated_at: new Date().toISOString(),
       };
