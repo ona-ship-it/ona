@@ -2,6 +2,16 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+
+export interface AdminUserWithRole {
+  id: string;
+  email: string;
+  onagui_type: string | null;
+  created_at: string;
+  is_admin: boolean;
+  roles: string[];
+}
 
 export async function getGiveaways() {
   const supabase = await createClient();
@@ -28,26 +38,29 @@ export async function getUsers() {
   return data || [];
 }
 
-export async function deactivateUser(userId: string) {
-  const supabase = await createClient();
 
-  const { error } = await supabase
-    .from("onagui_profiles")
-    .update({ is_active: false })
-    .eq("id" as any, userId as any);
 
-  if (error) throw new Error(error.message);
-  revalidatePath("/admin");
-}
+export async function fetchAdminUsers(): Promise<{ data: AdminUserWithRole[] | null; error: string | null }> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.getAll().map(c => `${c.name}=${c.value}`).join('; ');
+    const response = await fetch(`${baseUrl}/api/admin/users`, {
+      headers: {
+        cookie: cookieHeader,
+      },
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { data: null, error: errorData.error || 'Failed to fetch users' };
+    }
 
-export async function activateUser(userId: string) {
-  const supabase = await createClient();
-
-  const { error } = await supabase
-    .from("onagui_profiles")
-    .update({ is_active: true })
-    .eq("id" as any, userId as any);
-
-  if (error) throw new Error(error.message);
-  revalidatePath("/admin");
+    const { users } = await response.json();
+    return { data: users as AdminUserWithRole[], error: null };
+  } catch (error) {
+    console.error("fetchAdminUsers error:", error);
+    const message = error instanceof Error ? error.message : 'An unknown error occurred';
+    return { data: null, error: message };
+  }
 }

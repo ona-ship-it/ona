@@ -6,6 +6,7 @@ import type { Session } from "@supabase/supabase-js";
 import { useTheme } from "@/components/ThemeContext";
 import Link from "next/link";
 import { ProfileService } from "@/services/profileService";
+import type { Database } from "@/types/supabase";
 
 type CommentItem = {
   id: string;

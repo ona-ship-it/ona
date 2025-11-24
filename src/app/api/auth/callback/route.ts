@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createRouteSupabase } from '@/lib/supabaseServer';
 import type { Database } from '@/types/supabase';
 
 export async function GET(request: NextRequest) {
@@ -9,24 +8,7 @@ export async function GET(request: NextRequest) {
   const redirectTo = requestUrl.searchParams.get('redirectTo') || '/profile';
 
   if (code) {
-    const cookieStore = await cookies();
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options });
-          },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: '', ...options });
-          },
-        },
-      }
-    );
+    const supabase = await createRouteSupabase();
     
     const { data: sessionData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
@@ -38,7 +20,7 @@ export async function GET(request: NextRequest) {
       const avatarUrl = (user.user_metadata as any)?.avatar_url ?? null;
 
       // Upsert into onagui_profiles; if trigger ran already, this is a no-op
-      await supabase
+      await (supabase as any)
         .from('onagui_profiles')
         .upsert({
           id: user.id,

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { User } from '@supabase/supabase-js';
 import { handleAuthError } from '@/utils/authUtils';
 import type { Database } from '@/types/supabase';
+import { signInWithGoogle } from "@/lib/oauth-utils";
   
 export default function GoogleSignIn() { 
   const supabase = createClientComponentClient<Database>({
@@ -15,11 +16,32 @@ export default function GoogleSignIn() {
       sameSite: 'lax',
     }
   });
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Persisted flag to ensure the popup only appears once per browser
+  const POPUP_SEEN_KEY = 'onagui_google_popup_seen';
+
+  // Initialize visibility based on persisted flag
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+      const hasSeen = localStorage.getItem(POPUP_SEEN_KEY) === 'true';
+      if (hasSeen) {
+        setVisible(false);
+      } else {
+        // Show once, then persist the flag so it never reappears
+        setVisible(true);
+        localStorage.setItem(POPUP_SEEN_KEY, 'true');
+      }
+    } catch (e) {
+      // If localStorage is unavailable, default to showing once in this session
+      setVisible(true);
+    }
+  }, []);
   
   useEffect(() => {
     // Check if user is already signed in
@@ -66,7 +88,7 @@ export default function GoogleSignIn() {
     
     checkAuth();
     
-    // Hide after 5 seconds if visible
+    // Hide after 5 seconds if visible (first and only display)
     if (visible) {
       const timer = setTimeout(() => {
         setVisible(false);
@@ -76,29 +98,17 @@ export default function GoogleSignIn() {
     }
   }, [visible, supabase.auth]);
   
-  const handleSignIn = async () => { 
+  const handleSignIn = async () => {
     try {
       setLoading(true);
+      setError(null);
       
-      // Get the redirectTo parameter from URL if it exists
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirectPath = urlParams.get('redirectTo') || '/';
-      const callbackUrl = `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectPath)}`;
+      // Use standardized OAuth utility
+      const result = await signInWithGoogle();
       
-      const { error } = await supabase.auth.signInWithOAuth({ 
-        provider: "google", 
-        options: { 
-          redirectTo: callbackUrl,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        }, 
-      }); 
-      
-      if (error) { 
-        throw error;
-      } 
+      if (!result.success) {
+        throw new Error(result.error || 'Google sign-in failed');
+      }
     } catch (err) {
       console.error("Google sign-in error:", err);
       setError(err instanceof Error ? err.message : 'Sign-in failed');

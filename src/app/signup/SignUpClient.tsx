@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { signInWithGoogle } from '@/lib/oauth-utils';
 import { useRouter } from 'next/navigation';
-import Navigation from '@/components/Navigation';
+import { FcGoogle } from 'react-icons/fc';
 
 export default function SignUpClient() {
   const [email, setEmail] = useState('');
@@ -12,6 +13,8 @@ export default function SignUpClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -35,29 +38,42 @@ export default function SignUpClient() {
     }
 
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+      // Request a verification email via server-side generateLink
+      const res = await fetch('/api/send-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
       });
 
-      if (error) {
-        setError(error.message);
-      } else if (data.user) {
-        setMessage('Check your email for the confirmation link!');
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || 'Failed to send verification email');
       }
-    } catch (err) {
-      setError('An unexpected error occurred');
+
+      setMessage('Verification email sent! Please check your inbox to complete signup.');
+    } catch (err: any) {
+      setError(err?.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleGoogleSignUp = async () => {
+    try {
+      setError(null);
+      
+      const result = await signInWithGoogle('/account');
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Google sign up failed');
+      }
+    } catch (error: any) {
+      setError(error.message || 'An error occurred during Google sign up');
+    }
+  };
+
   return (
     <main className="min-h-screen bg-gray-800 text-white">
-      <Navigation />
       
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] p-6">
         <div className="w-full max-w-md p-8 space-y-6 bg-gray-900 rounded-lg shadow-xl">
@@ -129,6 +145,23 @@ export default function SignUpClient() {
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-600"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-gray-900 text-gray-400">Or continue with</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleGoogleSignUp}
+            className="w-full flex items-center justify-center p-3 text-sm font-medium border border-gray-600 rounded-lg hover:bg-gray-800 transition duration-150 text-gray-300"
+          >
+            <FcGoogle className="w-5 h-5 mr-3" />
+            Sign up with Google
+          </button>
           
           <div className="text-center text-white">
             <p>
@@ -143,6 +176,30 @@ export default function SignUpClient() {
           </div>
         </div>
       </div>
+
+      {/* Loading overlay with countdown */}
+      {isLoading && (
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          backgroundColor: 'rgba(0,0,0,0.8)', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          color: 'white', 
+          zIndex: 1000 
+        }}>
+          <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>🔄 Finalizing your session...</h2>
+          <p style={{ fontSize: '18px', marginBottom: '8px' }}>Redirecting in {countdown} seconds</p>
+          <p style={{ fontSize: '14px', marginTop: '10px', textAlign: 'center', maxWidth: '300px' }}>
+            This ensures your account page loads correctly
+          </p>
+        </div>
+      )}
     </main>
   );
 }

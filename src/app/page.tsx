@@ -2,10 +2,10 @@
 
 import Image from 'next/image';
 import Link from "next/link";
-import Navigation from '../components/Navigation';
 import PageTitle from '@/components/PageTitle';
 import FeaturedSection from '@/components/FeaturedSection';
 import GoogleSignIn from '@/components/GoogleSignIn';
+import MyDraftGiveaways from '@/components/MyDraftGiveaways';
 
 import { useTheme } from '@/components/ThemeContext';
 
@@ -14,7 +14,6 @@ export default function Home() {
   
   return (
     <main className={`min-h-screen ${isWhite ? 'bg-gray-50 text-gray-900' : 'dark:bg-gray-900 bg-gradient-to-b from-[#1f2937] to-[#000000] text-white'}`}>
-      <Navigation />
       <GoogleSignIn />
       
       {/* Main content */}
@@ -65,7 +64,7 @@ export default function Home() {
                 {/* Hover Cards Container */}
                 <div className="fixed z-[9999] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] grid grid-cols-2 gap-4">
                   {/* Giveaways Card */}
-                  <Link href="/giveaways" className="bg-gradient-to-br from-green-500/60 to-green-700/60 backdrop-blur-md p-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-green-400/30">
+                  <Link href="/giveaways/new" className="bg-gradient-to-br from-green-500/60 to-green-700/60 backdrop-blur-md p-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-green-400/30">
                     <div className="flex items-center mb-2">
                       <span className="text-2xl mr-2">🎁</span>
                       <h3 className="text-white font-bold">Giveaways</h3>
@@ -74,7 +73,7 @@ export default function Home() {
                   </Link>
                   
                   {/* Fundraise Card */}
-                  <Link href="/fundraise" className="bg-gradient-to-br from-purple-500/60 to-purple-700/60 backdrop-blur-md p-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-onaguiGreen-light/30">
+                  <Link href="/fundraise/new" className="bg-gradient-to-br from-purple-500/60 to-purple-700/60 backdrop-blur-md p-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-onaguiGreen-light/30">
                     <div className="flex items-center mb-2">
                       <span className="text-2xl mr-2">🎯</span>
                       <h3 className="text-white font-bold">Fundraise</h3>
@@ -83,7 +82,7 @@ export default function Home() {
                   </Link>
                   
                   {/* Raffles Card */}
-                  <Link href="/raffles" className="bg-gradient-to-br from-blue-500/60 to-blue-700/60 backdrop-blur-md p-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-blue-400/30">
+                  <Link href="/raffles/new" className="bg-gradient-to-br from-blue-500/60 to-blue-700/60 backdrop-blur-md p-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-blue-400/30">
                     <div className="flex items-center mb-2">
                       <span className="text-2xl mr-2">🎟️</span>
                       <h3 className="text-white font-bold">Raffles</h3>
@@ -92,7 +91,7 @@ export default function Home() {
                   </Link>
                   
                   {/* Marketplace Card */}
-                  <Link href="/marketplace" className="bg-gradient-to-br from-amber-500/60 to-amber-700/60 backdrop-blur-md p-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-amber-400/30">
+                  <Link href="/marketplace/new" className="bg-gradient-to-br from-amber-500/60 to-amber-700/60 backdrop-blur-md p-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-amber-400/30">
                     <div className="flex items-center mb-2">
                       <span className="text-2xl mr-2">🛒</span>
                       <h3 className="text-white font-bold">Marketplace</h3>
@@ -107,6 +106,9 @@ export default function Home() {
       </div>
 
       {/* Featured Sections from all pages */}
+      {/* Creator Drafts activation */}
+      <MyDraftGiveaways />
+
       <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {/* Giveaways Section */}
         <FeaturedSection 

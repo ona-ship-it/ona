@@ -39,5 +39,4 @@ GRANT INSERT, UPDATE ON onagui.app_users TO postgres;
 COMMENT ON FUNCTION onagui.sync_auth_user_to_app_users() IS 
 'Automatically syncs new auth.users records to onagui.app_users with matching IDs';
 
-COMMENT ON TRIGGER trigger_sync_auth_user_to_app_users ON auth.users IS 
-'Ensures auth.users.id matches onagui.app_users.id for new signups';
+-- Note: Cannot comment on auth.users trigger due to permissions

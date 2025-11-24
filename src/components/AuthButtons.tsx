@@ -45,7 +45,7 @@ export default function AuthButtons() {
     return (
       <div className="flex gap-2">
         <Link
-          href="/login"
+          href="/signin"
           className="group bg-onaguiGreen hover:bg-onaguiGreen-dark text-white font-semibold rounded-full shadow-lg flex items-center justify-center w-10 h-10 transition-all duration-300 ease-in-out overflow-hidden hover:w-28 md:hover:w-28 sm:hover:w-24 touch-manipulation relative"
           aria-label="Sign In or Sign Up"
         >

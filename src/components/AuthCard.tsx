@@ -78,7 +78,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({
         ) : (
           <p>
             Already have an account?{' '}
-            <Link href="/login" className="text-pink-400 hover:underline">
+            <Link href="/signin" className="text-pink-400 hover:underline">
               Sign In
             </Link>
           </p>

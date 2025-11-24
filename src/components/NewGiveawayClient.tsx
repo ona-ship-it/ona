@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Navigation from './Navigation';
 import PageTitle from './PageTitle';
 import WalletBalance from './WalletBalance';
-import { useSupabaseClient } from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { CreateGiveawayPayload } from '../types/giveaways';
 import { Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useAdmin } from '@/context/AdminContext';
 
 export default function NewGiveawayClient() {
   const [formData, setFormData] = useState<CreateGiveawayPayload & {
@@ -29,10 +29,9 @@ export default function NewGiveawayClient() {
   const [success, setSuccess] = useState(false);
   const [fiatBalance, setFiatBalance] = useState<number | null>(null);
   const [ticketBalance, setTicketBalance] = useState<number | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin, loading: adminLoading } = useAdmin();
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
-  const supabase = useSupabaseClient();
 
   // Fetch user admin status on component mount
   useEffect(() => {
@@ -41,21 +40,11 @@ export default function NewGiveawayClient() {
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
-          router.push('/login?redirect=/giveaways/new');
+          router.push('/signin?redirectTo=/giveaways/new');
           return;
         }
         
         setUser(user);
-        
-        // Check if user is admin
-        const { data: adminData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .single();
-          
-        setIsAdmin(!!adminData);
       } catch (err) {
         console.error('Error fetching user data:', err);
         setError('Failed to load user data');
@@ -125,7 +114,7 @@ export default function NewGiveawayClient() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        router.push('/login?redirect=/giveaways/new');
+        router.push('/signin?redirectTo=/giveaways/new');
         return;
       }
       
@@ -206,14 +195,14 @@ export default function NewGiveawayClient() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        router.push('/login?redirect=/giveaways/new');
+        router.push('/signin?redirectTo=/giveaways/new');
         return;
       }
       
       // Prepare media URL (either from upload or direct URL input)
       const mediaUrl = formData.photo_url || formData.media_url || null;
       
-      // Insert new giveaway with active status (admin bypass)
+      // Insert new giveaway as a draft (align with RLS policy)
       const { data, error } = await supabase
         .from('giveaways')
         .insert({
@@ -226,8 +215,7 @@ export default function NewGiveawayClient() {
           photo_url: formData.photo_url || null,
           media_url: mediaUrl,
           ends_at: formData.ends_at,
-          status: 'active', // Force active status for admin
-          escrow_amount: 0 // Admin bypass escrow
+          status: 'draft'
         })
         .select()
         .single();
@@ -322,7 +310,6 @@ export default function NewGiveawayClient() {
 
   return (
     <main className="min-h-screen bg-[#1a0033] text-white">
-      <Navigation />
       
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <PageTitle title="Create New Giveaway" className="text-3xl md:text-4xl mb-8" />
@@ -573,8 +560,8 @@ export default function NewGiveawayClient() {
                         <Loader2 className="animate-spin mr-2" size={20} />
                         <span>Creating...</span>
                       </div>
-                    ) : (
-                      'Create & Activate'
+                  ) : (
+                      'Save as Draft'
                     )}
                   </button>
                 )}

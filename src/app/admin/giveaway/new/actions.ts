@@ -1,20 +1,35 @@
 'use server';
 
 import { createAdminSupabaseClient } from '@/utils/supabase/server-admin';
+import { createClient as createServerSupabaseClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 export async function createGiveaway(formData: FormData) {
-  // 1. Get the authenticated user
-  const supabase = await createAdminSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  // 1. Get the authenticated user using SSR client (cookie-based session)
+  const userSupabase = await createServerSupabaseClient();
+  let { data: { session } } = await userSupabase.auth.getSession();
+  let user = session?.user ?? null;
+
+  // Fallback to server verification API in case of cookie propagation edge cases
+  if (!user) {
+    try {
+      const res = await fetch('/api/verify-session', { cache: 'no-store' });
+      if (res.ok) {
+        const json = await res.json();
+        user = json?.user ?? null;
+      }
+    } catch (_) {
+      // swallow; will error below
+    }
+  }
 
   if (!user) {
     throw new Error('User not authenticated.');
   }
 
   // 2. Security Check: Verify Admin Role
-  // Check if user has admin status in metadata
+  // Check if user has admin status in metadata via Service Role client
   const adminSupabase = await createAdminSupabaseClient();
   const { data: fullUser, error: adminCheckError } = await adminSupabase.auth.admin.getUserById(user.id);
   
@@ -34,8 +49,8 @@ export async function createGiveaway(formData: FormData) {
     throw new Error('Missing required form fields.');
   }
 
-  // 4. Insert data into the database
-  const { data, error } = await (supabase as any)
+  // 4. Insert data into the database (use Service Role to bypass RLS for admin)
+  const { data, error } = await (adminSupabase as any)
     .from('giveaways')
     .insert({
       title,
@@ -54,7 +69,13 @@ export async function createGiveaway(formData: FormData) {
 
   if (error) {
     console.error('Database insertion error:', error);
-    throw new Error('Failed to post giveaway. Check logs.');
+    const msg = [
+      'DB insert failed:',
+      error.message,
+      error.details || '',
+      error.hint || ''
+    ].filter(Boolean).join(' ');
+    throw new Error(msg);
   }
 
   // 5. Success: Revalidate and Redirect

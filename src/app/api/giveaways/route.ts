@@ -1,48 +1,63 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { createRouteSupabase } from '@/lib/supabaseServer';
 import type { Database } from '@/types/supabase';
 
-export async function GET(request: NextRequest) {
+// Simple per-IP rate limiter for demo purposes
+const rateMap = new Map<string, { last: number; count: number }>();
+function checkRate(ip: string, limit: number, windowMs: number) {
+  const now = Date.now();
+  const bucket = rateMap.get(ip) || { last: now, count: 0 };
+  if (now - bucket.last > windowMs) {
+    bucket.count = 0;
+    bucket.last = now;
+  }
+  bucket.count++;
+  rateMap.set(ip, bucket);
+  return bucket.count <= limit;
+}
+
+export async function GET(req: Request) {
+  const supabase = await createRouteSupabase();
+
+  // Basic rate-limit: 60 requests per minute per IP for list
+  const ip = (req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'local') as string;
+  const ok = checkRate(ip, 60, 60_000);
+  if (!ok) {
+    return NextResponse.json({ success: false, error: 'Too many requests' }, { status: 429 });
+  }
+
   try {
-    const cookieStore = await cookies();
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options });
-          },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: '', ...options });
-          },
-        },
-      }
-    );
+    const url = new URL(req.url);
+    const page = Math.max(parseInt(url.searchParams.get('page') || '1', 10), 1);
+    const limit = Math.min(Math.max(parseInt(url.searchParams.get('limit') || '20', 10), 1), 100);
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
 
-    const { data: giveaways, error } = await supabase
+    const { data, error, count } = await supabase
       .from('giveaways')
-      .select('*')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false });
+      .select(
+        `id,title,description,prize_amount,tickets_count,status,photo_url,media_url,created_at,ends_at`,
+        { count: 'exact' }
+      )
+      .order('created_at', { ascending: false })
+      .range(from, to);
 
-    if (error) {
-      console.error('Error fetching giveaways:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch giveaways' },
-        { status: 500 }
-      );
-    }
+    if (error) throw error;
 
-    return NextResponse.json({ giveaways });
-  } catch (error) {
-    console.error('API error:', error);
+    return NextResponse.json({
+      success: true,
+      data,
+      pagination: {
+        page,
+        limit,
+        total: count ?? null,
+        has_more: count != null ? to + 1 < count : false,
+      },
+    });
+  } catch (error: any) {
+    console.error('Giveaways list error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { success: false, error: error.message || 'Failed to fetch giveaways' },
       { status: 500 }
     );
   }
