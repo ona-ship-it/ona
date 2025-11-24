@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { ensureAdminApiAccess } from '@/lib/supabaseServer';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/supabase';
 import type { Database } from '@/types/supabase';
 
 export async function GET(request: NextRequest) {
@@ -10,7 +12,7 @@ export async function GET(request: NextRequest) {
     if (!access.isAdmin) {
       return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
     }
-    const { supabase } = access;
+    const supabase = access.supabase as SupabaseClient<Database>;
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
 
@@ -100,7 +102,7 @@ export async function POST(request: NextRequest) {
     if (!access.isAdmin) {
       return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
     }
-    const { supabase } = access;
+    const supabase = access.supabase as SupabaseClient<Database>;
     const body = await request.json();
     const { action, giveawayId } = body;
 
