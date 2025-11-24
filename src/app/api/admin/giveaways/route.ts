@@ -1,98 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import { ensureAdminApiAccess } from '@/lib/supabaseServer';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { createRouteSupabase } from '@/lib/supabaseServer';
 import type { Database } from '@/types/supabase';
 
-export async function GET(request: NextRequest) {
-  try {
-    const access = await ensureAdminApiAccess();
-    if (!access.isAdmin) {
-      return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
+export async function GET(req: Request) {
+  const supabase = await createRouteSupabase();
+
+  const { searchParams } = new URL(req.url);
+  const giveawayId = searchParams.get('id');
+
+  if (!giveawayId) {
+    const { data, error } = await supabase
+      .from<'giveaways'>('giveaways')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    const supabase = access.supabase as SupabaseClient<Database>;
-    const { searchParams } = new URL(request.url);
-    const action = searchParams.get('action');
 
-    switch (action) {
-      case 'pending-review':
-        // Prefer RPC; on failure, fall back to query by status or temp_winner
-        let pendingGiveaways: any[] | null = null;
-        const { data: rpcData, error: pendingError } = await (supabase as any)
-          .rpc('get_giveaways_pending_review');
-
-        if (!pendingError) {
-          pendingGiveaways = Array.isArray(rpcData) ? rpcData : [];
-        } else {
-          // Fallback for environments without the RPC/migration
-          const { data: fbData, error: fbErr } = await supabase
-            .from('giveaways')
-            .select(`
-              id,
-              title,
-              description,
-              prize_amount,
-              tickets_count,
-              temp_winner_id,
-              created_at,
-              ends_at,
-              status
-            `)
-            .or('status.eq.review_pending,temp_winner_id.not.is.null')
-            .order('created_at', { ascending: false });
-
-          if (fbErr) {
-            throw fbErr;
-          }
-          pendingGiveaways = fbData || [];
-        }
-
-        return NextResponse.json({ 
-          success: true, 
-          data: pendingGiveaways 
-        });
-
-      case 'all':
-      default:
-        // Get all giveaways for admin dashboard
-        const { data: allGiveaways, error: allError } = await supabase
-          .from('giveaways')
-          .select(`
-            id,
-            title,
-            description,
-            prize_amount,
-            tickets_count,
-            status,
-            escrow_status,
-            winner_id,
-            temp_winner_id,
-            created_at,
-            ends_at,
-            creator_id
-          `)
-          .order('created_at', { ascending: false });
-
-        if (allError) {
-          throw allError;
-        }
-
-        return NextResponse.json({ 
-          success: true, 
-          data: allGiveaways 
-        });
-    }
-  } catch (error: any) {
-    console.error('Admin giveaways API error:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: error.message || 'Failed to fetch giveaways' 
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ data }, { status: 200 });
   }
+
+  const { data, error } = await supabase
+    .from<'giveaways'>('giveaways')
+    .select('*')
+    .eq('id', giveawayId)
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 404 });
+  }
+
+  return NextResponse.json({ data }, { status: 200 });
 }
 
 export async function POST(request: NextRequest) {
@@ -136,9 +76,13 @@ export async function POST(request: NextRequest) {
           throw pickError;
         }
 
+        const updateDraftPayload: Partial<Database['public']['Tables']['giveaways']['Update']> = {
+          temp_winner_id: ticket.user_id,
+          updated_at: new Date().toISOString(),
+        };
         const { error: upErr } = await supabase
-          .from('giveaways')
-          .update({ temp_winner_id: ticket.user_id, updated_at: new Date().toISOString() })
+          .from<'giveaways'>('giveaways')
+          .update(updateDraftPayload)
           .eq('id', giveawayId);
 
         if (upErr) {
@@ -179,9 +123,15 @@ export async function POST(request: NextRequest) {
           throw finalizeError;
         }
 
+        const finalizePayload: Partial<Database['public']['Tables']['giveaways']['Update']> = {
+          winner_id: g.temp_winner_id,
+          status: 'completed',
+          escrow_status: 'released',
+          updated_at: new Date().toISOString(),
+        };
         const { error: upErr2 } = await supabase
-          .from('giveaways')
-          .update({ winner_id: g.temp_winner_id, status: 'completed', escrow_status: 'released', updated_at: new Date().toISOString() })
+          .from<'giveaways'>('giveaways')
+          .update(finalizePayload)
           .eq('id', giveawayId);
 
         if (upErr2) {
@@ -211,9 +161,13 @@ export async function POST(request: NextRequest) {
         }
 
         // Fallback: clear temp and pick first ticket holder again
+        const clearTempPayload: Partial<Database['public']['Tables']['giveaways']['Update']> = {
+          temp_winner_id: null,
+          updated_at: new Date().toISOString(),
+        };
         await supabase
-          .from('giveaways')
-          .update({ temp_winner_id: null, updated_at: new Date().toISOString() })
+          .from<'giveaways'>('giveaways')
+          .update(clearTempPayload)
           .eq('id', giveawayId);
 
         const { data: ticket2, error: tErr2 } = await supabase
@@ -227,9 +181,13 @@ export async function POST(request: NextRequest) {
           throw repickError;
         }
 
+        const repickPayload: Partial<Database['public']['Tables']['giveaways']['Update']> = {
+          temp_winner_id: ticket2.user_id,
+          updated_at: new Date().toISOString(),
+        };
         const { error: upErr3 } = await supabase
-          .from('giveaways')
-          .update({ temp_winner_id: ticket2.user_id, updated_at: new Date().toISOString() })
+          .from<'giveaways'>('giveaways')
+          .update(repickPayload)
           .eq('id', giveawayId);
 
         if (upErr3) {
@@ -250,12 +208,13 @@ export async function POST(request: NextRequest) {
           );
         }
 
+        const cancelPayload: Partial<Database['public']['Tables']['giveaways']['Update']> = {
+          status: 'cancelled',
+          updated_at: new Date().toISOString(),
+        };
         const { error: cancelError } = await supabase
-          .from('giveaways')
-          .update({ 
-            status: 'cancelled',
-            updated_at: new Date().toISOString()
-          })
+          .from<'giveaways'>('giveaways')
+          .update(cancelPayload)
           .eq('id', giveawayId);
 
         if (cancelError) {
