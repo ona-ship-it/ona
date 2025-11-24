@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRouteSupabase } from '@/lib/supabaseServer';
-import type { Database } from '@/types/supabase';
+import type { Database } from '@/types/database.types';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 type PostBody = {
