@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useTheme } from './ThemeContext';
 import ThemeToggle from './ThemeToggle';
@@ -9,9 +9,10 @@ import OnaguiLogo from './OnaguiLogo';
 import ProfilePopup from './ProfilePopup';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import type { User } from '@supabase/supabase-js';
 import { Loader2 } from 'lucide-react';
 
-export default function Navigation() {
+export default function Navigation({ initialUser }: { initialUser?: User | null }) {
   const { isWhite, isDarker } = useTheme();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -19,23 +20,27 @@ export default function Navigation() {
   const { user, loading, supabase } = useAuth();
   const router = useRouter();
 
+  // Prefer server-provided initial user on first render to avoid SSR mismatch
+  const effectiveUser = useMemo(() => user ?? (initialUser ?? null), [user, initialUser]);
+  const effectiveLoading = useMemo(() => (initialUser ? false : loading), [initialUser, loading]);
+
   useEffect(() => {
     console.debug('[NAV] auth state changed:', {
-      loading,
-      user: user ? { id: user.id, email: user.email } : user,
+      loading: effectiveLoading,
+      user: effectiveUser ? { id: effectiveUser.id, email: effectiveUser.email } : effectiveUser,
     });
-  }, [loading, user]);
+  }, [effectiveLoading, effectiveUser]);
 
   useEffect(() => {
     // derive avatar URL from user metadata when available
-    const meta = (user?.user_metadata || {}) as Record<string, any>;
+    const meta = (effectiveUser?.user_metadata || {}) as Record<string, any>;
     const googleAvatar = meta.picture || meta.avatar_url || meta.picture_url;
     let providerAvatar = googleAvatar || null;
     if (providerAvatar && typeof providerAvatar === 'string' && providerAvatar.includes('googleusercontent.com')) {
       providerAvatar = `/api/proxy-image?url=${encodeURIComponent(providerAvatar)}`;
     }
-    setAvatarUrl(user ? (providerAvatar || '/default-avatar.svg') : null);
-  }, [user]);
+    setAvatarUrl(effectiveUser ? (providerAvatar || '/default-avatar.svg') : null);
+  }, [effectiveUser]);
 
   return (
     <nav className={`sticky top-0 z-50 ${
@@ -113,11 +118,11 @@ export default function Navigation() {
           <div className="flex items-center space-x-4">
             <ThemeToggle />
             {/* Loading spinner while session resolves */}
-            {loading && (
+            {effectiveLoading && (
               <Loader2 className={isWhite ? 'text-gray-700 animate-spin' : 'text-gray-300 animate-spin'} />
             )}
             {/* Sign In CTA when signed out */}
-            {!loading && !user && (
+            {!effectiveLoading && !effectiveUser && (
               <Link
                 href="/signin"
                 className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 shadow-sm ${
@@ -133,7 +138,7 @@ export default function Navigation() {
               </Link>
             )}
             {/* Notifications bell placeholder to match target UI */}
-            {!loading && !!user && (
+            {!effectiveLoading && !!effectiveUser && (
               <button
                 aria-label="Notifications"
                 className={`p-2 rounded-full ${isWhite ? 'text-gray-700 hover:text-purple-600' : 'text-gray-300 hover:text-purple-400'}`}
@@ -144,7 +149,7 @@ export default function Navigation() {
               </button>
             )}
             {/* Avatar when signed in */}
-            {!loading && !!user && (
+            {!effectiveLoading && !!effectiveUser && (
               <button
                 onClick={() => router.push('/profile')}
                 className={`w-9 h-9 rounded-full overflow-hidden border transition-all duration-200 ${
