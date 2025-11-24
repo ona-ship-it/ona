@@ -3,6 +3,12 @@ import { createRouteSupabase } from '@/lib/supabaseServer';
 import type { Database } from '@/types/supabase';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+type PostBody = {
+  giveawayId: string;
+  tempWinnerTicketId?: string | null;
+  clearTemp?: boolean;
+};
+
 // Temporary stub for admin access check to satisfy build
 // TODO: Replace with real admin check logic or import when available
 async function ensureAdminApiAccess() {
@@ -54,6 +60,53 @@ export async function POST(request: NextRequest) {
     const { action, giveawayId } = body;
 
     switch (action) {
+      case 'set-temp-winner': {
+        const payload = body as PostBody;
+
+        if (!payload.giveawayId) {
+          return NextResponse.json({ error: 'Missing giveawayId' }, { status: 400 });
+        }
+
+        let tempWinnerUserId: string | null = null;
+        if (!payload.clearTemp && payload.tempWinnerTicketId) {
+          const { data: ticket, error: ticketErr } = await supabase
+            .from('tickets')
+            .select('user_id')
+            .eq('id', payload.tempWinnerTicketId)
+            .single();
+
+          if (ticketErr) {
+            return NextResponse.json({ error: ticketErr.message }, { status: 404 });
+          }
+
+          if (!ticket || !ticket.user_id) {
+            return NextResponse.json(
+              { error: 'Ticket not found or has no user_id' },
+              { status: 404 }
+            );
+          }
+
+          tempWinnerUserId = ticket.user_id;
+        }
+
+        const updatePayload: Database['public']['Tables']['giveaways']['Update'] = {
+          temp_winner_id: payload.clearTemp ? null : tempWinnerUserId,
+          updated_at: new Date().toISOString(),
+        };
+
+        const { data, error: updateErr } = await supabase
+          .from('giveaways')
+          .update<Database['public']['Tables']['giveaways']['Update']>(updatePayload)
+          .eq('id', payload.giveawayId)
+          .select('*')
+          .single();
+
+        if (updateErr) {
+          return NextResponse.json({ error: updateErr.message }, { status: 500 });
+        }
+
+        return NextResponse.json({ data }, { status: 200 });
+      }
       case 'pick-winner':
         if (!giveawayId) {
           return NextResponse.json(
