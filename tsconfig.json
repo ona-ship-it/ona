@@ -43,6 +43,7 @@
     "ona-production/**/*",
     "onagui/**/*",
     "onagui-*/**/*",
+    "frontend/**/*",
     "supabase/**/*",
     "temp-restore/**/*"
   ]
