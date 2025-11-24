@@ -1,7 +1,7 @@
-// PostCSS config using object-style plugins for Next.js compatibility
+// PostCSS config for TailwindCSS (Next.js compatibility)
 module.exports = {
   plugins: {
-    '@tailwindcss/postcss': {},
+    tailwindcss: {},
     autoprefixer: {},
   },
 };
