@@ -93,9 +93,9 @@ export type Database = {
         };
       };
     };
-    Views: Record<string, unknown>;
-    Functions: Record<string, unknown>;
-    Enums: Record<string, string | number>;
-    CompositeTypes: Record<string, unknown>;
+    Views: {};
+    Functions: {};
+    Enums: {};
+    CompositeTypes: {};
   };
 };
