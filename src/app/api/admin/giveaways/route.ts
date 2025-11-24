@@ -79,14 +79,15 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: ticketErr.message }, { status: 404 });
           }
 
-          if (!ticket || !ticket.user_id) {
+          const ticketTyped = ticket as Pick<Database['public']['Tables']['tickets']['Row'], 'user_id'> | null;
+          if (!ticketTyped || !ticketTyped.user_id) {
             return NextResponse.json(
               { error: 'Ticket not found or has no user_id' },
               { status: 404 }
             );
           }
 
-          tempWinnerUserId = ticket.user_id;
+          tempWinnerUserId = ticketTyped.user_id;
         }
 
         const updatePayload: Database['public']['Tables']['giveaways']['Update'] = {
@@ -133,12 +134,13 @@ export async function POST(request: NextRequest) {
           .limit(1)
           .single();
 
-        if (tErr || !ticket) {
+        const ticketTyped = ticket as Pick<Database['public']['Tables']['tickets']['Row'], 'user_id'> | null;
+        if (tErr || !ticketTyped) {
           throw pickError;
         }
 
         const updateDraftPayload: Database['public']['Tables']['giveaways']['Update'] = {
-          temp_winner_id: ticket.user_id,
+          temp_winner_id: ticketTyped.user_id,
           updated_at: new Date().toISOString(),
         };
         const { error: upErr } = await supabase
@@ -238,12 +240,13 @@ export async function POST(request: NextRequest) {
           .limit(1)
           .single();
 
-        if (tErr2 || !ticket2) {
+        const ticket2Typed = ticket2 as Pick<Database['public']['Tables']['tickets']['Row'], 'user_id'> | null;
+        if (tErr2 || !ticket2Typed) {
           throw repickError;
         }
 
         const repickPayload: Database['public']['Tables']['giveaways']['Update'] = {
-          temp_winner_id: ticket2.user_id,
+          temp_winner_id: ticket2Typed.user_id,
           updated_at: new Date().toISOString(),
         };
         const { error: upErr3 } = await supabase
@@ -257,7 +260,7 @@ export async function POST(request: NextRequest) {
 
         await supabase
           .from('giveaway_audit')
-          .insert({ giveaway_id: giveawayId, action: 'draft_winner', actor_id: null, target_id: ticket2.user_id, note: 'Fallback repick (no RPC)' });
+          .insert({ giveaway_id: giveawayId, action: 'draft_winner', actor_id: null, target_id: ticket2Typed.user_id, note: 'Fallback repick (no RPC)' });
 
         return NextResponse.json({ success: true, data: { winnerId: ticket2.user_id }, fallback: true });
 
