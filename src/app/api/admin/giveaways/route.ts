@@ -1,20 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { createRouteSupabase } from '@/lib/supabaseServer';
-import type { Database } from '@/types/database.types';
-import type { SupabaseClient } from '@supabase/supabase-js';
 
-type PostBody = {
-  giveawayId: string;
-  tempWinnerTicketId?: string | null;
-  clearTemp?: boolean;
-};
-
-// Temporary stub for admin access check to satisfy build
-// TODO: Replace with real admin check logic or import when available
-async function ensureAdminApiAccess() {
-  const supabase = await createRouteSupabase();
-  return { supabase, session: null, profile: null, isAdmin: true } as const;
-}
+type PostBody = unknown;
 
 export async function GET(req: Request) {
   const supabase = await createRouteSupabase();
@@ -49,261 +38,93 @@ export async function GET(req: Request) {
   return NextResponse.json({ data }, { status: 200 });
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const access = await ensureAdminApiAccess();
-    if (!access.isAdmin) {
-      return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
-    }
-    const supabase = access.supabase as SupabaseClient<Database>;
-    const body = await request.json();
-    const { action, giveawayId } = body;
+export async function POST(request: Request) {
+  const supabase = createRouteHandlerClient({ cookies });
 
-    switch (action) {
-      case 'set-temp-winner': {
-        const payload = body as PostBody;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-        if (!payload.giveawayId) {
-          return NextResponse.json({ error: 'Missing giveawayId' }, { status: 400 });
-        }
-
-        let tempWinnerUserId: string | null = null;
-        if (!payload.clearTemp && payload.tempWinnerTicketId) {
-          const { data: ticket, error: ticketErr } = await supabase
-            .from('tickets')
-            .select('user_id')
-            .eq('id', payload.tempWinnerTicketId)
-            .single();
-
-          if (ticketErr) {
-            return NextResponse.json({ error: ticketErr.message }, { status: 404 });
-          }
-
-          const ticketTyped = ticket as Pick<Database['public']['Tables']['tickets']['Row'], 'user_id'> | null;
-          if (!ticketTyped || !ticketTyped.user_id) {
-            return NextResponse.json(
-              { error: 'Ticket not found or has no user_id' },
-              { status: 404 }
-            );
-          }
-
-          tempWinnerUserId = ticketTyped.user_id;
-        }
-
-        const updatePayload: Database['public']['Tables']['giveaways']['Update'] = {
-          temp_winner_id: payload.clearTemp ? null : tempWinnerUserId,
-          updated_at: new Date().toISOString(),
-        };
-
-        const { data, error: updateErr } = await supabase
-          .from('giveaways')
-          .update<Database['public']['Tables']['giveaways']['Update']>(updatePayload)
-          .eq('id', payload.giveawayId)
-          .select('*')
-          .single();
-
-        if (updateErr) {
-          return NextResponse.json({ error: updateErr.message }, { status: 500 });
-        }
-
-        return NextResponse.json({ data }, { status: 200 });
-      }
-      case 'pick-winner':
-        if (!giveawayId) {
-          return NextResponse.json(
-            { success: false, error: 'Giveaway ID is required' },
-            { status: 400 }
-          );
-        }
-
-        // Try RPC first
-        const { data: winnerId, error: pickError } = await (supabase as any)
-          .rpc('pick_giveaway_winner', { 
-            giveaway_id: giveawayId
-          } as any);
-
-        if (!pickError) {
-          return NextResponse.json({ success: true, data: { winnerId } });
-        }
-
-        // Fallback: select a participant and set temp_winner without changing status
-        const { data: ticket, error: tErr } = await supabase
-          .from('tickets')
-          .select('user_id')
-          .eq('giveaway_id', giveawayId)
-          .limit(1)
-          .single();
-
-        const ticketTyped = ticket as Pick<Database['public']['Tables']['tickets']['Row'], 'user_id'> | null;
-        if (tErr || !ticketTyped) {
-          throw pickError;
-        }
-
-        const updateDraftPayload: Database['public']['Tables']['giveaways']['Update'] = {
-          temp_winner_id: ticketTyped.user_id,
-          updated_at: new Date().toISOString(),
-        };
-        const { error: upErr } = await supabase
-          .from('giveaways')
-          .update<Database['public']['Tables']['giveaways']['Update']>(updateDraftPayload)
-          .eq('id', giveawayId);
-
-        if (upErr) {
-          throw upErr;
-        }
-
-        // Log minimal audit entry (best-effort)
-        await supabase
-          .from('giveaway_audit')
-          .insert({ giveaway_id: giveawayId, action: 'draft_winner', actor_id: null, target_id: ticket.user_id, note: 'Fallback pick (no RPC)' });
-
-        return NextResponse.json({ success: true, data: { winnerId: ticket.user_id }, fallback: true });
-
-      case 'finalize-winner':
-        if (!giveawayId) {
-          return NextResponse.json(
-            { success: false, error: 'Giveaway ID is required' },
-            { status: 400 }
-          );
-        }
-
-        // Try RPC first
-        const { error: finalizeError } = await (supabase as any)
-          .rpc('finalize_giveaway_winner', { giveaway_id: giveawayId } as any);
-
-        if (!finalizeError) {
-          return NextResponse.json({ success: true, message: 'Winner finalized successfully' });
-        }
-
-        // Fallback: move temp_winner to winner, mark completed, release escrow
-        const { data: g, error: gErr } = await (supabase as any)
-          .from('giveaways')
-          .select('temp_winner_id, prize_amount')
-          .eq('id', giveawayId)
-          .single();
-
-        if (gErr || !g?.temp_winner_id) {
-          throw finalizeError;
-        }
-
-        const finalizePayload: Database['public']['Tables']['giveaways']['Update'] = {
-          winner_id: g.temp_winner_id,
-          status: 'completed',
-          escrow_status: 'released',
-          updated_at: new Date().toISOString(),
-        };
-        const { error: upErr2 } = await supabase
-          .from('giveaways')
-          .update<Database['public']['Tables']['giveaways']['Update']>(finalizePayload)
-          .eq('id', giveawayId);
-
-        if (upErr2) {
-          throw upErr2;
-        }
-
-        // Log minimal audit entries
-        await supabase.from('giveaway_audit').insert({ giveaway_id: giveawayId, action: 'winner_finalized', actor_id: null, target_id: g.temp_winner_id, note: 'Fallback finalize (no RPC)' });
-        await supabase.from('giveaway_audit').insert({ giveaway_id: giveawayId, action: 'escrow_released', actor_id: null, note: `Prize released (fallback)` });
-
-        return NextResponse.json({ success: true, message: 'Winner finalized (fallback)' });
-
-      case 'repick-winner':
-        if (!giveawayId) {
-          return NextResponse.json(
-            { success: false, error: 'Giveaway ID is required' },
-            { status: 400 }
-          );
-        }
-
-        // Try RPC first
-        const { data: newWinnerId, error: repickError } = await (supabase as any)
-          .rpc('repick_giveaway_winner', { giveaway_id: giveawayId } as any);
-
-        if (!repickError) {
-          return NextResponse.json({ success: true, data: { winnerId: newWinnerId } });
-        }
-
-        // Fallback: clear temp and pick first ticket holder again
-        const clearTempPayload: Database['public']['Tables']['giveaways']['Update'] = {
-          temp_winner_id: null,
-          updated_at: new Date().toISOString(),
-        };
-        await supabase
-          .from('giveaways')
-          .update<Database['public']['Tables']['giveaways']['Update']>(clearTempPayload)
-          .eq('id', giveawayId);
-
-        const { data: ticket2, error: tErr2 } = await supabase
-          .from('tickets')
-          .select('user_id')
-          .eq('giveaway_id', giveawayId)
-          .limit(1)
-          .single();
-
-        const ticket2Typed = ticket2 as Pick<Database['public']['Tables']['tickets']['Row'], 'user_id'> | null;
-        if (tErr2 || !ticket2Typed) {
-          throw repickError;
-        }
-
-        const repickPayload: Database['public']['Tables']['giveaways']['Update'] = {
-          temp_winner_id: ticket2Typed.user_id,
-          updated_at: new Date().toISOString(),
-        };
-        const { error: upErr3 } = await supabase
-          .from('giveaways')
-          .update<Database['public']['Tables']['giveaways']['Update']>(repickPayload)
-          .eq('id', giveawayId);
-
-        if (upErr3) {
-          throw upErr3;
-        }
-
-        await supabase
-          .from('giveaway_audit')
-          .insert({ giveaway_id: giveawayId, action: 'draft_winner', actor_id: null, target_id: ticket2Typed.user_id, note: 'Fallback repick (no RPC)' });
-
-        return NextResponse.json({ success: true, data: { winnerId: ticket2.user_id }, fallback: true });
-
-      case 'cancel-giveaway':
-        if (!giveawayId) {
-          return NextResponse.json(
-            { success: false, error: 'Giveaway ID is required' },
-            { status: 400 }
-          );
-        }
-
-        const cancelPayload: Database['public']['Tables']['giveaways']['Update'] = {
-          status: 'cancelled',
-          updated_at: new Date().toISOString(),
-        };
-        const { error: cancelError } = await supabase
-          .from('giveaways')
-          .update<Database['public']['Tables']['giveaways']['Update']>(cancelPayload)
-          .eq('id', giveawayId);
-
-        if (cancelError) {
-          throw cancelError;
-        }
-
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Giveaway cancelled successfully' 
-        });
-
-      default:
-        return NextResponse.json(
-          { success: false, error: 'Invalid action' },
-          { status: 400 }
-        );
-    }
-  } catch (error: any) {
-    console.error('Admin giveaways POST API error:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: error.message || 'Failed to process request' 
-      },
-      { status: 500 }
-    );
+  if (!user) {
+    return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
   }
+
+  let payload: any;
+  try {
+    payload = await request.json();
+  } catch {
+    return NextResponse.json({ ok: false, error: 'invalid_json' }, { status: 400 });
+  }
+
+  const { action, giveawayId } = payload;
+  if (!action || !giveawayId) {
+    return NextResponse.json({ ok: false, error: 'missing_fields' }, { status: 400 });
+  }
+
+  const { data: giveaway, error: gErr } = await supabase
+    .from('giveaways')
+    .select('*')
+    .eq('id', giveawayId)
+    .single();
+
+  if (gErr || !giveaway) {
+    return NextResponse.json({ ok: false, error: 'not_found' }, { status: 404 });
+  }
+
+  if (action === 'update-draft') {
+    const updatePayload = {
+      title: payload.title,
+      description: payload.description,
+      prize_amount: payload.prize_amount,
+      tickets_count: payload.tickets_count,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data, error: updateErr } = await supabase
+      .from('giveaways')
+      .update(updatePayload)
+      .eq('id', giveawayId)
+      .select('*')
+      .single();
+
+    if (updateErr) {
+      return NextResponse.json({ ok: false, error: updateErr.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true, giveaway: data });
+  }
+
+  if (action === 'pick-winner') {
+    const { data: tickets, error: ticketErr } = await supabase
+      .from('tickets')
+      .select('*')
+      .eq('giveaway_id', giveawayId);
+
+    if (ticketErr || !tickets || tickets.length === 0) {
+      return NextResponse.json(
+        { ok: false, error: 'no_tickets_available' },
+        { status: 400 }
+      );
+    }
+
+    const ticket = tickets[Math.floor(Math.random() * tickets.length)];
+
+    const { data, error: upErr } = await supabase
+      .from('giveaways')
+      .update({
+        temp_winner_id: ticket.user_id,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', giveawayId)
+      .select('*')
+      .single();
+
+    if (upErr) {
+      return NextResponse.json({ ok: false, error: upErr.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true, giveaway: data });
+  }
+
+  return NextResponse.json({ ok: false, error: 'invalid_action' }, { status: 400 });
 }
