@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRouteSupabase } from '@/lib/supabaseServer';
 import type { Database } from '@/types/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 // Temporary stub for admin access check to satisfy build
 // TODO: Replace with real admin check logic or import when available
@@ -83,13 +84,13 @@ export async function POST(request: NextRequest) {
           throw pickError;
         }
 
-        const updateDraftPayload: Partial<Database['public']['Tables']['giveaways']['Update']> = {
+        const updateDraftPayload: Database['public']['Tables']['giveaways']['Update'] = {
           temp_winner_id: ticket.user_id,
           updated_at: new Date().toISOString(),
         };
         const { error: upErr } = await supabase
           .from('giveaways')
-          .update(updateDraftPayload)
+          .update<Database['public']['Tables']['giveaways']['Update']>(updateDraftPayload)
           .eq('id', giveawayId);
 
         if (upErr) {
@@ -130,7 +131,7 @@ export async function POST(request: NextRequest) {
           throw finalizeError;
         }
 
-        const finalizePayload: Partial<Database['public']['Tables']['giveaways']['Update']> = {
+        const finalizePayload: Database['public']['Tables']['giveaways']['Update'] = {
           winner_id: g.temp_winner_id,
           status: 'completed',
           escrow_status: 'released',
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
         };
         const { error: upErr2 } = await supabase
           .from('giveaways')
-          .update(finalizePayload)
+          .update<Database['public']['Tables']['giveaways']['Update']>(finalizePayload)
           .eq('id', giveawayId);
 
         if (upErr2) {
@@ -168,13 +169,13 @@ export async function POST(request: NextRequest) {
         }
 
         // Fallback: clear temp and pick first ticket holder again
-        const clearTempPayload: Partial<Database['public']['Tables']['giveaways']['Update']> = {
+        const clearTempPayload: Database['public']['Tables']['giveaways']['Update'] = {
           temp_winner_id: null,
           updated_at: new Date().toISOString(),
         };
         await supabase
           .from('giveaways')
-          .update(clearTempPayload)
+          .update<Database['public']['Tables']['giveaways']['Update']>(clearTempPayload)
           .eq('id', giveawayId);
 
         const { data: ticket2, error: tErr2 } = await supabase
@@ -188,13 +189,13 @@ export async function POST(request: NextRequest) {
           throw repickError;
         }
 
-        const repickPayload: Partial<Database['public']['Tables']['giveaways']['Update']> = {
+        const repickPayload: Database['public']['Tables']['giveaways']['Update'] = {
           temp_winner_id: ticket2.user_id,
           updated_at: new Date().toISOString(),
         };
         const { error: upErr3 } = await supabase
           .from('giveaways')
-          .update(repickPayload)
+          .update<Database['public']['Tables']['giveaways']['Update']>(repickPayload)
           .eq('id', giveawayId);
 
         if (upErr3) {
@@ -215,13 +216,13 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const cancelPayload: Partial<Database['public']['Tables']['giveaways']['Update']> = {
+        const cancelPayload: Database['public']['Tables']['giveaways']['Update'] = {
           status: 'cancelled',
           updated_at: new Date().toISOString(),
         };
         const { error: cancelError } = await supabase
           .from('giveaways')
-          .update(cancelPayload)
+          .update<Database['public']['Tables']['giveaways']['Update']>(cancelPayload)
           .eq('id', giveawayId);
 
         if (cancelError) {
