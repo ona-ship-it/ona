@@ -10,7 +10,7 @@ export async function GET(req: Request) {
 
   if (!giveawayId) {
     const { data, error } = await supabase
-      .from<'giveaways'>('giveaways')
+      .from('giveaways')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(50);
@@ -23,7 +23,7 @@ export async function GET(req: Request) {
   }
 
   const { data, error } = await supabase
-    .from<'giveaways'>('giveaways')
+    .from('giveaways')
     .select('*')
     .eq('id', giveawayId)
     .single();
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString(),
         };
         const { error: upErr } = await supabase
-          .from<'giveaways'>('giveaways')
+          .from('giveaways')
           .update(updateDraftPayload)
           .eq('id', giveawayId);
 
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString(),
         };
         const { error: upErr2 } = await supabase
-          .from<'giveaways'>('giveaways')
+          .from('giveaways')
           .update(finalizePayload)
           .eq('id', giveawayId);
 
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString(),
         };
         await supabase
-          .from<'giveaways'>('giveaways')
+          .from('giveaways')
           .update(clearTempPayload)
           .eq('id', giveawayId);
 
@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString(),
         };
         const { error: upErr3 } = await supabase
-          .from<'giveaways'>('giveaways')
+          .from('giveaways')
           .update(repickPayload)
           .eq('id', giveawayId);
 
@@ -213,7 +213,7 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString(),
         };
         const { error: cancelError } = await supabase
-          .from<'giveaways'>('giveaways')
+          .from('giveaways')
           .update(cancelPayload)
           .eq('id', giveawayId);
 
