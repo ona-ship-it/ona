@@ -6,11 +6,9 @@ import { useTheme } from './ThemeContext';
 import ThemeToggle from './ThemeToggle';
 import OnaguiLogo from './OnaguiLogo';
 import AuthButtons from './AuthButtons';
-import ProfilePopup from './ProfilePopup';
 
 export default function Navigation() {
   const { isWhite, isDarker } = useTheme();
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -53,18 +51,15 @@ export default function Navigation() {
               }`}>
                 Marketplace
               </Link>
-              <button 
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
+              <Link 
+                href="/profile"
+                prefetch={false}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors relative ${
                   isWhite ? 'text-gray-700 hover:text-purple-600' : 'text-gray-300 hover:text-purple-400'
                 }`}
               >
                 Profile
-                <ProfilePopup 
-                  isOpen={isProfileOpen} 
-                  onClose={() => setIsProfileOpen(false)} 
-                />
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -129,14 +124,15 @@ export default function Navigation() {
             }`}>
               Marketplace
             </Link>
-              <button 
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
+              <Link 
+                href="/profile"
+                prefetch={false}
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   isWhite ? 'text-gray-700 hover:text-purple-600' : 'text-gray-300 hover:text-purple-400'
                 }`}
               >
                 Profile
-              </button>
+              </Link>
             </div>
           </div>
         )}

@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navigation from './Navigation';
 import PageTitle from './PageTitle';
-import WalletBalance from './WalletBalance';
+import { WalletBalance } from '@/components/WalletBalance';
+import { useAuth } from '@/lib/auth';
 import { useSupabaseClient } from '@/lib/supabaseClient';
 import { CreateGiveawayPayload } from '../types/giveaways';
 import { Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
@@ -29,6 +30,7 @@ export default function NewGiveawayClient() {
   const [success, setSuccess] = useState(false);
   const [fiatBalance, setFiatBalance] = useState<number | null>(null);
   const [ticketBalance, setTicketBalance] = useState<number | null>(null);
+  const [walletBalance, setWalletBalance] = useState<number>(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
@@ -69,6 +71,7 @@ export default function NewGiveawayClient() {
   const handleWalletBalanceUpdate = (fiat: number, tickets: number) => {
     setFiatBalance(fiat);
     setTicketBalance(tickets);
+    setWalletBalance(fiat);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -79,6 +82,14 @@ export default function NewGiveawayClient() {
     }));
   };
 
+  // Architectural validation: Admins bypass; regular users must have sufficient funds
+  const checkSufficientFunds = (prizeAmount: number): boolean => {
+    if (isAdmin) {
+      return true;
+    }
+    return walletBalance >= prizeAmount;
+  };
+
   // Determine initial status based on admin status
   const getInitialStatus = () => {
     return isAdmin ? 'active' : 'draft';
@@ -86,8 +97,16 @@ export default function NewGiveawayClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    const prizeAmount = formData.prize_amount;
+
+    // STEP 1: ARCHITECTURAL VALIDATION CHECK
+    if (!checkSufficientFunds(prizeAmount)) {
+      alert(`Insufficient funds. You need $${prizeAmount.toFixed(2)} USDT but only have $${walletBalance.toFixed(2)} USDT in your wallet.`);
+      return;
+    }
+
+    setLoading(true);
     
     try {
       // Validate form data
@@ -116,10 +135,7 @@ export default function NewGiveawayClient() {
         throw new Error('End date must be in the future');
       }
       
-      // For non-admin users, check fiat wallet balance
-      if (!isAdmin && fiatBalance !== null && formData.prize_amount > fiatBalance) {
-        throw new Error(`Insufficient wallet balance. You need ${formData.prize_amount} USDT but have ${fiatBalance.toFixed(2)} USDT`);
-      }
+      // Client-side check already performed above; server will enforce via RLS as well
       
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
@@ -156,6 +172,7 @@ export default function NewGiveawayClient() {
       if (error) throw error;
       
       setSuccess(true);
+      alert('Giveaway created successfully!');
       
       // Redirect to giveaways page after short delay
       setTimeout(() => {
@@ -165,6 +182,7 @@ export default function NewGiveawayClient() {
     } catch (err: any) {
       console.error('Error creating giveaway:', err);
       setError(err.message || 'Failed to create giveaway');
+      alert('Error creating giveaway. Check console for details.');
     } finally {
       setLoading(false);
     }
@@ -398,38 +416,26 @@ export default function NewGiveawayClient() {
                     </div>
                   </div>
                   {user && (
-                    <WalletBalance 
-                      userId={user.id} 
-                      onBalanceUpdate={handleWalletBalanceUpdate}
-                      className="mt-2"
+                    <WalletBalance
+                      userId={user.id}
+                      onBalanceUpdate={(fiat) => setWalletBalance(fiat)}
+                      className="mb-6"
                       showTickets={false}
                     />
                   )}
-                  {fiatBalance !== null && !isAdmin && formData.prize_amount > 0 && (
-                    <div className={`mt-2 p-3 rounded-lg border ${
-                      fiatBalance >= formData.prize_amount 
-                        ? 'bg-green-500 bg-opacity-20 border-green-500' 
-                        : 'bg-red-500 bg-opacity-20 border-red-500'
-                    }`}>
-                      <div className="flex items-center gap-2 mb-1">
-                        {fiatBalance >= formData.prize_amount ? (
-                          <CheckCircle className="w-4 h-4 text-green-400" />
-                        ) : (
-                          <AlertTriangle className="w-4 h-4 text-red-400" />
-                        )}
-                        <span className={`text-sm font-medium ${
-                          fiatBalance >= formData.prize_amount ? 'text-green-300' : 'text-red-300'
-                        }`}>
-                          {fiatBalance >= formData.prize_amount ? 'Sufficient Funds' : 'Insufficient Funds'}
-                        </span>
+                  {!isAdmin && formData.prize_amount > 0 && (
+                    <div className="bg-yellow-500 bg-opacity-20 border border-yellow-500 rounded-lg p-4 my-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-yellow-400">⚠️</span>
+                        <span className="text-yellow-300 font-medium">Escrow Required</span>
                       </div>
-                      <p className={`text-sm ${
-                        fiatBalance >= formData.prize_amount ? 'text-green-200' : 'text-red-200'
-                      }`}>
-                        {fiatBalance >= formData.prize_amount 
-                          ? `✓ ${formData.prize_amount} USDT will be locked in escrow when activated.`
-                          : `✗ You need ${(formData.prize_amount - fiatBalance).toFixed(2)} more USDT to create this giveaway.`
-                        }
+                      <p className="text-yellow-200 text-sm">
+                        Creating this giveaway requires ${formData.prize_amount.toFixed(2)} USDT to be held in escrow.
+                        {walletBalance < formData.prize_amount && (
+                          <span className="block mt-1 text-red-300 font-bold">
+                            Insufficient Funds! You need ${(formData.prize_amount - walletBalance).toFixed(2)} more USDT.
+                          </span>
+                        )}
                       </p>
                     </div>
                   )}

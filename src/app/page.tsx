@@ -8,9 +8,23 @@ import FeaturedSection from '@/components/FeaturedSection';
 import GoogleSignIn from '@/components/GoogleSignIn';
 
 import { useTheme } from '@/components/ThemeContext';
+import { WalletBalance } from '@/components/WalletBalance';
+import { useSupabaseClient } from '@/lib/supabaseClient';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
   const { isDarker, isWhite } = useTheme();
+  const supabase = useSupabaseClient();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (!mounted) return;
+      setUserId(data.user?.id ?? null);
+    });
+    return () => { mounted = false; };
+  }, [supabase]);
   
   return (
     <main className={`min-h-screen ${isWhite ? 'bg-gray-50 text-gray-900' : 'dark:bg-gray-900 bg-gradient-to-b from-[#1f2937] to-[#000000] text-white'}`}>
@@ -34,7 +48,9 @@ export default function Home() {
               <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
               </svg>
-              Wallet / Deposit <span className="ml-1 font-bold">$0.00</span>
+              {userId && (
+                <WalletBalance userId={userId} className="cursor-pointer hover:text-green-200 transition-colors" />
+              )}
             </Link>
           </div>
           <div className="text-center">

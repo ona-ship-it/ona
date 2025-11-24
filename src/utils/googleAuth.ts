@@ -21,7 +21,8 @@ export const signInWithGoogle = async () => {
     // Get the redirectTo parameter from URL if it exists
     const urlParams = new URLSearchParams(window.location.search);
     const redirectPath = urlParams.get('redirectTo') || '/';
-    const callbackUrl = `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectPath)}`;
+    const base = process.env.NODE_ENV !== 'production' ? 'http://localhost:3000' : window.location.origin;
+    const callbackUrl = `${base}/auth/callback?redirectTo=${encodeURIComponent(redirectPath)}`;
     
     const { error } = await supabase.auth.signInWithOAuth({ 
       provider: "google", 

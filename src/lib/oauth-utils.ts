@@ -12,11 +12,18 @@ import type { Database } from "@/types/supabase";
  * Gets the site URL based on environment
  */
 function getSiteUrl(): string {
+  // During development, always standardize to http://localhost:3000
+  const isDev = process.env.NODE_ENV !== 'production';
+  if (isDev) {
+    return 'http://localhost:3000';
+  }
+
+  // Production: prefer the actual origin in the browser
   if (typeof window !== 'undefined') {
     return window.location.origin;
   }
-  
-  // Fallback for server-side rendering
+
+  // SSR fallback
   return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 }
 

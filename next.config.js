@@ -1,11 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    domains: ['localhost'],
-  },
-  env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
-  },
-}
+  // Ensure Next only traces files within this project (Next 15+)
+  outputFileTracingRoot: __dirname,
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
