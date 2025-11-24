@@ -76,42 +76,40 @@ async function setupTestUsers() {
   logSection('Setting Up Test Users');
   
   try {
-    // Find admin user by checking profiles table first
-    const { data: profiles, error: profilesError } = await supabase
-      .from('profiles')
-      .select('id')
-      .limit(10);
+    // Use service role to list users from auth
+    const { data: usersPage, error: listError } = await supabase.auth.admin.listUsers({ page: 1, perPage: 50 });
+    if (listError) throw listError;
 
-    if (profilesError) throw profilesError;
-
-    if (!profiles || profiles.length === 0) {
-      logTest('Users found', false, 'No users in profiles table');
+    const users = usersPage?.users || [];
+    if (users.length === 0) {
+      logTest('Users found', false, 'No users found via auth.admin');
       return false;
     }
 
-    // Check each user to find admin and regular users
-    for (const profile of profiles) {
+    // Check each user to find admin and regular users via RPC
+    for (const user of users) {
+      const userId = user.id;
       try {
         const { data: isAdmin, error: adminCheckError } = await supabase.rpc('is_admin_user', { 
-          user_uuid: profile.id 
+          user_uuid: userId 
         });
-        
-        if (!adminCheckError) {
-          if (isAdmin && !TEST_USERS.admin) {
-            TEST_USERS.admin = profile.id;
-            logTest('Admin user found', true, `User ID: ${TEST_USERS.admin}`);
-          } else if (!isAdmin && !TEST_USERS.regular) {
-            TEST_USERS.regular = profile.id;
-            logTest('Regular user found', true, `User ID: ${TEST_USERS.regular}`);
-          }
+        if (adminCheckError) {
+          // If RPC missing, skip user and continue
+          continue;
         }
 
-        // Break if we found both types of users
+        if (isAdmin && !TEST_USERS.admin) {
+          TEST_USERS.admin = userId;
+          logTest('Admin user found', true, `User ID: ${TEST_USERS.admin}`);
+        } else if (!isAdmin && !TEST_USERS.regular) {
+          TEST_USERS.regular = userId;
+          logTest('Regular user found', true, `User ID: ${TEST_USERS.regular}`);
+        }
+
         if (TEST_USERS.admin && TEST_USERS.regular) {
           break;
         }
       } catch (error) {
-        // Continue to next user if this one fails
         continue;
       }
     }
@@ -156,7 +154,6 @@ async function testWalletFunctions() {
 
     // Verify balance
     const { data: balance, error: balanceError } = await supabase
-      .schema('onagui')
       .from('wallets')
       .select('balance_fiat')
       .eq('user_id', TEST_USERS.regular)
@@ -179,7 +176,6 @@ async function testWalletFunctions() {
 
     // Verify new balance
     const { data: newBalance, error: newBalanceError } = await supabase
-      .schema('onagui')
       .from('wallets')
       .select('balance_fiat')
       .eq('user_id', TEST_USERS.regular)
@@ -220,9 +216,10 @@ async function testAdminBypass() {
     const adminGiveaway = {
       ...TEST_GIVEAWAY,
       title: 'Admin Test Giveaway',
-      created_by: TEST_USERS.admin,
+      creator_id: TEST_USERS.admin,
       prize_amount: 1000.00, // High amount to test bypass
-      escrow_amount: 0 // Admin bypass
+      escrow_amount: 0, // Admin bypass
+      status: 'draft'
     };
 
     const { data: adminGiveawayResult, error: adminGiveawayError } = await supabase
@@ -255,22 +252,23 @@ async function testUserEscrowRequirements() {
     // Get current wallet balance
     const { data: walletData, error: walletError } = await supabase
       .from('wallets')
-      .select('balance')
+      .select('balance_fiat')
       .eq('user_id', TEST_USERS.regular)
       .single();
     
     if (walletError) throw walletError;
     
-    const currentBalance = walletData.balance;
+    const currentBalance = walletData.balance_fiat ?? 0;
     logInfo(`Current wallet balance: $${currentBalance}`);
 
     // Test 1: Giveaway with sufficient funds
     const sufficientGiveaway = {
       ...TEST_GIVEAWAY,
       title: 'Sufficient Funds Test',
-      created_by: TEST_USERS.regular,
-      prize_amount: Math.min(50.00, currentBalance - 10), // Ensure sufficient funds
-      escrow_amount: Math.min(50.00, currentBalance - 10)
+      creator_id: TEST_USERS.regular,
+      prize_amount: Math.max(0, Math.min(50.00, currentBalance - 10)), // Ensure sufficient funds
+      escrow_amount: Math.max(0, Math.min(50.00, currentBalance - 10)),
+      status: 'draft'
     };
 
     const { data: sufficientResult, error: sufficientError } = await supabase
@@ -295,9 +293,10 @@ async function testUserEscrowRequirements() {
     const insufficientGiveaway = {
       ...TEST_GIVEAWAY,
       title: 'Insufficient Funds Test',
-      created_by: TEST_USERS.regular,
+      creator_id: TEST_USERS.regular,
       prize_amount: currentBalance + 100.00, // More than available
-      escrow_amount: currentBalance + 100.00
+      escrow_amount: currentBalance + 100.00,
+      status: 'draft'
     };
 
     const { data: insufficientResult, error: insufficientError } = await supabase

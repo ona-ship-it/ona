@@ -52,12 +52,13 @@ export default function GiveawaysClient() {
       }
       
       const data = await response.json();
-      
+
       if (data.error) {
         throw new Error(data.error);
       }
 
-      setGiveaways(data.giveaways || []);
+      // API returns shape: { success, data, pagination }
+      setGiveaways(Array.isArray(data?.data) ? data.data : []);
     } catch (err: any) {
       console.error('Error fetching giveaways:', err);
       setError(err.message || 'Failed to load giveaways');

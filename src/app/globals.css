@@ -1,32 +1,25 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Base adaptive colors */ 
-html, body { 
-  @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100; 
+/* Base adaptive colors via CSS variables */
+html, body {
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 /* Adaptive text utility */
-.text-adaptive {
-  @apply text-gray-900 dark:text-gray-100;
+.text-adaptive { color: var(--foreground); }
+
+.text-adaptive-secondary { color: #6b7280; }
+
+button, a { color: var(--foreground); }
+
+button:hover, a:hover { color: #60a5fa; }
+
+input, textarea {
+  background-color: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--admin-border, #374151);
 }
-
-.text-adaptive-secondary {
-  @apply text-gray-600 dark:text-gray-400;
-}
-
-button, a { 
-  @apply text-gray-900 dark:text-gray-100; 
-} 
-
-button:hover, a:hover { 
-  @apply text-blue-600 dark:text-blue-400; 
-} 
-
-input, textarea { 
-  @apply bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-700; 
-} 
 
 :root {
   --background: #ffffff;
@@ -54,13 +47,18 @@ html[data-theme="darker"] {
 
 @layer base {
   html, body {
-    @apply scroll-smooth;
+    scroll-behavior: smooth;
   }
 }
 
 @layer components {
   button, a {
-    @apply transition-all duration-200 ease-in-out active:scale-95;
+    transition-property: all;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
+  }
+  button:active, a:active {
+    transform: scale(0.95);
   }
 }
 

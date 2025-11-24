@@ -15,6 +15,15 @@ interface FieldErrors {
 }
 
 export default function AdminNewGiveawayPage() {
+  const toLocalDateTimeInputValue = (date: Date) => {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [entryCost, setEntryCost] = useState(0);
@@ -63,7 +72,10 @@ export default function AdminNewGiveawayPage() {
         if (endDate > maxDate) return 'End date cannot be more than 1 year in the future';
         break;
       case 'image':
-        if (!imageUrl) return 'Image is required';
+        // Image is optional. If present, basic sanity check.
+        if (imageUrl && typeof imageUrl === 'string' && !imageUrl.startsWith('http')) {
+          return 'Invalid image URL';
+        }
         break;
     }
     return undefined;
@@ -121,38 +133,96 @@ export default function AdminNewGiveawayPage() {
       const previewUrl = URL.createObjectURL(file);
       setPhotoPreview(previewUrl);
 
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
+      // Resolve current session/user reliably
+      // 1) Prefer getSession (handles cookie-based auth better in Next.js)
+      let {
+        data: { session }
+      } = await supabase.auth.getSession();
+      let user = session?.user ?? null;
+
+      // 2) Fallback to server verification (handles cookie propagation/race conditions)
       if (!user) {
-        throw new Error('You must be logged in to upload images');
+        try {
+          const res = await fetch('/api/verify-session', {
+            cache: 'no-store',
+          });
+          if (res.ok) {
+            const json = await res.json();
+            user = json.user ?? null;
+          }
+        } catch (_e) {
+          // swallow; will show a friendly error below
+        }
       }
 
-      // Upload to Supabase Storage with correct bucket and path
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `giveaway-photos/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('giveaways')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) {
-        throw uploadError;
+      if (!user) {
+        setPhotoError('You must be logged in to upload images');
+        setPhotoPreview('');
+        setImageUrl('');
+        setPhotoLoading(false);
+        return;
       }
 
-      // Get public URL
-      const { data } = supabase.storage
-        .from('giveaways')
-        .getPublicUrl(filePath);
+      // Upload via server-side API to bypass RLS and ensure reliability
+      const formData = new FormData();
+      formData.append('file', file);
+      const resp = await fetch('/api/admin/giveaways/upload-image', {
+        method: 'POST',
+        body: formData,
+        // Ensure no cached redirects interfere
+        cache: 'no-store',
+      });
 
-      setImageUrl(data.publicUrl);
+      const contentType = resp.headers.get('content-type') || '';
+
+      if (!resp.ok) {
+        // Read body safely; could be JSON or HTML (redirect/error page)
+        const rawText = await resp.text();
+        let serverError = 'Failed to upload image';
+        if (contentType.includes('application/json')) {
+          try {
+            const errJson = JSON.parse(rawText);
+            serverError = errJson?.error || errJson?.message || serverError;
+          } catch (_) {
+            // fall back to text
+            serverError = rawText || serverError;
+          }
+        } else {
+          // HTML or plaintext — likely an auth redirect or middleware block
+          if (rawText?.trim().startsWith('<')) {
+            serverError = 'Upload failed: received HTML (possible auth redirect). Please ensure you are signed in as an admin and try again.';
+          } else {
+            serverError = rawText || serverError;
+          }
+        }
+        throw new Error(serverError);
+      }
+
+      // Successful status; ensure JSON payload
+      let json: any = null;
+      if (contentType.includes('application/json')) {
+        try {
+          json = await resp.json();
+        } catch (e) {
+          throw new Error('Upload succeeded but response is not valid JSON');
+        }
+      } else {
+        const rawText = await resp.text();
+        try {
+          json = JSON.parse(rawText);
+        } catch (_) {
+          throw new Error('Upload succeeded but returned HTML/text. Are you being redirected?');
+        }
+      }
+
+      if (!json?.publicUrl) {
+        throw new Error('Upload did not return image URL');
+      }
+      setImageUrl(json.publicUrl);
       
-      // Trigger image validation
+      // Trigger image validation (optional field)
       setTouched(prev => ({ ...prev, image: true }));
-      const imageError = validateField('image', data.publicUrl);
+      const imageError = validateField('image', json.publicUrl);
       setFieldErrors(prev => ({ ...prev, image: imageError }));
     } catch (err: any) {
       console.error('Error uploading image:', err);
@@ -186,7 +256,9 @@ export default function AdminNewGiveawayPage() {
       
       if (hasErrors) {
         setFieldErrors(errors);
-        throw new Error('Please fix the validation errors before submitting');
+        setError('Please fix the validation errors before submitting');
+        setLoading(false);
+        return;
       }
 
       // Create FormData for server action
@@ -351,8 +423,8 @@ export default function AdminNewGiveawayPage() {
                 id="ends_at"
                 value={endsAt}
                 onChange={(e) => handleFieldChange('endsAt', e.target.value, setEndsAt)}
-                min={new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16)} // 1 hour from now
-                max={new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)} // 1 year from now
+                min={toLocalDateTimeInputValue(new Date(Date.now() + 60 * 60 * 1000))} // 1 hour from now (local)
+                max={toLocalDateTimeInputValue(new Date(Date.now() + 365 * 24 * 60 * 60 * 1000))} // 1 year from now (local)
                 className={`w-full bg-purple-900/50 border rounded-lg p-3 text-white focus:outline-none focus:ring-2 transition-colors ${
                   fieldErrors.endsAt && touched.endsAt
                     ? 'border-red-500/50 focus:ring-red-400'
@@ -369,7 +441,7 @@ export default function AdminNewGiveawayPage() {
             {/* Image Upload */}
             <div>
               <label htmlFor="image" className="block text-purple-300 mb-2 font-medium">
-                Giveaway Image * <span className="text-sm text-gray-400">(Max 5MB, JPG/PNG/GIF/WebP)</span>
+                Giveaway Image (Optional) <span className="text-sm text-gray-400">(Max 5MB, JPG/PNG/GIF/WebP)</span>
               </label>
               <input
                 type="file"
@@ -381,7 +453,7 @@ export default function AdminNewGiveawayPage() {
                     ? 'border-red-500/50 focus:ring-red-400'
                     : 'border-purple-500/30 focus:ring-purple-400'
                 }`}
-                required
+                
               />
               {photoError && (
                 <p className="text-red-400 text-sm mt-2">{photoError}</p>

@@ -202,7 +202,7 @@ export default function NewGiveawayClient() {
       // Prepare media URL (either from upload or direct URL input)
       const mediaUrl = formData.photo_url || formData.media_url || null;
       
-      // Insert new giveaway with active status (admin bypass)
+      // Insert new giveaway as a draft (align with RLS policy)
       const { data, error } = await supabase
         .from('giveaways')
         .insert({
@@ -215,8 +215,7 @@ export default function NewGiveawayClient() {
           photo_url: formData.photo_url || null,
           media_url: mediaUrl,
           ends_at: formData.ends_at,
-          status: 'active', // Force active status for admin
-          escrow_amount: 0 // Admin bypass escrow
+          status: 'draft'
         })
         .select()
         .single();
@@ -561,8 +560,8 @@ export default function NewGiveawayClient() {
                         <Loader2 className="animate-spin mr-2" size={20} />
                         <span>Creating...</span>
                       </div>
-                    ) : (
-                      'Create & Activate'
+                  ) : (
+                      'Save as Draft'
                     )}
                   </button>
                 )}
