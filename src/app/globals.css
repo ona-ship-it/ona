@@ -1,16 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* Base adaptive colors */
 html,
 body {
-  @apply bg-white text-gray-900;
-}
-
-.dark html,
-.dark body {
-  @apply bg-gray-900 text-gray-100;
+  @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100;
 }
 
 /* Adaptive text utility */
@@ -54,7 +47,12 @@ html[data-theme="darker"] {
   --foreground: #ededed;
 }
 
-/* Theme variables are handled in :root */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
 
 @layer base {
 
