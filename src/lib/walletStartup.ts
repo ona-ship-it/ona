@@ -5,7 +5,8 @@
  * This should be called during the application initialization process.
  */
 
-import { initializeWalletServiceManager, WalletServiceManager } from '../services/walletServiceManager';
+// TEMPORARILY DISABLED - Wallet services moved to separate process
+// import { initializeWalletServiceManager, WalletServiceManager } from '../services/walletServiceManager';
 
 interface WalletStartupConfig {
   supabaseUrl: string;
@@ -140,7 +141,7 @@ function validateConfig(config: WalletStartupConfig): void {
   // Accept either plain private key (0x...) or encrypted format (iv:authTag:encrypted)
   const isPlainKey = config.hotWalletPrivateKey.startsWith('0x') && config.hotWalletPrivateKey.length === 66;
   const isEncryptedKey = config.hotWalletPrivateKey.split(':').length === 3;
-  
+
   if (!isPlainKey && !isEncryptedKey) {
     throw new Error('Invalid hot wallet private key format - must be either plain (0x...) or encrypted (iv:authTag:encrypted)');
   }
