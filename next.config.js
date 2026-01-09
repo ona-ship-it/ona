@@ -12,7 +12,6 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['node-cron', 'pg', 'nodemailer'],
   },
-  turbopack: {},
 }
 
 module.exports = nextConfig
