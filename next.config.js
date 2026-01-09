@@ -9,6 +9,9 @@ const nextConfig = {
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
+  experimental: {
+    serverComponentsExternalPackages: ['node-cron'],
+  },
 }
 
 module.exports = nextConfig
