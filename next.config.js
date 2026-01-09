@@ -12,19 +12,7 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['node-cron', 'pg', 'nodemailer'],
   },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Exclude server-only services from client bundle
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        '@/services/withdrawalWorker': false,
-        '@/services/reconciliationMonitor': false,
-        '@/services/walletServiceManager': false,
-        '@/services/onChainMonitor': false,
-      };
-    }
-    return config;
-  },
+  turbopack: {},
 }
 
 module.exports = nextConfig
