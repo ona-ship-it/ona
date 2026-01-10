@@ -8,6 +8,9 @@
 // TEMPORARILY DISABLED - Wallet services moved to separate process
 // import { initializeWalletServiceManager, WalletServiceManager } from '../services/walletServiceManager';
 
+// Temporary type definition while wallet services are disabled
+type WalletServiceManager = any;
+
 interface WalletStartupConfig {
   supabaseUrl: string;
   supabaseServiceKey: string;
