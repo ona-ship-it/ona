@@ -83,3 +83,4 @@ echo "5. Test: https://onaguicom.vercel.app/login"
 echo ""
 echo "✅ Ready to commit and push!"
 rm -rf src/app/admin src/app/dashboard src/middleware.ts middleware.ts src/actions.ts *.mjs && git add . && git commit -m "Clean up broken files" && git push origin main
+rm -rf src/app/admin src/app/dashboard src/app/wallet src/app/settings src/app/fundraise src/app/raffles src/app/marketplace src/app/giveaways src/app/community src/app/docs src/app/view-profile src/middleware.ts middleware.ts src/actions.ts src/app/actions.ts *.mjs *.sql && git add . && git commit -m "Clean slate" && git push origin main
