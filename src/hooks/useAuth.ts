@@ -41,13 +41,13 @@ export function useAuth() {
 
   const loadProfile = async (userId: string) => {
     const { data, error } = await supabase
-      .from('profiles')
+      .from('onagui_profiles')
       .select('*')
       .eq('id', userId)
       .single()
 
     if (!error && data) {
-      setProfile(data)
+      setProfile(data as any)
     }
   }
 
@@ -65,7 +65,7 @@ export function useAuth() {
       if (error) throw error
 
       if (data.user && phone) {
-        await supabase.from('profiles').update({ phone }).eq('id', data.user.id)
+        await supabase.from('onagui_profiles').update({ phone } as any).eq('id', data.user.id)
       }
 
       return { data, error: null }
@@ -110,14 +110,14 @@ export function useAuth() {
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return { error: new Error('Not authenticated') }
     try {
-      const { data, error } = await supabase
-        .from('profiles')
+      const { data, error } = await (supabase as any)
+        .from('onagui_profiles')
         .update(updates)
         .eq('id', user.id)
         .select()
         .single()
       if (error) throw error
-      setProfile(data)
+      setProfile(data as any)
       return { data, error: null }
     } catch (error: any) {
       return { data: null, error }

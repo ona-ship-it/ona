@@ -19,7 +19,7 @@ export default function XSignIn() {
 
   const handleSignIn = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
       
       const { error } = await supabase.auth.signInWithOAuth({
@@ -37,7 +37,7 @@ export default function XSignIn() {
       setError(errorMessage);
       console.error('X sign-in error:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -51,11 +51,11 @@ export default function XSignIn() {
       
       <button
         onClick={handleSignIn}
-        disabled={loading}
+        disabled={isLoading}
         className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-black hover:bg-gray-800 text-white rounded-md transition-colors"
       >
         <FaXTwitter className="text-xl" />
-        <span>{loading ? 'Connecting...' : 'Continue with X'}</span>
+        <span>{isLoading ? 'Connecting...' : 'Continue with X'}</span>
       </button>
     </div>
   );

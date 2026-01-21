@@ -30,20 +30,20 @@ export function WalletBalance({ userId, onBalanceUpdate, className = '', showTic
     
     try {
       // First, ensure user has a wallet using the new function
-      const { error: ensureError } = await supabase.rpc('ensure_user_wallet', {
+      const { error: ensureError } = await ((supabase as any).rpc('ensure_user_wallet', {
         user_uuid: userId
-      });
+      }));
 
       if (ensureError) {
         console.warn('Could not ensure wallet exists:', ensureError);
       }
 
       // Fetch wallet balance with new schema
-      const { data, error } = await supabase
+      const { data, error } = await ((supabase as any)
         .from('onagui.wallets')
         .select('balance_fiat, balance_tickets')
         .eq('user_id', userId)
-        .single();
+        .single());
 
       if (error) {
         if (error.code === 'PGRST116') {
