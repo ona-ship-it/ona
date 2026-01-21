@@ -1,3 +1,11 @@
+#!/bin/bash
+
+echo "🔧 Restoring homepage and layout..."
+echo ""
+
+# Create a clean, simple homepage
+echo "📝 Creating new homepage..."
+cat > src/app/page.tsx << 'EOF'
 'use client'
 
 import Link from 'next/link'
@@ -150,3 +158,47 @@ export default function Home() {
     </div>
   )
 }
+EOF
+echo "✅ Homepage created"
+
+# Ensure layout.tsx exists
+echo "📝 Checking layout..."
+if [ ! -f "src/app/layout.tsx" ]; then
+    echo "Creating layout.tsx..."
+    cat > src/app/layout.tsx << 'EOF'
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+
+const inter = Inter({ subsets: ['latin'] })
+
+export const metadata: Metadata = {
+  title: 'Onagui - Web3 Giveaway Platform',
+  description: 'Create and enter crypto-powered giveaways',
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body className={inter.className}>{children}</body>
+    </html>
+  )
+}
+EOF
+    echo "✅ Layout created"
+else
+    echo "✅ Layout exists"
+fi
+
+echo ""
+echo "🎉 Homepage and layout restored!"
+echo ""
+echo "📋 Next: Commit and push"
+echo "   git add ."
+echo "   git commit -m 'Restore homepage and layout'"
+echo "   git push origin main"
+echo ""
