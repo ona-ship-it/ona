@@ -151,7 +151,7 @@ export default function NewGiveawayClient() {
       const initialStatus = getInitialStatus();
       
       // Insert new giveaway
-      const { data, error } = await supabase
+      const { data, error } = await ((supabase as any)
         .from('giveaways')
         .insert({
           creator_id: user.id,
@@ -167,7 +167,7 @@ export default function NewGiveawayClient() {
           escrow_amount: isAdmin ? 0 : formData.prize_amount // Admin bypass escrow
         })
         .select()
-        .single();
+        .single());
         
       if (error) throw error;
       
@@ -232,7 +232,7 @@ export default function NewGiveawayClient() {
       const mediaUrl = formData.photo_url || formData.media_url || null;
       
       // Insert new giveaway with active status (admin bypass)
-      const { data, error } = await supabase
+      const { data, error } = await ((supabase as any)
         .from('giveaways')
         .insert({
           creator_id: user.id,
@@ -248,7 +248,7 @@ export default function NewGiveawayClient() {
           escrow_amount: 0 // Admin bypass escrow
         })
         .select()
-        .single();
+        .single());
         
       if (error) throw error;
       

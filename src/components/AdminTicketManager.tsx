@@ -59,10 +59,12 @@ export function AdminTicketManager() {
     setLoading(true);
 
     try {
-      const { data: success, error } = await supabase.rpc('add_funds_to_wallet_tickets', {
+      const response = await (supabase.rpc('add_funds_to_wallet_tickets', {
         user_uuid: selectedUserId,
         amount_to_add: ticketAmount,
-      });
+      } as any) as any);
+      
+      const { data: success, error } = response;
 
       if (error) throw error;
 

@@ -23,24 +23,24 @@ export function AdminWalletManager() {
     setLoading(true);
     try {
       // Fetch users with their wallet balances
-      const { data: usersData, error: usersError } = await supabase
+      const { data: usersData, error: usersError } = await (supabase
         .from('users')
         .select('id, email')
-        .limit(50);
+        .limit(50) as any);
 
       if (usersError) throw usersError;
 
       // Fetch wallet balances for these users
-      const userIds = usersData?.map(u => u.id) || [];
+      const userIds = (usersData as any)?.map((u: any) => u.id) || [];
       const { data: walletsData } = await supabase
         .from('wallets')
         .select('user_id, balance')
         .in('user_id', userIds);
 
       // Combine user data with wallet balances
-      const usersWithBalances = usersData?.map(user => ({
+      const usersWithBalances = (usersData as any)?.map((user: any) => ({
         ...user,
-        balance: walletsData?.find(w => w.user_id === user.id)?.balance || 0
+        balance: (walletsData as any)?.find((w: any) => w.user_id === user.id)?.balance || 0
       })) || [];
 
       setUsers(usersWithBalances);
@@ -63,10 +63,11 @@ export function AdminWalletManager() {
     setMessage(null);
 
     try {
-      const { error } = await supabase.rpc('add_funds_to_wallet', {
+      const response = await ((supabase as any).rpc('add_funds_to_wallet', {
         user_uuid: selectedUser,
         amount: parseFloat(amount)
-      });
+      }));
+      const { error } = response;
 
       if (error) throw error;
 

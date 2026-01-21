@@ -82,3 +82,4 @@ echo "4. Wait for Vercel to deploy (2-3 minutes)"
 echo "5. Test: https://onaguicom.vercel.app/login"
 echo ""
 echo "✅ Ready to commit and push!"
+rm -rf src/app/admin src/app/dashboard src/middleware.ts middleware.ts src/actions.ts *.mjs && git add . && git commit -m "Clean up broken files" && git push origin main
