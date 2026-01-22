@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import Link from 'next/link'
+import Image from 'next/image'
 
 type Giveaway = {
   id: string
   title: string
   emoji: string
+  image_url: string | null
   prize_value: number
   prize_currency: string
   total_tickets: number
@@ -196,17 +198,30 @@ export default function HomePage() {
                 href={`/giveaways/${giveaway.id}`}
                 className="group bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20 transition-all hover:-translate-y-1"
               >
-                {/* Emoji Header */}
-                <div className="relative h-32 bg-gradient-to-br from-blue-900/30 to-cyan-900/30 flex items-center justify-center">
-                  <div className="text-6xl group-hover:scale-110 transition-transform">
-                    {giveaway.emoji}
-                  </div>
+                {/* Image or Emoji Header */}
+                <div className="relative h-48 bg-gradient-to-br from-blue-900/30 to-cyan-900/30 flex items-center justify-center overflow-hidden">
+                  {giveaway.image_url ? (
+                    <Image
+                      src={giveaway.image_url}
+                      alt={giveaway.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="text-7xl group-hover:scale-110 transition-transform">
+                      {giveaway.emoji}
+                    </div>
+                  )}
+                  
+                  {/* Overlay badges */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  
                   {!giveaway.is_free && (
-                    <div className="absolute top-3 right-3 px-3 py-1 bg-yellow-600 rounded-lg text-xs font-bold text-white">
+                    <div className="absolute top-3 right-3 px-3 py-1 bg-yellow-600 rounded-lg text-xs font-bold text-white shadow-lg">
                       💰 Paid
                     </div>
                   )}
-                  <div className="absolute top-3 left-3 px-3 py-1 bg-slate-900/80 backdrop-blur rounded-lg text-xs font-semibold text-slate-300">
+                  <div className="absolute bottom-3 left-3 px-3 py-1 bg-slate-900/90 backdrop-blur rounded-lg text-xs font-semibold text-slate-300">
                     ⏰ {getTimeRemaining(giveaway.end_date)}
                   </div>
                 </div>
