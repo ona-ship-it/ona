@@ -16,7 +16,7 @@ export default function Home() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#0f0f23] text-white">
+    <div className="min-h-screen bg-black text-white">
       {/* Top Bar */}
       <div className="bg-gradient-to-r from-blue-900/10 via-blue-800/10 to-blue-900/10 border-b border-white/5 px-4 py-2">
         <div className="max-w-[1600px] mx-auto flex items-center justify-between text-sm">
