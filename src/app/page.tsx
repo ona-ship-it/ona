@@ -1,306 +1,266 @@
-'use client'
+import { useState } from 'react'
 
-import Link from 'next/link'
-import { useAuth } from '@/hooks/useAuth'
-import { ChevronRight, Zap, Users, Trophy, TrendingUp, Shield, Rocket } from 'lucide-react'
+export default function OnaguiPro() {
+  const [activeTab, setActiveTab] = useState('giveaways')
+  const [searchQuery, setSearchQuery] = useState('')
 
-export default function Home() {
-  const { user, loading } = useAuth()
+  const giveaways = [
+    { id: 1, title: 'Gaming PC Bundle', creator: 'TechGamer', prize: '$3,000', entries: '12.5K', timeLeft: '2d 14h', image: '🎮', hot: true },
+    { id: 2, title: 'Luxury Vacation', creator: 'TravelPro', prize: '$5,000', entries: '8.2K', timeLeft: '5d 3h', image: '✈️', featured: true },
+    { id: 3, title: 'iPhone 15 Pro Max', creator: 'TechReview', prize: '$1,200', entries: '25K', timeLeft: '1d 8h', image: '📱', hot: true },
+    { id: 4, title: 'Crypto Airdrop', creator: 'CryptoKing', prize: '10 ETH', entries: '45K', timeLeft: '12h', image: '💎', featured: true },
+    { id: 5, title: 'PS5 + Games', creator: 'GameZone', prize: '$800', entries: '18K', timeLeft: '3d 22h', image: '🎯', new: true },
+    { id: 6, title: 'MacBook Pro M3', creator: 'AppleFan', prize: '$2,500', entries: '15K', timeLeft: '4d 16h', image: '💻', hot: true },
+  ]
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-lg border-b border-gray-800/50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold">
-            <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              ONAGUI
-            </span>
-          </Link>
-          
-          <div className="hidden lg:flex gap-8">
-            <Link href="/giveaways" className="text-gray-400 hover:text-white transition">Giveaways</Link>
-            <Link href="/raffles" className="text-gray-400 hover:text-white transition">Raffles</Link>
-            <Link href="/marketplace" className="text-gray-400 hover:text-white transition">Marketplace</Link>
-            <Link href="/fundraise" className="text-gray-400 hover:text-white transition">Fundraise</Link>
+    <div className="min-h-screen bg-[#0f0f23] text-white">
+      {/* Top Bar */}
+      <div className="bg-gradient-to-r from-blue-900/10 via-blue-800/10 to-blue-900/10 border-b border-white/5 px-4 py-2">
+        <div className="max-w-[1600px] mx-auto flex items-center justify-between text-sm">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 text-green-400">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="font-medium">8,432 Online</span>
+            </div>
+            <div className="text-gray-400">Total Prizes: <span className="text-white font-semibold">$2.4M+</span></div>
           </div>
+          <div className="flex items-center gap-4">
+            <span className="text-gray-400">🎁 Next Draw in <span className="text-orange-400 font-mono">02:14:35</span></span>
+          </div>
+        </div>
+      </div>
 
-          <div className="flex gap-3">
-            {!loading && (
-              <>
-                {user ? (
-                  <div className="flex gap-3">
-                    <Link href="/wallet" className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-medium hover:opacity-90 transition">
-                      Wallet
-                    </Link>
-                    <Link href="/profile" className="px-4 py-2 border border-gray-700 rounded-lg hover:border-gray-500 transition">
-                      Profile
-                    </Link>
+      {/* Main Header */}
+      <header className="sticky top-0 z-50 bg-[#0f0f23]/95 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-[1600px] mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center text-2xl">
+                  🎁
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                    ONAGUI
+                  </h1>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wider">Provably Fair</p>
+                </div>
+              </div>
+
+              {/* Main Nav */}
+              <nav className="hidden lg:flex items-center gap-1">
+                {['Giveaways', 'Raffles', 'Fundraise', 'Marketplace'].map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => setActiveTab(item.toLowerCase())}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      activeTab === item.toLowerCase()
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </nav>
+            </div>
+
+            {/* Right Side */}
+            <div className="flex items-center gap-3">
+              {/* Search */}
+              <div className="hidden md:block relative">
+                <input
+                  type="text"
+                  placeholder="Search giveaways..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-80 bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 pl-10 text-sm focus:outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all"
+                />
+                <svg className="w-4 h-4 text-gray-500 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+
+              {/* Wallet Balance */}
+              <div className="hidden md:flex items-center gap-2 bg-gradient-to-r from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-lg px-4 py-2">
+                <div className="w-6 h-6 bg-green-500/20 rounded flex items-center justify-center">
+                  <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-[10px] text-gray-400 uppercase">Balance</div>
+                  <div className="text-sm font-bold text-green-400">$0.00</div>
+                </div>
+              </div>
+
+              {/* Create Button */}
+              <button className="hidden md:flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 rounded-lg px-5 py-2.5 font-semibold transition-all shadow-lg shadow-blue-500/25">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Create
+              </button>
+
+              {/* User */}
+              <button className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center font-bold">
+                U
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Stats Banner */}
+      <div className="bg-gradient-to-r from-blue-950/40 via-blue-900/40 to-blue-950/40 border-b border-white/5">
+        <div className="max-w-[1600px] mx-auto px-4 py-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <div className="text-gray-400 text-sm mb-1">Total Giveaways</div>
+              <div className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">1,247</div>
+            </div>
+            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <div className="text-gray-400 text-sm mb-1">Active Now</div>
+              <div className="text-3xl font-bold text-green-400">342</div>
+            </div>
+            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <div className="text-gray-400 text-sm mb-1">Total Winners</div>
+              <div className="text-3xl font-bold text-orange-400">15.2K</div>
+            </div>
+            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <div className="text-gray-400 text-sm mb-1">Prizes Awarded</div>
+              <div className="text-3xl font-bold text-blue-400">$2.4M</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="border-b border-white/5 bg-[#0f0f23]/50 backdrop-blur">
+        <div className="max-w-[1600px] mx-auto px-4 py-4">
+          <div className="flex items-center gap-2 overflow-x-auto">
+            {['🔥 Hot', '⭐ Featured', '🆕 New', '⏰ Ending Soon', '💎 High Value', '🎯 Low Entry'].map((filter) => (
+              <button
+                key={filter}
+                className="flex-shrink-0 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium transition-all"
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <main className="max-w-[1600px] mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {giveaways.map((item) => (
+            <div
+              key={item.id}
+              className="group bg-[#1a1a2e] rounded-2xl overflow-hidden border border-white/10 hover:border-blue-500/50 transition-all duration-300 hover:transform hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/20"
+            >
+              {/* Image/Icon */}
+              <div className="relative h-56 bg-gradient-to-br from-blue-950/60 to-blue-900/60 flex items-center justify-center overflow-hidden">
+                <div className="text-8xl filter drop-shadow-2xl">{item.image}</div>
+                
+                {/* Badges */}
+                <div className="absolute top-3 left-3 flex flex-col gap-2">
+                  {item.hot && (
+                    <div className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                      🔥 HOT
+                    </div>
+                  )}
+                  {item.featured && (
+                    <div className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                      ⭐ FEATURED
+                    </div>
+                  )}
+                  {item.new && (
+                    <div className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                      🆕 NEW
+                    </div>
+                  )}
+                </div>
+
+                {/* Time Left */}
+                <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white text-sm font-bold px-3 py-1.5 rounded-lg border border-white/20">
+                  ⏰ {item.timeLeft}
+                </div>
+
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                  <button className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 rounded-lg py-3 font-bold transition-all">
+                    Enter Now
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold mb-1 group-hover:text-blue-400 transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-gray-400">by {item.creator}</p>
                   </div>
-                ) : (
-                  <div className="flex gap-3">
-                    <Link href="/login" className="px-4 py-2 text-gray-300 hover:text-white transition">
-                      Sign In
-                    </Link>
-                    <Link href="/signup" className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-medium hover:opacity-90 transition">
-                      Get Started
-                    </Link>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                    <div className="text-xs text-gray-400 mb-1">Prize Value</div>
+                    <div className="text-lg font-bold text-green-400">{item.prize}</div>
                   </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+                  <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                    <div className="text-xs text-gray-400 mb-1">Entries</div>
+                    <div className="text-lg font-bold text-blue-400">{item.entries}</div>
+                  </div>
+                </div>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-24 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-20 left-1/4 w-72 h-72 bg-blue-600/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl"></div>
-        </div>
+                {/* Progress Bar */}
+                <div className="mb-4">
+                  <div className="flex justify-between text-xs text-gray-400 mb-2">
+                    <span>Tickets</span>
+                    <span>75% filled</span>
+                  </div>
+                  <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full w-3/4 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full"></div>
+                  </div>
+                </div>
 
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-8">
-            <span className="inline-block px-3 py-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-full text-sm text-blue-300">
-              ✨ The Future of Gaming & Rewards
-            </span>
-          </div>
-
-          <h1 className="text-7xl lg:text-8xl font-bold mb-6 leading-tight">
-            Play, Win,
-            <br />
-            <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-              Earn
-            </span>
-          </h1>
-
-          <p className="text-xl text-gray-400 max-w-2xl mb-8 leading-relaxed">
-            Experience the next generation of gaming platform where giveaways, raffles, and community rewards come together. Join thousands of players winning every day.
-          </p>
-
-          <div className="flex gap-4 mb-16">
-            {user ? (
-              <>
-                <Link href="/giveaways" className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-semibold hover:opacity-90 transition flex items-center gap-2">
-                  Explore Giveaways <ChevronRight className="w-4 h-4" />
-                </Link>
-                <Link href="/wallet" className="px-8 py-3 border border-gray-700 rounded-lg font-semibold hover:border-gray-500 transition">
-                  My Wallet
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/signup" className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-semibold hover:opacity-90 transition flex items-center gap-2">
-                  Start Playing <ChevronRight className="w-4 h-4" />
-                </Link>
-                <Link href="/login" className="px-8 py-3 border border-gray-700 rounded-lg font-semibold hover:border-gray-500 transition">
-                  Sign In
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 pt-8 border-t border-gray-800">
-            <div>
-              <div className="text-3xl font-bold text-blue-400 mb-1">10K+</div>
-              <div className="text-gray-500 text-sm">Active Players</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-purple-400 mb-1">$5M+</div>
-              <div className="text-gray-500 text-sm">Prizes Awarded</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-pink-400 mb-1">24/7</div>
-              <div className="text-gray-500 text-sm">Live Events</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-24 px-6 border-t border-gray-800/50">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-16">
-            <h2 className="text-4xl font-bold mb-4">Everything You Need to Win</h2>
-            <p className="text-gray-400 text-lg">Powerful features designed for every type of player</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Feature 1 */}
-            <div className="group p-8 rounded-xl bg-gradient-to-br from-gray-900 to-black border border-gray-800 hover:border-blue-500/50 transition">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-6">
-                <Trophy className="w-6 h-6" />
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <button className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg py-3 font-semibold transition-all">
+                    Free Entry
+                  </button>
+                  <button className="px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold mb-3">Giveaways</h3>
-              <p className="text-gray-400">Create and participate in giveaways with real prizes. Full control over entry methods and rewards.</p>
             </div>
-
-            {/* Feature 2 */}
-            <div className="group p-8 rounded-xl bg-gradient-to-br from-gray-900 to-black border border-gray-800 hover:border-purple-500/50 transition">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mb-6">
-                <Zap className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Raffles</h3>
-              <p className="text-gray-400">Daily raffles with instant results. Buy tickets with tokens or use free daily entries.</p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="group p-8 rounded-xl bg-gradient-to-br from-gray-900 to-black border border-gray-800 hover:border-pink-500/50 transition">
-              <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg flex items-center justify-center mb-6">
-                <TrendingUp className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Marketplace</h3>
-              <p className="text-gray-400">Buy and sell items with the community. Secure transactions with instant settlement.</p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="group p-8 rounded-xl bg-gradient-to-br from-gray-900 to-black border border-gray-800 hover:border-green-500/50 transition">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center mb-6">
-                <Rocket className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Fundraise</h3>
-              <p className="text-gray-400">Support projects and campaigns. Contribute to community initiatives and earn rewards.</p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="group p-8 rounded-xl bg-gradient-to-br from-gray-900 to-black border border-gray-800 hover:border-yellow-500/50 transition">
-              <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center mb-6">
-                <Users className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Community</h3>
-              <p className="text-gray-400">Connect with other players. View profiles, track achievements, and build your reputation.</p>
-            </div>
-
-            {/* Feature 6 */}
-            <div className="group p-8 rounded-xl bg-gradient-to-br from-gray-900 to-black border border-gray-800 hover:border-cyan-500/50 transition">
-              <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg flex items-center justify-center mb-6">
-                <Shield className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Secure Wallet</h3>
-              <p className="text-gray-400">Multi-chain crypto support. Secure transactions with instant deposits and withdrawals.</p>
-            </div>
-          </div>
+          ))}
         </div>
-      </section>
 
-      {/* How It Works */}
-      <section className="py-24 px-6 border-t border-gray-800/50 bg-gradient-to-b from-black to-gray-900/50">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-16">
-            <h2 className="text-4xl font-bold mb-4">How It Works</h2>
-            <p className="text-gray-400 text-lg">Get started in three simple steps</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-6 text-2xl font-bold">1</div>
-              <h3 className="text-xl font-semibold mb-3">Create Account</h3>
-              <p className="text-gray-400">Sign up in seconds with your email or wallet. Verify and you're ready to play.</p>
-            </div>
-
-            <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-6 text-2xl font-bold">2</div>
-              <h3 className="text-xl font-semibold mb-3">Fund Wallet</h3>
-              <p className="text-gray-400">Deposit crypto instantly. Supports multiple chains and tokens for maximum flexibility.</p>
-            </div>
-
-            <div>
-              <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-full flex items-center justify-center mb-6 text-2xl font-bold">3</div>
-              <h3 className="text-xl font-semibold mb-3">Start Winning</h3>
-              <p className="text-gray-400">Play giveaways, raffles, and more. Withdraw winnings anytime to your wallet.</p>
-            </div>
-          </div>
+        {/* Load More */}
+        <div className="text-center mt-12">
+          <button className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-8 py-4 font-semibold transition-all">
+            Load More Giveaways
+          </button>
         </div>
-      </section>
+      </main>
 
-      {/* CTA Section */}
-      <section className="py-24 px-6 border-t border-gray-800/50">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-5xl font-bold mb-6">Ready to Get Started?</h2>
-          <p className="text-xl text-gray-400 mb-8">Join thousands of players and start winning today</p>
-          
-          <div className="flex gap-4 justify-center">
-            {user ? (
-              <>
-                <Link href="/giveaways" className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-semibold hover:opacity-90 transition">
-                  Browse Giveaways
-                </Link>
-                <Link href="/wallet" className="px-8 py-4 border border-gray-700 rounded-lg font-semibold hover:border-gray-500 transition">
-                  Check Wallet
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/signup" className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-semibold hover:opacity-90 transition">
-                  Create Free Account
-                </Link>
-                <Link href="/login" className="px-8 py-4 border border-gray-700 rounded-lg font-semibold hover:border-gray-500 transition">
-                  Sign In
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-800/50 py-16 px-6 bg-gradient-to-t from-gray-900/50 to-transparent">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-5 gap-12 mb-12">
-            <div>
-              <h4 className="font-semibold mb-4">Platform</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><Link href="/giveaways" className="hover:text-white transition">Giveaways</Link></li>
-                <li><Link href="/raffles" className="hover:text-white transition">Raffles</Link></li>
-                <li><Link href="/marketplace" className="hover:text-white transition">Marketplace</Link></li>
-                <li><Link href="/fundraise" className="hover:text-white transition">Fundraise</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Community</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><Link href="/profile" className="hover:text-white transition">Players</Link></li>
-                <li><Link href="/contact" className="hover:text-white transition">Contact</Link></li>
-                <li><a href="#" className="hover:text-white transition">Discord</a></li>
-                <li><a href="#" className="hover:text-white transition">Twitter</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Account</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><Link href="/wallet" className="hover:text-white transition">Wallet</Link></li>
-                <li><Link href="/account" className="hover:text-white transition">Settings</Link></li>
-                <li><Link href="/settings" className="hover:text-white transition">Preferences</Link></li>
-                <li><a href="#" className="hover:text-white transition">Referral</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition">Terms</a></li>
-                <li><a href="#" className="hover:text-white transition">Privacy</a></li>
-                <li><a href="#" className="hover:text-white transition">Cookies</a></li>
-                <li><a href="#" className="hover:text-white transition">Status</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">ONAGUI</h4>
-              <p className="text-gray-400 text-sm">The next generation gaming and rewards platform.</p>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800/50 pt-8 flex justify-between items-center text-gray-400 text-sm">
-            <p>© 2026 ONAGUI. All rights reserved.</p>
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-white transition">Twitter</a>
-              <a href="#" className="hover:text-white transition">Discord</a>
-              <a href="#" className="hover:text-white transition">GitHub</a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* Live Chat Button */}
+      <button className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full shadow-2xl shadow-purple-500/50 flex items-center justify-center hover:scale-110 transition-transform z-50">
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      </button>
     </div>
   )
 }
