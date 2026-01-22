@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
-export default function OnaguiPro() {
+export default function Home() {
   const [activeTab, setActiveTab] = useState('giveaways')
-  const [searchQuery, setSearchQuery] = useState('')
 
   const giveaways = [
     { id: 1, title: 'Gaming PC Bundle', creator: 'TechGamer', prize: '$3,000', entries: '12.5K', timeLeft: '2d 14h', image: '🎮', hot: true },
@@ -71,45 +71,21 @@ export default function OnaguiPro() {
 
             {/* Right Side */}
             <div className="flex items-center gap-3">
-              {/* Search */}
-              <div className="hidden md:block relative">
-                <input
-                  type="text"
-                  placeholder="Search giveaways..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-80 bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 pl-10 text-sm focus:outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all"
-                />
-                <svg className="w-4 h-4 text-gray-500 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-
-              {/* Wallet Balance */}
-              <div className="hidden md:flex items-center gap-2 bg-gradient-to-r from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-lg px-4 py-2">
-                <div className="w-6 h-6 bg-green-500/20 rounded flex items-center justify-center">
-                  <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-[10px] text-gray-400 uppercase">Balance</div>
-                  <div className="text-sm font-bold text-green-400">$0.00</div>
-                </div>
-              </div>
-
               {/* Create Button */}
-              <button className="hidden md:flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 rounded-lg px-5 py-2.5 font-semibold transition-all shadow-lg shadow-blue-500/25">
+              <Link
+                href="/login"
+                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 rounded-lg px-5 py-2.5 font-semibold transition-all shadow-lg shadow-blue-500/25"
+              >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
                 Create
-              </button>
+              </Link>
 
               {/* User */}
-              <button className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center font-bold">
+              <Link href="/login" className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center font-bold">
                 U
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -235,7 +211,7 @@ export default function OnaguiPro() {
 
                 {/* Actions */}
                 <div className="flex gap-2">
-                  <button className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg py-3 font-semibold transition-all">
+                  <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 rounded-lg py-3 font-semibold transition-all">
                     Free Entry
                   </button>
                   <button className="px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all">
@@ -258,7 +234,7 @@ export default function OnaguiPro() {
       </main>
 
       {/* Live Chat Button */}
-      <button className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full shadow-2xl shadow-purple-500/50 flex items-center justify-center hover:scale-110 transition-transform z-50">
+      <button className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full shadow-2xl shadow-blue-500/50 flex items-center justify-center hover:scale-110 transition-transform z-50">
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
