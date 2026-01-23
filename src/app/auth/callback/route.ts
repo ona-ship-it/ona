@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const origin = requestUrl.origin
 
   if (code) {
-    const cookieStore = await cookies()
+    const cookieStore = cookies()
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -27,53 +27,20 @@ export async function GET(request: Request) {
       }
     )
 
-    try {
-      // Exchange code for session
-      const { data: { user }, error: authError } = await supabase.auth.exchangeCodeForSession(code)
+    // Exchange code for session - that's it!
+    // The database trigger will create the profile automatically
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
 
-      if (authError) throw authError
-
-      if (user) {
-        // Check if profile exists
-        const { data: existingProfile, error: fetchError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', user.id)
-          .maybeSingle()
-
-        if (fetchError && fetchError.code !== 'PGRST116') {
-          console.error('Error fetching profile:', fetchError)
-        }
-
-        // Create profile if it doesn't exist
-        if (!existingProfile) {
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert([
-              {
-                id: user.id,
-                email: user.email,
-                full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
-                avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
-              },
-            ])
-
-          if (insertError) {
-            console.error('Error creating profile:', insertError)
-            // Don't fail the auth flow - profile might be created by trigger
-          }
-        }
-
-        // Redirect to profile page
-        return NextResponse.redirect(`${origin}/profile`)
-      }
-    } catch (error) {
-      console.error('Auth callback error:', error)
-      // Redirect with error
-      return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
+    if (error) {
+      console.error('Auth error:', error)
+      return NextResponse.redirect(`${origin}/login`)
     }
+
+    // Success - redirect to profile
+    // Profile and wallet were created by database triggers
+    return NextResponse.redirect(`${origin}/profile`)
   }
 
-  // Return to home if something went wrong
+  // No code - redirect home
   return NextResponse.redirect(`${origin}/`)
 }
