@@ -30,14 +30,24 @@ export async function GET(request: NextRequest) {
     
     const { data: sessionData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
-    // Best-effort: ensure a profile row exists for the newly signed-in user
+    // Best-effort: ensure records exist in both tables for the newly signed-in user
     if (!exchangeError && sessionData?.user) {
       const user = sessionData.user;
       const username = user.email ? user.email.split('@')[0] : null;
-      const fullName = (user.user_metadata as any)?.full_name ?? null;
-      const avatarUrl = (user.user_metadata as any)?.avatar_url ?? null;
+      const fullName = (user.user_metadata as any)?.full_name ?? (user.user_metadata as any)?.name ?? null;
+      const avatarUrl = (user.user_metadata as any)?.avatar_url ?? (user.user_metadata as any)?.picture ?? null;
 
-      // Upsert into onagui_profiles; if trigger ran already, this is a no-op
+      // Upsert into app_users
+      await supabase
+        .from('app_users')
+        .upsert({
+          id: user.id,
+          email: user.email,
+          username,
+          created_at: user.created_at,
+        }, { onConflict: 'id' });
+
+      // Upsert into onagui_profiles
       await supabase
         .from('onagui_profiles')
         .upsert({

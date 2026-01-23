@@ -46,6 +46,24 @@ export default function SignUpClient() {
       if (error) {
         setError(error.message);
       } else if (data.user) {
+        // Create records in both tables
+        const username = email.split('@')[0];
+        
+        await supabase.from('app_users').upsert({
+          id: data.user.id,
+          email: data.user.email,
+          username,
+          created_at: data.user.created_at,
+        }, { onConflict: 'id' });
+
+        await supabase.from('onagui_profiles').upsert({
+          id: data.user.id,
+          username,
+          onagui_type: 'signed_in',
+          created_at: data.user.created_at,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'id' });
+
         setMessage('Check your email for the confirmation link!');
       }
     } catch (err) {

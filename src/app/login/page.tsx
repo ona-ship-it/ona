@@ -50,18 +50,35 @@ export default function LoginPage() {
         if (signUpError) throw signUpError
 
         if (authData.user) {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert([
-              {
-                id: authData.user.id,
-                email: authData.user.email,
-                full_name: fullName,
-                phone_number: phoneNumber,
-              },
-            ])
+          const username = email.split('@')[0];
+          
+          // Create in app_users
+          await supabase.from('app_users').upsert({
+            id: authData.user.id,
+            email: authData.user.email,
+            username,
+            created_at: authData.user.created_at,
+          }, { onConflict: 'id' });
 
-          if (profileError) throw profileError
+          // Create in onagui_profiles
+          await supabase.from('onagui_profiles').upsert({
+            id: authData.user.id,
+            username,
+            full_name: fullName,
+            onagui_type: 'signed_in',
+            created_at: authData.user.created_at,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'id' });
+
+          // Also create in profiles (for backward compatibility)
+          await supabase.from('profiles').upsert([
+            {
+              id: authData.user.id,
+              email: authData.user.email,
+              full_name: fullName,
+              phone_number: phoneNumber,
+            },
+          ], { onConflict: 'id' });
 
           setMessage('Account created! Please check your email to verify.')
         }
