@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import WalletModal from '@/components/WalletModal'
+import { paymentProcessor } from '@/lib/usdcPayment'
 
 type Giveaway = {
   id: string
@@ -38,7 +39,7 @@ type Profile = {
 export default function GiveawayDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
   const { user } = useAuth()
-  const { isConnected, address, disconnect } = useWallet()
+  const { isConnected, address, network, disconnect } = useWallet()
   const router = useRouter()
   const supabase = createClient()
 
@@ -50,12 +51,20 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
   const [entrySuccess, setEntrySuccess] = useState(false)
   const [error, setError] = useState('')
   const [userTicketCount, setUserTicketCount] = useState(0)
+  const [paymentStatus, setPaymentStatus] = useState('')
+  const [usdcBalance, setUsdcBalance] = useState<number | null>(null)
 
   useEffect(() => {
     if (resolvedParams.id) {
       fetchGiveaway()
     }
   }, [resolvedParams.id])
+
+  useEffect(() => {
+    if (isConnected && address && network && giveaway && !giveaway.is_free) {
+      checkUSDCBalance()
+    }
+  }, [isConnected, address, network, giveaway])
 
   const fetchGiveaway = async () => {
     setLoading(true)
@@ -97,6 +106,17 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
     }
   }
 
+  const checkUSDCBalance = async () => {
+    if (!address || !network || network === 'solana') return
+    
+    try {
+      const balance = await paymentProcessor.getBalance(address, network as any)
+      setUsdcBalance(balance)
+    } catch (err) {
+      console.error('Error checking USDC balance:', err)
+    }
+  }
+
   const handleEnter = async () => {
     if (!user) {
       router.push('/login')
@@ -108,7 +128,11 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
     if (giveaway.is_free) {
       await processFreeEntry()
     } else {
-      setShowWalletModal(true)
+      if (!isConnected || !address) {
+        setShowWalletModal(true)
+      } else {
+        await processPaidEntry()
+      }
     }
   }
 
@@ -149,24 +173,71 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
     }
   }
 
-  const handleWalletConnect = async (walletType: 'metamask' | 'phantom', selectedNetwork: string) => {
-    if (!giveaway) return
+  const processPaidEntry = async () => {
+    if (!giveaway || !address || !network) return
+    
     setEntering(true)
     setError('')
+    setPaymentStatus('Initializing payment...')
 
     try {
-      await processPayment()
+      // Process USDC payment
+      const result = await paymentProcessor.processPayment(
+        address,
+        giveaway.ticket_price,
+        network as any,
+        setPaymentStatus
+      )
+
+      if (!result.success) {
+        throw new Error(result.error || 'Payment failed')
+      }
+
+      // Create ticket entry
+      const { data: ticketData, error: ticketError } = await supabase
+        .from('tickets')
+        .insert([{
+          giveaway_id: giveaway.id,
+          user_id: user!.id,
+          purchase_price: giveaway.ticket_price,
+          payment_currency: giveaway.ticket_currency,
+          payment_method: 'crypto',
+          transaction_hash: result.transactionHash,
+        }])
+        .select()
+        .single()
+
+      if (ticketError) throw ticketError
+
+      // Record transaction
+      await supabase.from('transactions').insert([{
+        user_id: user!.id,
+        giveaway_id: giveaway.id,
+        ticket_id: ticketData.id,
+        transaction_type: 'ticket_purchase',
+        amount: giveaway.ticket_price,
+        currency: giveaway.ticket_currency,
+        payment_method: 'crypto',
+        blockchain_hash: result.transactionHash,
+        status: 'completed',
+      }])
+
+      setPaymentStatus('')
+      setEntrySuccess(true)
+      await fetchGiveaway()
+      await checkUSDCBalance()
     } catch (err: any) {
+      console.error('Payment error:', err)
       setError(err.message || 'Payment failed')
+      setPaymentStatus('')
     } finally {
       setEntering(false)
     }
   }
 
-  const processPayment = async () => {
-    if (!giveaway || !address) return
-    setError('Crypto payments will be enabled soon! Wallet connected successfully.')
+  const handleWalletConnect = async (walletType: 'metamask' | 'phantom', selectedNetwork: string) => {
     setShowWalletModal(false)
+    // Wallet is now connected, user can try entering again
   }
 
   const getTimeRemaining = () => {
@@ -197,14 +268,14 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
     )
   }
 
-  if (error || !giveaway) {
+  if (error && !giveaway) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">🤷</div>
           <h2 className="text-2xl font-bold text-white mb-2">Giveaway Not Found</h2>
           <p className="text-slate-400 mb-2">This giveaway doesn't exist or has been removed.</p>
-          {error && <p className="text-red-400 text-sm mb-6">Error: {error}</p>}
+          <p className="text-red-400 text-sm mb-6">Error: {error}</p>
           <Link href="/" className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all">
             Browse Giveaways
           </Link>
@@ -212,6 +283,8 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
       </div>
     )
   }
+
+  if (!giveaway) return null
 
   const progress = (giveaway.tickets_sold / giveaway.total_tickets) * 100
   const isSoldOut = giveaway.tickets_sold >= giveaway.total_tickets
@@ -260,6 +333,24 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-white mb-2">You're In!</h3>
                 <p className="text-green-400">Your entry has been confirmed. Good luck!</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-8 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400">
+            {error}
+          </div>
+        )}
+
+        {paymentStatus && (
+          <div className="mb-8 p-6 bg-blue-500/10 border-2 border-blue-500 rounded-2xl">
+            <div className="flex items-center gap-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-white mb-1">Processing Payment</h3>
+                <p className="text-blue-400">{paymentStatus}</p>
               </div>
             </div>
           </div>
@@ -360,6 +451,20 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
                 )}
               </div>
 
+              {!giveaway.is_free && isConnected && usdcBalance !== null && (
+                <div className="pt-4 border-t border-slate-800">
+                  <div className="p-4 bg-slate-800/50 rounded-xl">
+                    <div className="text-sm text-slate-400 mb-1">Your USDC Balance</div>
+                    <div className={`text-2xl font-bold ${usdcBalance >= giveaway.ticket_price ? 'text-green-400' : 'text-red-400'}`}>
+                      {usdcBalance.toFixed(2)} USDC
+                    </div>
+                    {usdcBalance < giveaway.ticket_price && (
+                      <p className="text-xs text-red-400 mt-2">Insufficient balance</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {userTicketCount > 0 && (
                 <div className="pt-4 border-t border-slate-800">
                   <div className="p-4 bg-blue-500/10 border border-blue-500/50 rounded-xl">
@@ -372,9 +477,13 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
 
             <button
               onClick={handleEnter}
-              disabled={entering || !canEnter}
+              disabled={entering || !canEnter || (!giveaway.is_free && isConnected && usdcBalance !== null && usdcBalance < giveaway.ticket_price)}
               className={`w-full py-6 px-8 rounded-2xl font-bold text-lg transition-all shadow-xl ${
-                !canEnter ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : entering ? 'bg-blue-600 text-white opacity-50' : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white hover:scale-105 shadow-blue-500/50'
+                !canEnter || (!giveaway.is_free && isConnected && usdcBalance !== null && usdcBalance < giveaway.ticket_price)
+                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                  : entering
+                  ? 'bg-blue-600 text-white opacity-50'
+                  : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white hover:scale-105 shadow-blue-500/50'
               }`}
             >
               {entering ? (
@@ -388,6 +497,10 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
                 'Sold Out'
               ) : isEnded ? (
                 'Giveaway Ended'
+              ) : !giveaway.is_free && !isConnected ? (
+                '🔗 Connect Wallet to Enter'
+              ) : !giveaway.is_free && usdcBalance !== null && usdcBalance < giveaway.ticket_price ? (
+                'Insufficient USDC Balance'
               ) : giveaway.is_free ? (
                 '🎁 Enter for FREE'
               ) : (
