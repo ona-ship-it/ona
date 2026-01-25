@@ -16,11 +16,11 @@ type Entry = {
   profiles: {
     full_name: string
     email: string
-  }
+  } | null
   giveaways: {
     title: string
     emoji: string
-  }
+  } | null
 }
 
 export default function AdminEntriesPage() {
@@ -58,20 +58,44 @@ export default function AdminEntriesPage() {
           purchase_price,
           payment_currency,
           is_winner,
-          profiles (
-            full_name,
-            email
-          ),
-          giveaways (
-            title,
-            emoji
-          )
+          user_id,
+          giveaway_id
         `)
         .order('created_at', { ascending: false })
         .range(page * entriesPerPage, (page + 1) * entriesPerPage - 1)
 
       if (error) throw error
-      setEntries(data || [])
+
+      // Fetch related data separately
+      const enrichedEntries = await Promise.all(
+        (data || []).map(async (entry) => {
+          // Get profile
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, email')
+            .eq('id', entry.user_id)
+            .single()
+
+          // Get giveaway
+          const { data: giveaway } = await supabase
+            .from('giveaways')
+            .select('title, emoji')
+            .eq('id', entry.giveaway_id)
+            .single()
+
+          return {
+            id: entry.id,
+            created_at: entry.created_at,
+            purchase_price: entry.purchase_price,
+            payment_currency: entry.payment_currency,
+            is_winner: entry.is_winner,
+            profiles: profile,
+            giveaways: giveaway,
+          }
+        })
+      )
+
+      setEntries(enrichedEntries)
     } catch (error) {
       console.error('Error fetching entries:', error)
     } finally {
@@ -128,13 +152,17 @@ export default function AdminEntriesPage() {
                 {entries.map((entry, index) => (
                   <tr key={entry.id} className={index % 2 === 0 ? 'bg-slate-800/20' : ''}>
                     <td className="px-6 py-4">
-                      <div className="text-white font-semibold">{entry.profiles.full_name}</div>
-                      <div className="text-slate-400 text-sm">{entry.profiles.email}</div>
+                      <div className="text-white font-semibold">
+                        {entry.profiles?.full_name || 'Unknown'}
+                      </div>
+                      <div className="text-slate-400 text-sm">
+                        {entry.profiles?.email || 'No email'}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl">{entry.giveaways.emoji}</span>
-                        <span className="text-white">{entry.giveaways.title}</span>
+                        <span className="text-2xl">{entry.giveaways?.emoji || '🎁'}</span>
+                        <span className="text-white">{entry.giveaways?.title || 'Unknown'}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
