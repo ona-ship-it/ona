@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
+import { useWallet } from '@/hooks/useWallet'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import WalletModal from '@/components/WalletModal'
 
 type Giveaway = {
   id: string
@@ -35,6 +37,7 @@ type Profile = {
 
 export default function GiveawayDetailPage({ params }: { params: { id: string } }) {
   const { user } = useAuth()
+  const { isConnected, address, network, disconnect } = useWallet()
   const router = useRouter()
   const supabase = createClient()
 
@@ -42,7 +45,7 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
   const [creator, setCreator] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [entering, setEntering] = useState(false)
-  const [showEntryModal, setShowEntryModal] = useState(false)
+  const [showWalletModal, setShowWalletModal] = useState(false)
   const [entrySuccess, setEntrySuccess] = useState(false)
   const [error, setError] = useState('')
   const [userTicketCount, setUserTicketCount] = useState(0)
@@ -53,7 +56,6 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
 
   const fetchGiveaway = async () => {
     try {
-      // Fetch giveaway
       const { data: giveawayData, error: giveawayError } = await supabase
         .from('giveaways')
         .select('*')
@@ -63,7 +65,6 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
       if (giveawayError) throw giveawayError
       setGiveaway(giveawayData)
 
-      // Fetch creator profile
       const { data: creatorData } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url')
@@ -72,7 +73,6 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
 
       setCreator(creatorData)
 
-      // Fetch user's ticket count if logged in
       if (user) {
         const { count } = await supabase
           .from('tickets')
@@ -98,51 +98,83 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
 
     if (!giveaway) return
 
+    // For free giveaways
+    if (giveaway.is_free) {
+      await processFreeEntry()
+    } else {
+      // For paid giveaways, show wallet modal
+      setShowWalletModal(true)
+    }
+  }
+
+  const processFreeEntry = async () => {
+    if (!giveaway) return
+
     setEntering(true)
     setError('')
 
     try {
-      // For free giveaways, directly create ticket
-      if (giveaway.is_free) {
-        const { error: ticketError } = await supabase
-          .from('tickets')
-          .insert([
-            {
-              giveaway_id: giveaway.id,
-              user_id: user.id,
-              purchase_price: 0,
-              payment_currency: 'FREE',
-              payment_method: 'free',
-            },
-          ])
-
-        if (ticketError) throw ticketError
-
-        // Record transaction
-        await supabase.from('transactions').insert([
+      const { error: ticketError } = await supabase
+        .from('tickets')
+        .insert([
           {
-            user_id: user.id,
             giveaway_id: giveaway.id,
-            transaction_type: 'ticket_purchase',
-            amount: 0,
-            currency: 'FREE',
+            user_id: user!.id,
+            purchase_price: 0,
+            payment_currency: 'FREE',
             payment_method: 'free',
-            status: 'completed',
           },
         ])
 
-        setEntrySuccess(true)
-        await fetchGiveaway() // Refresh data
-      } else {
-        // For paid giveaways, show entry modal with payment options
-        setShowEntryModal(true)
-      }
+      if (ticketError) throw ticketError
+
+      await supabase.from('transactions').insert([
+        {
+          user_id: user!.id,
+          giveaway_id: giveaway.id,
+          transaction_type: 'ticket_purchase',
+          amount: 0,
+          currency: 'FREE',
+          payment_method: 'free',
+          status: 'completed',
+        },
+      ])
+
+      setEntrySuccess(true)
+      await fetchGiveaway()
     } catch (err: any) {
       console.error('Entry error:', err)
       setError(err.message || 'Failed to enter giveaway')
     } finally {
       setEntering(false)
     }
+  }
+
+  const handleWalletConnect = async (walletType: 'metamask' | 'phantom', selectedNetwork: string) => {
+    // After wallet connects, proceed with payment
+    if (!giveaway) return
+
+    setEntering(true)
+    setError('')
+
+    try {
+      // Call payment processing function
+      await processPayment()
+    } catch (err: any) {
+      console.error('Payment error:', err)
+      setError(err.message || 'Payment failed')
+    } finally {
+      setEntering(false)
+    }
+  }
+
+  const processPayment = async () => {
+    if (!giveaway || !address) return
+
+    // This will be implemented with actual blockchain transactions
+    // For now, show that wallet is connected
+    setError('Crypto payments will be enabled soon! Wallet connected successfully.')
+    setShowWalletModal(false)
   }
 
   const getTimeRemaining = () => {
@@ -199,7 +231,7 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
       {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-50">
+      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3">
@@ -208,6 +240,22 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
               </h1>
             </Link>
             <div className="flex items-center gap-3">
+              {/* Wallet Connection Status */}
+              {isConnected && address && (
+                <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/50 rounded-xl">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-green-400 text-sm font-semibold">
+                    {address.slice(0, 6)}...{address.slice(-4)}
+                  </span>
+                  <button
+                    onClick={disconnect}
+                    className="text-slate-400 hover:text-white text-xs"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+
               {user ? (
                 <Link
                   href="/profile"
@@ -408,43 +456,13 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
                 'Sold Out'
               ) : isEnded ? (
                 'Giveaway Ended'
-              ) : giveaway.is_free ? (
-                '🎁 Enter for FREE'
-              ) : (
-                `💰 Enter for ${giveaway.ticket_price} ${giveaway.ticket_currency}`
-              )}
-            </button>
-
-            {!user && (
-              <p className="text-center text-sm text-slate-400">
-                Create an account or sign in to participate
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Entry Modal for Paid Giveaways */}
-      {showEntryModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-md w-full">
-            <div className="text-center mb-6">
-              <div className="text-6xl mb-4">💰</div>
-              <h2 className="text-2xl font-bold text-white mb-2">Connect Wallet</h2>
-              <p className="text-slate-400">
-                To enter this giveaway, connect your crypto wallet and pay {giveaway.ticket_price}{' '}
-                {giveaway.ticket_currency}
-              </p>
-            </div>
-
-            <div className="space-y-3 mb-6">
-              <button className="w-full p-4 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-3">
-                <span className="text-2xl">🦊</span>
-                Connect MetaMask
-              </button>
-              <button className="w-full p-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-3">
-                <span className="text-2xl">🔗</span>
-                WalletConnect
+          Wallet Modal */}
+      <WalletModal
+        isOpen={showWalletModal}
+        onClose={() => setShowWalletModal(false)}
+        onConnect={handleWalletConnect}
+        requiredNetwork={giveaway?.blockchain as any}
+      />        WalletConnect
               </button>
             </div>
 
