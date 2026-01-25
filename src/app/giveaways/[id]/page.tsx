@@ -38,7 +38,7 @@ type Profile = {
 export default function GiveawayDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
   const { user } = useAuth()
-  const { isConnected, address, network, disconnect } = useWallet()
+  const { isConnected, address, disconnect } = useWallet()
   const router = useRouter()
   const supabase = createClient()
 
@@ -62,37 +62,24 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
     setError('')
     
     try {
-      console.log('Fetching giveaway:', resolvedParams.id)
-      
       const { data: giveawayData, error: giveawayError } = await supabase
         .from('giveaways')
         .select('*')
         .eq('id', resolvedParams.id)
         .single()
 
-      if (giveawayError) {
-        console.error('Giveaway fetch error:', giveawayError)
-        throw giveawayError
-      }
+      if (giveawayError) throw giveawayError
+      if (!giveawayData) throw new Error('Giveaway not found')
 
-      if (!giveawayData) {
-        console.error('No giveaway data returned')
-        throw new Error('Giveaway not found')
-      }
-
-      console.log('Giveaway data:', giveawayData)
       setGiveaway(giveawayData)
 
-      // Fetch creator profile
-      const { data: creatorData, error: creatorError } = await supabase
+      const { data: creatorData } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url')
         .eq('id', giveawayData.creator_id)
         .single()
 
-      if (!creatorError && creatorData) {
-        setCreator(creatorData)
-      }
+      if (creatorData) setCreator(creatorData)
 
       if (user) {
         const { count } = await supabase
@@ -104,7 +91,6 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
         setUserTicketCount(count || 0)
       }
     } catch (err: any) {
-      console.error('Error fetching giveaway:', err)
       setError(err.message || 'Failed to load giveaway')
     } finally {
       setLoading(false)
@@ -119,52 +105,44 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
 
     if (!giveaway) return
 
-    // For free giveaways
     if (giveaway.is_free) {
       await processFreeEntry()
     } else {
-      // For paid giveaways, show wallet modal
       setShowWalletModal(true)
     }
   }
 
   const processFreeEntry = async () => {
     if (!giveaway) return
-
     setEntering(true)
     setError('')
 
     try {
       const { error: ticketError } = await supabase
         .from('tickets')
-        .insert([
-          {
-            giveaway_id: giveaway.id,
-            user_id: user!.id,
-            purchase_price: 0,
-            payment_currency: 'FREE',
-            payment_method: 'free',
-          },
-        ])
+        .insert([{
+          giveaway_id: giveaway.id,
+          user_id: user!.id,
+          purchase_price: 0,
+          payment_currency: 'FREE',
+          payment_method: 'free',
+        }])
 
       if (ticketError) throw ticketError
 
-      await supabase.from('transactions').insert([
-        {
-          user_id: user!.id,
-          giveaway_id: giveaway.id,
-          transaction_type: 'ticket_purchase',
-          amount: 0,
-          currency: 'FREE',
-          payment_method: 'free',
-          status: 'completed',
-        },
-      ])
+      await supabase.from('transactions').insert([{
+        user_id: user!.id,
+        giveaway_id: giveaway.id,
+        transaction_type: 'ticket_purchase',
+        amount: 0,
+        currency: 'FREE',
+        payment_method: 'free',
+        status: 'completed',
+      }])
 
       setEntrySuccess(true)
       await fetchGiveaway()
     } catch (err: any) {
-      console.error('Entry error:', err)
       setError(err.message || 'Failed to enter giveaway')
     } finally {
       setEntering(false)
@@ -172,23 +150,13 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
   }
 
   const handleWalletConnect = async (walletType: 'metamask' | 'phantom', selectedNetwork: string) => {
-<<<<<<< HEAD
-    // After wallet connects, proceed with payment
-=======
->>>>>>> df21429df50c3763c95fd4a03e9a72c05415fd2b
     if (!giveaway) return
-
     setEntering(true)
     setError('')
 
     try {
-<<<<<<< HEAD
-      // Call payment processing function
-=======
->>>>>>> df21429df50c3763c95fd4a03e9a72c05415fd2b
       await processPayment()
     } catch (err: any) {
-      console.error('Payment error:', err)
       setError(err.message || 'Payment failed')
     } finally {
       setEntering(false)
@@ -197,12 +165,6 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
 
   const processPayment = async () => {
     if (!giveaway || !address) return
-
-<<<<<<< HEAD
-    // This will be implemented with actual blockchain transactions
-    // For now, show that wallet is connected
-=======
->>>>>>> df21429df50c3763c95fd4a03e9a72c05415fd2b
     setError('Crypto payments will be enabled soon! Wallet connected successfully.')
     setShowWalletModal(false)
   }
@@ -242,13 +204,8 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
           <div className="text-6xl mb-4">🤷</div>
           <h2 className="text-2xl font-bold text-white mb-2">Giveaway Not Found</h2>
           <p className="text-slate-400 mb-2">This giveaway doesn't exist or has been removed.</p>
-          {error && (
-            <p className="text-red-400 text-sm mb-6">Error: {error}</p>
-          )}
-          <Link
-            href="/"
-            className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all"
-          >
+          {error && <p className="text-red-400 text-sm mb-6">Error: {error}</p>}
+          <Link href="/" className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all">
             Browse Giveaways
           </Link>
         </div>
@@ -263,7 +220,6 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
-      {/* Header */}
       <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -273,37 +229,21 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
               </h1>
             </Link>
             <div className="flex items-center gap-3">
-<<<<<<< HEAD
-              {/* Wallet Connection Status */}
-=======
->>>>>>> df21429df50c3763c95fd4a03e9a72c05415fd2b
               {isConnected && address && (
                 <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/50 rounded-xl">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                   <span className="text-green-400 text-sm font-semibold">
                     {address.slice(0, 6)}...{address.slice(-4)}
                   </span>
-                  <button
-                    onClick={disconnect}
-                    className="text-slate-400 hover:text-white text-xs"
-                  >
-                    ✕
-                  </button>
+                  <button onClick={disconnect} className="text-slate-400 hover:text-white text-xs">✕</button>
                 </div>
               )}
-
               {user ? (
-                <Link
-                  href="/profile"
-                  className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-white font-bold"
-                >
+                <Link href="/profile" className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-white font-bold">
                   {user.email?.charAt(0).toUpperCase()}
                 </Link>
               ) : (
-                <Link
-                  href="/login"
-                  className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl transition-all"
-                >
+                <Link href="/login" className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl transition-all">
                   Sign In
                 </Link>
               )}
@@ -312,52 +252,35 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
         </div>
       </header>
 
-      {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 py-12">
-        {/* Success Message */}
         {entrySuccess && (
           <div className="mb-8 p-6 bg-green-500/10 border-2 border-green-500 rounded-2xl animate-bounce">
             <div className="flex items-center gap-4">
               <div className="text-5xl">🎉</div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-white mb-2">You're In!</h3>
-                <p className="text-green-400">
-                  Your entry has been confirmed. Good luck! Check your profile to see all your entries.
-                </p>
+                <p className="text-green-400">Your entry has been confirmed. Good luck!</p>
               </div>
             </div>
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Main Image */}
             <div className="relative h-96 bg-gradient-to-br from-blue-900/30 to-cyan-900/30 rounded-3xl overflow-hidden">
               {giveaway.image_url ? (
-                <Image
-                  src={giveaway.image_url}
-                  alt={giveaway.title}
-                  fill
-                  className="object-cover"
-                />
+                <Image src={giveaway.image_url} alt={giveaway.title} fill className="object-cover" />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-9xl">
-                  {giveaway.emoji}
-                </div>
+                <div className="absolute inset-0 flex items-center justify-center text-9xl">{giveaway.emoji}</div>
               )}
-
               <div className="absolute top-6 left-6 flex gap-3">
                 <div className="px-4 py-2 bg-slate-900/90 backdrop-blur rounded-xl text-white font-semibold">
                   ⏰ {getTimeRemaining()}
                 </div>
                 {!giveaway.is_free && (
-                  <div className="px-4 py-2 bg-yellow-600/90 backdrop-blur rounded-xl text-white font-semibold">
-                    💰 Paid Entry
-                  </div>
+                  <div className="px-4 py-2 bg-yellow-600/90 backdrop-blur rounded-xl text-white font-semibold">💰 Paid Entry</div>
                 )}
               </div>
-
               {isSoldOut && (
                 <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
                   <div className="text-center">
@@ -366,7 +289,6 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
                   </div>
                 </div>
               )}
-
               {isEnded && (
                 <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
                   <div className="text-center">
@@ -377,15 +299,11 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
               )}
             </div>
 
-            {/* Title & Description */}
             <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-8">
               <h1 className="text-4xl font-black text-white mb-4">{giveaway.title}</h1>
-              <p className="text-lg text-slate-300 leading-relaxed whitespace-pre-wrap">
-                {giveaway.description}
-              </p>
+              <p className="text-lg text-slate-300 leading-relaxed whitespace-pre-wrap">{giveaway.description}</p>
             </div>
 
-            {/* Creator */}
             {creator && (
               <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
                 <div className="flex items-center gap-4">
@@ -401,19 +319,14 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
             )}
           </div>
 
-          {/* Right Column */}
           <div className="space-y-6">
-            {/* Prize Card */}
             <div className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-2 border-green-500/50 rounded-3xl p-8 text-center">
               <div className="text-5xl mb-4">🏆</div>
               <div className="text-sm text-green-400 mb-2">Prize Value</div>
-              <div className="text-5xl font-black text-white mb-2">
-                ${giveaway.prize_value.toLocaleString()}
-              </div>
+              <div className="text-5xl font-black text-white mb-2">${giveaway.prize_value.toLocaleString()}</div>
               <div className="text-slate-400">{giveaway.prize_currency}</div>
             </div>
 
-            {/* Stats Card */}
             <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -423,10 +336,7 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
                   </span>
                 </div>
                 <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-blue-600 to-blue-700 transition-all duration-500"
-                    style={{ width: `${Math.min(progress, 100)}%` }}
-                  />
+                  <div className="h-full bg-gradient-to-r from-blue-600 to-blue-700 transition-all duration-500" style={{ width: `${Math.min(progress, 100)}%` }} />
                 </div>
                 <div className="text-xs text-slate-500 mt-1">{progress.toFixed(1)}% filled</div>
               </div>
@@ -442,7 +352,6 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
                     )}
                   </span>
                 </div>
-
                 {!giveaway.is_free && (
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">Blockchain</span>
@@ -461,16 +370,11 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
               )}
             </div>
 
-            {/* Entry Button */}
             <button
               onClick={handleEnter}
               disabled={entering || !canEnter}
               className={`w-full py-6 px-8 rounded-2xl font-bold text-lg transition-all shadow-xl ${
-                !canEnter
-                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                  : entering
-                  ? 'bg-blue-600 text-white opacity-50'
-                  : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white hover:scale-105 shadow-blue-500/50'
+                !canEnter ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : entering ? 'bg-blue-600 text-white opacity-50' : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white hover:scale-105 shadow-blue-500/50'
               }`}
             >
               {entering ? (
@@ -484,9 +388,6 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
                 'Sold Out'
               ) : isEnded ? (
                 'Giveaway Ended'
-<<<<<<< HEAD
-          Wallet Modal */}
-=======
               ) : giveaway.is_free ? (
                 '🎁 Enter for FREE'
               ) : (
@@ -495,42 +396,18 @@ export default function GiveawayDetailPage({ params }: { params: Promise<{ id: s
             </button>
 
             {!user && (
-              <p className="text-center text-sm text-slate-400">
-                Create an account or sign in to participate
-              </p>
+              <p className="text-center text-sm text-slate-400">Create an account or sign in to participate</p>
             )}
           </div>
         </div>
       </div>
 
-      {/* Wallet Modal */}
->>>>>>> df21429df50c3763c95fd4a03e9a72c05415fd2b
       <WalletModal
         isOpen={showWalletModal}
         onClose={() => setShowWalletModal(false)}
         onConnect={handleWalletConnect}
         requiredNetwork={giveaway?.blockchain as any}
-<<<<<<< HEAD
-      />        WalletConnect
-              </button>
-            </div>
-
-            <button
-              onClick={() => setShowEntryModal(false)}
-              className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition-all"
-            >
-              Cancel
-            </button>
-
-            <p className="text-center text-xs text-slate-500 mt-4">
-              Wallet integration coming soon. For now, only free giveaways are available.
-            </p>
-          </div>
-        </div>
-      )}
-=======
       />
->>>>>>> df21429df50c3763c95fd4a03e9a72c05415fd2b
     </div>
   )
 }
