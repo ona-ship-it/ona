@@ -25,7 +25,7 @@ type Ticket = {
   profiles: {
     full_name: string
     email: string
-  }
+  } | null
 }
 
 export default function AdminWinnersPage() {
@@ -86,19 +86,30 @@ export default function AdminWinnersPage() {
     try {
       const { data, error } = await supabase
         .from('tickets')
-        .select(`
-          id,
-          user_id,
-          created_at,
-          profiles (
-            full_name,
-            email
-          )
-        `)
+        .select('id, user_id, created_at')
         .eq('giveaway_id', giveawayId)
 
       if (error) throw error
-      setTickets(data || [])
+
+      // Fetch profiles separately
+      const enrichedTickets = await Promise.all(
+        (data || []).map(async (ticket) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, email')
+            .eq('id', ticket.user_id)
+            .single()
+
+          return {
+            id: ticket.id,
+            user_id: ticket.user_id,
+            created_at: ticket.created_at,
+            profiles: profile,
+          }
+        })
+      )
+
+      setTickets(enrichedTickets)
     } catch (error) {
       console.error('Error fetching tickets:', error)
     }
@@ -284,7 +295,7 @@ export default function AdminWinnersPage() {
                 </div>
 
                 {/* Winner Display */}
-                {winner && (
+                {winner && winner.profiles && (
                   <div className={`bg-gradient-to-br from-yellow-900/30 to-orange-900/30 border-2 border-yellow-500/50 rounded-3xl p-8 ${
                     animating ? 'animate-pulse' : 'animate-bounce'
                   }`}>
@@ -293,8 +304,12 @@ export default function AdminWinnersPage() {
                       <h3 className="text-2xl font-bold text-yellow-400 mb-2">
                         {animating ? 'Drawing...' : 'Winner!'}
                       </h3>
-                      <div className="text-4xl font-black text-white mb-2">{winner.profiles.full_name}</div>
-                      <div className="text-lg text-slate-400">{winner.profiles.email}</div>
+                      <div className="text-4xl font-black text-white mb-2">
+                        {winner.profiles.full_name || 'Unknown User'}
+                      </div>
+                      <div className="text-lg text-slate-400">
+                        {winner.profiles.email || 'No email'}
+                      </div>
                     </div>
                   </div>
                 )}
