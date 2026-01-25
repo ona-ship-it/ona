@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { useWallet } from '@/hooks/useWallet'
@@ -35,7 +35,8 @@ type Profile = {
   avatar_url: string | null
 }
 
-export default function GiveawayDetailPage({ params }: { params: { id: string } }) {
+export default function GiveawayDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params)
   const { user } = useAuth()
   const { isConnected, address, network, disconnect } = useWallet()
   const router = useRouter()
@@ -51,40 +52,60 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
   const [userTicketCount, setUserTicketCount] = useState(0)
 
   useEffect(() => {
-    fetchGiveaway()
-  }, [params.id])
+    if (resolvedParams.id) {
+      fetchGiveaway()
+    }
+  }, [resolvedParams.id])
 
   const fetchGiveaway = async () => {
+    setLoading(true)
+    setError('')
+    
     try {
+      console.log('Fetching giveaway:', resolvedParams.id)
+      
       const { data: giveawayData, error: giveawayError } = await supabase
         .from('giveaways')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', resolvedParams.id)
         .single()
 
-      if (giveawayError) throw giveawayError
+      if (giveawayError) {
+        console.error('Giveaway fetch error:', giveawayError)
+        throw giveawayError
+      }
+
+      if (!giveawayData) {
+        console.error('No giveaway data returned')
+        throw new Error('Giveaway not found')
+      }
+
+      console.log('Giveaway data:', giveawayData)
       setGiveaway(giveawayData)
 
-      const { data: creatorData } = await supabase
+      // Fetch creator profile
+      const { data: creatorData, error: creatorError } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url')
         .eq('id', giveawayData.creator_id)
         .single()
 
-      setCreator(creatorData)
+      if (!creatorError && creatorData) {
+        setCreator(creatorData)
+      }
 
       if (user) {
         const { count } = await supabase
           .from('tickets')
           .select('*', { count: 'exact', head: true })
-          .eq('giveaway_id', params.id)
+          .eq('giveaway_id', resolvedParams.id)
           .eq('user_id', user.id)
 
         setUserTicketCount(count || 0)
       }
     } catch (err: any) {
       console.error('Error fetching giveaway:', err)
-      setError(err.message)
+      setError(err.message || 'Failed to load giveaway')
     } finally {
       setLoading(false)
     }
@@ -151,14 +172,20 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
   }
 
   const handleWalletConnect = async (walletType: 'metamask' | 'phantom', selectedNetwork: string) => {
+<<<<<<< HEAD
     // After wallet connects, proceed with payment
+=======
+>>>>>>> df21429df50c3763c95fd4a03e9a72c05415fd2b
     if (!giveaway) return
 
     setEntering(true)
     setError('')
 
     try {
+<<<<<<< HEAD
       // Call payment processing function
+=======
+>>>>>>> df21429df50c3763c95fd4a03e9a72c05415fd2b
       await processPayment()
     } catch (err: any) {
       console.error('Payment error:', err)
@@ -171,8 +198,11 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
   const processPayment = async () => {
     if (!giveaway || !address) return
 
+<<<<<<< HEAD
     // This will be implemented with actual blockchain transactions
     // For now, show that wallet is connected
+=======
+>>>>>>> df21429df50c3763c95fd4a03e9a72c05415fd2b
     setError('Crypto payments will be enabled soon! Wallet connected successfully.')
     setShowWalletModal(false)
   }
@@ -205,13 +235,16 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
     )
   }
 
-  if (!giveaway) {
+  if (error || !giveaway) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">🤷</div>
           <h2 className="text-2xl font-bold text-white mb-2">Giveaway Not Found</h2>
-          <p className="text-slate-400 mb-6">This giveaway doesn't exist or has been removed.</p>
+          <p className="text-slate-400 mb-2">This giveaway doesn't exist or has been removed.</p>
+          {error && (
+            <p className="text-red-400 text-sm mb-6">Error: {error}</p>
+          )}
           <Link
             href="/"
             className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all"
@@ -240,7 +273,10 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
               </h1>
             </Link>
             <div className="flex items-center gap-3">
+<<<<<<< HEAD
               {/* Wallet Connection Status */}
+=======
+>>>>>>> df21429df50c3763c95fd4a03e9a72c05415fd2b
               {isConnected && address && (
                 <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/50 rounded-xl">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -293,17 +329,10 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
           </div>
         )}
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-8 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400">
-            {error}
-          </div>
-        )}
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Image & Creator */}
+          {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Main Image/Emoji */}
+            {/* Main Image */}
             <div className="relative h-96 bg-gradient-to-br from-blue-900/30 to-cyan-900/30 rounded-3xl overflow-hidden">
               {giveaway.image_url ? (
                 <Image
@@ -318,7 +347,6 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
                 </div>
               )}
 
-              {/* Status Badges */}
               <div className="absolute top-6 left-6 flex gap-3">
                 <div className="px-4 py-2 bg-slate-900/90 backdrop-blur rounded-xl text-white font-semibold">
                   ⏰ {getTimeRemaining()}
@@ -357,7 +385,7 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
               </p>
             </div>
 
-            {/* Creator Info */}
+            {/* Creator */}
             {creator && (
               <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
                 <div className="flex items-center gap-4">
@@ -373,7 +401,7 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
             )}
           </div>
 
-          {/* Right Column - Entry Card */}
+          {/* Right Column */}
           <div className="space-y-6">
             {/* Prize Card */}
             <div className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-2 border-green-500/50 rounded-3xl p-8 text-center">
@@ -456,12 +484,33 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
                 'Sold Out'
               ) : isEnded ? (
                 'Giveaway Ended'
+<<<<<<< HEAD
           Wallet Modal */}
+=======
+              ) : giveaway.is_free ? (
+                '🎁 Enter for FREE'
+              ) : (
+                `💰 Enter for ${giveaway.ticket_price} ${giveaway.ticket_currency}`
+              )}
+            </button>
+
+            {!user && (
+              <p className="text-center text-sm text-slate-400">
+                Create an account or sign in to participate
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Wallet Modal */}
+>>>>>>> df21429df50c3763c95fd4a03e9a72c05415fd2b
       <WalletModal
         isOpen={showWalletModal}
         onClose={() => setShowWalletModal(false)}
         onConnect={handleWalletConnect}
         requiredNetwork={giveaway?.blockchain as any}
+<<<<<<< HEAD
       />        WalletConnect
               </button>
             </div>
@@ -479,6 +528,9 @@ export default function GiveawayDetailPage({ params }: { params: { id: string } 
           </div>
         </div>
       )}
+=======
+      />
+>>>>>>> df21429df50c3763c95fd4a03e9a72c05415fd2b
     </div>
   )
 }
