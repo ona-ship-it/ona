@@ -1,4 +1,6 @@
 // Wallet Integration for USDC Payments
+'use client'
+
 import { ethers } from 'ethers'
 
 // USDC Contract Address (Polygon Mainnet)
@@ -28,6 +30,32 @@ export async function connectWallet(): Promise<string | null> {
   } catch (error) {
     console.error('Error connecting wallet:', error)
     return null
+  }
+}
+
+export async function getCurrentWallet(): Promise<string | null> {
+  if (typeof window === 'undefined' || !window.ethereum) return null
+
+  try {
+    const provider = new ethers.BrowserProvider(window.ethereum)
+    const accounts = await provider.send('eth_accounts', [])
+    return accounts.length > 0 ? accounts[0] : null
+  } catch (error) {
+    console.error('Error getting current wallet:', error)
+    return null
+  }
+}
+
+export async function isOnPolygon(): Promise<boolean> {
+  if (typeof window === 'undefined' || !window.ethereum) return false
+
+  try {
+    const provider = new ethers.BrowserProvider(window.ethereum)
+    const network = await provider.getNetwork()
+    return network.chainId === BigInt(137) // Polygon Mainnet chain ID
+  } catch (error) {
+    console.error('Error checking network:', error)
+    return false
   }
 }
 

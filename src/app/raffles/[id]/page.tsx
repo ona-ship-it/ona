@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import WalletConnect from '@/components/WalletConnect'
+import { payWithUSDC, isOnPolygon, getCurrentWallet } from '@/lib/wallet'
 
 type Raffle = {
   id: string
@@ -65,6 +67,7 @@ export default function RaffleDetailPage() {
   const [user, setUser] = useState<any>(null)
   const [buying, setBuying] = useState(false)
   const [selectedImage, setSelectedImage] = useState(0)
+  const [walletAddress, setWalletAddress] = useState<string | null>(null)
 
   useEffect(() => {
     checkAuth()
@@ -221,28 +224,62 @@ export default function RaffleDetailPage() {
 
     if (!raffle || quantity < 1) return
 
+    // Check wallet connection
+    const wallet = await getCurrentWallet()
+    if (!wallet) {
+      alert('Please connect your wallet first')
+      return
+    }
+
+    const onPolygon = await isOnPolygon()
+    if (!onPolygon) {
+      alert('Please switch to Polygon network')
+      return
+    }
+
     setBuying(true)
 
     try {
-      // TODO: Implement actual USDC payment with wallet
-      // For now, just show alert
-      alert('Payment integration coming soon! This will connect to your wallet and process USDC payment.')
+      const totalPrice = calculatePrice(quantity)
       
-      // After payment succeeds, create ticket entry
-      // const ticketNumbers = generateTicketNumbers(quantity)
-      // await supabase.from('raffle_tickets').insert({
-      //   raffle_id: raffle.id,
-      //   user_id: user.id,
-      //   ticket_numbers: ticketNumbers,
-      //   quantity: quantity,
-      //   original_price: raffle.base_ticket_price * quantity,
-      //   final_price: calculatePrice(quantity),
-      //   transaction_hash: txHash
-      // })
+      // Process USDC payment
+      const paymentResult = await payWithUSDC(totalPrice)
       
-    } catch (error) {
+      if (!paymentResult.success) {
+        throw new Error(paymentResult.error || 'Payment failed')
+      }
+
+      // Generate ticket numbers
+      const ticketNumbers: number[] = []
+      for (let i = 0; i < quantity; i++) {
+        ticketNumbers.push(raffle.tickets_sold + i + 1)
+      }
+
+      // Save tickets to database
+      const { error: ticketError } = await supabase
+        .from('raffle_tickets')
+        .insert({
+          raffle_id: raffle.id,
+          user_id: user.id,
+          ticket_numbers: ticketNumbers,
+          quantity: quantity,
+          original_price: raffle.base_ticket_price * quantity,
+          discount_applied: getSavings(quantity) / (raffle.base_ticket_price * quantity) * 100,
+          final_price: totalPrice,
+          transaction_hash: paymentResult.txHash,
+          payment_currency: 'USDC',
+          blockchain: 'Polygon',
+        })
+
+      if (ticketError) throw ticketError
+
+      alert(`Success! You purchased ${quantity} ticket${quantity > 1 ? 's' : ''}!\n\nYour ticket numbers: ${ticketNumbers.join(', ')}`)
+      
+      // Refresh raffle
+      await fetchRaffle()
+    } catch (error: any) {
       console.error('Error buying tickets:', error)
-      alert('Failed to purchase tickets')
+      alert(`Failed to purchase tickets: ${error.message || 'Unknown error'}`)
     } finally {
       setBuying(false)
     }
@@ -534,10 +571,15 @@ export default function RaffleDetailPage() {
                 </div>
               </div>
 
+              {/* Wallet Connect */}
+              <div className="mb-4">
+                <WalletConnect onConnect={setWalletAddress} />
+              </div>
+
               {/* Buy Button */}
               <button
                 onClick={handleBuyTickets}
-                disabled={buying || raffle.status !== 'active'}
+                disabled={buying || raffle.status !== 'active' || !walletAddress}
                 className="w-full py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:from-slate-700 disabled:to-slate-700 text-white font-bold rounded-xl text-lg transition-all disabled:cursor-not-allowed"
               >
                 {buying ? 'Processing...' : raffle.status !== 'active' ? 'Raffle Ended' : 'Buy Tickets 🎟️'}
