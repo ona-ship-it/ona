@@ -7,6 +7,24 @@ import { createClient } from '@/lib/supabase'
 import { isAdmin } from '@/lib/admin'
 import Link from 'next/link'
 import Image from 'next/image'
+const { user, loading: authLoading } = useAuth()
+
+// Change the useEffect to:
+useEffect(() => {
+  if (authLoading) return // Wait for auth to load
+  
+  if (!user) {
+    router.push('/login')
+    return
+  }
+
+  if (!isAdmin(user.email)) {
+    router.push('/')
+    return
+  }
+
+  fetchGiveaways()
+}, [user, authLoading, filter])
 
 type Giveaway = {
   id: string
