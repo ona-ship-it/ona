@@ -16,7 +16,7 @@ type DashboardStats = {
 }
 
 export default function AdminDashboard() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const router = useRouter()
   const supabase = createClient()
 
@@ -30,18 +30,26 @@ export default function AdminDashboard() {
   })
 
   useEffect(() => {
+    // Wait for auth to finish loading
+    if (authLoading) return
+
+    // Check if user exists
     if (!user) {
+      console.log('No user found, redirecting to login')
       router.push('/login')
       return
     }
 
+    // Check if user is admin
     if (!isAdmin(user.email)) {
+      console.log('User is not admin:', user.email)
       router.push('/')
       return
     }
 
+    console.log('Admin user authenticated:', user.email)
     fetchStats()
-  }, [user])
+  }, [user, authLoading])
 
   const fetchStats = async () => {
     try {
@@ -92,7 +100,8 @@ export default function AdminDashboard() {
     }
   }
 
-  if (loading) {
+  // Show loading while auth is checking
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center">
         <div className="text-center">
