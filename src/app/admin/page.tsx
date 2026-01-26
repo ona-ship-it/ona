@@ -12,11 +12,19 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [userEmail, setUserEmail] = useState<string>('')
   const [stats, setStats] = useState({
+    // Giveaways
     totalGiveaways: 0,
     activeGiveaways: 0,
     totalEntries: 0,
     totalRevenue: 0,
     pendingDraws: 0,
+    
+    // Raffles
+    totalRaffles: 0,
+    activeRaffles: 0,
+    pendingRaffles: 0,
+    raffleRevenue: 0,
+    raffleTicketsSold: 0,
   })
 
   useEffect(() => {
@@ -44,6 +52,7 @@ export default function AdminDashboard() {
 
   async function fetchStats() {
     try {
+      // GIVEAWAYS STATS
       const { count: totalGiveaways } = await supabase
         .from('giveaways')
         .select('*', { count: 'exact', head: true })
@@ -72,12 +81,39 @@ export default function AdminDashboard() {
         .lt('end_date', new Date().toISOString())
         .is('winner_id', null)
 
+      // RAFFLES STATS
+      const { count: totalRaffles } = await supabase
+        .from('raffles')
+        .select('*', { count: 'exact', head: true })
+
+      const { count: activeRaffles } = await supabase
+        .from('raffles')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active')
+
+      const { count: pendingRaffles } = await supabase
+        .from('raffles')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending')
+
+      const { data: raffleTickets } = await supabase
+        .from('raffle_tickets')
+        .select('final_price, quantity')
+
+      const raffleRevenue = raffleTickets?.reduce((sum, ticket) => sum + (ticket.final_price || 0), 0) || 0
+      const raffleTicketsSold = raffleTickets?.reduce((sum, ticket) => sum + (ticket.quantity || 0), 0) || 0
+
       setStats({
         totalGiveaways: totalGiveaways || 0,
         activeGiveaways: activeGiveaways || 0,
         totalEntries: totalEntries || 0,
         totalRevenue,
         pendingDraws: pendingDraws || 0,
+        totalRaffles: totalRaffles || 0,
+        activeRaffles: activeRaffles || 0,
+        pendingRaffles: pendingRaffles || 0,
+        raffleRevenue,
+        raffleTicketsSold,
       })
     } catch (error) {
       console.error('Error fetching stats:', error)
@@ -125,39 +161,99 @@ export default function AdminDashboard() {
           <p className="text-slate-400">Manage your platform, view analytics, and draw winners</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
-          <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
-            <div className="text-4xl mb-3">🎁</div>
-            <div className="text-3xl font-black text-white mb-1">{stats.totalGiveaways}</div>
-            <div className="text-sm text-slate-400">Total Giveaways</div>
-          </div>
+        {/* GIVEAWAYS SECTION */}
+        <div className="mb-12">
+          <h3 className="text-2xl font-bold text-white mb-6">Giveaways</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
+              <div className="text-4xl mb-3">🎁</div>
+              <div className="text-3xl font-black text-white mb-1">{stats.totalGiveaways}</div>
+              <div className="text-sm text-slate-400">Total Giveaways</div>
+            </div>
 
-          <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
-            <div className="text-4xl mb-3">🔥</div>
-            <div className="text-3xl font-black text-green-400 mb-1">{stats.activeGiveaways}</div>
-            <div className="text-sm text-slate-400">Active Now</div>
-          </div>
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
+              <div className="text-4xl mb-3">🔥</div>
+              <div className="text-3xl font-black text-green-400 mb-1">{stats.activeGiveaways}</div>
+              <div className="text-sm text-slate-400">Active Now</div>
+            </div>
 
-          <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
-            <div className="text-4xl mb-3">🎫</div>
-            <div className="text-3xl font-black text-blue-400 mb-1">{stats.totalEntries}</div>
-            <div className="text-sm text-slate-400">Total Entries</div>
-          </div>
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
+              <div className="text-4xl mb-3">🎫</div>
+              <div className="text-3xl font-black text-blue-400 mb-1">{stats.totalEntries}</div>
+              <div className="text-sm text-slate-400">Total Entries</div>
+            </div>
 
-          <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
-            <div className="text-4xl mb-3">💰</div>
-            <div className="text-3xl font-black text-yellow-400 mb-1">${stats.totalRevenue.toFixed(2)}</div>
-            <div className="text-sm text-slate-400">Total Revenue</div>
-          </div>
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
+              <div className="text-4xl mb-3">💰</div>
+              <div className="text-3xl font-black text-yellow-400 mb-1">${stats.totalRevenue.toFixed(2)}</div>
+              <div className="text-sm text-slate-400">Revenue</div>
+            </div>
 
-          <div className="bg-gradient-to-br from-red-900/30 to-orange-900/30 border-2 border-red-500/50 rounded-3xl p-6">
-            <div className="text-4xl mb-3">⚠️</div>
-            <div className="text-3xl font-black text-red-400 mb-1">{stats.pendingDraws}</div>
-            <div className="text-sm text-red-400 font-semibold">Needs Winner</div>
+            <div className="bg-gradient-to-br from-red-900/30 to-orange-900/30 border-2 border-red-500/50 rounded-3xl p-6">
+              <div className="text-4xl mb-3">⚠️</div>
+              <div className="text-3xl font-black text-red-400 mb-1">{stats.pendingDraws}</div>
+              <div className="text-sm text-red-400 font-semibold">Needs Winner</div>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* RAFFLES SECTION */}
+        <div className="mb-12">
+          <h3 className="text-2xl font-bold text-white mb-6">Raffles</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
+              <div className="text-4xl mb-3">🎟️</div>
+              <div className="text-3xl font-black text-white mb-1">{stats.totalRaffles}</div>
+              <div className="text-sm text-slate-400">Total Raffles</div>
+            </div>
+
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
+              <div className="text-4xl mb-3">✅</div>
+              <div className="text-3xl font-black text-green-400 mb-1">{stats.activeRaffles}</div>
+              <div className="text-sm text-slate-400">Active Raffles</div>
+            </div>
+
+            <div className="bg-gradient-to-br from-orange-900/30 to-yellow-900/30 border-2 border-orange-500/50 rounded-3xl p-6">
+              <div className="text-4xl mb-3">⏳</div>
+              <div className="text-3xl font-black text-orange-400 mb-1">{stats.pendingRaffles}</div>
+              <div className="text-sm text-orange-400 font-semibold">Pending Approval</div>
+            </div>
+
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
+              <div className="text-4xl mb-3">🎫</div>
+              <div className="text-3xl font-black text-purple-400 mb-1">{stats.raffleTicketsSold}</div>
+              <div className="text-sm text-slate-400">Tickets Sold</div>
+            </div>
+
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
+              <div className="text-4xl mb-3">💵</div>
+              <div className="text-3xl font-black text-yellow-400 mb-1">${stats.raffleRevenue.toFixed(2)}</div>
+              <div className="text-sm text-slate-400">Raffle Revenue</div>
+            </div>
+          </div>
+        </div>
+
+        {/* COMBINED REVENUE */}
+        <div className="mb-12">
+          <div className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-2 border-green-500/50 rounded-3xl p-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm text-green-400 mb-2">Total Platform Revenue</div>
+                <div className="text-5xl font-black text-white">
+                  ${(stats.totalRevenue + stats.raffleRevenue).toFixed(2)}
+                </div>
+                <div className="text-sm text-slate-400 mt-2">
+                  Giveaways: ${stats.totalRevenue.toFixed(2)} + Raffles: ${stats.raffleRevenue.toFixed(2)}
+                </div>
+              </div>
+              <div className="text-8xl">💰</div>
+            </div>
+          </div>
+        </div>
+
+        {/* ACTION CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {/* Giveaways Management */}
           <Link href="/admin/giveaways" className="group">
             <div className="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 border-2 border-blue-500/50 hover:border-blue-500 rounded-3xl p-8 transition-all hover:scale-105">
               <div className="text-6xl mb-4">🎁</div>
@@ -168,6 +264,7 @@ export default function AdminDashboard() {
             </div>
           </Link>
 
+          {/* Draw Winners */}
           <Link href="/admin/winners" className="group">
             <div className="bg-gradient-to-br from-yellow-900/30 to-orange-900/30 border-2 border-yellow-500/50 hover:border-yellow-500 rounded-3xl p-8 transition-all hover:scale-105">
               <div className="text-6xl mb-4">🏆</div>
@@ -183,16 +280,23 @@ export default function AdminDashboard() {
             </div>
           </Link>
 
-          <Link href="/admin/entries" className="group">
+          {/* Raffle Management */}
+          <Link href="/admin/raffles" className="group">
             <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-2 border-purple-500/50 hover:border-purple-500 rounded-3xl p-8 transition-all hover:scale-105">
-              <div className="text-6xl mb-4">🎫</div>
+              <div className="text-6xl mb-4">🎟️</div>
               <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">
-                View Entries
+                Manage Raffles
               </h3>
-              <p className="text-slate-400 text-sm">See all entries across all giveaways</p>
+              <p className="text-slate-400 text-sm">Approve and manage all raffles</p>
+              {stats.pendingRaffles > 0 && (
+                <div className="mt-3 px-3 py-1 bg-orange-500 rounded-full inline-block">
+                  <span className="text-white font-bold text-xs">{stats.pendingRaffles} Pending</span>
+                </div>
+              )}
             </div>
           </Link>
 
+          {/* Analytics */}
           <Link href="/admin/analytics" className="group">
             <div className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-2 border-green-500/50 hover:border-green-500 rounded-3xl p-8 transition-all hover:scale-105">
               <div className="text-6xl mb-4">📊</div>
@@ -204,7 +308,8 @@ export default function AdminDashboard() {
           </Link>
         </div>
 
-        <div className="mt-12 p-6 bg-blue-500/10 border border-blue-500/50 rounded-2xl">
+        {/* Admin Info */}
+        <div className="p-6 bg-blue-500/10 border border-blue-500/50 rounded-2xl">
           <div className="flex items-start gap-4">
             <div className="text-3xl">ℹ️</div>
             <div className="flex-1">
