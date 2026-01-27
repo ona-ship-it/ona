@@ -1,0 +1,23 @@
+# Hardhat files
+node_modules
+cache
+artifacts
+
+# TypeChain
+typechain
+typechain-types
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+
+# Coverage
+coverage
+coverage.json
+
+# Build
+dist
+build
