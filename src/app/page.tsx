@@ -101,6 +101,9 @@ export default function HomePage() {
               <Link href="/raffles" className="text-slate-400 font-semibold hover:text-blue-400 transition-colors">
                 Raffles
               </Link>
+              <Link href="/dashboard" className="text-slate-400 font-semibold hover:text-blue-400 transition-colors">
+                Dashboard
+              </Link>
               <Link href="/fundraise" className="text-slate-400 font-semibold hover:text-blue-400 transition-colors">
                 Fundraise
               </Link>
