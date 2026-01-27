@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/draw-winners",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/send-emails",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
