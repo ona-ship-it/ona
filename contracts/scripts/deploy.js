@@ -2,11 +2,19 @@ const hre = require("hardhat");
 
 async function main() {
   // USDC addresses
-  const USDC_MUMBAI = "0x0FA8781a83E46826621b3BC094Ea2A0212e71B23"; // Mumbai testnet
+  const USDC_MUMBAI = "0x0FA8781a83E46826621b3BC094Ea2A0212e71B23"; // Mumbai testnet (deprecated)
+  const USDC_AMOY = "0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582"; // Amoy testnet
   const USDC_POLYGON = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"; // Polygon mainnet
   
   const network = await hre.ethers.provider.getNetwork();
-  const USDC_ADDRESS = network.chainId === 137 ? USDC_POLYGON : USDC_MUMBAI;
+  let USDC_ADDRESS;
+  if (network.chainId === 137) {
+    USDC_ADDRESS = USDC_POLYGON;
+  } else if (network.chainId === 80002) {
+    USDC_ADDRESS = USDC_AMOY;
+  } else {
+    USDC_ADDRESS = USDC_MUMBAI; // fallback for Mumbai
+  }
   
   console.log("🚀 Deploying RaffleEscrow contract...");
   console.log(`📍 Network: ${network.name} (Chain ID: ${network.chainId})`);

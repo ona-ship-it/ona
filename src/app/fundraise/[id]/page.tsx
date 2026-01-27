@@ -1,8 +1,11 @@
-'use client'
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-import { useState } from 'react'
+import FundraiserDetailClient from './FundraiserDetailClient';
 
-export default function FundraisePage() {
+export default function FundraisePage({ params }: { params: { id: string } }) {
+  return <FundraiserDetailClient fundraiserId={params.id} />;
+}
   const [donationAmount, setDonationAmount] = useState(25)
 
   const tiers = [
