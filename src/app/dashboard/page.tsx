@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import VerificationBadge from '@/components/VerificationBadge'
 
 type Entry = {
   id: string
@@ -258,9 +259,12 @@ export default function UserDashboard() {
               {profile?.full_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="flex-1">
-              <h2 className="text-3xl font-black text-white mb-2">
-                {profile?.full_name || 'User Dashboard'}
-              </h2>
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-3xl font-black text-white">
+                  {profile?.full_name || 'User Dashboard'}
+                </h2>
+                <VerificationBadge />
+              </div>
               <p className="text-slate-400">{user?.email}</p>
             </div>
           </div>
