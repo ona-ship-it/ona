@@ -24,6 +24,8 @@ type Giveaway = {
   status: string
   end_date: string
   winner_id: string | null
+  share_code: string | null
+  share_url: string | null
 }
 
 export default function GiveawayDetailPage() {
@@ -37,18 +39,11 @@ export default function GiveawayDetailPage() {
   const [entering, setEntering] = useState(false)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
   const [quantity, setQuantity] = useState(1)
-  const [shareCode, setShareCode] = useState('')
 
   useEffect(() => {
     checkAuth()
     fetchGiveaway()
   }, [params.id])
-
-  useEffect(() => {
-    if (user && giveaway) {
-      generateShareCode()
-    }
-  }, [user, giveaway])
 
   async function checkAuth() {
     const { data: { session } } = await supabase.auth.getSession()
@@ -77,14 +72,6 @@ export default function GiveawayDetailPage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  async function generateShareCode() {
-    if (!user || !giveaway) return
-
-    // Generate unique share code
-    const code = `${giveaway.id.slice(0, 8)}-${user.id.slice(0, 8)}`
-    setShareCode(code)
   }
 
   async function handleEnter() {
@@ -216,11 +203,11 @@ export default function GiveawayDetailPage() {
             </div>
 
             {/* Share Component */}
-            {user && shareCode && (
+            {giveaway.share_code && giveaway.share_url && (
               <ShareGiveaway
                 giveawayId={giveaway.id}
-                shareCode={shareCode}
-                shareUrl={`${typeof window !== 'undefined' ? window.location.origin : ''}/share/${shareCode}`}
+                shareCode={giveaway.share_code}
+                shareUrl={giveaway.share_url}
                 title={giveaway.title}
               />
             )}
