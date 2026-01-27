@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 
 export default function SignUpClient() {
@@ -12,6 +13,7 @@ export default function SignUpClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [showVerificationMessage, setShowVerificationMessage] = useState(false);
   
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -64,7 +66,7 @@ export default function SignUpClient() {
           updated_at: new Date().toISOString(),
         }, { onConflict: 'id' });
 
-        setMessage('Check your email for the confirmation link!');
+        setShowVerificationMessage(true);
       }
     } catch (err) {
       setError('An unexpected error occurred');
@@ -80,6 +82,26 @@ export default function SignUpClient() {
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] p-6">
         <div className="w-full max-w-md p-8 space-y-6 bg-gray-900 rounded-lg shadow-xl">
           <h2 className="text-3xl font-bold text-center text-pink-500">Create an Account</h2>
+          
+          {showVerificationMessage && (
+            <div className="bg-blue-500/10 border border-blue-500/50 rounded-2xl p-6">
+              <div className="flex items-start gap-4">
+                <div className="text-3xl">📧</div>
+                <div>
+                  <h3 className="text-lg font-bold text-white mb-2">Verify Your Email</h3>
+                  <p className="text-slate-300 text-sm mb-3">
+                    We've sent a verification link to your email. Click it to activate your account and claim free tickets!
+                  </p>
+                  <p className="text-slate-400 text-xs">
+                    Didn't receive it? Check your spam folder or{' '}
+                    <Link href="/resend-verification" className="text-blue-400 hover:underline">
+                      resend verification email
+                    </Link>
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           
           {error && (
             <div className="p-3 text-red-400 bg-red-900/20 border border-red-400 rounded-md">
