@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import WalletConnect from '@/components/WalletConnect'
+import WinnerDisplay from '@/components/WinnerDisplay'
 import { payWithUSDC, isOnPolygon, getCurrentWallet } from '@/lib/wallet'
 
 type Raffle = {
@@ -34,6 +35,8 @@ type Raffle = {
   tags: string[]
   status: string
   creator_id: string
+  winner_id: string | null
+  winner_drawn_at: string | null
   view_count: number
   created_at: string
 }
@@ -409,6 +412,15 @@ export default function RaffleDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Winner Display */}
+            {raffle.winner_id && raffle.winner_drawn_at && (
+              <WinnerDisplay
+                raffleId={raffle.id}
+                winnerId={raffle.winner_id}
+                winnerDrawnAt={raffle.winner_drawn_at}
+              />
+            )}
 
             {/* Activity Feed */}
             <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-8">
