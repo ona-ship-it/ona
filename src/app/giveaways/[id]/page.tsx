@@ -7,6 +7,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import WalletConnect from '@/components/WalletConnect'
 import ShareGiveaway from '@/components/ShareGiveaway'
+import WinnerDisplay from '@/components/WinnerDisplay'
 import { payWithUSDC, isOnPolygon } from '@/lib/wallet'
 
 type Giveaway = {
@@ -24,6 +25,7 @@ type Giveaway = {
   status: string
   end_date: string
   winner_id: string | null
+  winner_drawn_at: string | null
   share_code: string | null
   share_url: string | null
 }
@@ -209,6 +211,15 @@ export default function GiveawayDetailPage() {
                 shareCode={giveaway.share_code}
                 shareUrl={giveaway.share_url}
                 title={giveaway.title}
+              />
+            )}
+
+            {/* Winner Display */}
+            {giveaway.winner_id && giveaway.winner_drawn_at && (
+              <WinnerDisplay
+                giveawayId={giveaway.id}
+                winnerId={giveaway.winner_id}
+                winnerDrawnAt={giveaway.winner_drawn_at}
               />
             )}
           </div>
