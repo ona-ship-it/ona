@@ -1,23 +1,19 @@
 {
   "name": "onagui-contracts",
-  "version": "1.0.0",
-  "description": "Smart contracts for Onagui raffle escrow system",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy:mumbai": "hardhat run scripts/deploy.js --network mumbai",
-    "deploy:polygon": "hardhat run scripts/deploy.js --network polygon",
-    "verify": "hardhat verify"
+    "deploy:polygon": "hardhat run scripts/deploy.js --network polygon"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
     "@nomiclabs/hardhat-waffle": "^2.0.6",
     "@openzeppelin/contracts": "^4.9.3",
-    "chai": "^4.3.10",
-    "dotenv": "^16.3.1",
+    "chai": "^4.3.7",
     "ethereum-waffle": "^4.0.10",
     "ethers": "^5.7.2",
-    "hardhat": "^2.19.0"
+    "hardhat": "^2.17.1"
   }
 }
