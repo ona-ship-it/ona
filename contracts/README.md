@@ -16,7 +16,7 @@ Secure on-chain escrow system for Onagui raffle platform built with Solidity and
 ### 1. Install Dependencies
 ```bash
 cd contracts
-npm install
+npm install --save-dev hardhat @nomiclabs/hardhat-waffle @nomiclabs/hardhat-ethers @nomiclabs/hardhat-etherscan @openzeppelin/contracts ethers ethereum-waffle chai
 ```
 
 ### 2. Configure Environment
@@ -30,10 +30,10 @@ Edit `.env` and add:
 
 ### 3. Compile Contracts
 ```bash
-npm run compile
+npx hardhat compile
 ```
 
-### 4. Deploy to Mumbai Testnet
+### 4. Deploy to Mumbai Testnet (Test First!)
 ```bash
 npm run deploy:mumbai
 ```
@@ -44,6 +44,7 @@ npm run deploy:polygon
 ```
 
 ### 6. Verify Contract
+Contract verification happens automatically during deployment. If needed, manually verify:
 ```bash
 npx hardhat verify --network polygon <CONTRACT_ADDRESS> <USDC_ADDRESS>
 ```
