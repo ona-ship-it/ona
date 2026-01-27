@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import WalletConnect from '@/components/WalletConnect'
+import ShareGiveaway from '@/components/ShareGiveaway'
 import { payWithUSDC, isOnPolygon } from '@/lib/wallet'
 
 type Giveaway = {
@@ -36,11 +37,18 @@ export default function GiveawayDetailPage() {
   const [entering, setEntering] = useState(false)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
   const [quantity, setQuantity] = useState(1)
+  const [shareCode, setShareCode] = useState('')
 
   useEffect(() => {
     checkAuth()
     fetchGiveaway()
   }, [params.id])
+
+  useEffect(() => {
+    if (user && giveaway) {
+      generateShareCode()
+    }
+  }, [user, giveaway])
 
   async function checkAuth() {
     const { data: { session } } = await supabase.auth.getSession()
@@ -69,6 +77,14 @@ export default function GiveawayDetailPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function generateShareCode() {
+    if (!user || !giveaway) return
+
+    // Generate unique share code
+    const code = `${giveaway.id.slice(0, 8)}-${user.id.slice(0, 8)}`
+    setShareCode(code)
   }
 
   async function handleEnter() {
@@ -198,6 +214,16 @@ export default function GiveawayDetailPage() {
               <h1 className="text-4xl font-black text-white mb-4">{giveaway.title}</h1>
               <p className="text-slate-300 text-lg">{giveaway.description}</p>
             </div>
+
+            {/* Share Component */}
+            {user && shareCode && (
+              <ShareGiveaway
+                giveawayId={giveaway.id}
+                shareCode={shareCode}
+                shareUrl={`${typeof window !== 'undefined' ? window.location.origin : ''}/share/${shareCode}`}
+                title={giveaway.title}
+              />
+            )}
           </div>
 
           {/* Right - Entry Panel */}
