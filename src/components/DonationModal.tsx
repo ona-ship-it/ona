@@ -128,7 +128,7 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       
-      await supabase.from('donations').insert([
+      await supabase.schema('onagui').from('donations').insert([
         {
           fundraiser_id: fundraiser.id,
           user_id: user?.id || null,
