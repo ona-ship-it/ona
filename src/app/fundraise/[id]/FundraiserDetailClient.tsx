@@ -58,13 +58,20 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
   async function fetchFundraiser() {
     try {
       const supabase = createClient();
+      console.log('Fetching fundraiser with ID:', fundraiserId);
       const { data, error } = await supabase
         .from('fundraisers')
         .select('*')
         .eq('id', fundraiserId)
         .single();
 
-      if (error) throw error;
+      console.log('Fundraiser query result:', { data, error });
+      
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
       setFundraiser(data);
     } catch (error) {
       console.error('Error fetching fundraiser:', error);
