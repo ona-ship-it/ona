@@ -22,8 +22,13 @@ export default function CreateFundraiseClient() {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string>('');
   
-  const [ory: 'Medical',
+  const [formData, setFormData] = useState({
+    title: '',
+    story: '',
+    category: 'Medical',
     goal_amount: '',
     location: '',
     country: '',

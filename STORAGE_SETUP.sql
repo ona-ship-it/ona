@@ -6,6 +6,12 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('fundraiser-images', 'fundraiser-images', true)
 ON CONFLICT (id) DO NOTHING;
 
+-- Drop existing policies to recreate them
+DROP POLICY IF EXISTS "Public Access" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can upload" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update own images" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete own images" ON storage.objects;
+
 -- Set up storage policy to allow anyone to read
 CREATE POLICY "Public Access"
 ON storage.objects FOR SELECT
