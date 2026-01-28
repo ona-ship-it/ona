@@ -53,10 +53,6 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
   const donationAmount = parseFloat(amount) || 0;
   const platformFee = donationAmount > 0 ? calculatePlatformFee(donationAmount) : 0;
   const netToFundraiser = donationAmount > 0 ? calculateNetAmount(donationAmount) : 0;
-  
-  const donationAmount = parseFloat(amount) || 0;
-  const platformFee = donationAmount > 0 ? calculatePlatformFee(donationAmount) : 0;
-  const netToFundraiser = donationAmount > 0 ? calculateNetAmount(donationAmount) : 0;
 
   useEffect(() => {
     checkWalletConnection();
