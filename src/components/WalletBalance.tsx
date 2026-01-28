@@ -38,9 +38,9 @@ export function WalletBalance({ userId, onBalanceUpdate, className = '', showTic
         console.warn('Could not ensure wallet exists:', ensureError);
       }
 
-      // Fetch wallet balance with new schema
+      // Fetch wallet balance
       const { data, error } = await ((supabase as any)
-        .from('onagui.wallets')
+        .from('wallets')
         .select('balance_fiat, balance_tickets')
         .eq('user_id', userId)
         .single());
