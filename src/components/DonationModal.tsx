@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase';
 import { IconX, IconWallet, IconCheck, IconChevronDown } from '@tabler/icons-react';
 import { ethers } from 'ethers';
 import { SUPPORTED_CRYPTOS, getCryptoById, ERC20_ABI, type CryptoNetwork } from '@/lib/cryptoConfig';
+import { connectPhantomWallet, sendSolanaTransaction, getSolanaExplorerUrl } from '@/lib/solanaWallet';
+import { connectUnisatWallet, btcToSatoshis, getBitcoinExplorerUrl } from '@/lib/bitcoinWallet';
 
 interface DonationModalProps {
   fundraiser: {
@@ -217,9 +219,81 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
           },
         ]);
       } else {
-        // Bitcoin and Solana require different handling
-        alert(`${selectedCrypto.name} donations coming soon! Please use an EVM-compatible crypto for now.`);
-        throw new Error('Non-EVM chains not yet implemented');
+        // Bitcoin and Solana - different wallet connectors
+        if (selectedCrypto.id === 'solana') {
+          const wallet = await connectPhantomWallet();
+          if (!wallet) throw new Error('Failed to connect Phantom wallet');
+
+          const signature = await sendSolanaTransaction(
+            wallet,
+            selectedCrypto.platformWallet,
+            parseFloat(amount)
+          );
+          
+          setTxHash(signature);
+
+          // Save to database
+          const supabase = createClient();
+          const { data: { user } } = await supabase.auth.getUser();
+          
+          const donationAmount = parseFloat(amount);
+          const platformFee = calculatePlatformFee(donationAmount);
+          const netAmount = calculateNetAmount(donationAmount);
+          
+          await supabase.from('donations').insert([
+            {
+              fundraiser_id: fundraiser.id,
+              user_id: user?.id || null,
+              amount: donationAmount,
+              platform_fee: platformFee,
+              net_amount: netAmount,
+              currency: 'SOL',
+              donor_name: isAnonymous ? null : (donorName || 'Anonymous'),
+              message: message || null,
+              is_anonymous: isAnonymous,
+              transaction_hash: signature,
+              wallet_address: wallet.publicKey?.toString() || '',
+              blockchain: 'solana',
+              status: 'confirmed',
+              confirmed_at: new Date().toISOString(),
+            },
+          ]);
+        } else if (selectedCrypto.id === 'bitcoin') {
+          const wallet = await connectUnisatWallet();
+          if (!wallet) throw new Error('Failed to connect Bitcoin wallet');
+
+          const amountSats = btcToSatoshis(parseFloat(amount));
+          const txid = await wallet.sendBitcoin(selectedCrypto.platformWallet, amountSats);
+          
+          setTxHash(txid);
+
+          // Save to database
+          const supabase = createClient();
+          const { data: { user } } = await supabase.auth.getUser();
+          
+          const donationAmount = parseFloat(amount);
+          const platformFee = calculatePlatformFee(donationAmount);
+          const netAmount = calculateNetAmount(donationAmount);
+          
+          await supabase.from('donations').insert([
+            {
+              fundraiser_id: fundraiser.id,
+              user_id: user?.id || null,
+              amount: donationAmount,
+              platform_fee: platformFee,
+              net_amount: netAmount,
+              currency: 'BTC',
+              donor_name: isAnonymous ? null : (donorName || 'Anonymous'),
+              message: message || null,
+              is_anonymous: isAnonymous,
+              transaction_hash: txid,
+              wallet_address: wallet.address,
+              blockchain: 'bitcoin',
+              status: 'confirmed',
+              confirmed_at: new Date().toISOString(),
+            },
+          ]);
+        }
       }
 
       // Save donation to database with fee tracking

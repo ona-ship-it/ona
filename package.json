@@ -9,6 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@solana/wallet-adapter-base": "^0.9.27",
+    "@solana/wallet-adapter-phantom": "^0.9.28",
+    "@solana/wallet-adapter-react": "^0.15.39",
+    "@solana/wallet-adapter-wallets": "^0.19.37",
+    "@solana/web3.js": "^1.98.4",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.91.0",
@@ -30,6 +35,7 @@
     "react-dom": "^18.3.1",
     "react-icons": "^5.5.0",
     "resend": "^6.9.0",
+    "sats-connect": "^4.2.1",
     "speakeasy": "^2.0.0",
     "uuid": "^11.1.0",
     "validator": "^13.15.15",
