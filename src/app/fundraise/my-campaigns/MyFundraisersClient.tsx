@@ -45,7 +45,7 @@ export default function MyFundraisersClient() {
       setLoading(true);
       const supabase = createClient();
       const { data, error } = await supabase
-        .schema('onagui').from('fundraisers')
+        .from('fundraisers')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
@@ -64,7 +64,7 @@ export default function MyFundraisersClient() {
     
     try {
       const { error } = await supabase
-        .schema('onagui').from('fundraisers')
+        .from('fundraisers')
         .update({ status: newStatus })
         .eq('id', id);
 
@@ -86,7 +86,7 @@ export default function MyFundraisersClient() {
 
     try {
       const { error } = await supabase
-        .schema('onagui').from('fundraisers')
+        .from('fundraisers')
         .delete()
         .eq('id', id);
 
