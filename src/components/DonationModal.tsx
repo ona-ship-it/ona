@@ -27,15 +27,6 @@ function calculateNetAmount(amount: number): number {
   return amount - calculatePlatformFee(amount);
 }
 
-// Calculate platform fee: 2.9% + $0.30 (like GoFundMe)
-function calculatePlatformFee(amount: number): number {
-  return (amount * 0.029) + 0.30;
-}
-
-function calculateNetAmount(amount: number): number {
-  return amount - calculatePlatformFee(amount);
-}
-
 export default function DonationModal({ fundraiser, onClose, onSuccess }: DonationModalProps) {
   const [amount, setAmount] = useState('');
   const [donorName, setDonorName] = useState('');
