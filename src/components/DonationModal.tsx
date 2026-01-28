@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
-import { IconX, IconWallet, IconCheck } from '@tabler/icons-react';
+import { IconX, IconWallet, IconCheck, IconChevronDown } from '@tabler/icons-react';
 import { ethers } from 'ethers';
+import { SUPPORTED_CRYPTOS, getCryptoById, ERC20_ABI, type CryptoNetwork } from '@/lib/cryptoConfig';
 
 interface DonationModalProps {
   fundraiser: {
@@ -14,15 +15,6 @@ interface DonationModalProps {
   onClose: () => void;
   onSuccess: () => void;
 }
-
-const USDC_ADDRESS = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'; // Polygon USDC
-const PLATFORM_WALLET = process.env.NEXT_PUBLIC_PLATFORM_ESCROW_WALLET || '';
-
-const USDC_ABI = [
-  'function transfer(address to, uint256 amount) returns (bool)',
-  'function balanceOf(address owner) view returns (uint256)',
-  'function decimals() view returns (uint8)',
-];
 
 // Calculate platform fee: 2.9% + $0.30 (like GoFundMe)
 function calculatePlatformFee(amount: number): number {
@@ -48,7 +40,8 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
   const [message, setMessage] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<'amount' | 'details' | 'payment' | 'success'>('amount');
+  const [step, setStep] = useState<'crypto' | 'amount' | 'details' | 'payment' | 'success'>('crypto');
+  const [selectedCrypto, setSelectedCrypto] = useState<CryptoNetwork>(SUPPORTED_CRYPTOS[3]); // Default to Polygon USDC
   const [txHash, setTxHash] = useState('');
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
@@ -142,26 +135,92 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
       const signer = provider.getSigner();
       const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
 
-      // Convert amount to USDC decimals (6)
-      const amountInUSDC = ethers.utils.parseUnits(amount, 6);
-
       // Validate platform wallet is configured
-      if (!PLATFORM_WALLET) {
-        alert('Platform wallet not configured. Please contact support.');
+      if (!selectedCrypto.platformWallet) {
+        alert('Platform wallet not configured for ' + selectedCrypto.name);
         throw new Error('Platform wallet not configured');
       }
 
-      // Send to PLATFORM ESCROW WALLET (not directly to fundraiser)
-      const tx = await usdcContract.transfer(PLATFORM_WALLET, amountInUSDC);
-      
-      // Wait for confirmation
-      const receipt = await tx.wait();
-      setTxHash(receipt.transactionHash);
+      // EVM-based cryptocurrencies (Ethereum, Polygon, Base, BNB)
+      if (selectedCrypto.chainId) {
+        // Switch to correct network
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: selectedCrypto.chainId }],
+          });
+        } catch (switchError: any) {
+          // If chain doesn't exist, add it
+          if (switchError.code === 4902 && selectedCrypto.rpcUrl) {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: selectedCrypto.chainId,
+                chainName: selectedCrypto.name,
+                nativeCurrency: {
+                  name: selectedCrypto.symbol,
+                  symbol: selectedCrypto.symbol,
+                  decimals: selectedCrypto.decimals
+                },
+                rpcUrls: [selectedCrypto.rpcUrl],
+                blockExplorerUrls: [selectedCrypto.explorerUrl]
+              }]
+            });
+          }
+        }
 
-      // Calculate fees
-      const donationAmount = parseFloat(amount);
-      const platformFee = calculatePlatformFee(donationAmount);
-      const netAmount = calculateNetAmount(donationAmount);
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+
+        let tx;
+        if (selectedCrypto.tokenAddress) {
+          // It's a token (like USDC)
+          const tokenContract = new ethers.Contract(selectedCrypto.tokenAddress, ERC20_ABI, signer);
+          const amountInToken = ethers.utils.parseUnits(amount, selectedCrypto.decimals);
+          tx = await tokenContract.transfer(selectedCrypto.platformWallet, amountInToken);
+        } else {
+          // It's native currency (ETH, MATIC, BNB)
+          const amountInWei = ethers.utils.parseUnits(amount, selectedCrypto.decimals);
+          tx = await signer.sendTransaction({
+            to: selectedCrypto.platformWallet,
+            value: amountInWei,
+          });
+        }
+
+        const receipt = await tx.wait();
+        setTxHash(receipt.transactionHash);
+
+        // Save to database
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        const donationAmount = parseFloat(amount);
+        const platformFee = calculatePlatformFee(donationAmount);
+        const netAmount = calculateNetAmount(donationAmount);
+        
+        await supabase.from('donations').insert([
+          {
+            fundraiser_id: fundraiser.id,
+            user_id: user?.id || null,
+            amount: donationAmount,
+            platform_fee: platformFee,
+            net_amount: netAmount,
+            currency: selectedCrypto.symbol,
+            donor_name: isAnonymous ? null : (donorName || 'Anonymous'),
+            message: message || null,
+            is_anonymous: isAnonymous,
+            transaction_hash: receipt.transactionHash,
+            wallet_address: walletAddress,
+            blockchain: selectedCrypto.id,
+            status: 'confirmed',
+            confirmed_at: new Date().toISOString(),
+          },
+        ]);
+      } else {
+        // Bitcoin and Solana require different handling
+        alert(`${selectedCrypto.name} donations coming soon! Please use an EVM-compatible crypto for now.`);
+        throw new Error('Non-EVM chains not yet implemented');
+      }
 
       // Save donation to database with fee tracking
       const supabase = createClient();
@@ -216,12 +275,56 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
         </div>
 
         <div className="p-6">
+          {/* Step 0: Select Cryptocurrency */}
+          {step === 'crypto' && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 font-semibold mb-3">
+                  Select Cryptocurrency
+                </label>
+                <div className="grid grid-cols-1 gap-3">
+                  {SUPPORTED_CRYPTOS.map((crypto) => (
+                    <button
+                      key={crypto.id}
+                      onClick={() => {
+                        setSelectedCrypto(crypto);
+                        setStep('amount');
+                      }}
+                      className="flex items-center justify-between p-4 border-2 rounded-lg hover:border-green-500 transition-colors text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-3xl">{crypto.logo}</span>
+                        <div>
+                          <div className="font-semibold text-gray-900">{crypto.name}</div>
+                          <div className="text-sm text-gray-500">{crypto.symbol}</div>
+                        </div>
+                      </div>
+                      <IconChevronDown size={20} className="text-gray-400 rotate-[-90deg]" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Step 1: Amount */}
           {step === 'amount' && (
             <div className="space-y-6">
+              <div className="flex items-center justify-between mb-4">
+                <button
+                  onClick={() => setStep('crypto')}
+                  className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
+                >
+                  ← Change Crypto
+                </button>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-2xl">{selectedCrypto.logo}</span>
+                  <span className="font-semibold">{selectedCrypto.symbol}</span>
+                </div>
+              </div>
               <div>
                 <label className="block text-gray-700 font-semibold mb-3">
-                  Choose Amount (USDC)
+                  Choose Amount ({selectedCrypto.symbol})
                 </label>
                 <div className="grid grid-cols-3 gap-3 mb-4">
                   {presetAmounts.map((preset) => (
@@ -252,6 +355,22 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
                     step="0.01"
                   />
                 </div>
+                {donationAmount > 0 && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-gray-600">Your donation:</span>
+                      <span className="font-semibold">${donationAmount.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-gray-600">Platform fee (2.9% + $0.30):</span>
+                      <span className="text-gray-600">${platformFee.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between pt-2 border-t">
+                      <span className="font-semibold text-gray-900">To fundraiser:</span>
+                      <span className="font-semibold text-green-600">${netToFundraiser.toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
               </div>
               <button
                 onClick={() => setStep('details')}
