@@ -117,14 +117,22 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
       // Convert amount to USDC decimals (6)
       const amountInUSDC = ethers.utils.parseUnits(amount, 6);
 
-      // Send transaction
-      const tx = await usdcContract.transfer(fundraiser.wallet_address, amountInUSDC);
+      // Send to PLATFORM ESCROW WALLET (not directly to fundraiser)
+      const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_ESCROW_WALLET || fundraiser.wallet_address;
+      
+      // Calculate platform fee (2.9% + $0.30)
+      const donationAmount = parseFloat(amount);
+      const platformFee = (donationAmount * 0.029) + 0.30;
+      const netAmount = donationAmount - platformFee;
+
+      // Send transaction to platform escrow
+      const tx = await usdcContract.transfer(platformWallet, amountInUSDC);
       
       // Wait for confirmation
       const receipt = await tx.wait();
       setTxHash(receipt.transactionHash);
 
-      // Save donation to database
+      // Save donation to database with fee tracking
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -132,7 +140,9 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
         {
           fundraiser_id: fundraiser.id,
           user_id: user?.id || null,
-          amount: parseFloat(amount),
+          amount: donationAmount,
+          platform_fee: platformFee,
+          net_amount: netAmount,
           currency: 'USDC',
           donor_name: isAnonymous ? null : (donorName || 'Anonymous'),
           message: message || null,
@@ -141,6 +151,7 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
           wallet_address: walletAddress,
           blockchain: 'polygon',
           status: 'confirmed',
+          escrow_status: 'held',
           confirmed_at: new Date().toISOString(),
         },
       ]);
@@ -228,7 +239,19 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
                 <div className="text-2xl font-bold text-green-700">
                   ${parseFloat(amount).toLocaleString()} USDC
                 </div>
-                <div className="text-sm text-green-600">Your generous donation</div>
+                <div className="text-sm text-green-600 space-y-1">
+                  <div>Your generous donation</div>
+                  <div className="text-xs text-gray-500">
+                    Platform fee: ${((parseFloat(amount) * 0.029) + 0.30).toFixed(2)} 
+                    <span className="ml-1">(2.9% + $0.30)</span>
+                  </div>
+                  <div className="text-xs font-semibold text-green-700">
+                    Fundraiser receives: ${(parseFloat(amount) - ((parseFloat(amount) * 0.029) + 0.30)).toFixed(2)}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    💰 Funds held in secure escrow until KYC verification
+                  </div>
+                </div>
               </div>
 
               <div>
