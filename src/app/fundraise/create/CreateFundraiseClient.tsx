@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabase';
 import { IconHeart, IconUpload, IconX } from '@tabler/icons-react';
 
 const CATEGORIES = [
@@ -41,6 +41,7 @@ export default function CreateFundraiseClient() {
   }, []);
 
   async function checkUser() {
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       router.push('/login?redirect=/fundraise/create');
@@ -72,6 +73,7 @@ export default function CreateFundraiseClient() {
     try {
       setLoading(true);
 
+      const supabase = createClient();
       const { data, error } = await supabase
         .from('fundraisers')
         .insert([

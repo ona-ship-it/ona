@@ -1,0 +1,20 @@
+name: Draw Winners Cron Job
+
+on:
+  schedule:
+    # Runs every hour at minute 0
+    - cron: '0 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  draw-winners:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Call draw-winners API endpoint
+        run: |
+          curl -X POST https://onagui.com/api/cron/draw-winners \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --fail-with-body \
+            || echo "Failed to trigger draw-winners cron"

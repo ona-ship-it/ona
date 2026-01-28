@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabase';
 import { IconPlus, IconEdit, IconEye, IconTrash, IconTrendingUp, IconUsers } from '@tabler/icons-react';
 
 interface Fundraiser {
@@ -30,6 +30,7 @@ export default function MyFundraisersClient() {
   }, []);
 
   async function checkUser() {
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       router.push('/login?redirect=/fundraise/my-campaigns');
@@ -42,6 +43,7 @@ export default function MyFundraisersClient() {
   async function fetchMyFundraisers(userId: string) {
     try {
       setLoading(true);
+      const supabase = createClient();
       const { data, error } = await supabase
         .from('fundraisers')
         .select('*')

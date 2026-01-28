@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabase';
 import DonationModal from '@/components/DonationModal';
 import { IconHeart, IconShare, IconClock, IconMapPin, IconUser } from '@tabler/icons-react';
 import Link from 'next/link';
@@ -57,6 +57,7 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
 
   async function fetchFundraiser() {
     try {
+      const supabase = createClient();
       const { data, error } = await supabase
         .from('fundraisers')
         .select('*')
@@ -74,6 +75,7 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
 
   async function fetchDonations() {
     try {
+      const supabase = createClient();
       const { data, error } = await supabase
         .from('donations')
         .select('*')
@@ -91,6 +93,7 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
 
   async function fetchUpdates() {
     try {
+      const supabase = createClient();
       const { data, error } = await supabase
         .from('fundraiser_updates')
         .select('*')

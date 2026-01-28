@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabase';
 import { IconX, IconWallet, IconCheck } from '@tabler/icons-react';
 import { ethers } from 'ethers';
 
@@ -125,6 +125,7 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
       setTxHash(receipt.transactionHash);
 
       // Save donation to database
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       
       await supabase.from('donations').insert([

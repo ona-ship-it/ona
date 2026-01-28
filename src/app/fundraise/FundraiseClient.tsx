@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabase';
 import { IconHeart, IconSearch, IconPlus, IconTrendingUp } from '@tabler/icons-react';
 
 interface Fundraiser {
@@ -46,6 +46,7 @@ export default function FundraiseClient() {
   async function fetchFundraisers() {
     try {
       setLoading(true);
+      const supabase = createClient();
       let query = supabase
         .from('fundraisers')
         .select('*')
