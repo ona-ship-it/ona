@@ -48,7 +48,7 @@ export default function FundraiseClient() {
       setLoading(true);
       const supabase = createClient();
       let query = supabase
-        .from('fundraisers')
+        .from('onagui.fundraisers')
         .select('*')
         .eq('status', 'active');
 

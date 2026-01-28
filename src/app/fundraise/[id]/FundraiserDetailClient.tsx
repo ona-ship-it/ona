@@ -59,7 +59,7 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
     try {
       const supabase = createClient();
       const { data, error } = await supabase
-        .from('fundraisers')
+        .from('onagui.fundraisers')
         .select('*')
         .eq('id', fundraiserId)
         .single();
@@ -77,7 +77,7 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
     try {
       const supabase = createClient();
       const { data, error } = await supabase
-        .from('donations')
+        .from('onagui.donations')
         .select('*')
         .eq('fundraiser_id', fundraiserId)
         .eq('status', 'confirmed')
@@ -95,7 +95,7 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
     try {
       const supabase = createClient();
       const { data, error } = await supabase
-        .from('fundraiser_updates')
+        .from('onagui.fundraiser_updates')
         .select('*')
         .eq('fundraiser_id', fundraiserId)
         .order('created_at', { ascending: false });

@@ -51,7 +51,7 @@ export default function CreateFundraiseClient() {
     
     // Set default wallet address if available
     const { data: profile } = await supabase
-      .from('users')
+      .from('onagui.users')
       .select('wallet_address')
       .eq('id', user.id)
       .single();
@@ -75,7 +75,7 @@ export default function CreateFundraiseClient() {
 
       const supabase = createClient();
       const { data, error } = await supabase
-        .from('fundraisers')
+        .from('onagui.fundraisers')
         .insert([
           {
             user_id: user.id,
