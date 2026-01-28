@@ -16,11 +16,31 @@ interface DonationModalProps {
 }
 
 const USDC_ADDRESS = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'; // Polygon USDC
+const PLATFORM_WALLET = process.env.NEXT_PUBLIC_PLATFORM_ESCROW_WALLET || '';
+
 const USDC_ABI = [
   'function transfer(address to, uint256 amount) returns (bool)',
   'function balanceOf(address owner) view returns (uint256)',
   'function decimals() view returns (uint8)',
 ];
+
+// Calculate platform fee: 2.9% + $0.30 (like GoFundMe)
+function calculatePlatformFee(amount: number): number {
+  return (amount * 0.029) + 0.30;
+}
+
+function calculateNetAmount(amount: number): number {
+  return amount - calculatePlatformFee(amount);
+}
+
+// Calculate platform fee: 2.9% + $0.30 (like GoFundMe)
+function calculatePlatformFee(amount: number): number {
+  return (amount * 0.029) + 0.30;
+}
+
+function calculateNetAmount(amount: number): number {
+  return amount - calculatePlatformFee(amount);
+}
 
 export default function DonationModal({ fundraiser, onClose, onSuccess }: DonationModalProps) {
   const [amount, setAmount] = useState('');
@@ -34,6 +54,14 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
   const [walletAddress, setWalletAddress] = useState('');
 
   const presetAmounts = [10, 25, 50, 100, 250, 500];
+  
+  const donationAmount = parseFloat(amount) || 0;
+  const platformFee = donationAmount > 0 ? calculatePlatformFee(donationAmount) : 0;
+  const netToFundraiser = donationAmount > 0 ? calculateNetAmount(donationAmount) : 0;
+  
+  const donationAmount = parseFloat(amount) || 0;
+  const platformFee = donationAmount > 0 ? calculatePlatformFee(donationAmount) : 0;
+  const netToFundraiser = donationAmount > 0 ? calculateNetAmount(donationAmount) : 0;
 
   useEffect(() => {
     checkWalletConnection();
@@ -117,20 +145,23 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
       // Convert amount to USDC decimals (6)
       const amountInUSDC = ethers.utils.parseUnits(amount, 6);
 
-      // Send to PLATFORM ESCROW WALLET (not directly to fundraiser)
-      const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_ESCROW_WALLET || fundraiser.wallet_address;
-      
-      // Calculate platform fee (2.9% + $0.30)
-      const donationAmount = parseFloat(amount);
-      const platformFee = (donationAmount * 0.029) + 0.30;
-      const netAmount = donationAmount - platformFee;
+      // Validate platform wallet is configured
+      if (!PLATFORM_WALLET) {
+        alert('Platform wallet not configured. Please contact support.');
+        throw new Error('Platform wallet not configured');
+      }
 
-      // Send transaction to platform escrow
-      const tx = await usdcContract.transfer(platformWallet, amountInUSDC);
+      // Send to PLATFORM ESCROW WALLET (not directly to fundraiser)
+      const tx = await usdcContract.transfer(PLATFORM_WALLET, amountInUSDC);
       
       // Wait for confirmation
       const receipt = await tx.wait();
       setTxHash(receipt.transactionHash);
+
+      // Calculate fees
+      const donationAmount = parseFloat(amount);
+      const platformFee = calculatePlatformFee(donationAmount);
+      const netAmount = calculateNetAmount(donationAmount);
 
       // Save donation to database with fee tracking
       const supabase = createClient();
