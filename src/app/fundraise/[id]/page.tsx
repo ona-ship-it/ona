@@ -3,6 +3,7 @@ export const revalidate = 0;
 
 import FundraiserDetailClient from './FundraiserDetailClient';
 
-export default function FundraisePage({ params }: { params: { id: string } }) {
-  return <FundraiserDetailClient fundraiserId={params.id} />;
+export default async function FundraisePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <FundraiserDetailClient fundraiserId={id} />;
 }
