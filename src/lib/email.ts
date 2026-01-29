@@ -439,3 +439,394 @@ export async function sendEndingSoonEmail({
     return { success: false, error }
   }
 }
+
+// Fundraiser email types
+export interface FundraiserEmailData {
+  amount?: number;
+  currency?: string;
+  donor_name?: string;
+  fundraiser_title?: string;
+  net_amount?: number;
+  platform_fee?: number;
+  status?: string;
+  rejection_reason?: string;
+  transaction_hash?: string;
+  failure_reason?: string;
+}
+
+export type FundraiserEmailType = 
+  | 'donation_received'
+  | 'kyc_submitted'
+  | 'kyc_approved'
+  | 'kyc_rejected'
+  | 'payout_requested'
+  | 'payout_approved'
+  | 'payout_completed'
+  | 'payout_failed';
+
+// Fundraiser email templates
+const fundraiserEmailTemplates: Record<FundraiserEmailType, (data: FundraiserEmailData) => { subject: string; html: string }> = {
+  donation_received: (data) => ({
+    subject: `💰 You received a ${data.amount} ${data.currency} donation!`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+            .content { background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
+            .footer { background: #f9fafb; padding: 20px; border-radius: 0 0 10px 10px; text-align: center; font-size: 14px; color: #6b7280; }
+            .amount { font-size: 36px; font-weight: bold; color: #10b981; margin: 20px 0; text-align: center; }
+            .details { background: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0; }
+            .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+            .detail-row:last-child { border-bottom: none; }
+            .button { display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🎉 New Donation Received!</h1>
+            </div>
+            <div class="content">
+              <p>Great news! Someone just supported your fundraiser.</p>
+              
+              <div class="amount">${data.amount} ${data.currency}</div>
+              
+              <div class="details">
+                <div class="detail-row">
+                  <span><strong>Fundraiser:</strong></span>
+                  <span>${data.fundraiser_title}</span>
+                </div>
+                <div class="detail-row">
+                  <span><strong>Donor:</strong></span>
+                  <span>${data.donor_name || 'Anonymous'}</span>
+                </div>
+                <div class="detail-row">
+                  <span><strong>Gross Amount:</strong></span>
+                  <span>${data.amount} ${data.currency}</span>
+                </div>
+                <div class="detail-row">
+                  <span><strong>Platform Fee (2.9% + $0.30):</strong></span>
+                  <span>-${data.platform_fee} ${data.currency}</span>
+                </div>
+                <div class="detail-row">
+                  <span><strong>Net Amount:</strong></span>
+                  <span style="color: #10b981; font-weight: bold;">${data.net_amount} ${data.currency}</span>
+                </div>
+              </div>
+              
+              <p>The funds are securely held in escrow. Once you complete KYC verification, you can request a payout.</p>
+              
+              <center><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://ona.com'}/fundraise/dashboard" class="button">View Dashboard</a></center>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} ONA Platform. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
+
+  kyc_submitted: (data) => ({
+    subject: '📋 KYC Verification Submitted',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+            .content { background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
+            .footer { background: #f9fafb; padding: 20px; border-radius: 0 0 10px 10px; text-align: center; font-size: 14px; color: #6b7280; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>✅ KYC Verification Received</h1>
+            </div>
+            <div class="content">
+              <p>Thank you for submitting your KYC verification for <strong>${data.fundraiser_title}</strong>.</p>
+              <p>Our team will review your documents within 24-48 hours. We'll notify you once the review is complete.</p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} ONA Platform. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
+
+  kyc_approved: (data) => ({
+    subject: '✅ KYC Approved - You can now request payouts!',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+            .content { background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
+            .footer { background: #f9fafb; padding: 20px; border-radius: 0 0 10px 10px; text-align: center; font-size: 14px; color: #6b7280; }
+            .button { display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🎉 KYC Approved!</h1>
+            </div>
+            <div class="content">
+              <p>Congratulations! Your KYC verification has been approved for <strong>${data.fundraiser_title}</strong>.</p>
+              <p>You can now request payouts for your fundraiser. Your funds are ready to be withdrawn to your wallet.</p>
+              <center><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://ona.com'}/fundraise/dashboard" class="button">Request Payout</a></center>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} ONA Platform. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
+
+  kyc_rejected: (data) => ({
+    subject: '⚠️ KYC Application Needs Attention',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+            .content { background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
+            .footer { background: #f9fafb; padding: 20px; border-radius: 0 0 10px 10px; text-align: center; font-size: 14px; color: #6b7280; }
+            .reason { background: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; }
+            .button { display: inline-block; background: #ef4444; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>⚠️ KYC Application Update</h1>
+            </div>
+            <div class="content">
+              <p>Your KYC verification for <strong>${data.fundraiser_title}</strong> requires attention.</p>
+              
+              ${data.rejection_reason ? `
+                <div class="reason">
+                  <strong>Reason:</strong><br>
+                  ${data.rejection_reason}
+                </div>
+              ` : ''}
+              
+              <p>Please review and resubmit your documents with the correct information.</p>
+              <center><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://ona.com'}/fundraise/dashboard" class="button">Update KYC</a></center>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} ONA Platform. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
+
+  payout_requested: (data) => ({
+    subject: '💸 Payout Request Submitted',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+            .content { background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
+            .footer { background: #f9fafb; padding: 20px; border-radius: 0 0 10px 10px; text-align: center; font-size: 14px; color: #6b7280; }
+            .amount { font-size: 36px; font-weight: bold; color: #8b5cf6; margin: 20px 0; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>💸 Payout Request Received</h1>
+            </div>
+            <div class="content">
+              <p>Your payout request for <strong>${data.fundraiser_title}</strong> has been submitted.</p>
+              
+              <div class="amount">$${data.net_amount}</div>
+              
+              <p>Our team will review and process your request within 1-3 business days. You'll receive another email once the payout is completed.</p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} ONA Platform. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
+
+  payout_approved: (data) => ({
+    subject: '✅ Payout Approved - Processing Soon',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+            .content { background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
+            .footer { background: #f9fafb; padding: 20px; border-radius: 0 0 10px 10px; text-align: center; font-size: 14px; color: #6b7280; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>✅ Payout Approved!</h1>
+            </div>
+            <div class="content">
+              <p>Great news! Your payout request for <strong>${data.fundraiser_title}</strong> has been approved.</p>
+              <p>The transaction will be processed shortly. You'll receive a confirmation email with the transaction hash once complete.</p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} ONA Platform. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
+
+  payout_completed: (data) => ({
+    subject: '✅ Payout Completed Successfully!',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+            .content { background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
+            .footer { background: #f9fafb; padding: 20px; border-radius: 0 0 10px 10px; text-align: center; font-size: 14px; color: #6b7280; }
+            .amount { font-size: 36px; font-weight: bold; color: #10b981; margin: 20px 0; text-align: center; }
+            .tx-hash { background: #f9fafb; padding: 15px; border-radius: 8px; word-break: break-all; font-family: monospace; font-size: 12px; margin: 10px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🎉 Payout Completed!</h1>
+            </div>
+            <div class="content">
+              <p>Your payout for <strong>${data.fundraiser_title}</strong> has been successfully processed!</p>
+              
+              <div class="amount">$${data.net_amount}</div>
+              
+              ${data.transaction_hash ? `
+                <p><strong>Transaction Hash:</strong></p>
+                <div class="tx-hash">${data.transaction_hash}</div>
+                <p><small>You can verify this transaction on the blockchain explorer.</small></p>
+              ` : ''}
+              
+              <p>The funds should appear in your wallet within a few minutes. Thank you for using ONA Platform!</p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} ONA Platform. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
+
+  payout_failed: (data) => ({
+    subject: '❌ Payout Failed - Action Required',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+            .content { background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
+            .footer { background: #f9fafb; padding: 20px; border-radius: 0 0 10px 10px; text-align: center; font-size: 14px; color: #6b7280; }
+            .reason { background: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; }
+            .button { display: inline-block; background: #ef4444; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>⚠️ Payout Failed</h1>
+            </div>
+            <div class="content">
+              <p>Unfortunately, your payout for <strong>${data.fundraiser_title}</strong> could not be processed.</p>
+              
+              ${data.failure_reason ? `
+                <div class="reason">
+                  <strong>Reason:</strong><br>
+                  ${data.failure_reason}
+                </div>
+              ` : ''}
+              
+              <p>Please contact our support team or submit a new payout request with updated information.</p>
+              <center><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://ona.com'}/fundraise/dashboard" class="button">Contact Support</a></center>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} ONA Platform. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
+};
+
+export async function sendFundraiserEmail(
+  to: string,
+  type: FundraiserEmailType,
+  data: FundraiserEmailData
+): Promise<{ success: boolean; error?: any }> {
+  try {
+    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'dummy_key') {
+      console.warn('RESEND_API_KEY not configured - skipping email');
+      return { success: false, error: 'Email service not configured' };
+    }
+
+    const template = fundraiserEmailTemplates[type];
+    if (!template) {
+      return { success: false, error: 'Invalid email type' };
+    }
+
+    const { subject, html } = template(data);
+
+    const { data: emailData, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject,
+      html,
+    });
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to send fundraiser email:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
