@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
 import DonationModal from '@/components/DonationModal';
 import { IconHeart, IconShare, IconClock, IconMapPin, IconUser, IconBrandX, IconBrandInstagram } from '@tabler/icons-react';
-import Link from 'next/link';
-
+import Link from 'next/link';import FundraiseHeader from '@/components/FundraiseHeader';
 interface Fundraiser {
   id: string;
   user_id: string;
@@ -151,10 +150,13 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <FundraiseHeader />
+        <div className="flex items-center justify-center min-h-[80vh]">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
           <p className="mt-4 text-white">Loading campaign...</p>
+        </div>
         </div>
       </div>
     );
@@ -162,12 +164,15 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
 
   if (!fundraiser) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <FundraiseHeader />
+        <div className="flex items-center justify-center min-h-[80vh]">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-white mb-4">Campaign Not Found</h1>
           <Link href="/fundraise" className="text-green-400 hover:underline">
             Browse other campaigns
           </Link>
+        </div>
         </div>
       </div>
     );
@@ -178,6 +183,7 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <FundraiseHeader />
         {/* Hero Section */}
         <div className="bg-white">
           <div className="max-w-7xl mx-auto px-4 py-8">

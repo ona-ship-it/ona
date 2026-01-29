@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase';
 import { IconPlus, IconEdit, IconEye, IconTrash, IconTrendingUp, IconUsers } from '@tabler/icons-react';
+import FundraiseHeader from '@/components/FundraiseHeader';
 
 interface Fundraiser {
   id: string;
@@ -110,17 +111,21 @@ export default function MyFundraisersClient() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <FundraiseHeader />
+        <div className="flex items-center justify-center min-h-[80vh]">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
           <p className="mt-4 text-white">Loading your campaigns...</p>
+        </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <FundraiseHeader />
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">

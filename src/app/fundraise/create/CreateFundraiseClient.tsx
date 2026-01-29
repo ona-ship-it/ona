@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 import { IconHeart, IconUpload, IconX } from '@tabler/icons-react';
+import FundraiseHeader from '@/components/FundraiseHeader';
 
 const CATEGORIES = [
   'Medical',
@@ -177,7 +178,9 @@ export default function CreateFundraiseClient() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <FundraiseHeader />
+      <div className="py-12">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
@@ -525,6 +528,7 @@ export default function CreateFundraiseClient() {
             )}
           </div>
         </form>
+      </div>
       </div>
     </div>
   );

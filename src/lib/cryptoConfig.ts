@@ -124,6 +124,16 @@ export const SUPPORTED_CRYPTOS: CryptoNetwork[] = [
     decimals: 9,
     logo: '◎',
   },
+  {
+    id: 'tron-usdt',
+    name: 'USDT (TRC20)',
+    symbol: 'USDT',
+    explorerUrl: 'https://tronscan.org',
+    platformWallet: process.env.NEXT_PUBLIC_PLATFORM_WALLET_TRON || 'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf',
+    tokenAddress: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t', // USDT contract on TRON
+    decimals: 6,
+    logo: '💰',
+  },
 ];
 
 export const ERC20_ABI = [

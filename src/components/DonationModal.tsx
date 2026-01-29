@@ -343,7 +343,7 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
                 <label className="block text-gray-700 font-semibold mb-3">
                   Select Cryptocurrency
                 </label>
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto pr-2">
                   {SUPPORTED_CRYPTOS.map((crypto) => (
                     <button
                       key={crypto.id}
@@ -417,19 +417,14 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
                   />
                 </div>
                 {donationAmount > 0 && (
-                  <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-gray-600">Your donation:</span>
-                      <span className="font-semibold">${donationAmount.toFixed(2)}</span>
+                  <div className="mt-4 p-3 bg-green-50 rounded-lg text-sm border border-green-200">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700">Amount to fundraiser:</span>
+                      <span className="font-bold text-green-600 text-lg">${netToFundraiser.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-gray-600">Platform fee (2.9% + $0.30):</span>
-                      <span className="text-gray-600">${platformFee.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between pt-2 border-t">
-                      <span className="font-semibold text-gray-900">To fundraiser:</span>
-                      <span className="font-semibold text-green-600">${netToFundraiser.toFixed(2)}</span>
-                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Your ${donationAmount.toFixed(2)} donation will help make a difference!
+                    </p>
                   </div>
                 )}
               </div>
@@ -448,16 +443,12 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
             <div className="space-y-4">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                 <div className="text-2xl font-bold text-green-700">
-                  ${parseFloat(amount).toLocaleString()} USDC
+                  ${parseFloat(amount).toLocaleString()} {selectedCrypto.symbol}
                 </div>
                 <div className="text-sm text-green-600 space-y-1">
                   <div>Your generous donation</div>
-                  <div className="text-xs text-gray-500">
-                    Platform fee: ${((parseFloat(amount) * 0.029) + 0.30).toFixed(2)} 
-                    <span className="ml-1">(2.9% + $0.30)</span>
-                  </div>
-                  <div className="text-xs font-semibold text-green-700">
-                    Fundraiser receives: ${(parseFloat(amount) - ((parseFloat(amount) * 0.029) + 0.30)).toFixed(2)}
+                  <div className="text-xs font-semibold text-green-700 mt-2">
+                    ${netToFundraiser.toFixed(2)} will go to the fundraiser
                   </div>
                   <div className="text-xs text-gray-500 mt-2">
                     💰 Funds held in secure escrow until KYC verification

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase';
 import { IconHeart, IconSearch, IconPlus, IconTrendingUp } from '@tabler/icons-react';
+import FundraiseHeader from '@/components/FundraiseHeader';
 
 interface Fundraiser {
   id: string;
@@ -117,6 +118,8 @@ export default function FundraiseClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <FundraiseHeader />
+      
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-green-600 to-teal-600 text-white py-16">
         <div className="max-w-7xl mx-auto px-4">
