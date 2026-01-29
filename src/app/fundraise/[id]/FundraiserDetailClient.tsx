@@ -188,7 +188,25 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
                 <div className="relative h-96 bg-gradient-to-br from-green-400 to-teal-500 rounded-xl overflow-hidden mb-6">
                   {fundraiser.cover_image ? (
                     <img
-                   div className="flex items-start justify-between mb-4">
+                      src={fundraiser.cover_image}
+                      alt={fundraiser.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <IconHeart size={128} className="text-white opacity-50" />
+                    </div>
+                  )}
+                  <div className="absolute top-4 left-4">
+                    <span className="bg-white text-green-700 px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                      {fundraiser.category}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Title & Meta */}
+                <div className="mb-6">
+                  <div className="flex items-start justify-between mb-4">
                     <h1 className="text-4xl font-bold text-gray-900 flex-1">{fundraiser.title}</h1>
                     <div className="relative ml-4">
                       <button
@@ -217,25 +235,7 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
                         </div>
                       )}
                     </div>
-                  </div
-                      alt={fundraiser.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <IconHeart size={128} className="text-white opacity-50" />
-                    </div>
-                  )}
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-white text-green-700 px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
-                      {fundraiser.category}
-                    </span>
                   </div>
-                </div>
-
-                {/* Title & Meta */}
-                <div className="mb-6">
-                  <h1 className="text-4xl font-bold text-gray-900 mb-4">{fundraiser.title}</h1>
                   <div className="flex flex-wrap gap-4 text-gray-600">
                     {fundraiser.location && (
                       <div className="flex items-center gap-1">
