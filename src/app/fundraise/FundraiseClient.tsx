@@ -38,10 +38,40 @@ export default function FundraiseClient() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'trending' | 'goal'>('recent');
+  const [stats, setStats] = useState({
+    totalRaised: 0,
+    totalCampaigns: 0,
+    totalDonors: 0,
+  });
 
   useEffect(() => {
     fetchFundraisers();
+    fetchStats();
   }, [selectedCategory, sortBy]);
+
+  async function fetchStats() {
+    try {
+      const supabase = createClient();
+      
+      // Get total raised across all fundraisers
+      const { data: fundraisersData } = await supabase
+        .from('fundraisers')
+        .select('raised_amount, total_donors');
+
+      if (fundraisersData) {
+        const totalRaised = fundraisersData.reduce((sum, f) => sum + (f.raised_amount || 0), 0);
+        const totalDonors = fundraisersData.reduce((sum, f) => sum + (f.total_donors || 0), 0);
+        
+        setStats({
+          totalRaised,
+          totalCampaigns: fundraisersData.length,
+          totalDonors,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  }
 
   async function fetchFundraisers() {
     try {
@@ -117,15 +147,21 @@ export default function FundraiseClient() {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-green-600 mb-2">$2.5M+</div>
+              <div className="text-4xl font-bold text-green-600 mb-2">
+                ${stats.totalRaised.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </div>
               <div className="text-gray-600">Raised in Crypto</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-green-600 mb-2">15K+</div>
+              <div className="text-4xl font-bold text-green-600 mb-2">
+                {stats.totalCampaigns.toLocaleString()}
+              </div>
               <div className="text-gray-600">Campaigns Funded</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-green-600 mb-2">50K+</div>
+              <div className="text-4xl font-bold text-green-600 mb-2">
+                {stats.totalDonors.toLocaleString()}
+              </div>
               <div className="text-gray-600">Generous Donors</div>
             </div>
           </div>

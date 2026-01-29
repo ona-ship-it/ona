@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
 import DonationModal from '@/components/DonationModal';
-import { IconHeart, IconShare, IconClock, IconMapPin, IconUser } from '@tabler/icons-react';
+import { IconHeart, IconShare, IconClock, IconMapPin, IconUser, IconBrandX, IconBrandInstagram } from '@tabler/icons-react';
 import Link from 'next/link';
 
 interface Fundraiser {
@@ -48,12 +48,30 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
   const [loading, setLoading] = useState(true);
   const [showDonationModal, setShowDonationModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'story' | 'updates' | 'donations'>('story');
+  const [showShareMenu, setShowShareMenu] = useState(false);
 
   useEffect(() => {
     fetchFundraiser();
     fetchDonations();
     fetchUpdates();
   }, [fundraiserId]);
+
+  function handleShare(platform: 'twitter' | 'instagram') {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const text = fundraiser ? `Help support: ${fundraiser.title}` : '';
+    
+    if (platform === 'twitter') {
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      window.open(twitterUrl, '_blank', 'width=550,height=420');
+    } else if (platform === 'instagram') {
+      // Instagram doesn't support direct web sharing, so copy link to clipboard
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url);
+        alert('Link copied! Share it on Instagram');
+      }
+    }
+    setShowShareMenu(false);
+  }
 
   async function fetchFundraiser() {
     try {
@@ -170,7 +188,36 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
                 <div className="relative h-96 bg-gradient-to-br from-green-400 to-teal-500 rounded-xl overflow-hidden mb-6">
                   {fundraiser.cover_image ? (
                     <img
-                      src={fundraiser.cover_image}
+                   div className="flex items-start justify-between mb-4">
+                    <h1 className="text-4xl font-bold text-gray-900 flex-1">{fundraiser.title}</h1>
+                    <div className="relative ml-4">
+                      <button
+                        onClick={() => setShowShareMenu(!showShareMenu)}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-700 transition-colors"
+                      >
+                        <IconShare size={20} />
+                        Share
+                      </button>
+                      {showShareMenu && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-10">
+                          <button
+                            onClick={() => handleShare('twitter')}
+                            className="w-full px-4 py-2 hover:bg-gray-50 flex items-center gap-3 text-left text-gray-700"
+                          >
+                            <IconBrandX size={20} />
+                            Share on X
+                          </button>
+                          <button
+                            onClick={() => handleShare('instagram')}
+                            className="w-full px-4 py-2 hover:bg-gray-50 flex items-center gap-3 text-left text-gray-700"
+                          >
+                            <IconBrandInstagram size={20} />
+                            Copy for Instagram
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div
                       alt={fundraiser.title}
                       className="w-full h-full object-cover"
                     />
