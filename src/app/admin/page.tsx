@@ -25,6 +25,14 @@ export default function AdminDashboard() {
     pendingRaffles: 0,
     raffleRevenue: 0,
     raffleTicketsSold: 0,
+    
+    // Fundraisers
+    totalFundraisers: 0,
+    activeFundraisers: 0,
+    fundraiserRevenue: 0,
+    fundraiserPlatformFees: 0,
+    pendingKYC: 0,
+    pendingPayouts: 0,
   })
 
   useEffect(() => {
@@ -103,6 +111,33 @@ export default function AdminDashboard() {
       const raffleRevenue = raffleTickets?.reduce((sum, ticket) => sum + (ticket.final_price || 0), 0) || 0
       const raffleTicketsSold = raffleTickets?.reduce((sum, ticket) => sum + (ticket.quantity || 0), 0) || 0
 
+      // FUNDRAISERS STATS
+      const { count: totalFundraisers } = await supabase
+        .from('fundraisers')
+        .select('*', { count: 'exact', head: true })
+
+      const { count: activeFundraisers } = await supabase
+        .from('fundraisers')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active')
+
+      const { data: fundraisers } = await supabase
+        .from('fundraisers')
+        .select('raised_amount, platform_fees')
+
+      const fundraiserRevenue = fundraisers?.reduce((sum, f) => sum + (f.raised_amount || 0), 0) || 0
+      const fundraiserPlatformFees = fundraisers?.reduce((sum, f) => sum + (f.platform_fees || 0), 0) || 0
+
+      const { count: pendingKYC } = await supabase
+        .from('kyc_submissions')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending')
+
+      const { count: pendingPayouts } = await supabase
+        .from('payout_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending')
+
       setStats({
         totalGiveaways: totalGiveaways || 0,
         activeGiveaways: activeGiveaways || 0,
@@ -114,6 +149,12 @@ export default function AdminDashboard() {
         pendingRaffles: pendingRaffles || 0,
         raffleRevenue,
         raffleTicketsSold,
+        totalFundraisers: totalFundraisers || 0,
+        activeFundraisers: activeFundraisers || 0,
+        fundraiserRevenue,
+        fundraiserPlatformFees,
+        pendingKYC: pendingKYC || 0,
+        pendingPayouts: pendingPayouts || 0,
       })
     } catch (error) {
       console.error('Error fetching stats:', error)
@@ -240,10 +281,13 @@ export default function AdminDashboard() {
               <div>
                 <div className="text-sm text-green-400 mb-2">Total Platform Revenue</div>
                 <div className="text-5xl font-black text-white">
-                  ${(stats.totalRevenue + stats.raffleRevenue).toFixed(2)}
+                  ${(stats.totalRevenue + stats.raffleRevenue + stats.fundraiserRevenue).toFixed(2)}
                 </div>
                 <div className="text-sm text-slate-400 mt-2">
-                  Giveaways: ${stats.totalRevenue.toFixed(2)} + Raffles: ${stats.raffleRevenue.toFixed(2)}
+                  Giveaways: ${stats.totalRevenue.toFixed(2)} + Raffles: ${stats.raffleRevenue.toFixed(2)} + Fundraisers: ${stats.fundraiserRevenue.toFixed(2)}
+                </div>
+                <div className="text-sm text-green-400 mt-1 font-semibold">
+                  Platform Fees Earned: ${stats.fundraiserPlatformFees.toFixed(2)}
                 </div>
               </div>
               <div className="text-8xl">💰</div>
@@ -251,8 +295,50 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* FUNDRAISERS SECTION */}
+        <div className="mb-12">
+          <h3 className="text-2xl font-bold text-white mb-6">Fundraisers</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
+              <div className="text-4xl mb-3">💝</div>
+              <div className="text-3xl font-black text-white mb-1">{stats.totalFundraisers}</div>
+              <div className="text-sm text-slate-400">Total Fundraisers</div>
+            </div>
+
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
+              <div className="text-4xl mb-3">🔥</div>
+              <div className="text-3xl font-black text-green-400 mb-1">{stats.activeFundraisers}</div>
+              <div className="text-sm text-slate-400">Active Now</div>
+            </div>
+
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
+              <div className="text-4xl mb-3">💵</div>
+              <div className="text-3xl font-black text-blue-400 mb-1">${stats.fundraiserRevenue.toFixed(0)}</div>
+              <div className="text-sm text-slate-400">Total Raised</div>
+            </div>
+
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
+              <div className="text-4xl mb-3">💰</div>
+              <div className="text-3xl font-black text-yellow-400 mb-1">${stats.fundraiserPlatformFees.toFixed(0)}</div>
+              <div className="text-sm text-slate-400">Platform Fees</div>
+            </div>
+
+            <div className="bg-gradient-to-br from-orange-900/30 to-yellow-900/30 border-2 border-orange-500/50 rounded-3xl p-6">
+              <div className="text-4xl mb-3">📋</div>
+              <div className="text-3xl font-black text-orange-400 mb-1">{stats.pendingKYC}</div>
+              <div className="text-sm text-orange-400 font-semibold">Pending KYC</div>
+            </div>
+
+            <div className="bg-gradient-to-br from-red-900/30 to-orange-900/30 border-2 border-red-500/50 rounded-3xl p-6">
+              <div className="text-4xl mb-3">💸</div>
+              <div className="text-3xl font-black text-red-400 mb-1">{stats.pendingPayouts}</div>
+              <div className="text-sm text-red-400 font-semibold">Pending Payouts</div>
+            </div>
+          </div>
+        </div>
+
         {/* ACTION CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {/* Giveaways Management */}
           <Link href="/admin/giveaways" className="group">
             <div className="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 border-2 border-blue-500/50 hover:border-blue-500 rounded-3xl p-8 transition-all hover:scale-105">
@@ -304,6 +390,38 @@ export default function AdminDashboard() {
                 Analytics
               </h3>
               <p className="text-slate-400 text-sm">View detailed platform statistics</p>
+            </div>
+          </Link>
+
+          {/* KYC Review */}
+          <Link href="/admin/kyc" className="group">
+            <div className="bg-gradient-to-br from-orange-900/30 to-red-900/30 border-2 border-orange-500/50 hover:border-orange-500 rounded-3xl p-8 transition-all hover:scale-105">
+              <div className="text-6xl mb-4">📋</div>
+              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-orange-400 transition-colors">
+                KYC Review
+              </h3>
+              <p className="text-slate-400 text-sm">Review and approve identity verifications</p>
+              {stats.pendingKYC > 0 && (
+                <div className="mt-3 px-3 py-1 bg-orange-500 rounded-full inline-block">
+                  <span className="text-white font-bold text-xs">{stats.pendingKYC} Pending</span>
+                </div>
+              )}
+            </div>
+          </Link>
+
+          {/* Payout Requests */}
+          <Link href="/admin/payouts" className="group">
+            <div className="bg-gradient-to-br from-red-900/30 to-pink-900/30 border-2 border-red-500/50 hover:border-red-500 rounded-3xl p-8 transition-all hover:scale-105">
+              <div className="text-6xl mb-4">💸</div>
+              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-red-400 transition-colors">
+                Payout Requests
+              </h3>
+              <p className="text-slate-400 text-sm">Process fundraiser creator payouts</p>
+              {stats.pendingPayouts > 0 && (
+                <div className="mt-3 px-3 py-1 bg-red-500 rounded-full inline-block">
+                  <span className="text-white font-bold text-xs">{stats.pendingPayouts} Pending</span>
+                </div>
+              )}
             </div>
           </Link>
         </div>
