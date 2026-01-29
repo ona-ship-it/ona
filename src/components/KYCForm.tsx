@@ -35,11 +35,11 @@ export default function KYCForm({ fundraiserId, fundraiserTitle, escrowBalance, 
     proofOfAddress: null as File | null,
   });
 
-  async function uploadFile(file: File, path: string): Promise<string> {
+  async function uploadFile(file: File, userId: string, documentType: string): Promise<string> {
     const supabase = createClient();
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `${path}/${fileName}`;
+    const fileName = `${documentType}_${Date.now()}.${fileExt}`;
+    const filePath = `${userId}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from('kyc-documents')
@@ -73,9 +73,9 @@ export default function KYCForm({ fundraiserId, fundraiserTitle, escrowBalance, 
       }
 
       // Upload documents
-      const passportUrl = await uploadFile(files.passportPhoto, 'passports');
-      const idUrl = files.idDocument ? await uploadFile(files.idDocument, 'ids') : null;
-      const addressProofUrl = files.proofOfAddress ? await uploadFile(files.proofOfAddress, 'address-proofs') : null;
+      const passportUrl = await uploadFile(files.passportPhoto, user.id, 'passport');
+      const idUrl = files.idDocument ? await uploadFile(files.idDocument, user.id, 'id_document') : null;
+      const addressProofUrl = files.proofOfAddress ? await uploadFile(files.proofOfAddress, user.id, 'proof_of_address') : null;
 
       // Submit KYC
       const { error } = await supabase.from('kyc_submissions').insert([
