@@ -418,12 +418,8 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
                 </div>
                 {donationAmount > 0 && (
                   <div className="mt-4 p-3 bg-green-50 rounded-lg text-sm border border-green-200">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-700">Amount to fundraiser:</span>
-                      <span className="font-bold text-green-600 text-lg">${netToFundraiser.toFixed(2)}</span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      Your ${donationAmount.toFixed(2)} donation will help make a difference!
+                    <p className="text-sm text-gray-700 text-center">
+                      Your <span className="font-bold text-green-700">${donationAmount.toFixed(2)}</span> donation will help make a difference!
                     </p>
                   </div>
                 )}
@@ -447,9 +443,6 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
                 </div>
                 <div className="text-sm text-green-600 space-y-1">
                   <div>Your generous donation</div>
-                  <div className="text-xs font-semibold text-green-700 mt-2">
-                    ${netToFundraiser.toFixed(2)} will go to the fundraiser
-                  </div>
                   <div className="text-xs text-gray-500 mt-2">
                     💰 Funds held in secure escrow until KYC verification
                   </div>
