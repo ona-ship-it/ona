@@ -64,10 +64,12 @@ export default function MyFundraisersClient() {
     const newStatus = currentStatus === 'active' ? 'paused' : 'active';
     
     try {
+      const supabase = createClient(); // ✅ FIXED
       const { error } = await supabase
         .from('fundraisers')
         .update({ status: newStatus })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id); // ✅ Security check
 
       if (error) throw error;
       
@@ -86,10 +88,12 @@ export default function MyFundraisersClient() {
     }
 
     try {
+      const supabase = createClient(); // ✅ FIXED
       const { error } = await supabase
         .from('fundraisers')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id); // ✅ Security check
 
       if (error) throw error;
       
