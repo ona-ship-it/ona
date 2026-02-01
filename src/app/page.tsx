@@ -227,7 +227,7 @@ export default function HomePage() {
                 <button
                   onMouseEnter={() => setShowCreateMenu(true)}
                   onMouseLeave={() => setShowCreateMenu(false)}
-                  className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all"
+                  className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all hover:opacity-90"
                   style={{ 
                     background: 'var(--accent-green)',
                     color: 'var(--text-primary)'
@@ -240,7 +240,7 @@ export default function HomePage() {
                   <div
                     onMouseEnter={() => setShowCreateMenu(true)}
                     onMouseLeave={() => setShowCreateMenu(false)}
-                    className="absolute top-full right-0 mt-2 w-56 rounded-lg shadow-xl overflow-hidden"
+                    className="absolute top-full right-0 mt-2 w-56 rounded-lg shadow-xl overflow-hidden z-50"
                     style={{ 
                       background: 'var(--secondary-bg)',
                       border: '1px solid var(--border)'
@@ -248,10 +248,15 @@ export default function HomePage() {
                   >
                     <Link
                       href="/create"
-                      className="block px-4 py-3 transition-colors"
+                      className="block px-4 py-3 transition-colors cursor-pointer"
                       style={{ borderBottom: '1px solid var(--border)' }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'var(--tertiary-bg)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent'
+                      }}
+                      onClick={() => setShowCreateMenu(false)}
                     >
                       <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
                         Giveaway
@@ -263,10 +268,15 @@ export default function HomePage() {
                     
                     <Link
                       href="/raffles/create"
-                      className="block px-4 py-3 transition-colors"
+                      className="block px-4 py-3 transition-colors cursor-pointer"
                       style={{ borderBottom: '1px solid var(--border)' }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'var(--tertiary-bg)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent'
+                      }}
+                      onClick={() => setShowCreateMenu(false)}
                     >
                       <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
                         Raffle
@@ -278,10 +288,15 @@ export default function HomePage() {
                     
                     <Link
                       href="/fundraise/create"
-                      className="block px-4 py-3 transition-colors"
+                      className="block px-4 py-3 transition-colors cursor-pointer"
                       style={{ borderBottom: '1px solid var(--border)' }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'var(--tertiary-bg)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent'
+                      }}
+                      onClick={() => setShowCreateMenu(false)}
                     >
                       <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
                         Fundraise
@@ -293,9 +308,14 @@ export default function HomePage() {
                     
                     <Link
                       href="/marketplace/create"
-                      className="block px-4 py-3 transition-colors"
-                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      className="block px-4 py-3 transition-colors cursor-pointer"
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'var(--tertiary-bg)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent'
+                      }}
+                      onClick={() => setShowCreateMenu(false)}
                     >
                       <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
                         Marketplace
