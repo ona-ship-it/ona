@@ -7,6 +7,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import VerificationBadge from '@/components/VerificationBadge'
 import Header from '@/components/Header'
+import ProfilePicture from '@/components/ProfilePicture'
 
 type Entry = {
   id: string
@@ -234,9 +235,7 @@ export default function UserDashboard() {
         {/* Profile Header */}
         <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-8 mb-8">
           <div className="flex items-center gap-6">
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-4xl">
-              {profile?.full_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
-            </div>
+            <ProfilePicture size="lg" />
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <h2 className="text-3xl font-black text-white">
