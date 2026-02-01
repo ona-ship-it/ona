@@ -41,3 +41,37 @@ CREATE POLICY "Users can delete their own verifications"
 
 -- Add comment for documentation
 COMMENT ON TABLE social_verifications IS 'Stores social media verification codes and status';
+
+-- Create admin verification function
+CREATE OR REPLACE FUNCTION admin_verify_social_account(
+  target_user_id UUID,
+  social_platform TEXT,
+  verified_status BOOLEAN
+)
+RETURNS void AS $$
+BEGIN
+  -- Update profile verification status
+  CASE social_platform
+    WHEN 'twitter' THEN
+      UPDATE profiles SET twitter_verified = verified_status WHERE id = target_user_id;
+    WHEN 'instagram' THEN
+      UPDATE profiles SET instagram_verified = verified_status WHERE id = target_user_id;
+    WHEN 'tiktok' THEN
+      UPDATE profiles SET tiktok_verified = verified_status WHERE id = target_user_id;
+    WHEN 'youtube' THEN
+      UPDATE profiles SET youtube_verified = verified_status WHERE id = target_user_id;
+    WHEN 'facebook' THEN
+      UPDATE profiles SET facebook_verified = verified_status WHERE id = target_user_id;
+    WHEN 'linkedin' THEN
+      UPDATE profiles SET linkedin_verified = verified_status WHERE id = target_user_id;
+  END CASE;
+  
+  -- Update verification records
+  UPDATE social_verifications 
+  SET verified = verified_status, verified_at = NOW()
+  WHERE user_id = target_user_id AND platform = social_platform;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission to authenticated users (admin check will be done in app)
+GRANT EXECUTE ON FUNCTION admin_verify_social_account TO authenticated;
