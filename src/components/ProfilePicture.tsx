@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
+import { getGravatarUrl } from '@/utils/gravatar'
 import Image from 'next/image'
 
 type ProfilePictureProps = {
@@ -53,23 +54,6 @@ export default function ProfilePicture({ size = 'sm', showUpload = false }: Prof
     } catch (error) {
       console.error('Error fetching user:', error)
     }
-  }
-
-  function getGravatarUrl(email: string): string {
-    // MD5 hash function (simple implementation)
-    const md5 = (str: string) => {
-      // Use a library or crypto for production
-      // For now, using a simple hash
-      return Array.from(str)
-        .reduce((hash, char) => {
-          const charCode = char.charCodeAt(0)
-          return ((hash << 5) - hash) + charCode | 0
-        }, 0)
-        .toString(16)
-    }
-
-    const hash = md5(email.toLowerCase().trim())
-    return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=200`
   }
 
   async function uploadAvatar(event: React.ChangeEvent<HTMLInputElement>) {
