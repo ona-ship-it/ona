@@ -52,7 +52,10 @@ export default function GiveawaysClient() {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        <div 
+          className="animate-spin rounded-full h-12 w-12 border-b-2" 
+          style={{ borderColor: 'var(--accent-green)' }}
+        ></div>
       </div>
     );
   }
@@ -60,7 +63,14 @@ export default function GiveawaysClient() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <div 
+          className="px-4 py-3 rounded-lg border"
+          style={{
+            background: 'rgba(246, 70, 93, 0.1)',
+            borderColor: 'var(--accent-red)',
+            color: 'var(--accent-red)'
+          }}
+        >
           Error loading giveaways: {error}
         </div>
       </div>
@@ -70,9 +80,17 @@ export default function GiveawaysClient() {
   if (giveaways.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-8 shadow-xl border border-white border-opacity-20">
-          <h2 className="text-xl font-semibold text-white mb-4">No Active Giveaways</h2>
-          <p className="text-white opacity-80">Check back soon for new giveaways!</p>
+        <div 
+          className="rounded-xl p-8 border"
+          style={{
+            background: 'var(--card-bg)',
+            borderColor: 'var(--border)'
+          }}
+        >
+          <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+            No Active Giveaways
+          </h2>
+          <p style={{ color: 'var(--text-secondary)' }}>Check back soon for new giveaways!</p>
         </div>
       </div>
     );
@@ -84,7 +102,11 @@ export default function GiveawaysClient() {
         {giveaways.map((giveaway) => (
           <div
             key={giveaway.id}
-            className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 shadow-xl border border-white border-opacity-20 hover:bg-opacity-20 transition-all duration-300 transform hover:scale-105"
+            className="rounded-xl p-6 border hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            style={{
+              background: 'var(--card-bg)',
+              borderColor: 'var(--border)'
+            }}
           >
             {giveaway.media_url && (
               <div className="mb-4 rounded-lg overflow-hidden">
@@ -101,15 +123,15 @@ export default function GiveawaysClient() {
             )}
             
             <div className="space-y-3">
-              <h3 className="text-xl font-bold text-white">
+              <h3 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 {giveaway.title || 'Untitled Giveaway'}
               </h3>
               
-              <p className="text-white opacity-90">
+              <p style={{ color: 'var(--text-secondary)' }}>
                 {giveaway.description || 'No description available'}
               </p>
               
-              <div className="flex justify-between items-center text-sm text-white opacity-80">
+              <div className="flex justify-between items-center text-sm" style={{ color: 'var(--text-tertiary)' }}>
                 <span>Prize: ${giveaway.prize_amount || 0}</span>
                 {giveaway.ticket_price && (
                   <span>Ticket: ${giveaway.ticket_price}</span>
@@ -117,12 +139,15 @@ export default function GiveawaysClient() {
               </div>
               
               {giveaway.ends_at && (
-                <div className="text-sm text-white opacity-70">
+                <div className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
                   Ends: {new Date(giveaway.ends_at).toLocaleDateString()}
                 </div>
               )}
               
-              <button className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+              <button 
+                className="w-full font-bold py-2 px-4 rounded-lg transition-all duration-300"
+                style={{ background: 'var(--accent-green)', color: 'var(--text-primary)' }}
+              >
                 Enter Giveaway
               </button>
             </div>
