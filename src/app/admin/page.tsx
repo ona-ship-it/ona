@@ -33,6 +33,9 @@ export default function AdminDashboard() {
     fundraiserPlatformFees: 0,
     pendingKYC: 0,
     pendingPayouts: 0,
+    
+    // Social Verification
+    pendingVerifications: 0,
   })
 
   useEffect(() => {
@@ -138,6 +141,12 @@ export default function AdminDashboard() {
         .select('*', { count: 'exact', head: true })
         .eq('status', 'pending')
 
+      // SOCIAL VERIFICATION STATS
+      const { count: pendingVerifications } = await supabase
+        .from('social_verifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('verified', false)
+
       setStats({
         totalGiveaways: totalGiveaways || 0,
         activeGiveaways: activeGiveaways || 0,
@@ -155,6 +164,7 @@ export default function AdminDashboard() {
         fundraiserPlatformFees,
         pendingKYC: pendingKYC || 0,
         pendingPayouts: pendingPayouts || 0,
+        pendingVerifications: pendingVerifications || 0,
       })
     } catch (error) {
       console.error('Error fetching stats:', error)
@@ -420,6 +430,22 @@ export default function AdminDashboard() {
               {stats.pendingPayouts > 0 && (
                 <div className="mt-3 px-3 py-1 bg-red-500 rounded-full inline-block">
                   <span className="text-white font-bold text-xs">{stats.pendingPayouts} Pending</span>
+                </div>
+              )}
+            </div>
+          </Link>
+
+          {/* Social Verification */}
+          <Link href="/admin/verify-social" className="group">
+            <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 border-2 border-blue-500/50 hover:border-blue-500 rounded-3xl p-8 transition-all hover:scale-105">
+              <div className="text-6xl mb-4">✓</div>
+              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                Social Verification
+              </h3>
+              <p className="text-slate-400 text-sm">Verify social media accounts</p>
+              {stats.pendingVerifications > 0 && (
+                <div className="mt-3 px-3 py-1 bg-blue-500 rounded-full inline-block">
+                  <span className="text-white font-bold text-xs">{stats.pendingVerifications} Pending</span>
                 </div>
               )}
             </div>
