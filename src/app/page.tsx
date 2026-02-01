@@ -21,42 +21,131 @@ type Giveaway = {
   end_date: string
 }
 
+type Raffle = {
+  id: string
+  title: string
+  emoji: string
+  prize_value: number
+  tickets_sold: number
+  total_tickets: number
+  base_ticket_price: number
+  status: string
+}
+
 export default function HomePage() {
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
   const [giveaways, setGiveaways] = useState<Giveaway[]>([])
-  const [filter, setFilter] = useState<'all' | 'free' | 'paid'>('all')
+  const [raffles, setRaffles] = useState<Raffle[]>([])
   const [showCreateMenu, setShowCreateMenu] = useState(false)
 
   useEffect(() => {
-    fetchGiveaways()
-  }, [filter])
+    fetchData()
+  }, [])
 
-  async function fetchGiveaways() {
+  async function fetchData() {
     setLoading(true)
     try {
-      let query = supabase
+      // Fetch top 4 giveaways
+      const { data: giveawaysData } = await supabase
         .from('giveaways')
         .select('*')
         .eq('status', 'active')
-        .order('created_at', { ascending: false })
+        .order('tickets_sold', { ascending: false })
+        .limit(4)
 
-      if (filter === 'free') {
-        query = query.eq('is_free', true)
-      } else if (filter === 'paid') {
-        query = query.eq('is_free', false)
-      }
+      // Fetch top 4 raffles
+      const { data: rafflesData } = await supabase
+        .from('raffles')
+        .select('*')
+        .eq('status', 'active')
+        .order('tickets_sold', { ascending: false })
+        .limit(4)
 
-      const { data, error } = await query
-
-      if (error) throw error
-      setGiveaways(data || [])
+      setGiveaways(giveawaysData || [])
+      setRaffles(rafflesData || [])
     } catch (error) {
-      console.error('Error fetching giveaways:', error)
+      console.error('Error fetching data:', error)
     } finally {
       setLoading(false)
     }
   }
+
+  // Mock data for marketplace (TODO: Remove when real data is ready)
+  const mockMarketplace = [
+    {
+      id: '1',
+      title: 'iPhone 15 Pro Max',
+      price: 1299,
+      image: 'https://images.unsplash.com/photo-1696446702403-69e5f8ab97ec?w=400',
+      category: 'Electronics',
+      seller: 'TechStore'
+    },
+    {
+      id: '2',
+      title: 'Sony PS5 Console',
+      price: 499,
+      image: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400',
+      category: 'Gaming',
+      seller: 'GameHub'
+    },
+    {
+      id: '3',
+      title: 'MacBook Pro M3',
+      price: 2499,
+      image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400',
+      category: 'Computers',
+      seller: 'AppleStore'
+    },
+    {
+      id: '4',
+      title: 'AirPods Pro 2',
+      price: 249,
+      image: 'https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7?w=400',
+      category: 'Audio',
+      seller: 'AudioTech'
+    }
+  ]
+
+  // Mock data for fundraise (TODO: Remove when real data is ready)
+  const mockFundraise = [
+    {
+      id: '1',
+      title: 'Help Build Clean Water Wells in Africa',
+      raised: 45000,
+      goal: 100000,
+      image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=400',
+      category: 'Charity',
+      donors: 1234
+    },
+    {
+      id: '2',
+      title: 'Support Local Animal Shelter',
+      raised: 12500,
+      goal: 25000,
+      image: 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=400',
+      category: 'Animals',
+      donors: 543
+    },
+    {
+      id: '3',
+      title: 'Medical Treatment for Children',
+      raised: 67000,
+      goal: 80000,
+      image: 'https://images.unsplash.com/photo-1559757175-5700dde675bc?w=400',
+      category: 'Medical',
+      donors: 2156
+    },
+    {
+      id: '4',
+      title: 'Education Fund for Underprivileged Kids',
+      raised: 33000,
+      goal: 50000,
+      image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400',
+      category: 'Education',
+      donors: 876
+    }
+  ]
 
   const getProgressPercentage = (sold: number, total: number) => {
     return Math.min((sold / total) * 100, 100)
@@ -80,7 +169,7 @@ export default function HomePage() {
     <div className="min-h-screen" style={{ background: 'var(--primary-bg)' }}>
       {/* Header */}
       <header className="border-b sticky top-0 z-50 backdrop-blur-xl" style={{ 
-        background: 'rgba(11, 14, 17, 0.8)',
+        background: 'rgba(11, 14, 17, 0.95)',
         borderColor: 'var(--border)'
       }}>
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -98,6 +187,13 @@ export default function HomePage() {
                 href="/" 
                 className="text-sm font-medium transition-colors"
                 style={{ color: 'var(--text-primary)' }}
+              >
+                Home
+              </Link>
+              <Link 
+                href="/giveaways" 
+                className="text-sm font-medium transition-colors hover:opacity-80"
+                style={{ color: 'var(--text-secondary)' }}
               >
                 Giveaways
               </Link>
@@ -122,207 +218,128 @@ export default function HomePage() {
               >
                 Marketplace
               </Link>
-              <Link 
-                href="/dashboard" 
-                className="text-sm font-medium transition-colors hover:opacity-80"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Dashboard
-              </Link>
             </nav>
 
-            {/* Create Button with Dropdown */}
-            <div className="relative">
-              <button
-                onMouseEnter={() => setShowCreateMenu(true)}
-                onMouseLeave={() => setShowCreateMenu(false)}
-                className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all"
-                style={{ 
-                  background: 'var(--accent-green)',
-                  color: 'var(--text-primary)'
-                }}
-              >
-                + Create
-              </button>
-
-              {showCreateMenu && (
-                <div
+            {/* Right Side */}
+            <div className="flex items-center gap-4">
+              {/* Create Button with Dropdown */}
+              <div className="relative">
+                <button
                   onMouseEnter={() => setShowCreateMenu(true)}
                   onMouseLeave={() => setShowCreateMenu(false)}
-                  className="absolute top-full right-0 mt-2 w-56 rounded-lg shadow-xl overflow-hidden"
+                  className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all"
                   style={{ 
-                    background: 'var(--secondary-bg)',
-                    border: '1px solid var(--border)'
+                    background: 'var(--accent-green)',
+                    color: 'var(--text-primary)'
                   }}
                 >
-                  <Link
-                    href="/create"
-                    className="block px-4 py-3 transition-colors"
-                    style={{ borderBottom: '1px solid var(--border)' }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-                      Giveaway
-                    </div>
-                    <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                      Create a free or paid giveaway
-                    </div>
-                  </Link>
-                  
-                  <Link
-                    href="/raffles/create"
-                    className="block px-4 py-3 transition-colors"
-                    style={{ borderBottom: '1px solid var(--border)' }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-                      Raffle
-                    </div>
-                    <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                      Launch a raffle for prizes
-                    </div>
-                  </Link>
-                  
-                  <Link
-                    href="/fundraise/create"
-                    className="block px-4 py-3 transition-colors"
-                    style={{ borderBottom: '1px solid var(--border)' }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-                      Fundraise
-                    </div>
-                    <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                      Start a fundraising campaign
-                    </div>
-                  </Link>
-                  
-                  <Link
-                    href="/marketplace/create"
-                    className="block px-4 py-3 transition-colors"
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-                      Marketplace
-                    </div>
-                    <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                      List an item for sale
-                    </div>
-                  </Link>
-                </div>
-              )}
-            </div>
+                  + Create
+                </button>
 
-            {/* User Profile */}
-            <Link href="/profile">
-              <div 
-                className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer transition-opacity hover:opacity-80"
-                style={{ background: 'var(--accent-blue)', color: 'var(--text-primary)' }}
-              >
-                T
+                {showCreateMenu && (
+                  <div
+                    onMouseEnter={() => setShowCreateMenu(true)}
+                    onMouseLeave={() => setShowCreateMenu(false)}
+                    className="absolute top-full right-0 mt-2 w-56 rounded-lg shadow-xl overflow-hidden"
+                    style={{ 
+                      background: 'var(--secondary-bg)',
+                      border: '1px solid var(--border)'
+                    }}
+                  >
+                    <Link
+                      href="/create"
+                      className="block px-4 py-3 transition-colors"
+                      style={{ borderBottom: '1px solid var(--border)' }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                        Giveaway
+                      </div>
+                      <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                        Create a free or paid giveaway
+                      </div>
+                    </Link>
+                    
+                    <Link
+                      href="/raffles/create"
+                      className="block px-4 py-3 transition-colors"
+                      style={{ borderBottom: '1px solid var(--border)' }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                        Raffle
+                      </div>
+                      <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                        Launch a raffle for prizes
+                      </div>
+                    </Link>
+                    
+                    <Link
+                      href="/fundraise/create"
+                      className="block px-4 py-3 transition-colors"
+                      style={{ borderBottom: '1px solid var(--border)' }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                        Fundraise
+                      </div>
+                      <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                        Start a fundraising campaign
+                      </div>
+                    </Link>
+                    
+                    <Link
+                      href="/marketplace/create"
+                      className="block px-4 py-3 transition-colors"
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                        Marketplace
+                      </div>
+                      <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                        List an item for sale
+                      </div>
+                    </Link>
+                  </div>
+                )}
               </div>
-            </Link>
+
+              {/* User Profile */}
+              <Link href="/dashboard">
+                <div 
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer transition-opacity hover:opacity-80"
+                  style={{ background: 'var(--accent-blue)', color: 'var(--text-primary)' }}
+                >
+                  T
+                </div>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Stats Bar */}
-      <div className="border-b" style={{ 
-        background: 'var(--secondary-bg)',
-        borderColor: 'var(--border)'
-      }}>
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="grid grid-cols-3 gap-8">
-            <div>
-              <div className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
-                Active Giveaways
-              </div>
-              <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                {giveaways.length}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
-                Total Prizes
-              </div>
-              <div className="text-2xl font-bold" style={{ color: 'var(--accent-green)' }}>
-                ${giveaways.reduce((sum, g) => sum + g.prize_value, 0).toLocaleString()}+
-              </div>
-            </div>
-            <div>
-              <div className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
-                Winners
-              </div>
-              <div className="text-2xl font-bold" style={{ color: 'var(--accent-blue)' }}>
-                15.2K
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter Tabs */}
-      <div className="border-b" style={{ 
-        background: 'var(--secondary-bg)',
-        borderColor: 'var(--border)'
-      }}>
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center gap-1 py-3">
-            <button
-              onClick={() => setFilter('all')}
-              className="px-4 py-2 text-sm font-medium rounded-md transition-all"
-              style={{ 
-                background: filter === 'all' ? 'var(--accent-blue)' : 'transparent',
-                color: filter === 'all' ? 'var(--text-primary)' : 'var(--text-secondary)'
-              }}
-            >
-              All
-            </button>
-            <button
-              onClick={() => setFilter('free')}
-              className="px-4 py-2 text-sm font-medium rounded-md transition-all"
-              style={{ 
-                background: filter === 'free' ? 'var(--accent-blue)' : 'transparent',
-                color: filter === 'free' ? 'var(--text-primary)' : 'var(--text-secondary)'
-              }}
-            >
-              Free
-            </button>
-            <button
-              onClick={() => setFilter('paid')}
-              className="px-4 py-2 text-sm font-medium rounded-md transition-all"
-              style={{ 
-                background: filter === 'paid' ? 'var(--accent-blue)' : 'transparent',
-                color: filter === 'paid' ? 'var(--text-primary)' : 'var(--text-secondary)'
-              }}
-            >
-              Paid
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {loading ? (
-          <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-2 border-t-transparent" style={{ borderColor: 'var(--accent-blue)' }}></div>
+        
+        {/* ROW 1: POPULAR GIVEAWAYS */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              Popular Giveaways
+            </h2>
+            <Link 
+              href="/giveaways" 
+              className="text-sm font-medium hover:opacity-80 transition-opacity"
+              style={{ color: 'var(--accent-blue)' }}
+            >
+              View More →
+            </Link>
           </div>
-        ) : giveaways.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-4xl mb-4">📦</div>
-            <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-              No Giveaways Found
-            </h3>
-            <p style={{ color: 'var(--text-secondary)' }}>
-              Check back soon for new giveaways
-            </p>
-          </div>
-        ) : (
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {giveaways.map((giveaway) => (
               <Link
@@ -347,11 +364,21 @@ export default function HomePage() {
                   >
                     {getTimeRemaining(giveaway.end_date)}
                   </div>
+
+                  {/* Free/Paid Badge */}
+                  {giveaway.is_free && (
+                    <div 
+                      className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold"
+                      style={{ background: 'var(--accent-green)', color: 'var(--text-primary)' }}
+                    >
+                      FREE
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}
                 <div className="p-4">
-                  <h3 className="font-semibold mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity" style={{ color: 'var(--text-primary)' }}>
+                  <h3 className="font-semibold mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity text-sm" style={{ color: 'var(--text-primary)' }}>
                     {giveaway.title}
                   </h3>
 
@@ -396,7 +423,248 @@ export default function HomePage() {
               </Link>
             ))}
           </div>
-        )}
+        </div>
+
+        {/* ROW 2: POPULAR RAFFLES */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              Popular Raffles
+            </h2>
+            <Link 
+              href="/raffles" 
+              className="text-sm font-medium hover:opacity-80 transition-opacity"
+              style={{ color: 'var(--accent-blue)' }}
+            >
+              View More →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {raffles.map((raffle) => (
+              <Link
+                key={raffle.id}
+                href={`/raffles/${raffle.id}`}
+                className="card group cursor-pointer"
+              >
+                {/* Image */}
+                <div className="relative h-40 overflow-hidden rounded-t-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                  <div className="text-6xl">{raffle.emoji}</div>
+                  
+                  {/* Sold Badge */}
+                  <div 
+                    className="absolute top-2 right-2 px-2 py-1 rounded text-xs font-semibold"
+                    style={{ background: 'rgba(11, 14, 17, 0.8)', color: 'var(--accent-green)' }}
+                  >
+                    {raffle.tickets_sold}/{raffle.total_tickets}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-4">
+                  <h3 className="font-semibold mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity text-sm" style={{ color: 'var(--text-primary)' }}>
+                    {raffle.title}
+                  </h3>
+
+                  {/* Prize Value */}
+                  <div className="mb-3">
+                    <div className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Prize Value
+                    </div>
+                    <div className="text-lg font-bold" style={{ color: 'var(--accent-green)' }}>
+                      ${raffle.prize_value.toLocaleString()}
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="mb-3">
+                    <div className="flex justify-between text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      <span>{getProgressPercentage(raffle.tickets_sold, raffle.total_tickets).toFixed(0)}% sold</span>
+                      <span>{raffle.tickets_sold} tickets</span>
+                    </div>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--tertiary-bg)' }}>
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${getProgressPercentage(raffle.tickets_sold, raffle.total_tickets)}%`,
+                          background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Buy Button */}
+                  <button 
+                    className="w-full py-2.5 rounded-md text-sm font-semibold transition-all"
+                    style={{ 
+                      background: 'var(--accent-blue)',
+                      color: 'var(--text-primary)'
+                    }}
+                  >
+                    ${raffle.base_ticket_price}/ticket
+                  </button>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* ROW 3: MARKETPLACE (MOCK DATA - TODO: REMOVE) */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              Marketplace
+            </h2>
+            <Link 
+              href="/marketplace" 
+              className="text-sm font-medium hover:opacity-80 transition-opacity"
+              style={{ color: 'var(--accent-blue)' }}
+            >
+              View More →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {mockMarketplace.map((item) => (
+              <Link
+                key={item.id}
+                href={`/marketplace/${item.id}`}
+                className="card group cursor-pointer"
+              >
+                {/* Image */}
+                <div className="relative h-40 overflow-hidden rounded-t-lg" style={{ background: 'var(--tertiary-bg)' }}>
+                  <Image src={item.image} alt={item.title} fill className="object-cover" />
+                  
+                  {/* Category Badge */}
+                  <div 
+                    className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold"
+                    style={{ background: 'rgba(11, 14, 17, 0.8)', color: 'var(--accent-orange)' }}
+                  >
+                    {item.category}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-4">
+                  <h3 className="font-semibold mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity text-sm" style={{ color: 'var(--text-primary)' }}>
+                    {item.title}
+                  </h3>
+
+                  {/* Price */}
+                  <div className="mb-3">
+                    <div className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Price
+                    </div>
+                    <div className="text-lg font-bold" style={{ color: 'var(--accent-green)' }}>
+                      ${item.price.toLocaleString()}
+                    </div>
+                  </div>
+
+                  {/* Seller */}
+                  <div className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+                    by {item.seller}
+                  </div>
+
+                  {/* Buy Button */}
+                  <button 
+                    className="w-full py-2.5 rounded-md text-sm font-semibold transition-all"
+                    style={{ 
+                      background: 'var(--accent-blue)',
+                      color: 'var(--text-primary)'
+                    }}
+                  >
+                    Buy Now
+                  </button>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* ROW 4: FUNDRAISE (MOCK DATA - TODO: REMOVE) */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              Fundraising Campaigns
+            </h2>
+            <Link 
+              href="/fundraise" 
+              className="text-sm font-medium hover:opacity-80 transition-opacity"
+              style={{ color: 'var(--accent-blue)' }}
+            >
+              View More →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {mockFundraise.map((campaign) => (
+              <Link
+                key={campaign.id}
+                href={`/fundraise/${campaign.id}`}
+                className="card group cursor-pointer"
+              >
+                {/* Image */}
+                <div className="relative h-40 overflow-hidden rounded-t-lg" style={{ background: 'var(--tertiary-bg)' }}>
+                  <Image src={campaign.image} alt={campaign.title} fill className="object-cover" />
+                  
+                  {/* Category Badge */}
+                  <div 
+                    className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold"
+                    style={{ background: 'rgba(11, 14, 17, 0.8)', color: 'var(--accent-green)' }}
+                  >
+                    {campaign.category}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-4">
+                  <h3 className="font-semibold mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity text-sm" style={{ color: 'var(--text-primary)' }}>
+                    {campaign.title}
+                  </h3>
+
+                  {/* Raised Amount */}
+                  <div className="mb-3">
+                    <div className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Raised
+                    </div>
+                    <div className="text-lg font-bold" style={{ color: 'var(--accent-green)' }}>
+                      ${campaign.raised.toLocaleString()}
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="mb-3">
+                    <div className="flex justify-between text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      <span>{Math.round((campaign.raised / campaign.goal) * 100)}%</span>
+                      <span>{campaign.donors} donors</span>
+                    </div>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--tertiary-bg)' }}>
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${(campaign.raised / campaign.goal) * 100}%`,
+                          background: 'var(--accent-green)'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Donate Button */}
+                  <button 
+                    className="w-full py-2.5 rounded-md text-sm font-semibold transition-all"
+                    style={{ 
+                      background: 'var(--accent-green)',
+                      color: 'var(--text-primary)'
+                    }}
+                  >
+                    Donate Now
+                  </button>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
       </div>
     </div>
   )
