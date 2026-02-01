@@ -109,3 +109,6 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   return GET(request)
 }
+
+export const maxDuration = 60 // Winner drawing might take longer
+export const dynamic = 'force-dynamic'
