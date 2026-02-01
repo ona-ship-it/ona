@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
+import ProfilePicture from '@/components/ProfilePicture'
 
 export default function Header() {
   const [showCreateMenu, setShowCreateMenu] = useState(false)
@@ -157,12 +158,7 @@ export default function Header() {
 
             {/* User Profile */}
             <Link href="/dashboard">
-              <div 
-                className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer transition-opacity hover:opacity-80"
-                style={{ background: 'var(--accent-blue)', color: 'var(--text-primary)' }}
-              >
-                T
-              </div>
+              <ProfilePicture size="sm" />
             </Link>
           </div>
         </div>
