@@ -5,6 +5,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
+import { getGravatarUrl } from '@/utils/gravatar';
 
 export default function SignUpClient() {
   const [email, setEmail] = useState('');
@@ -50,6 +51,7 @@ export default function SignUpClient() {
       } else if (data.user) {
         // Create records in both tables
         const username = email.split('@')[0];
+        const gravatarUrl = getGravatarUrl(email);
         
         await supabase.from('app_users').upsert({
           id: data.user.id,
@@ -64,6 +66,13 @@ export default function SignUpClient() {
           onagui_type: 'signed_in',
           created_at: data.user.created_at,
           updated_at: new Date().toISOString(),
+        }, { onConflict: 'id' });
+
+        // Create profile with Gravatar
+        await supabase.from('profiles').upsert({
+          id: data.user.id,
+          avatar_url: gravatarUrl,
+          created_at: data.user.created_at,
         }, { onConflict: 'id' });
 
         setShowVerificationMessage(true);

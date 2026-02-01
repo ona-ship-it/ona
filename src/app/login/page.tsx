@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { getGravatarUrl } from '@/utils/gravatar'
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true)
@@ -50,7 +51,7 @@ export default function LoginPage() {
         if (signUpError) throw signUpError
 
         if (authData.user) {
-          const username = email.split('@')[0];
+          const gravatarUrl = getGravatarUrl(email);
           
           // Create in app_users
           await supabase.from('app_users').upsert({
@@ -70,12 +71,14 @@ export default function LoginPage() {
             updated_at: new Date().toISOString(),
           }, { onConflict: 'id' });
 
-          // Also create in profiles (for backward compatibility)
+          // Also create in profiles (for backward compatibility) with Gravatar
           await supabase.from('profiles').upsert([
             {
               id: authData.user.id,
               email: authData.user.email,
               full_name: fullName,
+              phone_number: phoneNumber,
+              avatar_url: gravatarUrl
               phone_number: phoneNumber,
             },
           ], { onConflict: 'id' });
