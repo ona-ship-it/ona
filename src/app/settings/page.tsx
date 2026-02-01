@@ -94,6 +94,41 @@ export default function SettingsPage() {
     }
   }
 
+  async function removeSocialAccount(platform: string, platformName: string) {
+    if (!confirm(`Remove your ${platformName} account?`)) return
+
+    try {
+      const urlField = `${platform}_url`
+      const verifiedField = `${platform}_verified`
+
+      // Remove from profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          [urlField]: null,
+          [verifiedField]: false 
+        })
+        .eq('id', user.id)
+
+      if (profileError) throw profileError
+
+      // Remove verification records
+      await supabase
+        .from('social_verifications')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('platform', platform)
+
+      // Update local state
+      setFormData({ ...formData, [urlField]: '' })
+      await fetchProfile(user.id)
+      
+      alert(`✅ ${platformName} account removed!`)
+    } catch (error: any) {
+      alert('Error: ' + error.message)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--primary-bg)' }}>
@@ -176,13 +211,25 @@ export default function SettingsPage() {
                   Twitter / X
                 </span>
               </label>
-              <input
-                type="url"
-                value={formData.twitter_url}
-                onChange={(e) => setFormData({ ...formData, twitter_url: e.target.value })}
-                placeholder="https://twitter.com/yourusername"
-                className="w-full"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={formData.twitter_url}
+                  onChange={(e) => setFormData({ ...formData, twitter_url: e.target.value })}
+                  placeholder="https://twitter.com/yourusername"
+                  className="flex-1"
+                />
+                {formData.twitter_url && (
+                  <button
+                    onClick={() => removeSocialAccount('twitter', 'Twitter / X')}
+                    className="px-3 py-2 rounded-md text-sm font-semibold transition-all"
+                    style={{ background: 'var(--accent-red)', color: 'var(--text-primary)' }}
+                    title="Remove Twitter account"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
               <SocialVerification
                 platform="twitter"
                 platformName="Twitter / X"
@@ -202,13 +249,25 @@ export default function SettingsPage() {
                   Instagram
                 </span>
               </label>
-              <input
-                type="url"
-                value={formData.instagram_url}
-                onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })}
-                placeholder="https://instagram.com/yourusername"
-                className="w-full"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={formData.instagram_url}
+                  onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })}
+                  placeholder="https://instagram.com/yourusername"
+                  className="flex-1"
+                />
+                {formData.instagram_url && (
+                  <button
+                    onClick={() => removeSocialAccount('instagram', 'Instagram')}
+                    className="px-3 py-2 rounded-md text-sm font-semibold transition-all"
+                    style={{ background: 'var(--accent-red)', color: 'var(--text-primary)' }}
+                    title="Remove Instagram account"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
               <SocialVerification
                 platform="instagram"
                 platformName="Instagram"
@@ -228,13 +287,25 @@ export default function SettingsPage() {
                   Facebook
                 </span>
               </label>
-              <input
-                type="url"
-                value={formData.facebook_url}
-                onChange={(e) => setFormData({ ...formData, facebook_url: e.target.value })}
-                placeholder="https://facebook.com/yourusername"
-                className="w-full"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={formData.facebook_url}
+                  onChange={(e) => setFormData({ ...formData, facebook_url: e.target.value })}
+                  placeholder="https://facebook.com/yourusername"
+                  className="flex-1"
+                />
+                {formData.facebook_url && (
+                  <button
+                    onClick={() => removeSocialAccount('facebook', 'Facebook')}
+                    className="px-3 py-2 rounded-md text-sm font-semibold transition-all"
+                    style={{ background: 'var(--accent-red)', color: 'var(--text-primary)' }}
+                    title="Remove Facebook account"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* LinkedIn */}
@@ -247,13 +318,25 @@ export default function SettingsPage() {
                   LinkedIn
                 </span>
               </label>
-              <input
-                type="url"
-                value={formData.linkedin_url}
-                onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
-                placeholder="https://linkedin.com/in/yourusername"
-                className="w-full"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={formData.linkedin_url}
+                  onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+                  placeholder="https://linkedin.com/in/yourusername"
+                  className="flex-1"
+                />
+                {formData.linkedin_url && (
+                  <button
+                    onClick={() => removeSocialAccount('linkedin', 'LinkedIn')}
+                    className="px-3 py-2 rounded-md text-sm font-semibold transition-all"
+                    style={{ background: 'var(--accent-red)', color: 'var(--text-primary)' }}
+                    title="Remove LinkedIn account"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* TikTok */}
@@ -266,13 +349,25 @@ export default function SettingsPage() {
                   TikTok
                 </span>
               </label>
-              <input
-                type="url"
-                value={formData.tiktok_url}
-                onChange={(e) => setFormData({ ...formData, tiktok_url: e.target.value })}
-                placeholder="https://tiktok.com/@yourusername"
-                className="w-full"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={formData.tiktok_url}
+                  onChange={(e) => setFormData({ ...formData, tiktok_url: e.target.value })}
+                  placeholder="https://tiktok.com/@yourusername"
+                  className="flex-1"
+                />
+                {formData.tiktok_url && (
+                  <button
+                    onClick={() => removeSocialAccount('tiktok', 'TikTok')}
+                    className="px-3 py-2 rounded-md text-sm font-semibold transition-all"
+                    style={{ background: 'var(--accent-red)', color: 'var(--text-primary)' }}
+                    title="Remove TikTok account"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
               <SocialVerification
                 platform="tiktok"
                 platformName="TikTok"
@@ -292,13 +387,25 @@ export default function SettingsPage() {
                   YouTube
                 </span>
               </label>
-              <input
-                type="url"
-                value={formData.youtube_url}
-                onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
-                placeholder="https://youtube.com/@yourusername"
-                className="w-full"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={formData.youtube_url}
+                  onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
+                  placeholder="https://youtube.com/@yourusername"
+                  className="flex-1"
+                />
+                {formData.youtube_url && (
+                  <button
+                    onClick={() => removeSocialAccount('youtube', 'YouTube')}
+                    className="px-3 py-2 rounded-md text-sm font-semibold transition-all"
+                    style={{ background: 'var(--accent-red)', color: 'var(--text-primary)' }}
+                    title="Remove YouTube account"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
               <SocialVerification
                 platform="youtube"
                 platformName="YouTube"
