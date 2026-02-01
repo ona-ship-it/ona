@@ -78,8 +78,7 @@ export default function LoginPage() {
               email: authData.user.email,
               full_name: fullName,
               phone_number: phoneNumber,
-              avatar_url: gravatarUrl
-              phone_number: phoneNumber,
+              avatar_url: gravatarUrl,
             },
           ], { onConflict: 'id' });
 
