@@ -61,18 +61,13 @@ export default function SocialVerification({
       setLoading(true)
       setError('')
 
-      const username = extractUsername(profileUrl, platform)
-      if (!username) {
-        throw new Error('Invalid profile URL')
-      }
-
       // Call verification API
       const response = await fetch('/api/verify-social', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           platform,
-          username,
+          profileUrl, // Pass the full URL
           verificationCode,
         }),
       })
@@ -80,7 +75,7 @@ export default function SocialVerification({
       const data = await response.json()
 
       if (!data.verified) {
-        throw new Error(data.error || 'Verification failed. Make sure the code is in your bio.')
+        throw new Error(data.error || 'Verification failed')
       }
 
       // Update profile
@@ -93,13 +88,19 @@ export default function SocialVerification({
       // Mark as verified
       await supabase
         .from('social_verifications')
-        .update({ verified: true, verified_at: new Date().toISOString() })
+        .update({ 
+          verified: true, 
+          verified_at: new Date().toISOString() 
+        })
         .eq('verification_code', verificationCode)
 
       alert('✅ Account verified successfully!')
+      setShowInstructions(false)
+      setVerificationCode('')
       onVerified()
+      
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message || 'Verification failed')
     } finally {
       setLoading(false)
     }
