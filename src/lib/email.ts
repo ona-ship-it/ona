@@ -36,10 +36,10 @@ export async function sendWinnerEmail({
           <style>
             body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0; }
+            .header { background: linear-gradient(135deg, #2B6FED 0%, #1E5BD9 100%); color: white; padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0; }
             .content { background: #ffffff; padding: 40px 20px; border: 1px solid #e0e0e0; }
-            .prize-box { background: #f7f9fc; border: 2px solid #667eea; border-radius: 10px; padding: 20px; margin: 20px 0; text-align: center; }
-            .button { display: inline-block; background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+            .prize-box { background: #f7f9fc; border: 2px solid #2B6FED; border-radius: 10px; padding: 20px; margin: 20px 0; text-align: center; }
+            .button { display: inline-block; background: #2B6FED; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
             .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; }
             .emoji { font-size: 48px; }
           </style>
@@ -58,7 +58,7 @@ export async function sendWinnerEmail({
               <p>We're thrilled to announce that you've won:</p>
               
               <div class="prize-box">
-                <h2 style="color: #667eea; margin: 0 0 10px;">${prizeName}</h2>
+                <h2 style="color: #2B6FED; margin: 0 0 10px;">${prizeName}</h2>
                 <p style="font-size: 24px; font-weight: bold; color: #333; margin: 0;">Worth $${prizeValue.toLocaleString()}</p>
               </div>
               
