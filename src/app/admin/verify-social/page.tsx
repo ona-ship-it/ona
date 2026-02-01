@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
+import { isAdmin } from '@/lib/admin'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 
@@ -33,9 +34,15 @@ export default function AdminVerifySocialPage() {
   }, [filter])
 
   async function checkAdmin() {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
     
-    if (!user || user.email !== 'admin@onagui.com') {
+    if (!session?.user) {
+      router.push('/login')
+      return
+    }
+
+    const email = session.user.email
+    if (!isAdmin(email)) {
       router.push('/')
       return
     }
