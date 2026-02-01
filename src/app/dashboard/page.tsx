@@ -246,6 +246,14 @@ export default function UserDashboard() {
               </div>
               <p className="text-slate-400">{user?.email}</p>
             </div>
+            <Link href="/settings">
+              <button className="px-4 py-2 rounded-md text-sm font-semibold" style={{
+                background: 'var(--tertiary-bg)',
+                color: 'var(--text-primary)'
+              }}>
+                Edit Profile
+              </button>
+            </Link>
           </div>
         </div>
 
