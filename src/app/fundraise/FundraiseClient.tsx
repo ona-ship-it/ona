@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase';
 import { IconHeart, IconSearch, IconPlus, IconTrendingUp } from '@tabler/icons-react';
-import FundraiseHeader from '@/components/FundraiseHeader';
+import Header from '@/components/Header';
 
 interface Fundraiser {
   id: string;
@@ -117,27 +117,34 @@ export default function FundraiseClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <FundraiseHeader />
+    <div className="min-h-screen" style={{ background: 'var(--primary-bg)' }}>
+      <Header />
       
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 to-teal-600 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <h1 className="text-5xl font-bold mb-4">Fundraise with Crypto</h1>
-          <p className="text-xl mb-8 opacity-90">
+      <div className="border-b" style={{ 
+        background: 'var(--secondary-bg)',
+        borderColor: 'var(--border)'
+      }}>
+        <div className="max-w-7xl mx-auto px-4 py-16">
+          <h1 className="text-5xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+            Fundraise with Crypto
+          </h1>
+          <p className="text-xl mb-8" style={{ color: 'var(--text-secondary)' }}>
             The #1 platform for crypto crowdfunding. Start a campaign, raise money, change lives.
           </p>
           <div className="flex flex-wrap gap-4">
             <Link
               href="/fundraise/create"
-              className="bg-white text-green-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors inline-flex items-center gap-2"
+              className="px-8 py-4 rounded-lg font-bold text-lg transition-all inline-flex items-center gap-2"
+              style={{ background: 'var(--accent-green)', color: 'var(--text-primary)' }}
             >
               <IconPlus size={24} />
               Start a Campaign
             </Link>
             <Link
               href="#browse"
-              className="bg-green-700 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-800 transition-colors"
+              className="px-8 py-4 rounded-lg font-bold text-lg transition-all"
+              style={{ background: 'var(--accent-blue)', color: 'var(--text-primary)' }}
             >
               Browse Campaigns
             </Link>
@@ -146,44 +153,59 @@ export default function FundraiseClient() {
       </div>
 
       {/* Stats Section */}
-      <div className="bg-white border-b">
+      <div className="border-b" style={{ 
+        background: 'var(--secondary-bg)',
+        borderColor: 'var(--border)'
+      }}>
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-green-600 mb-2">
+              <div className="text-4xl font-bold mb-2" style={{ color: 'var(--accent-green)' }}>
                 ${stats.totalRaised.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </div>
-              <div className="text-gray-600">Raised in Crypto</div>
+              <div style={{ color: 'var(--text-secondary)' }}>Raised in Crypto</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-green-600 mb-2">
+              <div className="text-4xl font-bold mb-2" style={{ color: 'var(--accent-green)' }}>
                 {stats.totalCampaigns.toLocaleString()}
               </div>
-              <div className="text-gray-600">Campaigns Funded</div>
+              <div style={{ color: 'var(--text-secondary)' }}>Campaigns Funded</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-green-600 mb-2">
+              <div className="text-4xl font-bold mb-2" style={{ color: 'var(--accent-green)' }}>
                 {stats.totalDonors.toLocaleString()}
               </div>
-              <div className="text-gray-600">Generous Donors</div>
+              <div style={{ color: 'var(--text-secondary)' }}>Generous Donors</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Search & Filter Section */}
-      <div id="browse" className="bg-white border-b sticky top-0 z-10 shadow-sm">
+      <div id="browse" className="border-b sticky top-0 z-10 backdrop-blur-xl" style={{ 
+        background: 'rgba(22, 26, 30, 0.95)',
+        borderColor: 'var(--border)'
+      }}>
         <div className="max-w-7xl mx-auto px-4 py-6">
           {/* Search Bar */}
           <div className="mb-6">
             <div className="relative">
-              <IconSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <IconSearch 
+                className="absolute left-4 top-1/2 transform -translate-y-1/2" 
+                size={20}
+                style={{ color: 'var(--text-tertiary)' }}
+              />
               <input
                 type="text"
                 placeholder="Search campaigns..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none text-gray-900"
+                className="w-full pl-12 pr-4 py-3 rounded-lg border-2 focus:outline-none transition-all"
+                style={{
+                  background: 'var(--secondary-bg)',
+                  borderColor: 'var(--border)',
+                  color: 'var(--text-primary)'
+                }}
               />
             </div>
           </div>
@@ -194,11 +216,13 @@ export default function FundraiseClient() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full font-medium transition-colors ${
-                  selectedCategory === category
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
+                className="px-4 py-2 rounded-full font-medium transition-all"
+                style={{
+                  background: selectedCategory === category ? 'var(--accent-green)' : 'var(--secondary-bg)',
+                  color: 'var(--text-primary)',
+                  borderWidth: '1px',
+                  borderColor: selectedCategory === category ? 'var(--accent-green)' : 'var(--border)'
+                }}
               >
                 {category}
               </button>
@@ -209,32 +233,38 @@ export default function FundraiseClient() {
           <div className="flex gap-3">
             <button
               onClick={() => setSortBy('recent')}
-              className={`px-4 py-2 rounded-lg font-medium ${
-                sortBy === 'recent'
-                  ? 'bg-green-100 text-green-700'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              className="px-4 py-2 rounded-lg font-medium transition-all"
+              style={{
+                background: sortBy === 'recent' ? 'rgba(43, 111, 237, 0.1)' : 'transparent',
+                color: sortBy === 'recent' ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                borderWidth: '1px',
+                borderColor: sortBy === 'recent' ? 'var(--accent-blue)' : 'var(--border)'
+              }}
             >
               Most Recent
             </button>
             <button
               onClick={() => setSortBy('trending')}
-              className={`px-4 py-2 rounded-lg font-medium inline-flex items-center gap-1 ${
-                sortBy === 'trending'
-                  ? 'bg-green-100 text-green-700'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              className="px-4 py-2 rounded-lg font-medium inline-flex items-center gap-1 transition-all"
+              style={{
+                background: sortBy === 'trending' ? 'rgba(43, 111, 237, 0.1)' : 'transparent',
+                color: sortBy === 'trending' ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                borderWidth: '1px',
+                borderColor: sortBy === 'trending' ? 'var(--accent-blue)' : 'var(--border)'
+              }}
             >
               <IconTrendingUp size={18} />
               Trending
             </button>
             <button
               onClick={() => setSortBy('goal')}
-              className={`px-4 py-2 rounded-lg font-medium ${
-                sortBy === 'goal'
-                  ? 'bg-green-100 text-green-700'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              className="px-4 py-2 rounded-lg font-medium transition-all"
+              style={{
+                background: sortBy === 'goal' ? 'rgba(43, 111, 237, 0.1)' : 'transparent',
+                color: sortBy === 'goal' ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                borderWidth: '1px',
+                borderColor: sortBy === 'goal' ? 'var(--accent-blue)' : 'var(--border)'
+              }}
             >
               Biggest Goals
             </button>
@@ -246,16 +276,20 @@ export default function FundraiseClient() {
       <div className="max-w-7xl mx-auto px-4 py-12">
         {loading ? (
           <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
-            <p className="mt-4 text-gray-400">Loading campaigns...</p>
+            <div 
+              className="inline-block animate-spin rounded-full h-12 w-12 border-b-2" 
+              style={{ borderColor: 'var(--accent-green)' }}
+            ></div>
+            <p className="mt-4" style={{ color: 'var(--text-secondary)' }}>Loading campaigns...</p>
           </div>
         ) : filteredFundraisers.length === 0 ? (
           <div className="text-center py-20">
-            <IconHeart size={64} className="mx-auto text-gray-400 mb-4" />
-            <p className="text-xl text-gray-400 mb-6">No campaigns found</p>
+            <IconHeart size={64} className="mx-auto mb-4" style={{ color: 'var(--text-tertiary)' }} />
+            <p className="text-xl mb-6" style={{ color: 'var(--text-secondary)' }}>No campaigns found</p>
             <Link
               href="/fundraise/create"
-              className="bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 transition-colors inline-block"
+              className="px-6 py-3 rounded-lg font-bold inline-block transition-all"
+              style={{ background: 'var(--accent-green)', color: 'var(--text-primary)' }}
             >
               Start the First One
             </Link>
@@ -269,10 +303,15 @@ export default function FundraiseClient() {
                 <Link
                   key={fundraiser.id}
                   href={`/fundraise/${fundraiser.id}`}
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow group"
+                  className="rounded-lg overflow-hidden hover:shadow-xl transition-all group"
+                  style={{
+                    background: 'var(--card-bg)',
+                    borderWidth: '1px',
+                    borderColor: 'var(--border)'
+                  }}
                 >
                   {/* Cover Image */}
-                  <div className="relative h-48 bg-gradient-to-br from-green-400 to-teal-500 overflow-hidden">
+                  <div className="relative h-48 overflow-hidden" style={{ background: 'var(--secondary-bg)' }}>
                     {fundraiser.cover_image ? (
                       <img
                         src={fundraiser.cover_image}
@@ -281,7 +320,7 @@ export default function FundraiseClient() {
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full">
-                        <IconHeart size={64} className="text-white opacity-50" />
+                        <IconHeart size={64} style={{ color: 'var(--text-tertiary)', opacity: 0.3 }} />
                       </div>
                     )}
                   </div>
@@ -290,41 +329,59 @@ export default function FundraiseClient() {
                   <div className="p-5">
                     {/* Category Badge */}
                     <div className="mb-3">
-                      <span className="inline-block bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
+                      <span 
+                        className="inline-block text-xs font-semibold px-3 py-1 rounded-full"
+                        style={{
+                          background: 'rgba(0, 192, 135, 0.1)',
+                          color: 'var(--accent-green)'
+                        }}
+                      >
                         {fundraiser.category}
                       </span>
                     </div>
 
                     {/* Title */}
-                    <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">
+                    <h3 
+                      className="font-bold text-lg mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
                       {fundraiser.title}
                     </h3>
 
                     {/* Story Preview */}
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    <p className="text-sm mb-4 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
                       {fundraiser.story}
                     </p>
 
                     {/* Progress Bar */}
                     <div className="mb-3">
-                      <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                      <div className="w-full rounded-full h-2 mb-2" style={{ background: 'var(--secondary-bg)' }}>
                         <div
-                          className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${percentage}%` }}
+                          className="h-2 rounded-full transition-all duration-300"
+                          style={{ 
+                            width: `${percentage}%`,
+                            background: 'var(--accent-green)'
+                          }}
                         ></div>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="font-bold text-gray-900">
+                        <span className="font-bold" style={{ color: 'var(--text-primary)' }}>
                           ${fundraiser.raised_amount.toLocaleString()} USDC
                         </span>
-                        <span className="text-gray-500">
+                        <span style={{ color: 'var(--text-tertiary)' }}>
                           {percentage}% of ${fundraiser.goal_amount.toLocaleString()}
                         </span>
                       </div>
                     </div>
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between text-sm text-gray-500 pt-3 border-t">
+                    <div 
+                      className="flex items-center justify-between text-sm pt-3 border-t"
+                      style={{ 
+                        color: 'var(--text-tertiary)',
+                        borderColor: 'var(--border)'
+                      }}
+                    >
                       <div>
                         <IconHeart size={16} className="inline mr-1" />
                         {fundraiser.total_donors} donors

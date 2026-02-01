@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import VerificationBadge from '@/components/VerificationBadge'
+import Header from '@/components/Header'
 
 type Entry = {
   id: string
@@ -213,8 +214,8 @@ export default function UserDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--primary-bg)' }}>
+        <div className="inline-block animate-spin rounded-full h-16 w-16 border-2 border-t-transparent" style={{ borderColor: 'var(--accent-blue)' }}></div>
       </div>
     )
   }
@@ -226,30 +227,8 @@ export default function UserDashboard() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/">
-              <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                ONAGUI
-              </h1>
-            </Link>
-            <div className="flex items-center gap-4">
-              <Link href="/" className="text-slate-400 hover:text-white transition-colors">
-                Home
-              </Link>
-              <Link href="/raffles" className="text-slate-400 hover:text-white transition-colors">
-                Raffles
-              </Link>
-              <Link href="/profile" className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition-all">
-                Profile
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen" style={{ background: 'var(--primary-bg)' }}>
+      <Header />
 
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Profile Header */}

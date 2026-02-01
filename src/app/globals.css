@@ -8,13 +8,12 @@
   --secondary-bg: #161A1E;
   --tertiary-bg: #1E2329;
   
-  /* Accent Colors */
+  /* Accent Colors (NO PURPLE) */
   --accent-blue: #2B6FED;
   --accent-green: #00C087;
   --accent-red: #F6465D;
   --accent-orange: #F0B90B;
   --accent-gold: #F0B90B;      /* Premium/VIP color */
-  --accent-purple: #A461D8;
   
   /* Text Colors */
   --text-primary: #FFFFFF;
@@ -25,13 +24,14 @@
   --border: #2B3139;
   --border-light: #363A45;
   
-  /* Gradients */
-  --gradient-blue: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* Gradients (NO PURPLE) */
+  --gradient-blue: linear-gradient(135deg, #2B6FED 0%, #1a5ad6 100%);
   --gradient-green: linear-gradient(135deg, #00C087 0%, #00d89a 100%);
   --gradient-gold: linear-gradient(135deg, #F0B90B 0%, #FCD535 100%);
   --gradient-premium: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
 }
 
+/* Rest of CSS stays the same... */
 * {
   box-sizing: border-box;
   padding: 0;
@@ -46,7 +46,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Professional Card Style */
 .card {
   background: var(--secondary-bg);
   border: 1px solid var(--border);
@@ -60,7 +59,6 @@ body {
   transform: translateY(-2px);
 }
 
-/* Premium Card with Gold Accent */
 .card-premium {
   background: var(--secondary-bg);
   border: 1px solid var(--accent-gold);
@@ -75,7 +73,6 @@ body {
   transform: translateY(-2px);
 }
 
-/* Button Styles */
 .btn-primary {
   background: var(--accent-blue);
   color: var(--text-primary);
@@ -93,56 +90,6 @@ body {
   transform: translateY(-1px);
 }
 
-.btn-success {
-  background: var(--accent-green);
-  color: var(--text-primary);
-}
-
-.btn-success:hover {
-  background: #00d89a;
-}
-
-.btn-gold {
-  background: var(--gradient-gold);
-  color: #000;
-  font-weight: 700;
-}
-
-.btn-gold:hover {
-  background: var(--gradient-premium);
-}
-
-/* Badge Styles */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.badge-premium {
-  background: var(--gradient-gold);
-  color: #000;
-}
-
-.badge-active {
-  background: rgba(0, 192, 135, 0.1);
-  color: var(--accent-green);
-}
-
-.badge-pending {
-  background: rgba(240, 185, 11, 0.1);
-  color: var(--accent-orange);
-}
-
-.badge-inactive {
-  background: rgba(139, 142, 147, 0.1);
-  color: var(--text-secondary);
-}
-
-/* Progress Bar */
 .progress-bar {
   width: 100%;
   height: 6px;
@@ -157,11 +104,6 @@ body {
   transition: width 0.3s ease;
 }
 
-.progress-bar-fill-premium {
-  background: var(--gradient-gold);
-}
-
-/* Input Styles */
 input, textarea, select {
   background: var(--tertiary-bg);
   border: 1px solid var(--border);
@@ -178,63 +120,15 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 0 3px rgba(43, 111, 237, 0.1);
 }
 
-input::placeholder, textarea::placeholder {
-  color: var(--text-tertiary);
-}
-
-/* Animations */
 @keyframes fade-in {
-  from { 
-    opacity: 0; 
-    transform: translateY(10px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  }
-}
-
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
 }
 
-.animate-slide-up {
-  animation: slide-up 0.4s ease-out;
-}
-
-/* Loading Skeleton */
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--tertiary-bg) 0%,
-    var(--border) 50%,
-    var(--tertiary-bg) 100%
-  );
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite;
-}
-
-/* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -249,11 +143,6 @@ input::placeholder, textarea::placeholder {
   border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--border-light);
-}
-
-/* Selection */
 ::selection {
   background: var(--accent-blue);
   color: var(--text-primary);

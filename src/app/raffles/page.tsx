@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 import Image from 'next/image'
+import Header from '@/components/Header'
 
 type Raffle = {
   id: string
@@ -115,36 +116,23 @@ export default function RafflesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <Link href="/">
-                <h1 className="text-3xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">
-                  ONAGUI
-                </h1>
-              </Link>
-              <p className="text-slate-400 text-sm">Raffles - Win Amazing Prizes</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link
-                href="/raffles/create"
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold rounded-xl transition-all"
-              >
-                Create Raffle
-              </Link>
-              <Link
-                href="/"
-                className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition-all"
-              >
-                Giveaways
-              </Link>
-            </div>
-          </div>
+    <div className="min-h-screen" style={{ background: 'var(--primary-bg)' }}>
+      <Header />
+      
+      {/* Hero Section */}
+      <div className="border-b" style={{ 
+        background: 'var(--secondary-bg)',
+        borderColor: 'var(--border)'
+      }}>
+        <div className="max-w-7xl mx-auto px-4 py-12 text-center">
+          <h2 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+            Active Raffles
+          </h2>
+          <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
+            Buy tickets, win amazing prizes. Every ticket counts!
+          </p>
         </div>
-      </header>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Hero Section */}
