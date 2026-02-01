@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import ProfilePicture from '@/components/ProfilePicture'
+import SocialVerification from '@/components/SocialVerification'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -12,6 +13,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const [profile, setProfile] = useState<any>(null)
   const [formData, setFormData] = useState({
     full_name: '',
     bio: '',
@@ -49,6 +51,7 @@ export default function SettingsPage() {
       .single()
 
     if (data) {
+      setProfile(data)
       setFormData({
         full_name: data.full_name || '',
         bio: data.bio || '',
@@ -180,6 +183,13 @@ export default function SettingsPage() {
                 placeholder="https://twitter.com/yourusername"
                 className="w-full"
               />
+              <SocialVerification
+                platform="twitter"
+                platformName="Twitter / X"
+                profileUrl={formData.twitter_url}
+                verified={profile?.twitter_verified || false}
+                onVerified={() => fetchProfile(user.id)}
+              />
             </div>
 
             {/* Instagram */}
@@ -198,6 +208,13 @@ export default function SettingsPage() {
                 onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })}
                 placeholder="https://instagram.com/yourusername"
                 className="w-full"
+              />
+              <SocialVerification
+                platform="instagram"
+                platformName="Instagram"
+                profileUrl={formData.instagram_url}
+                verified={profile?.instagram_verified || false}
+                onVerified={() => fetchProfile(user.id)}
               />
             </div>
 
@@ -256,6 +273,13 @@ export default function SettingsPage() {
                 placeholder="https://tiktok.com/@yourusername"
                 className="w-full"
               />
+              <SocialVerification
+                platform="tiktok"
+                platformName="TikTok"
+                profileUrl={formData.tiktok_url}
+                verified={profile?.tiktok_verified || false}
+                onVerified={() => fetchProfile(user.id)}
+              />
             </div>
 
             {/* YouTube */}
@@ -274,6 +298,13 @@ export default function SettingsPage() {
                 onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
                 placeholder="https://youtube.com/@yourusername"
                 className="w-full"
+              />
+              <SocialVerification
+                platform="youtube"
+                platformName="YouTube"
+                profileUrl={formData.youtube_url}
+                verified={profile?.youtube_verified || false}
+                onVerified={() => fetchProfile(user.id)}
               />
             </div>
 
