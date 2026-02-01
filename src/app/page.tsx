@@ -295,7 +295,7 @@ export default function HomePage() {
                 className="card group cursor-pointer"
               >
                 {/* Image */}
-                <div className="relative h-40 overflow-hidden rounded-t-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                <div className="relative h-40 overflow-hidden rounded-t-lg flex items-center justify-center" style={{ background: 'var(--gradient-blue)' }}>
                   <div className="text-6xl">{raffle.emoji}</div>
                   
                   {/* Sold Badge */}
@@ -334,7 +334,7 @@ export default function HomePage() {
                         className="h-full rounded-full transition-all duration-500"
                         style={{
                           width: `${getProgressPercentage(raffle.tickets_sold, raffle.total_tickets)}%`,
-                          background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)'
+                          background: 'var(--gradient-blue)'
                         }}
                       />
                     </div>
