@@ -9,6 +9,7 @@ type SocialVerificationProps = {
   platformName: string
   profileUrl: string
   verified: boolean
+  pendingReview?: boolean
   onVerified: () => void
   onSaveProfile?: () => Promise<void>
 }
@@ -18,6 +19,7 @@ export default function SocialVerification({
   platformName,
   profileUrl,
   verified,
+  pendingReview = false,
   onVerified,
   onSaveProfile,
 }: SocialVerificationProps) {
@@ -69,31 +71,31 @@ export default function SocialVerification({
       setError('')
 
       const { data: { user } } = await supabase.auth.getUser()
-      
       if (!user) throw new Error('Not authenticated')
 
-      // Mark as submitted for review, not verified
+      // Submit for review (NOT verified yet)
       await supabase
         .from('social_verifications')
         .update({ 
-          verified: false, // Stay as pending
-          submitted_for_review: true, // Flag for admin review
+          submitted_for_review: true,
           submitted_at: new Date().toISOString()
         })
         .eq('verification_code', verificationCode)
         .eq('user_id', user.id)
 
-      alert('✅ Submitted for admin review! You will be notified when approved.')
+      // Mark profile as pending review
+      await supabase
+        .from('profiles')
+        .update({ [`${platform}_pending_review`]: true })
+        .eq('id', user.id)
+
+      alert('✅ Submitted for admin review! We will verify your account within 24 hours.')
       setShowInstructions(false)
       setVerificationCode('')
       onVerified()
       
     } catch (err: any) {
-      setError(err.message || 'Failed to submit for review')
-    } finally {
-      setLoading(false)
-    }
-  }
+      setError(err.message || 'Failed to submit')
     } finally {
       setLoading(false)
     }
@@ -105,6 +107,17 @@ export default function SocialVerification({
         <span style={{ color: 'var(--accent-green)' }}>✓</span>
         <span className="text-sm font-semibold" style={{ color: 'var(--accent-green)' }}>
           Verified
+        </span>
+      </div>
+    )
+  }
+
+  if (pendingReview) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-2 rounded-md" style={{ background: 'rgba(255, 193, 7, 0.1)' }}>
+        <span style={{ color: 'var(--accent-gold)' }}>⏳</span>
+        <span className="text-sm font-semibold" style={{ color: 'var(--accent-gold)' }}>
+          Pending Admin Review
         </span>
       </div>
     )

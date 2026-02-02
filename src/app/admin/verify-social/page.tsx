@@ -71,10 +71,10 @@ export default function AdminVerifySocialPage() {
             youtube_verified
           )
         `)
-        .order('created_at', { ascending: false })
+        .order('submitted_at', { ascending: false })
 
       if (filter === 'pending') {
-        query = query.eq('verified', false).eq('submitted_for_review', true)
+        query = query.eq('submitted_for_review', true).eq('verified', false)
       }
 
       const { data, error } = await query
@@ -116,17 +116,22 @@ export default function AdminVerifySocialPage() {
         .from('social_verifications')
         .update({ 
           verified: approve,
-          verified_at: approve ? new Date().toISOString() : null 
+          verified_at: approve ? new Date().toISOString() : null,
+          submitted_for_review: false // Clear pending status
         })
         .eq('id', verification.id)
 
       if (updateError) throw updateError
 
-      // Update profile verification
-      const updateField = `${verification.platform}_verified`
+      // Update profile verification and clear pending status
+      const verifiedField = `${verification.platform}_verified`
+      const pendingField = `${verification.platform}_pending_review`
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ [updateField]: approve })
+        .update({ 
+          [verifiedField]: approve,
+          [pendingField]: false // Clear pending flag
+        })
         .eq('id', verification.user_id)
 
       if (profileError) throw profileError

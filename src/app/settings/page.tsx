@@ -251,6 +251,7 @@ export default function SettingsPage() {
                 platformName="Twitter / X"
                 profileUrl={formData.twitter_url}
                 verified={profile?.twitter_verified || false}
+                pendingReview={profile?.twitter_pending_review || false}
                 onVerified={() => fetchProfile(user.id)}
                 onSaveProfile={() => saveSocialUrl('twitter')}
               />
@@ -290,6 +291,7 @@ export default function SettingsPage() {
                 platformName="Instagram"
                 profileUrl={formData.instagram_url}
                 verified={profile?.instagram_verified || false}
+                pendingReview={profile?.instagram_pending_review || false}
                 onVerified={() => fetchProfile(user.id)}
                 onSaveProfile={() => saveSocialUrl('instagram')}
               />
@@ -391,6 +393,7 @@ export default function SettingsPage() {
                 platformName="TikTok"
                 profileUrl={formData.tiktok_url}
                 verified={profile?.tiktok_verified || false}
+                pendingReview={profile?.tiktok_pending_review || false}
                 onVerified={() => fetchProfile(user.id)}
                 onSaveProfile={() => saveSocialUrl('tiktok')}
               />
@@ -430,6 +433,7 @@ export default function SettingsPage() {
                 platformName="YouTube"
                 profileUrl={formData.youtube_url}
                 verified={profile?.youtube_verified || false}
+                pendingReview={profile?.youtube_pending_review || false}
                 onVerified={() => fetchProfile(user.id)}
                 onSaveProfile={() => saveSocialUrl('youtube')}
               />
