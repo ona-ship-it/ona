@@ -30,6 +30,44 @@ export default function SettingsPage() {
     checkAuth()
   }, [])
 
+  useEffect(() => {
+    if (!user) return
+
+    // Subscribe to profile changes
+    const channel = supabase
+      .channel('profile-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`
+        },
+        (payload) => {
+          setProfile(payload.new)
+          // Update form data with new profile
+          const data = payload.new as any
+          setFormData({
+            full_name: data.full_name || '',
+            bio: data.bio || '',
+            twitter_url: data.twitter_url || '',
+            instagram_url: data.instagram_url || '',
+            facebook_url: data.facebook_url || '',
+            linkedin_url: data.linkedin_url || '',
+            tiktok_url: data.tiktok_url || '',
+            youtube_url: data.youtube_url || '',
+            website_url: data.website_url || '',
+          })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user])
+
   async function checkAuth() {
     const { data: { session } } = await supabase.auth.getSession()
     
