@@ -66,6 +66,19 @@ export default function Header() {
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
+            {/* Sign Up Button */}
+            <Link href="/signup">
+              <button
+                className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all hover:opacity-90"
+                style={{ 
+                  background: 'var(--accent-blue)',
+                  color: 'var(--text-primary)'
+                }}
+              >
+                Sign Up
+              </button>
+            </Link>
+
             {/* Create Button with Dropdown */}
             <div className="relative">
               <button
