@@ -288,10 +288,8 @@ export default function SettingsPage() {
                 platform="twitter"
                 platformName="Twitter / X"
                 profileUrl={formData.twitter_url}
-                verified={profile?.twitter_verified || false}
-                pendingReview={profile?.twitter_pending_review || false}
+                userId={user.id}
                 onVerified={() => fetchProfile(user.id)}
-                onSaveProfile={() => saveSocialUrl('twitter')}
               />
             </div>
 
@@ -328,10 +326,8 @@ export default function SettingsPage() {
                 platform="instagram"
                 platformName="Instagram"
                 profileUrl={formData.instagram_url}
-                verified={profile?.instagram_verified || false}
-                pendingReview={profile?.instagram_pending_review || false}
+                userId={user.id}
                 onVerified={() => fetchProfile(user.id)}
-                onSaveProfile={() => saveSocialUrl('instagram')}
               />
             </div>
 
@@ -430,10 +426,8 @@ export default function SettingsPage() {
                 platform="tiktok"
                 platformName="TikTok"
                 profileUrl={formData.tiktok_url}
-                verified={profile?.tiktok_verified || false}
-                pendingReview={profile?.tiktok_pending_review || false}
+                userId={user.id}
                 onVerified={() => fetchProfile(user.id)}
-                onSaveProfile={() => saveSocialUrl('tiktok')}
               />
             </div>
 
@@ -470,10 +464,8 @@ export default function SettingsPage() {
                 platform="youtube"
                 platformName="YouTube"
                 profileUrl={formData.youtube_url}
-                verified={profile?.youtube_verified || false}
-                pendingReview={profile?.youtube_pending_review || false}
+                userId={user.id}
                 onVerified={() => fetchProfile(user.id)}
-                onSaveProfile={() => saveSocialUrl('youtube')}
               />
             </div>
 
