@@ -245,14 +245,29 @@ export default function UserDashboard() {
               </div>
               <p className="text-slate-400">{user?.email}</p>
             </div>
-            <Link href="/settings">
-              <button className="px-4 py-2 rounded-md text-sm font-semibold" style={{
-                background: 'var(--tertiary-bg)',
-                color: 'var(--text-primary)'
-              }}>
-                Edit Profile
+            <div className="flex gap-3">
+              <Link href="/settings">
+                <button className="px-4 py-2 rounded-md text-sm font-semibold" style={{
+                  background: 'var(--tertiary-bg)',
+                  color: 'var(--text-primary)'
+                }}>
+                  Edit Profile
+                </button>
+              </Link>
+              <button 
+                onClick={async () => {
+                  await supabase.auth.signOut()
+                  router.push('/')
+                }}
+                className="px-4 py-2 rounded-md text-sm font-semibold"
+                style={{
+                  background: 'var(--accent-red)',
+                  color: 'var(--text-primary)'
+                }}
+              >
+                Sign Out
               </button>
-            </Link>
+            </div>
           </div>
         </div>
 
