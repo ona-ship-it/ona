@@ -53,52 +53,30 @@ export default function AdminVerifySocialPage() {
 
   async function fetchVerifications() {
     try {
-      // Get verifications with user details
-      let query = supabase
-        .from('social_verifications')
-        .select('*')
-        .order('submitted_at', { ascending: false })
-
-      if (filter === 'pending') {
-        query = query.eq('submitted_for_review', true).eq('verified', false)
+      // Get current user email
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user?.email) {
+        throw new Error('Not authenticated')
       }
 
-      const { data, error } = await query
-
-      if (error) {
-        console.error('Query error:', error)
-        throw error
-      }
-
-      console.log('Fetched verifications:', data)
-
-      // Get user emails and profile details
-      const enrichedData = await Promise.all(
-        (data || []).map(async (v) => {
-          // Get user email
-          const { data: { user } } = await supabase.auth.admin.getUser(v.user_id)
-          
-          // Get profile
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('full_name, twitter_url, instagram_url, twitter_verified, instagram_verified')
-            .eq('id', v.user_id)
-            .single()
-
-          return {
-            ...v,
-            user_email: user?.email,
-            user_name: profile?.full_name,
-            profile_twitter_url: profile?.twitter_url,
-            profile_instagram_url: profile?.instagram_url,
-            profile_twitter_verified: profile?.twitter_verified,
-            profile_instagram_verified: profile?.instagram_verified,
+      // Fetch from API route (server-side with service role)
+      const response = await fetch(
+        `/api/admin/social-verifications?filter=${filter}&email=${encodeURIComponent(session.user.email)}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
           }
-        })
+        }
       )
 
-      console.log('Enriched data:', enrichedData)
-      setVerifications(enrichedData || [])
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to fetch')
+      }
+
+      const { data } = await response.json()
+      console.log('Fetched verifications:', data)
+      setVerifications(data || [])
     } catch (error) {
       console.error('Error fetching verifications:', error)
     }
