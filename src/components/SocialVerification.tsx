@@ -68,46 +68,32 @@ export default function SocialVerification({
       setLoading(true)
       setError('')
 
-      // Call verification API
-      const response = await fetch('/api/verify-social', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          platform,
-          profileUrl, // Pass the full URL
-          verificationCode,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!data.verified) {
-        throw new Error(data.error || 'Verification failed')
-      }
-
-      // Update profile
       const { data: { user } } = await supabase.auth.getUser()
-      await supabase
-        .from('profiles')
-        .update({ [`${platform}_verified`]: true })
-        .eq('id', user?.id)
+      
+      if (!user) throw new Error('Not authenticated')
 
-      // Mark as verified
+      // Mark as submitted for review, not verified
       await supabase
         .from('social_verifications')
         .update({ 
-          verified: true, 
-          verified_at: new Date().toISOString() 
+          verified: false, // Stay as pending
+          submitted_for_review: true, // Flag for admin review
+          submitted_at: new Date().toISOString()
         })
         .eq('verification_code', verificationCode)
+        .eq('user_id', user.id)
 
-      alert('✅ Account verified successfully!')
+      alert('✅ Submitted for admin review! You will be notified when approved.')
       setShowInstructions(false)
       setVerificationCode('')
       onVerified()
       
     } catch (err: any) {
-      setError(err.message || 'Verification failed')
+      setError(err.message || 'Failed to submit for review')
+    } finally {
+      setLoading(false)
+    }
+  }
     } finally {
       setLoading(false)
     }
@@ -190,19 +176,22 @@ export default function SocialVerification({
 
           <div className="mb-4">
             <div className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-              Step 3: Verify
+              Step 3: Submit for Review
+            </div>
+            <div className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>
+              After adding the code to your bio, submit for admin review. An admin will verify it manually.
             </div>
             <button
               onClick={verifyAccount}
               disabled={loading}
               className="w-full py-2.5 rounded-md font-semibold transition-all"
               style={{ 
-                background: 'var(--accent-green)',
+                background: 'var(--accent-blue)',
                 color: 'var(--text-primary)',
                 opacity: loading ? 0.5 : 1
               }}
             >
-              {loading ? 'Checking...' : '✓ Verify Account'}
+              {loading ? 'Submitting...' : '📝 Submit for Review'}
             </button>
           </div>
 

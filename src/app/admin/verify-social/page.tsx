@@ -74,7 +74,7 @@ export default function AdminVerifySocialPage() {
         .order('created_at', { ascending: false })
 
       if (filter === 'pending') {
-        query = query.eq('verified', false)
+        query = query.eq('verified', false).eq('submitted_for_review', true)
       }
 
       const { data, error } = await query

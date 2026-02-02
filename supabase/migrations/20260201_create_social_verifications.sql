@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS social_verifications (
   verification_code TEXT NOT NULL,
   profile_url TEXT,
   verified BOOLEAN DEFAULT false,
+  submitted_for_review BOOLEAN DEFAULT false,
+  submitted_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   verified_at TIMESTAMP WITH TIME ZONE,
   UNIQUE(verification_code)
@@ -18,6 +20,8 @@ CREATE TABLE IF NOT EXISTS social_verifications (
 CREATE INDEX IF NOT EXISTS idx_social_verifications_user_id ON social_verifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_social_verifications_code ON social_verifications(verification_code);
 CREATE INDEX IF NOT EXISTS idx_social_verifications_platform ON social_verifications(platform);
+CREATE INDEX IF NOT EXISTS idx_social_verifications_submitted ON social_verifications(submitted_for_review);
+CREATE INDEX IF NOT EXISTS idx_social_verifications_verified ON social_verifications(verified);
 
 -- Enable RLS
 ALTER TABLE social_verifications ENABLE ROW LEVEL SECURITY;
