@@ -88,28 +88,26 @@ export default function AdminVerifySocialPage() {
     setProcessingId(verification.id)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Not authenticated')
 
-      // 1. Update verification status to approved
-      const { error: verifyError } = await supabase
-        .from('social_verifications')
-        .update({ 
-          status: 'approved',
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: user?.id
+      const response = await fetch('/api/admin/social-verifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          action: 'approve',
+          verificationId: verification.id
         })
-        .eq('id', verification.id)
+      })
 
-      if (verifyError) throw verifyError
+      const result = await response.json()
 
-      // 2. Update profile verification
-      const verifiedField = `${verification.platform}_verified`
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ [verifiedField]: true })
-        .eq('id', verification.user_id)
-
-      if (profileError) throw profileError
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to approve')
+      }
 
       alert('✅ Verification approved!')
       await fetchVerifications()
@@ -130,20 +128,27 @@ export default function AdminVerifySocialPage() {
     setProcessingId(verification.id)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Not authenticated')
 
-      // Update verification status to rejected
-      const { error } = await supabase
-        .from('social_verifications')
-        .update({ 
-          status: 'rejected',
-          rejection_reason: reason,
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: user?.id
+      const response = await fetch('/api/admin/social-verifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          action: 'reject',
+          verificationId: verification.id,
+          rejectionReason: reason
         })
-        .eq('id', verification.id)
+      })
 
-      if (error) throw error
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to reject')
+      }
 
       alert('✅ Verification rejected!')
       await fetchVerifications()
