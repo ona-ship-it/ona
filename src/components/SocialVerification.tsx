@@ -10,6 +10,7 @@ type SocialVerificationProps = {
   profileUrl: string
   verified: boolean
   onVerified: () => void
+  onSaveProfile?: () => Promise<void>
 }
 
 export default function SocialVerification({
@@ -18,6 +19,7 @@ export default function SocialVerification({
   profileUrl,
   verified,
   onVerified,
+  onSaveProfile,
 }: SocialVerificationProps) {
   const supabase = createClient()
   const [verificationCode, setVerificationCode] = useState<string>('')
@@ -29,7 +31,12 @@ export default function SocialVerification({
     try {
       setLoading(true)
       setError('')
+// Save profile first if callback provided
+      if (onSaveProfile) {
+        await onSaveProfile()
+      }
 
+      
       const code = generateVerificationCode()
       const { data: { user } } = await supabase.auth.getUser()
       

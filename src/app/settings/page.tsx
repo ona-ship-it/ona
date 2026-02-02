@@ -89,8 +89,24 @@ export default function SettingsPage() {
     } catch (error) {
       console.error('Error:', error)
       alert('Failed to update profile')
+      throw error
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function saveSocialUrl(platform: string) {
+    const urlField = `${platform}_url`
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ [urlField]: formData[urlField as keyof typeof formData] })
+        .eq('id', user.id)
+
+      if (error) throw error
+      await fetchProfile(user.id)
+    } catch (error: any) {
+      throw new Error(`Failed to save ${platform} URL: ${error.message}`)
     }
   }
 
@@ -236,6 +252,7 @@ export default function SettingsPage() {
                 profileUrl={formData.twitter_url}
                 verified={profile?.twitter_verified || false}
                 onVerified={() => fetchProfile(user.id)}
+                onSaveProfile={() => saveSocialUrl('twitter')}
               />
             </div>
 
@@ -274,6 +291,7 @@ export default function SettingsPage() {
                 profileUrl={formData.instagram_url}
                 verified={profile?.instagram_verified || false}
                 onVerified={() => fetchProfile(user.id)}
+                onSaveProfile={() => saveSocialUrl('instagram')}
               />
             </div>
 
@@ -374,6 +392,7 @@ export default function SettingsPage() {
                 profileUrl={formData.tiktok_url}
                 verified={profile?.tiktok_verified || false}
                 onVerified={() => fetchProfile(user.id)}
+                onSaveProfile={() => saveSocialUrl('tiktok')}
               />
             </div>
 
@@ -412,6 +431,7 @@ export default function SettingsPage() {
                 profileUrl={formData.youtube_url}
                 verified={profile?.youtube_verified || false}
                 onVerified={() => fetchProfile(user.id)}
+                onSaveProfile={() => saveSocialUrl('youtube')}
               />
             </div>
 
