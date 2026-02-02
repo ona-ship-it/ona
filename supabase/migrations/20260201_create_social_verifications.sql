@@ -31,6 +31,15 @@ CREATE POLICY "Users can view their own verifications"
   ON social_verifications FOR SELECT
   USING (auth.uid() = user_id);
 
+CREATE POLICY "Admins can view all verifications"
+  ON social_verifications FOR SELECT
+  USING (
+    auth.jwt() ->> 'email' IN (
+      'theoonagui@icloud.com',
+      'samiraeddaoudi88@gmail.com'
+    )
+  );
+
 CREATE POLICY "Users can insert their own verifications"
   ON social_verifications FOR INSERT
   WITH CHECK (auth.uid() = user_id);
@@ -38,6 +47,15 @@ CREATE POLICY "Users can insert their own verifications"
 CREATE POLICY "Users can update their own verifications"
   ON social_verifications FOR UPDATE
   USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins can update all verifications"
+  ON social_verifications FOR UPDATE
+  USING (
+    auth.jwt() ->> 'email' IN (
+      'theoonagui@icloud.com',
+      'samiraeddaoudi88@gmail.com'
+    )
+  );
 
 CREATE POLICY "Users can delete their own verifications"
   ON social_verifications FOR DELETE
