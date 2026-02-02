@@ -6,7 +6,7 @@ import { isAdmin } from '@/lib/admin'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 
-type PendingVerification = {
+type Verification = {
   id: string
   user_id: string
   platform: string
@@ -14,23 +14,19 @@ type PendingVerification = {
   profile_url: string
   status: string
   created_at: string
-  submitted_at?: string
-  reviewed_at?: string
+  submitted_at: string | null
   rejection_reason?: string
   user_email?: string
   user_name?: string
-  profile_twitter_url?: string
-  profile_instagram_url?: string
-  profile_twitter_verified?: boolean
-  profile_instagram_verified?: boolean
 }
 
 export default function AdminVerifySocialPage() {
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
-  const [verifications, setVerifications] = useState<PendingVerification[]>([])
+  const [verifications, setVerifications] = useState<Verification[]>([])
   const [filter, setFilter] = useState<'pending' | 'all'>('pending')
+  const [processingId, setProcessingId] = useState<string | null>(null)
 
   useEffect(() => {
     checkAdmin()
@@ -78,51 +74,85 @@ export default function AdminVerifySocialPage() {
       }
 
       const { data } = await response.json()
-      console.log('Fetched verifications:', data)
       setVerifications(data || [])
     } catch (error) {
       console.error('Error fetching verifications:', error)
     }
   }
 
-  async function handleVerify(verification: PendingVerification, approve: boolean) {
+  async function handleApprove(verification: Verification) {
+    if (!confirm(`Approve verification for ${verification.user_email}?`)) {
+      return
+    }
+
+    setProcessingId(verification.id)
+
     try {
-      if (!confirm(`${approve ? 'Approve' : 'Reject'} verification for ${verification.user_email}?`)) {
-        return
-      }
+      const { data: { user } } = await supabase.auth.getUser()
 
-      let rejectionReason = ''
-      if (!approve) {
-        rejectionReason = prompt('Reason for rejection (optional):') || ''
-      }
-
-      // Update verification status
-      const { error: updateError } = await supabase
+      // 1. Update verification status to approved
+      const { error: verifyError } = await supabase
         .from('social_verifications')
         .update({ 
-          status: approve ? 'approved' : 'rejected',
+          status: 'approved',
           reviewed_at: new Date().toISOString(),
-          rejection_reason: approve ? null : rejectionReason
+          reviewed_by: user?.id
         })
         .eq('id', verification.id)
 
-      if (updateError) throw updateError
+      if (verifyError) throw verifyError
 
-      // Update profile verification
+      // 2. Update profile verification
       const verifiedField = `${verification.platform}_verified`
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ 
-          [verifiedField]: approve
-        })
+        .update({ [verifiedField]: true })
         .eq('id', verification.user_id)
 
       if (profileError) throw profileError
 
-      alert(`✅ Verification ${approve ? 'approved' : 'rejected'}!`)
-      fetchVerifications()
+      alert('✅ Verification approved!')
+      await fetchVerifications()
+
     } catch (error: any) {
+      console.error('Error approving:', error)
       alert('Error: ' + error.message)
+    } finally {
+      setProcessingId(null)
+    }
+  }
+
+  async function handleReject(verification: Verification) {
+    const reason = prompt('Rejection reason (will be shown to user):')
+    
+    if (!reason) return
+
+    setProcessingId(verification.id)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      // Update verification status to rejected
+      const { error } = await supabase
+        .from('social_verifications')
+        .update({ 
+          status: 'rejected',
+          rejection_reason: reason,
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: user?.id
+        })
+        .eq('id', verification.id)
+
+      if (error) throw error
+
+      alert('✅ Verification rejected!')
+      await fetchVerifications()
+
+    } catch (error: any) {
+      console.error('Error rejecting:', error)
+      alert('Error: ' + error.message)
+    } finally {
+      setProcessingId(null)
     }
   }
 
@@ -138,6 +168,24 @@ export default function AdminVerifySocialPage() {
     return icons[platform] || '🔗'
   }
 
+  function getStatusBadge(status: string) {
+    const styles: Record<string, any> = {
+      pending: { bg: 'rgba(240, 185, 11, 0.1)', color: 'var(--accent-orange)' },
+      approved: { bg: 'rgba(0, 192, 135, 0.1)', color: 'var(--accent-green)' },
+      rejected: { bg: 'rgba(246, 70, 93, 0.1)', color: 'var(--accent-red)' },
+    }
+    
+    const style = styles[status] || styles.pending
+    
+    return (
+      <span className="px-2 py-1 rounded text-xs font-semibold" style={{ background: style.bg, color: style.color }}>
+        {status === 'pending' && '⏳ Pending'}
+        {status === 'approved' && '✓ Approved'}
+        {status === 'rejected' && '✗ Rejected'}
+      </span>
+    )
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--primary-bg)' }}>
@@ -146,18 +194,23 @@ export default function AdminVerifySocialPage() {
     )
   }
 
+  const pendingCount = verifications.filter(v => v.status === 'pending').length
+  const approvedCount = verifications.filter(v => v.status === 'approved').length
+  const rejectedCount = verifications.filter(v => v.status === 'rejected').length
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--primary-bg)' }}>
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
               Social Media Verification Queue
             </h1>
             <p style={{ color: 'var(--text-secondary)' }}>
-              Manually approve or reject social media verifications
+              Review and approve social media verifications
             </p>
           </div>
 
@@ -171,7 +224,7 @@ export default function AdminVerifySocialPage() {
                 color: 'var(--text-primary)'
               }}
             >
-              Pending ({verifications.filter(v => v.status === 'pending').length})
+              Pending ({pendingCount})
             </button>
             <button
               onClick={() => setFilter('all')}
@@ -187,13 +240,13 @@ export default function AdminVerifySocialPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="card p-6">
             <div className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
               Pending
             </div>
-            <div className="text-3xl font-bold" style={{ color: 'var(--accent-gold)' }}>
-              {verifications.filter(v => v.status === 'pending').length}
+            <div className="text-3xl font-bold" style={{ color: 'var(--accent-orange)' }}>
+              {pendingCount}
             </div>
           </div>
           <div className="card p-6">
@@ -201,23 +254,15 @@ export default function AdminVerifySocialPage() {
               Approved
             </div>
             <div className="text-3xl font-bold" style={{ color: 'var(--accent-green)' }}>
-              {verifications.filter(v => v.status === 'approved').length}
+              {approvedCount}
             </div>
           </div>
           <div className="card p-6">
             <div className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
-              Twitter
+              Rejected
             </div>
-            <div className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-              {verifications.filter(v => v.platform === 'twitter').length}
-            </div>
-          </div>
-          <div className="card p-6">
-            <div className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
-              Instagram
-            </div>
-            <div className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-              {verifications.filter(v => v.platform === 'instagram').length}
+            <div className="text-3xl font-bold" style={{ color: 'var(--accent-red)' }}>
+              {rejectedCount}
             </div>
           </div>
         </div>
@@ -227,10 +272,10 @@ export default function AdminVerifySocialPage() {
           <div className="card p-12 text-center">
             <div className="text-5xl mb-4">✅</div>
             <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-              No Pending Verifications
+              No {filter === 'pending' ? 'Pending' : ''} Verifications
             </h3>
             <p style={{ color: 'var(--text-secondary)' }}>
-              All caught up! Check back later.
+              {filter === 'pending' ? 'All caught up!' : 'No verifications yet.'}
             </p>
           </div>
         ) : (
@@ -245,33 +290,18 @@ export default function AdminVerifySocialPage() {
 
                   {/* Details */}
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-3 mb-3">
                       <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
                         {verification.user_name || 'Anonymous User'}
                       </h3>
                       <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                         {verification.user_email}
                       </span>
-                      {verification.status === 'approved' && (
-                        <span className="px-2 py-1 rounded text-xs font-semibold" style={{ 
-                          background: 'rgba(0, 192, 135, 0.1)', 
-                          color: 'var(--accent-green)' 
-                        }}>
-                          ✓ Verified
-                        </span>
-                      )}
-                      {verification.status === 'rejected' && (
-                        <span className="px-2 py-1 rounded text-xs font-semibold" style={{ 
-                          background: 'rgba(246, 70, 93, 0.1)', 
-                          color: 'var(--accent-red)' 
-                        }}>
-                          ✗ Rejected
-                        </span>
-                      )}
+                      {getStatusBadge(verification.status)}
                     </div>
 
                     {/* Platform Details */}
-                    <div className="mb-3">
+                    <div className="mb-4">
                       <div className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>
                         Platform: <span style={{ color: 'var(--text-primary)' }} className="font-semibold capitalize">
                           {verification.platform}
@@ -290,7 +320,10 @@ export default function AdminVerifySocialPage() {
                       </div>
                       <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                         Submitted: <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                          {new Date(verification.created_at).toLocaleString()}
+                          {verification.submitted_at 
+                            ? new Date(verification.submitted_at).toLocaleString()
+                            : new Date(verification.created_at).toLocaleString()
+                          }
                         </span>
                       </div>
                     </div>
@@ -298,7 +331,7 @@ export default function AdminVerifySocialPage() {
                     {/* Verification Code */}
                     <div className="mb-4 p-4 rounded-lg" style={{ background: 'var(--tertiary-bg)' }}>
                       <div className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>
-                        Verification Code to Check:
+                        Verification Code to Check in Bio:
                       </div>
                       <code className="text-lg font-bold font-mono" style={{ color: 'var(--accent-gold)' }}>
                         {verification.verification_code}
@@ -309,27 +342,31 @@ export default function AdminVerifySocialPage() {
                     </div>
 
                     {/* Actions */}
-                    {!verification.verified && (
+                    {verification.status === 'pending' && (
                       <div className="flex gap-3">
                         <button
-                          onClick={() => handleVerify(verification, true)}
+                          onClick={() => handleApprove(verification)}
+                          disabled={processingId === verification.id}
                           className="px-6 py-2.5 rounded-md font-semibold transition-all"
                           style={{ 
                             background: 'var(--accent-green)',
-                            color: 'var(--text-primary)'
+                            color: 'var(--text-primary)',
+                            opacity: processingId === verification.id ? 0.5 : 1
                           }}
                         >
-                          ✓ Approve
+                          {processingId === verification.id ? 'Processing...' : '✓ Approve'}
                         </button>
                         <button
-                          onClick={() => handleVerify(verification, false)}
+                          onClick={() => handleReject(verification)}
+                          disabled={processingId === verification.id}
                           className="px-6 py-2.5 rounded-md font-semibold transition-all"
                           style={{ 
                             background: 'var(--accent-red)',
-                            color: 'var(--text-primary)'
+                            color: 'var(--text-primary)',
+                            opacity: processingId === verification.id ? 0.5 : 1
                           }}
                         >
-                          ✗ Reject
+                          {processingId === verification.id ? 'Processing...' : '✗ Reject'}
                         </button>
                         <a
                           href={verification.profile_url}
