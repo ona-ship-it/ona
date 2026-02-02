@@ -12,8 +12,11 @@ type PendingVerification = {
   platform: string
   verification_code: string
   profile_url: string
-  verified: boolean
+  status: string
   created_at: string
+  submitted_at?: string
+  reviewed_at?: string
+  rejection_reason?: string
   user_email?: string
   user_name?: string
   profile_twitter_url?: string
@@ -88,26 +91,29 @@ export default function AdminVerifySocialPage() {
         return
       }
 
+      let rejectionReason = ''
+      if (!approve) {
+        rejectionReason = prompt('Reason for rejection (optional):') || ''
+      }
+
       // Update verification status
       const { error: updateError } = await supabase
         .from('social_verifications')
         .update({ 
-          verified: approve,
-          verified_at: approve ? new Date().toISOString() : null,
-          submitted_for_review: false // Clear pending status
+          status: approve ? 'approved' : 'rejected',
+          reviewed_at: new Date().toISOString(),
+          rejection_reason: approve ? null : rejectionReason
         })
         .eq('id', verification.id)
 
       if (updateError) throw updateError
 
-      // Update profile verification and clear pending status
+      // Update profile verification
       const verifiedField = `${verification.platform}_verified`
-      const pendingField = `${verification.platform}_pending_review`
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
-          [verifiedField]: approve,
-          [pendingField]: false // Clear pending flag
+          [verifiedField]: approve
         })
         .eq('id', verification.user_id)
 
@@ -165,7 +171,7 @@ export default function AdminVerifySocialPage() {
                 color: 'var(--text-primary)'
               }}
             >
-              Pending ({verifications.filter(v => !v.verified).length})
+              Pending ({verifications.filter(v => v.status === 'pending').length})
             </button>
             <button
               onClick={() => setFilter('all')}
@@ -187,7 +193,7 @@ export default function AdminVerifySocialPage() {
               Pending
             </div>
             <div className="text-3xl font-bold" style={{ color: 'var(--accent-gold)' }}>
-              {verifications.filter(v => !v.verified).length}
+              {verifications.filter(v => v.status === 'pending').length}
             </div>
           </div>
           <div className="card p-6">
@@ -195,7 +201,7 @@ export default function AdminVerifySocialPage() {
               Approved
             </div>
             <div className="text-3xl font-bold" style={{ color: 'var(--accent-green)' }}>
-              {verifications.filter(v => v.verified).length}
+              {verifications.filter(v => v.status === 'approved').length}
             </div>
           </div>
           <div className="card p-6">
@@ -246,12 +252,20 @@ export default function AdminVerifySocialPage() {
                       <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                         {verification.user_email}
                       </span>
-                      {verification.verified && (
+                      {verification.status === 'approved' && (
                         <span className="px-2 py-1 rounded text-xs font-semibold" style={{ 
                           background: 'rgba(0, 192, 135, 0.1)', 
                           color: 'var(--accent-green)' 
                         }}>
                           ✓ Verified
+                        </span>
+                      )}
+                      {verification.status === 'rejected' && (
+                        <span className="px-2 py-1 rounded text-xs font-semibold" style={{ 
+                          background: 'rgba(246, 70, 93, 0.1)', 
+                          color: 'var(--accent-red)' 
+                        }}>
+                          ✗ Rejected
                         </span>
                       )}
                     </div>

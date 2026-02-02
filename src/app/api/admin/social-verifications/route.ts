@@ -36,10 +36,10 @@ export async function GET(request: Request) {
     let query = supabase
       .from('social_verifications')
       .select('*')
-      .order('submitted_at', { ascending: false })
+      .order('created_at', { ascending: false })
 
     if (filter === 'pending') {
-      query = query.eq('submitted_for_review', true).eq('verified', false)
+      query = query.eq('status', 'pending')
     }
 
     const { data: verifications, error } = await query
