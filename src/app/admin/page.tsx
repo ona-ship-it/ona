@@ -145,6 +145,7 @@ export default function AdminDashboard() {
       const { count: pendingVerifications } = await supabase
         .from('social_verifications')
         .select('*', { count: 'exact', head: true })
+        .eq('submitted_for_review', true)
         .eq('verified', false)
 
       setStats({
