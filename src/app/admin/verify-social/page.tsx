@@ -56,21 +56,7 @@ export default function AdminVerifySocialPage() {
       // Get verifications with user details
       let query = supabase
         .from('social_verifications')
-        .select(`
-          *,
-          profiles!inner(
-            id,
-            full_name,
-            twitter_url,
-            instagram_url,
-            tiktok_url,
-            youtube_url,
-            twitter_verified,
-            instagram_verified,
-            tiktok_verified,
-            youtube_verified
-          )
-        `)
+        .select('*')
         .order('submitted_at', { ascending: false })
 
       if (filter === 'pending') {
@@ -79,26 +65,39 @@ export default function AdminVerifySocialPage() {
 
       const { data, error } = await query
 
-      if (error) throw error
+      if (error) {
+        console.error('Query error:', error)
+        throw error
+      }
 
-      // Get user emails from auth.users
-      const { data: { users } } = await supabase.auth.admin.listUsers()
+      console.log('Fetched verifications:', data)
 
-      const enrichedData = data?.map(v => {
-        const user = users?.find(u => u.id === v.user_id)
-        const profile = (v as any).profiles
-        
-        return {
-          ...v,
-          user_email: user?.email,
-          user_name: profile?.full_name,
-          profile_twitter_url: profile?.twitter_url,
-          profile_instagram_url: profile?.instagram_url,
-          profile_twitter_verified: profile?.twitter_verified,
-          profile_instagram_verified: profile?.instagram_verified,
-        }
-      })
+      // Get user emails and profile details
+      const enrichedData = await Promise.all(
+        (data || []).map(async (v) => {
+          // Get user email
+          const { data: { user } } = await supabase.auth.admin.getUser(v.user_id)
+          
+          // Get profile
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, twitter_url, instagram_url, twitter_verified, instagram_verified')
+            .eq('id', v.user_id)
+            .single()
 
+          return {
+            ...v,
+            user_email: user?.email,
+            user_name: profile?.full_name,
+            profile_twitter_url: profile?.twitter_url,
+            profile_instagram_url: profile?.instagram_url,
+            profile_twitter_verified: profile?.twitter_verified,
+            profile_instagram_verified: profile?.instagram_verified,
+          }
+        })
+      )
+
+      console.log('Enriched data:', enrichedData)
       setVerifications(enrichedData || [])
     } catch (error) {
       console.error('Error fetching verifications:', error)
