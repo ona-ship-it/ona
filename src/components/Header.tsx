@@ -1,13 +1,32 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 import ProfilePicture from '@/components/ProfilePicture'
 
 export default function Header() {
   const [showCreateMenu, setShowCreateMenu] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const pathname = usePathname()
+  const supabase = createClient()
+
+  useEffect(() => {
+    checkAuth()
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsLoggedIn(!!session)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  async function checkAuth() {
+    const { data: { session } } = await supabase.auth.getSession()
+    setIsLoggedIn(!!session)
+  }
 
   const isActive = (path: string) => pathname === path
 
@@ -66,18 +85,20 @@ export default function Header() {
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
-            {/* Sign Up Button */}
-            <Link href="/signup">
-              <button
-                className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all hover:opacity-90"
-                style={{ 
-                  background: 'var(--accent-blue)',
-                  color: 'var(--text-primary)'
-                }}
-              >
-                Sign Up
-              </button>
-            </Link>
+            {/* Sign Up Button - Only show when NOT logged in */}
+            {!isLoggedIn && (
+              <Link href="/signup">
+                <button
+                  className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all hover:opacity-90"
+                  style={{ 
+                    background: 'var(--accent-blue)',
+                    color: 'var(--text-primary)'
+                  }}
+                >
+                  Sign Up
+                </button>
+              </Link>
+            )}
 
             {/* Create Button with Dropdown */}
             <div className="relative">
@@ -169,10 +190,12 @@ export default function Header() {
               )}
             </div>
 
-            {/* User Profile */}
-            <Link href="/dashboard">
-              <ProfilePicture size="sm" />
-            </Link>
+            {/* User Profile - Only show when logged in */}
+            {isLoggedIn && (
+              <Link href="/dashboard">
+                <ProfilePicture size="sm" />
+              </Link>
+            )}
           </div>
         </div>
       </div>
