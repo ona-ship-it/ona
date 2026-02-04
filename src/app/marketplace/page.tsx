@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Header from '@/components/Header'
 
 export default function Marketplace() {
   const [category, setCategory] = useState('all')
@@ -25,9 +26,12 @@ export default function Marketplace() {
 
   return (
     <div className="min-h-screen bg-[#0f0f23] text-white">
-      {/* Header */}
-      <header className="bg-[#0f0f23]/95 backdrop-blur-xl border-b border-white/5 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+      {/* Use shared Header component */}
+      <Header />
+
+      {/* Marketplace Title Section */}
+      <div className="bg-[#0f0f23]/95 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
@@ -40,7 +44,7 @@ export default function Marketplace() {
             </button>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Stats Banner */}
       <div className="bg-gradient-to-r from-blue-950/40 via-blue-900/40 to-blue-950/40 border-b border-white/5">
