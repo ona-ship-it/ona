@@ -3,11 +3,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import theme system */
-@import '../styles/theme.css';
-@import '../styles/components.css';
-@import '../styles/animations.css';
-
 /* Base Styles */
 * {
   box-sizing: border-box;

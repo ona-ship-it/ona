@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import '@/styles/theme.css'
+import '@/styles/components.css'
+import '@/styles/animations.css'
 import './globals.css'
 import { WalletProvider } from '@/hooks/useWallet'
 import { ThemeProvider } from '@/components/ThemeContext'
