@@ -1,0 +1,111 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import Logo from './Logo'
+
+export default function Hero() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  return (
+    <section className="hero-section">
+      {/* Animated background */}
+      <div className="hero-background">
+        <div className="stars"></div>
+        <div className="tech-grid"></div>
+      </div>
+
+      {/* Content */}
+      <div className="hero-content">
+        <div className="container">
+          <div className="hero-inner">
+            {/* Logo */}
+            <div className="hero-logo animate-slide-down">
+              <Logo variant="full" size="lg" />
+            </div>
+
+            {/* Main headline */}
+            <h1 className="hero-title animate-fade-in">
+              ONAGUI
+            </h1>
+
+            {/* Subtitle */}
+            <p className="hero-subtitle animate-fade-in">
+              Statistically, Onagui is your best chance to win
+            </p>
+
+            {/* Stats cards */}
+            <div className="hero-stats stagger-children">
+              <div className="stat-card">
+                <div className="stat-value">$2.5M+</div>
+                <div className="stat-label">Total Prizes</div>
+              </div>
+              
+              <div className="stat-card">
+                <div className="stat-value">50K+</div>
+                <div className="stat-label">Winners</div>
+              </div>
+              
+              <div className="stat-card">
+                <div className="stat-value">95%</div>
+                <div className="stat-label">Win Rate</div>
+              </div>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="hero-cta animate-slide-up">
+              <Link href="/giveaways" className="btn btn-primary btn-xl glow-cyan">
+                Browse Giveaways
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </Link>
+              
+              <Link href="/raffles" className="btn btn-secondary btn-xl">
+                View Raffles
+              </Link>
+            </div>
+
+            {/* Trust indicators */}
+            <div className="hero-trust animate-fade-in">
+              <div className="trust-item">
+                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18.5c-3.87-.96-7-5.21-7-9.5V8.3l7-3.11 7 3.11V11c0 4.29-3.13 8.54-7 9.5z"/>
+                  <path d="M10 13l-2-2-1.41 1.41L10 15.83l6-6-1.41-1.42L10 13z"/>
+                </svg>
+                <span>100% Secure</span>
+              </div>
+              
+              <div className="trust-item">
+                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Verified Winners</span>
+              </div>
+              
+              <div className="trust-item">
+                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                <span>Instant Payouts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="hero-scroll">
+        <div className="scroll-indicator animate-bounce">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </div>
+      </div>
+    </section>
+  )
+}

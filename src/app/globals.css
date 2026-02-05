@@ -7,5 +7,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom styles */
+@import '../styles/theme.css';
+@import '../styles/components.css';
+@import '../styles/animations.css';
+@import '../styles/overrides.css';
+@import '../styles/hero.css';
+
 /* Theme system - imported in layout.tsx */
 

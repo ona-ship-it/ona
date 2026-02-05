@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 import Image from 'next/image'
 import Header from '@/components/Header'
+import Hero from '@/components/Hero'
 
 type Giveaway = {
   id: string
@@ -168,6 +169,9 @@ export default function HomePage() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--primary-bg)' }}>
       <Header />
+      
+      {/* Hero Section */}
+      <Hero />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
