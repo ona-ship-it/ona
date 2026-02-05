@@ -10,6 +10,70 @@
 /* Theme system - imported in layout.tsx */
 
 /* ============================================
+   CLICKABLE ELEMENTS - CYAN HOVER
+   ============================================ */
+
+/* All links turn cyan on hover */
+a {
+  color: #FFFFFF;
+  text-decoration: none;
+  transition: color 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a:hover {
+  color: #00d4d4;
+}
+
+/* Links that are already cyan glow on hover */
+a.text-cyan,
+a[style*="color: var(--brand-cyan)"],
+a[style*="color: #00d4d4"],
+a[style*="color: #00D4D4"] {
+  color: #00d4d4;
+}
+
+a.text-cyan:hover,
+a[style*="color: var(--brand-cyan)"]:hover,
+a[style*="color: #00d4d4"]:hover,
+a[style*="color: #00D4D4"]:hover {
+  color: #00ffff;
+  text-shadow: 0 0 8px rgba(0, 212, 212, 0.5);
+}
+
+/* Navigation links */
+nav a:hover,
+.nav-link:hover {
+  color: #00d4d4;
+}
+
+/* Card titles when clickable */
+.card a:hover h3,
+.card a:hover h4,
+.card-title:hover {
+  color: #00d4d4;
+}
+
+/* Text buttons (no background) */
+.text-button {
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: color 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.text-button:hover {
+  color: #00d4d4;
+}
+
+/* Clickable elements */
+button:not(.btn):hover,
+.clickable:hover {
+  color: #00d4d4;
+  cursor: pointer;
+}
+
+/* ============================================
    HERO SECTION - MEXC INSPIRED
    ============================================ */
 
