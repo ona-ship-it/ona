@@ -14,10 +14,19 @@ DELETE FROM auth.users;
 3. Create Google OAuth credentials:
    - Visit: https://console.cloud.google.com/
    - Create a new project or select existing
+   - Navigate to APIs & Services → OAuth consent screen
+     - App name: Onagui
+     - User support email: your email
+     - Application home page: **https://onagui.com**
+     - Authorized domains: **onagui.com**
+     - Developer contact: your email
    - Navigate to APIs & Services → Credentials
    - Click "Create Credentials" → "OAuth client ID"
    - Application type: Web application
-   - Authorized redirect URIs: `https://qazuurdubwpcpzpwjfwh.supabase.co/auth/v1/callback`
+   - Authorized redirect URIs: 
+     - `https://qazuurdubwpcpzpwjfwh.supabase.co/auth/v1/callback`
+     - `https://onagui.com/auth/callback` (production)
+     - `http://localhost:3000/auth/callback` (local dev)
    - Copy Client ID and Client Secret
 4. Paste credentials in Supabase Google provider settings
 
