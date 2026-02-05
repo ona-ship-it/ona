@@ -1,30 +1,75 @@
-'use client';
+'use client'
 
-import React from 'react';
-import { useTheme } from './ThemeContext';
+import { useState, useEffect } from 'react'
+
+type Theme = 'dark' | 'light'
 
 export default function ThemeToggle() {
-  const { isDarker, isWhite, toggleTheme } = useTheme();
-  
+  const [theme, setTheme] = useState<Theme>('dark')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    // Get theme from localStorage or default to dark
+    const savedTheme = localStorage.getItem('onagui-theme') as Theme || 'dark'
+    setTheme(savedTheme)
+    document.documentElement.setAttribute('data-theme', savedTheme)
+  }, [])
+
+  const toggleTheme = () => {
+    const newTheme: Theme = theme === 'dark' ? 'light' : 'dark'
+    setTheme(newTheme)
+    localStorage.setItem('onagui-theme', newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
+  }
+
+  // Prevent flash of unstyled content
+  if (!mounted) return null
+
   return (
     <button
       onClick={toggleTheme}
-      className={`rounded-full p-2 ${isWhite ? 'bg-gray-200 hover:bg-gray-300' : isDarker ? 'bg-gray-800 hover:bg-gray-700' : 'bg-green-700/50 hover:bg-green-600/60'}`}
-      aria-label="Toggle theme"
+      className="relative p-2 rounded-lg transition-all hover:bg-[var(--surface-hover)] group"
+      aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
     >
-      {isWhite ? (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
-        </svg>
-      ) : isDarker ? (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-        </svg>
-      ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
-        </svg>
-      )}
+      {/* Sun Icon (Light Mode) */}
+      <svg
+        className={`w-5 h-5 transition-all duration-300 ${
+          theme === 'dark' ? 'rotate-0 scale-100' : 'rotate-90 scale-0'
+        } absolute inset-0 m-auto`}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <circle cx="12" cy="12" r="4" strokeWidth="2" />
+        <path
+          strokeLinecap="round"
+          strokeWidth="2"
+          d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+        />
+      </svg>
+      
+      {/* Moon Icon (Dark Mode) */}
+      <svg
+        className={`w-5 h-5 transition-all duration-300 ${
+          theme === 'dark' ? 'rotate-90 scale-0' : 'rotate-0 scale-100'
+        }`}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+        />
+      </svg>
+      
+      {/* Tooltip */}
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+        {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+      </span>
     </button>
-  );
+  )
 }

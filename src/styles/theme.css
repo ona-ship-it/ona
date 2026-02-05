@@ -1,0 +1,159 @@
+/* ONAGUI Theme System - Modern Professional Design */
+
+:root {
+  /* === Color Palette === */
+  /* Primary Background Layers */
+  --bg-primary: #0A0E13;
+  --bg-secondary: #0F1419;
+  --bg-tertiary: #151A21;
+  --bg-elevated: #1A2029;
+  --bg-overlay: rgba(10, 14, 19, 0.95);
+  
+  /* Surface Colors */
+  --surface-default: #1E2329;
+  --surface-hover: #252B35;
+  --surface-active: #2C3340;
+  
+  /* Brand Colors */
+  --brand-primary: #2D7EFF;
+  --brand-primary-hover: #1E6FED;
+  --brand-primary-light: rgba(45, 126, 255, 0.1);
+  
+  /* Accent Colors */
+  --accent-success: #00D395;
+  --accent-success-light: rgba(0, 211, 149, 0.1);
+  --accent-error: #FF4D4F;
+  --accent-error-light: rgba(255, 77, 79, 0.1);
+  --accent-warning: #FAAD14;
+  --accent-warning-light: rgba(250, 173, 20, 0.1);
+  --accent-info: #1890FF;
+  --accent-info-light: rgba(24, 144, 255, 0.1);
+  
+  /* Premium/Gold */
+  --accent-gold: #FFB800;
+  --accent-gold-light: rgba(255, 184, 0, 0.1);
+  --gradient-gold: linear-gradient(135deg, #FFB800 0%, #FFC940 100%);
+  --gradient-premium: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  
+  /* Text Colors */
+  --text-primary: #FFFFFF;
+  --text-secondary: #B3B9C4;
+  --text-tertiary: #7A8499;
+  --text-quaternary: #5A6273;
+  --text-disabled: #454D5D;
+  
+  /* Border Colors */
+  --border-default: #2A3140;
+  --border-subtle: #202731;
+  --border-strong: #353F52;
+  
+  /* Semantic Colors */
+  --color-buy: #00D395;
+  --color-sell: #FF4D4F;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 20px rgba(45, 126, 255, 0.3);
+  --shadow-gold-glow: 0 0 20px rgba(255, 184, 0, 0.3);
+  
+  /* Blur Effects */
+  --blur-light: blur(8px);
+  --blur-medium: blur(16px);
+  --blur-heavy: blur(24px);
+  
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  
+  /* Spacing Scale */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.5rem;   /* 24px */
+  --space-6: 2rem;     /* 32px */
+  --space-8: 3rem;     /* 48px */
+  --space-10: 4rem;    /* 64px */
+  
+  /* Z-Index Scale */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* Light Theme Support (Optional) */
+[data-theme="light"] {
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F8F9FA;
+  --bg-tertiary: #F0F2F5;
+  --bg-elevated: #FFFFFF;
+  
+  --surface-default: #FFFFFF;
+  --surface-hover: #F8F9FA;
+  --surface-active: #F0F2F5;
+  
+  --text-primary: #1A1A1A;
+  --text-secondary: #5A5A5A;
+  --text-tertiary: #8A8A8A;
+  --text-quaternary: #AAAAAA;
+  
+  --border-default: #E5E7EB;
+  --border-subtle: #F0F2F5;
+  --border-strong: #D1D5DB;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Gradients */
+.gradient-brand {
+  background: linear-gradient(135deg, var(--brand-primary) 0%, #5E9FFF 100%);
+}
+
+.gradient-success {
+  background: linear-gradient(135deg, var(--accent-success) 0%, #33E0A9 100%);
+}
+
+.gradient-gold {
+  background: var(--gradient-gold);
+}
+
+/* Glass Effects */
+.glass {
+  background: rgba(30, 35, 41, 0.6);
+  backdrop-filter: var(--blur-medium);
+  border: 1px solid var(--border-subtle);
+}
+
+.glass-strong {
+  background: rgba(30, 35, 41, 0.8);
+  backdrop-filter: var(--blur-heavy);
+  border: 1px solid var(--border-default);
+}
+
+/* Glow Effects */
+.glow-brand {
+  box-shadow: var(--shadow-glow);
+}
+
+.glow-gold {
+  box-shadow: var(--shadow-gold-glow);
+}
