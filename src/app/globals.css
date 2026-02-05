@@ -79,12 +79,12 @@ button:not(.btn):hover,
 
 .hero-section {
   position: relative;
-  min-height: 50vh;
+  min-height: 35vh;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 2.5rem 1rem;
+  padding: 1.5rem 1rem;
 }
 
 /* ===== ANIMATED BACKGROUND ===== */
@@ -171,7 +171,7 @@ button:not(.btn):hover,
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 /* ===== TITLE ===== */

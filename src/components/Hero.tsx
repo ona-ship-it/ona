@@ -32,24 +32,6 @@ export default function Hero() {
               Statistically, Onagui is your best chance to win
             </p>
 
-            {/* Stats cards */}
-            <div className="hero-stats stagger-children">
-              <div className="stat-card">
-                <div className="stat-value">$2.5M+</div>
-                <div className="stat-label">Total Prizes</div>
-              </div>
-              
-              <div className="stat-card">
-                <div className="stat-value">50K+</div>
-                <div className="stat-label">Winners</div>
-              </div>
-              
-              <div className="stat-card">
-                <div className="stat-value">95%</div>
-                <div className="stat-label">Win Rate</div>
-              </div>
-            </div>
-
             {/* CTA Buttons */}
             <div className="hero-cta animate-slide-up">
               <Link href="/giveaways" className="btn btn-primary btn-xl glow-cyan">
