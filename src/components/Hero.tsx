@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Logo from './Logo'
 
 export default function Hero() {
   const [mounted, setMounted] = useState(false)
@@ -23,11 +22,6 @@ export default function Hero() {
       <div className="hero-content">
         <div className="container">
           <div className="hero-inner">
-            {/* Logo */}
-            <div className="hero-logo animate-slide-down">
-              <Logo variant="full" size="lg" />
-            </div>
-
             {/* Main headline */}
             <h1 className="hero-title animate-fade-in">
               ONAGUI

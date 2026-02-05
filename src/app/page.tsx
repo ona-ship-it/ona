@@ -262,10 +262,10 @@ export default function HomePage() {
 
                   {/* Enter Button */}
                   <button 
-                    className="w-full py-2.5 rounded-md text-sm font-semibold transition-all"
+                    className="w-full py-2.5 rounded-md text-sm font-semibold transition-all hover:brightness-110"
                     style={{ 
-                      background: giveaway.is_free ? 'var(--accent-green)' : 'var(--accent-blue)',
-                      color: 'var(--text-primary)'
+                      background: '#00d4d4',
+                      color: '#0A0E13'
                     }}
                   >
                     {giveaway.is_free ? 'Enter Free' : `${giveaway.ticket_price} USDC`}

@@ -174,13 +174,6 @@ button:not(.btn):hover,
   gap: 1.5rem;
 }
 
-/* ===== LOGO ===== */
-
-.hero-logo {
-  margin-bottom: 1rem;
-  filter: drop-shadow(0 0 30px rgba(0, 212, 212, 0.3));
-}
-
 /* ===== TITLE ===== */
 
 .hero-title {
@@ -382,10 +375,6 @@ button:not(.btn):hover,
   
   .hero-subtitle {
     font-size: 0.9rem;
-  }
-  
-  .hero-logo {
-    margin-bottom: 1rem;
   }
 }
 

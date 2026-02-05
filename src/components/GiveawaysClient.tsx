@@ -145,8 +145,8 @@ export default function GiveawaysClient() {
               )}
               
               <button 
-                className="w-full font-bold py-2 px-4 rounded-lg transition-all duration-300"
-                style={{ background: 'var(--accent-green)', color: 'var(--text-primary)' }}
+                className="w-full font-bold py-2 px-4 rounded-lg transition-all duration-300 hover:brightness-110"
+                style={{ background: '#00d4d4', color: '#0A0E13' }}
               >
                 Enter Giveaway
               </button>

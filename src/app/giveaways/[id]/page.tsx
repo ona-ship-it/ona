@@ -299,7 +299,8 @@ export default function GiveawayDetailPage() {
               <button
                 onClick={handleEnter}
                 disabled={entering || giveaway.status !== 'active' || (!giveaway.is_free && !walletAddress)}
-                className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-slate-700 disabled:to-slate-700 text-white font-bold rounded-xl text-lg transition-all disabled:cursor-not-allowed"
+                className="w-full py-4 hover:brightness-110 disabled:from-slate-700 disabled:to-slate-700 text-white font-bold rounded-xl text-lg transition-all disabled:cursor-not-allowed"
+                style={{ background: entering || giveaway.status !== 'active' ? '#334155' : '#00d4d4', color: entering || giveaway.status !== 'active' ? '#fff' : '#0A0E13' }}
               >
                 {entering ? 'Processing...' : giveaway.is_free ? 'Enter Free' : `Buy ${quantity} Ticket${quantity > 1 ? 's' : ''}`}
               </button>
