@@ -1,24 +1,15 @@
-export type Theme = 'light' | 'dark'
+// Dark mode only - light theme removed
+export type Theme = 'dark'
 
 export function getInitialTheme(): Theme {
-  if (typeof window === 'undefined') return 'dark'
-  
-  const savedTheme = localStorage.getItem('theme') as Theme | null
-  if (savedTheme) return savedTheme
-  
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  return prefersDark ? 'dark' : 'light'
+  return 'dark'
 }
 
 export function setTheme(theme: Theme) {
-  document.documentElement.setAttribute('data-theme', theme)
-  localStorage.setItem('theme', theme)
+  document.documentElement.setAttribute('data-theme', 'dark')
 }
 
 export function toggleTheme() {
-  const current = getInitialTheme()
-  const newTheme = current === 'light' ? 'dark' : 'light'
-  setTheme(newTheme)
-  return newTheme
+  return 'dark'
 }
 

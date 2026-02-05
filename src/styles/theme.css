@@ -97,32 +97,6 @@
   --z-tooltip: 1070;
 }
 
-/* Light Theme Support (Optional) */
-[data-theme="light"] {
-  --bg-primary: #FFFFFF;
-  --bg-secondary: #F8F9FA;
-  --bg-tertiary: #F0F2F5;
-  --bg-elevated: #FFFFFF;
-  
-  --surface-default: #FFFFFF;
-  --surface-hover: #F8F9FA;
-  --surface-active: #F0F2F5;
-  
-  --text-primary: #1A1A1A;
-  --text-secondary: #5A5A5A;
-  --text-tertiary: #8A8A8A;
-  --text-quaternary: #AAAAAA;
-  
-  --border-default: #E5E7EB;
-  --border-subtle: #F0F2F5;
-  --border-strong: #D1D5DB;
-  
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
-  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.2);
-}
-
 /* Gradients */
 .gradient-brand {
   background: linear-gradient(135deg, var(--brand-primary) 0%, #5E9FFF 100%);
