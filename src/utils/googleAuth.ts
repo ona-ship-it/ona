@@ -22,7 +22,7 @@ export const signInWithGoogle = async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const redirectPath = urlParams.get('redirectTo') || '/';
     const base = process.env.NODE_ENV !== 'production' ? 'http://localhost:3000' : window.location.origin;
-    const callbackUrl = `${base}/auth/callback?redirectTo=${encodeURIComponent(redirectPath)}`;
+    const callbackUrl = `${base}/api/auth/callback?redirectTo=${encodeURIComponent(redirectPath)}`;
     
     const { error } = await supabase.auth.signInWithOAuth({ 
       provider: "google", 

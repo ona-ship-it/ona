@@ -33,7 +33,7 @@ function getSiteUrl(): string {
 function constructCallbackUrl(redirectTo?: string): string {
   const siteUrl = getSiteUrl();
   const finalRedirectTo = redirectTo || '/';
-  return `${siteUrl}/auth/callback?redirectTo=${encodeURIComponent(finalRedirectTo)}`;
+  return `${siteUrl}/api/auth/callback?redirectTo=${encodeURIComponent(finalRedirectTo)}`;
 }
 
 /**

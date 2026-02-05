@@ -47,7 +47,7 @@ export default function SignInClient() {
       provider: 'google',
       options: {
         // The redirectTo path must be one of your authorized redirect URIs
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/api/auth/callback`,
       },
     });
 
@@ -55,7 +55,7 @@ export default function SignInClient() {
       console.error('Google sign-in error:', error.message);
       setError('Error signing in with Google. Check console for details.');
     }
-    // Supabase redirects the user to Google login, then back to /auth/callback
+    // Supabase redirects the user to Google login, then back to /api/auth/callback
   };
 
   return (

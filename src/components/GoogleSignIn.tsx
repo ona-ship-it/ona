@@ -83,7 +83,7 @@ export default function GoogleSignIn() {
       // Get the redirectTo parameter from URL if it exists
       const urlParams = new URLSearchParams(window.location.search);
       const redirectPath = urlParams.get('redirectTo') || '/';
-      const callbackUrl = `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectPath)}`;
+      const callbackUrl = `${window.location.origin}/api/auth/callback?redirectTo=${encodeURIComponent(redirectPath)}`;
       
       const { error } = await supabase.auth.signInWithOAuth({ 
         provider: "google", 
