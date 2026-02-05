@@ -1,62 +1,78 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-
-type Theme = 'dark' | 'light'
+import { useEffect, useState } from 'react'
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>('dark')
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    // Get theme from localStorage or default to dark
-    const savedTheme = localStorage.getItem('onagui-theme') as Theme || 'dark'
-    setTheme(savedTheme)
-    document.documentElement.setAttribute('data-theme', savedTheme)
+    // Get saved theme or system preference
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    const initialTheme = savedTheme || systemTheme
+    setTheme(initialTheme)
+    document.documentElement.setAttribute('data-theme', initialTheme)
   }, [])
 
   const toggleTheme = () => {
-    const newTheme: Theme = theme === 'dark' ? 'light' : 'dark'
+    const newTheme = theme === 'light' ? 'dark' : 'light'
     setTheme(newTheme)
-    localStorage.setItem('onagui-theme', newTheme)
     document.documentElement.setAttribute('data-theme', newTheme)
+    localStorage.setItem('theme', newTheme)
   }
 
-  // Prevent flash of unstyled content
-  if (!mounted) return null
+  // Avoid hydration mismatch
+  if (!mounted) {
+    return <div className="w-10 h-10" />
+  }
 
   return (
     <button
       onClick={toggleTheme}
-      className="relative p-2 rounded-lg transition-all hover:bg-[var(--surface-hover)] group"
-      aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      className="btn-icon btn-ghost relative overflow-hidden"
+      aria-label="Toggle theme"
+      style={{
+        width: '40px',
+        height: '40px',
+        borderRadius: 'var(--radius-full)',
+        transition: 'all var(--transition-base)',
+      }}
     >
       {/* Sun Icon (Light Mode) */}
       <svg
-        className={`w-5 h-5 transition-all duration-300 ${
-          theme === 'dark' ? 'rotate-0 scale-100' : 'rotate-90 scale-0'
-        } absolute inset-0 m-auto`}
+        className="absolute inset-0 m-auto transition-all duration-300"
+        style={{
+          width: '20px',
+          height: '20px',
+          opacity: theme === 'light' ? 1 : 0,
+          transform: theme === 'light' ? 'rotate(0deg) scale(1)' : 'rotate(90deg) scale(0)',
+        }}
         fill="none"
-        stroke="currentColor"
         viewBox="0 0 24 24"
+        stroke="currentColor"
       >
-        <circle cx="12" cy="12" r="4" strokeWidth="2" />
         <path
           strokeLinecap="round"
-          strokeWidth="2"
-          d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
         />
       </svg>
-      
+
       {/* Moon Icon (Dark Mode) */}
       <svg
-        className={`w-5 h-5 transition-all duration-300 ${
-          theme === 'dark' ? 'rotate-90 scale-0' : 'rotate-0 scale-100'
-        }`}
+        className="absolute inset-0 m-auto transition-all duration-300"
+        style={{
+          width: '20px',
+          height: '20px',
+          opacity: theme === 'dark' ? 1 : 0,
+          transform: theme === 'dark' ? 'rotate(0deg) scale(1)' : 'rotate(-90deg) scale(0)',
+        }}
         fill="none"
-        stroke="currentColor"
         viewBox="0 0 24 24"
+        stroke="currentColor"
       >
         <path
           strokeLinecap="round"
@@ -65,11 +81,6 @@ export default function ThemeToggle() {
           d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
         />
       </svg>
-      
-      {/* Tooltip */}
-      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-        {theme === 'dark' ? 'Light mode' : 'Dark mode'}
-      </span>
     </button>
   )
 }
