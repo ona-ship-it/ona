@@ -1,0 +1,427 @@
+/* ============================================
+   ONAGUI DESIGN OVERRIDES
+   Specific styling rules for brand consistency
+   ============================================ */
+
+/* ===== 1. CLICKABLE WORDS - CYAN HOVER ===== */
+
+/* All links turn cyan on hover */
+a {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color var(--transition-base);
+}
+
+a:hover {
+  color: var(--brand-cyan);
+}
+
+/* Links that are already cyan stay cyan but glow */
+a.text-cyan,
+a[style*="color: var(--brand-cyan)"],
+a[style*="color: #00D4D4"] {
+  color: var(--brand-cyan);
+}
+
+a.text-cyan:hover,
+a[style*="color: var(--brand-cyan)"]:hover,
+a[style*="color: #00D4D4"]:hover {
+  color: var(--brand-cyan-hover);
+  text-shadow: 0 0 8px rgba(0, 212, 212, 0.5);
+}
+
+/* Buttons with text inside should also hover cyan */
+button:not(.btn):hover,
+.clickable:hover {
+  color: var(--brand-cyan);
+  cursor: pointer;
+}
+
+/* Navigation links */
+nav a:hover,
+.nav-link:hover {
+  color: var(--brand-cyan);
+}
+
+/* Card titles when clickable */
+.card a:hover h3,
+.card a:hover h4,
+.card-title:hover {
+  color: var(--brand-cyan);
+}
+
+/* Text buttons (no background) */
+.text-button {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: color var(--transition-base);
+}
+
+.text-button:hover {
+  color: var(--brand-cyan);
+}
+
+/* ===== 2. ENTRIES BAR - CYAN COLOR ===== */
+
+/* Giveaway entries progress bar */
+.entries-bar,
+.entries-progress,
+[class*="entries"] .progress-bar {
+  background: var(--brand-cyan) !important;
+  box-shadow: 0 0 10px rgba(0, 212, 212, 0.3);
+}
+
+/* Entries progress container */
+.entries-progress-container {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  height: 8px;
+}
+
+/* Entries count badge */
+.entries-badge {
+  background: var(--brand-cyan-light);
+  color: var(--brand-cyan-darker);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+}
+
+[data-theme="dark"] .entries-badge {
+  background: var(--brand-cyan-darker);
+  color: var(--brand-cyan);
+}
+
+/* Entries text */
+.entries-text,
+[class*="entries"]:not(.progress):not(.badge) {
+  color: var(--brand-cyan);
+  font-weight: var(--font-semibold);
+}
+
+/* ===== 3. DONATIONS BAR - CYAN COLOR ===== */
+
+/* Fundraising/donation progress bar */
+.donation-bar,
+.fundraise-bar,
+.donation-progress,
+[class*="donation"] .progress-bar,
+[class*="fundraise"] .progress-bar,
+[class*="raised"] .progress-bar {
+  background: var(--brand-cyan) !important;
+  box-shadow: 0 0 10px rgba(0, 212, 212, 0.3);
+}
+
+/* Donation progress with gradient */
+.donation-bar-gradient {
+  background: linear-gradient(90deg, var(--brand-cyan) 0%, var(--brand-cyan-hover) 100%) !important;
+}
+
+/* Donation percentage text */
+.donation-percentage {
+  color: var(--brand-cyan);
+  font-weight: var(--font-bold);
+}
+
+/* ===== 4. PRICES - GOLDEN COLOR ===== */
+
+/* Define golden colors */
+:root {
+  --gold: #FFD700;
+  --gold-light: #FFF4CC;
+  --gold-dark: #DAA520;
+  --gold-gradient: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+}
+
+[data-theme="dark"] {
+  --gold: #FFD700;
+  --gold-light: #8B7500;
+}
+
+/* Price styling */
+.price,
+.price-tag,
+.amount,
+[class*="price"],
+[class*="cost"] {
+  color: var(--gold) !important;
+  font-weight: var(--font-bold);
+}
+
+/* Large price displays */
+.price-large {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-extrabold);
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Price in cards */
+.card .price,
+.card [class*="price"] {
+  color: var(--gold) !important;
+  font-weight: var(--font-bold);
+}
+
+/* Ticket price */
+.ticket-price,
+.raffle-price {
+  color: var(--gold);
+  font-size: var(--text-xl);
+  font-weight: var(--font-extrabold);
+}
+
+/* Price badge */
+.price-badge {
+  background: var(--gold-light);
+  color: var(--gold-dark);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-bold);
+}
+
+[data-theme="dark"] .price-badge {
+  background: var(--gold-light);
+  color: var(--gold);
+}
+
+/* Currency symbol */
+.currency {
+  color: var(--gold);
+  font-weight: var(--font-semibold);
+}
+
+/* USDC token display */
+.usdc-amount,
+.token-amount {
+  color: var(--gold);
+  font-weight: var(--font-bold);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* ===== 5. DONATED AMOUNT - GREEN (KEEP AS IS) ===== */
+
+/* Donated/raised amount stays green */
+.donated-amount,
+.raised-amount,
+.contribution-amount,
+[class*="donated"],
+[class*="raised"]:not(.progress) {
+  color: var(--success) !important;
+  font-weight: var(--font-bold);
+}
+
+/* Large donated amount */
+.donated-large {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-extrabold);
+  color: var(--success);
+}
+
+/* Donation goal text */
+.goal-amount {
+  color: var(--text-secondary);
+  font-weight: var(--font-medium);
+}
+
+/* Donation stats */
+.donation-stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.stat-raised {
+  color: var(--success);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+}
+
+.stat-goal {
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+}
+
+/* ===== COMBINED CARD STYLES ===== */
+
+/* Giveaway card styling */
+.giveaway-card .progress-bar {
+  background: var(--brand-cyan) !important;
+}
+
+.giveaway-card .entries {
+  color: var(--brand-cyan);
+  font-weight: var(--font-semibold);
+}
+
+/* Raffle card styling */
+.raffle-card .price {
+  color: var(--gold) !important;
+}
+
+.raffle-card .entries {
+  color: var(--brand-cyan);
+}
+
+/* Fundraise card styling */
+.fundraise-card .progress-bar {
+  background: var(--brand-cyan) !important;
+}
+
+.fundraise-card .raised {
+  color: var(--success) !important;
+}
+
+.fundraise-card .goal {
+  color: var(--text-secondary);
+}
+
+/* ===== UTILITY CLASSES ===== */
+
+/* Quick color utilities */
+.text-cyan { color: var(--brand-cyan) !important; }
+.text-gold { color: var(--gold) !important; }
+.text-green { color: var(--success) !important; }
+
+/* Background utilities */
+.bg-cyan { background: var(--brand-cyan) !important; }
+.bg-gold { background: var(--gold) !important; }
+.bg-green { background: var(--success) !important; }
+
+/* Border utilities */
+.border-cyan { border-color: var(--brand-cyan) !important; }
+.border-gold { border-color: var(--gold) !important; }
+.border-green { border-color: var(--success) !important; }
+
+/* Glow effects */
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 212, 212, 0.4);
+}
+
+.glow-gold {
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.glow-green {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+/* ===== SPECIFIC COMPONENT OVERRIDES ===== */
+
+/* Entry button */
+.entry-btn {
+  background: var(--brand-cyan);
+  color: var(--bg-primary);
+  border: none;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.entry-btn:hover {
+  background: var(--brand-cyan-hover);
+  box-shadow: var(--shadow-cyan-lg);
+  transform: translateY(-2px);
+}
+
+/* Buy ticket button */
+.buy-ticket-btn {
+  background: var(--gold);
+  color: #000;
+  border: none;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-bold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.buy-ticket-btn:hover {
+  background: var(--gold-dark);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Donate button */
+.donate-btn {
+  background: var(--brand-cyan);
+  color: var(--bg-primary);
+  border: none;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.donate-btn:hover {
+  background: var(--brand-cyan-hover);
+  box-shadow: var(--shadow-cyan-lg);
+  transform: translateY(-2px);
+}
+
+/* ===== CARD HOVER ENHANCEMENTS ===== */
+
+/* Enhanced card hover with color accents */
+.card:hover .price {
+  color: var(--gold) !important;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.card:hover .entries {
+  color: var(--brand-cyan) !important;
+  text-shadow: 0 0 10px rgba(0, 212, 212, 0.3);
+}
+
+.card:hover .donated {
+  color: var(--success) !important;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+
+@media (max-width: 768px) {
+  .price-large {
+    font-size: var(--text-2xl);
+  }
+  
+  .donated-large {
+    font-size: var(--text-2xl);
+  }
+  
+  .stat-raised {
+    font-size: var(--text-xl);
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+/* Ensure sufficient contrast for prices */
+@media (prefers-contrast: high) {
+  .price,
+  [class*="price"] {
+    color: #FFD700 !important;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+
+@media print {
+  .price,
+  .donated,
+  .entries {
+    color: #000 !important;
+    text-shadow: none !important;
+  }
+}
