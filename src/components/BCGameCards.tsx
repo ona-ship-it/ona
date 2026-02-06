@@ -966,7 +966,8 @@ const ONAGUIBCGameCards = () => {
           <MarketplaceCard key={item.id} item={item} />
         ))}
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
