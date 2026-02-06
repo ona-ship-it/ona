@@ -1,5 +1,5 @@
-import BCGameCards from '@/components/BCGameCards'
+import ONAGUIBCGameCards from '@/components/BCGameCards'
 
 export default function BCGamePreviewPage() {
-  return <BCGameCards />
+  return <ONAGUIBCGameCards />
 }
