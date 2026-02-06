@@ -375,8 +375,8 @@ const ONAGUIBCGameCards = () => {
   );
 
   return (
-    <div className="bc-container">
-      <style jsx>{`
+    <>
+      <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap');
 
         * {
@@ -928,10 +928,11 @@ const ONAGUIBCGameCards = () => {
         }
       `}</style>
 
-      <div className="header">
-        <h1 className="logo">ONAGUI</h1>
-        <p className="tagline">Your best chance to win</p>
-      </div>
+      <div className="bc-container">
+        <div className="header">
+          <h1 className="logo">ONAGUI</h1>
+          <p className="tagline">Your best chance to win</p>
+        </div>
 
       <div className="tabs-container">
         <button 
