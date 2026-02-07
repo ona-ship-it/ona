@@ -84,10 +84,12 @@ export default function Header() {
             </Link>
             
             {/* Profiles Dropdown */}
-            <div className="relative">
+            <div 
+              className="relative"
+              onMouseEnter={() => setShowProfilesMenu(true)}
+              onMouseLeave={() => setShowProfilesMenu(false)}
+            >
               <div
-                onMouseEnter={() => setShowProfilesMenu(true)}
-                onMouseLeave={() => setShowProfilesMenu(false)}
                 className="text-sm font-medium transition-colors hover:opacity-80 cursor-pointer"
                 style={{ color: isActive('/profiles') ? 'var(--text-primary)' : 'var(--text-secondary)' }}
               >
@@ -96,9 +98,9 @@ export default function Header() {
 
               {showProfilesMenu && (
                 <div
-                  onMouseEnter={() => setShowProfilesMenu(true)}
-                  onMouseLeave={() => setShowProfilesMenu(false)}
-                  className="absolute top-full left-0 mt-2 w-64 rounded-lg shadow-xl overflow-hidden z-50"
+                  className="absolute top-full left-0 pt-2 w-64 z-50"
+                >
+                <div className="rounded-lg shadow-xl overflow-hidden"
                   style={{ 
                     background: 'var(--secondary-bg)',
                     border: '1px solid var(--border)'
@@ -240,6 +242,7 @@ export default function Header() {
                       </div>
                     </div>
                   </Link>
+                </div>
                 </div>
               )}
             </div>
