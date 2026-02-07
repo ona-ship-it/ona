@@ -392,6 +392,28 @@ export default function AdminDashboard() {
             </div>
           </Link>
 
+          {/* Fundraise Management */}
+          <Link href="/admin/fundraise" className="group">
+            <div className="bg-gradient-to-br from-pink-900/30 to-rose-900/30 border-2 border-pink-500/50 hover:border-pink-500 rounded-3xl p-8 transition-all hover:scale-105">
+              <div className="text-6xl mb-4">❤️</div>
+              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-pink-400 transition-colors">
+                Manage Fundraisers
+              </h3>
+              <p className="text-slate-400 text-sm">View and manage all fundraising campaigns</p>
+            </div>
+          </Link>
+
+          {/* Marketplace Management */}
+          <Link href="/admin/marketplace" className="group">
+            <div className="bg-gradient-to-br from-amber-900/30 to-yellow-900/30 border-2 border-amber-500/50 hover:border-amber-500 rounded-3xl p-8 transition-all hover:scale-105">
+              <div className="text-6xl mb-4">🛒</div>
+              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-amber-400 transition-colors">
+                Manage Marketplace
+              </h3>
+              <p className="text-slate-400 text-sm">Oversee all marketplace listings</p>
+            </div>
+          </Link>
+
           {/* Analytics */}
           <Link href="/admin/analytics" className="group">
             <div className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-2 border-green-500/50 hover:border-green-500 rounded-3xl p-8 transition-all hover:scale-105">
