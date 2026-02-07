@@ -8,6 +8,7 @@ import ProfilePicture from '@/components/ProfilePicture'
 
 export default function Header() {
   const [showCreateMenu, setShowCreateMenu] = useState(false)
+  const [showProfilesMenu, setShowProfilesMenu] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const pathname = usePathname()
   const supabase = createClient()
@@ -81,6 +82,167 @@ export default function Header() {
             >
               Marketplace
             </Link>
+            
+            {/* Profiles Dropdown */}
+            <div className="relative">
+              <div
+                onMouseEnter={() => setShowProfilesMenu(true)}
+                onMouseLeave={() => setShowProfilesMenu(false)}
+                className="text-sm font-medium transition-colors hover:opacity-80 cursor-pointer"
+                style={{ color: isActive('/profiles') ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+              >
+                Profiles
+              </div>
+
+              {showProfilesMenu && (
+                <div
+                  onMouseEnter={() => setShowProfilesMenu(true)}
+                  onMouseLeave={() => setShowProfilesMenu(false)}
+                  className="absolute top-full left-0 mt-2 w-64 rounded-lg shadow-xl overflow-hidden z-50"
+                  style={{ 
+                    background: 'var(--secondary-bg)',
+                    border: '1px solid var(--border)'
+                  }}
+                >
+                  {/* My Profile */}
+                  <Link
+                    href="/profile"
+                    className="block px-4 py-3 transition-colors cursor-pointer"
+                    style={{ borderBottom: '1px solid var(--border)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    onClick={() => setShowProfilesMenu(false)}
+                  >
+                    <div className="font-semibold text-sm flex items-center gap-2" style={{ color: 'var(--accent-green)' }}>
+                      <span>👤</span>
+                      <span>My Profile</span>
+                    </div>
+                  </Link>
+
+                  {/* Divider */}
+                  <div className="px-4 py-2" style={{ background: 'rgba(0, 255, 136, 0.05)' }}>
+                    <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                      Top Creators
+                    </div>
+                  </div>
+
+                  {/* Top 5 Profiles */}
+                  <Link
+                    href="/profiles"
+                    className="block px-4 py-3 transition-colors cursor-pointer"
+                    style={{ borderBottom: '1px solid rgba(0, 255, 136, 0.1)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    onClick={() => setShowProfilesMenu(false)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-xs font-bold">
+                        1
+                      </div>
+                      <div>
+                        <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                          Tech King
+                        </div>
+                        <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                          547 giveaways • 98% trust
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/profiles"
+                    className="block px-4 py-3 transition-colors cursor-pointer"
+                    style={{ borderBottom: '1px solid rgba(0, 255, 136, 0.1)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    onClick={() => setShowProfilesMenu(false)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-xs font-bold">
+                        2
+                      </div>
+                      <div>
+                        <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                          Crypto Queen
+                        </div>
+                        <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                          432 giveaways • 96% trust
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/profiles"
+                    className="block px-4 py-3 transition-colors cursor-pointer"
+                    style={{ borderBottom: '1px solid rgba(0, 255, 136, 0.1)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    onClick={() => setShowProfilesMenu(false)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-xs font-bold">
+                        3
+                      </div>
+                      <div>
+                        <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                          Giveaway Master
+                        </div>
+                        <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                          389 giveaways • 95% trust
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/profiles"
+                    className="block px-4 py-3 transition-colors cursor-pointer"
+                    style={{ borderBottom: '1px solid rgba(0, 255, 136, 0.1)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    onClick={() => setShowProfilesMenu(false)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-xs font-bold">
+                        4
+                      </div>
+                      <div>
+                        <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                          Prize Hunter
+                        </div>
+                        <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                          321 giveaways • 94% trust
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/profiles"
+                    className="block px-4 py-3 transition-colors cursor-pointer"
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    onClick={() => setShowProfilesMenu(false)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center text-xs font-bold">
+                        5
+                      </div>
+                      <div>
+                        <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                          Lucky Star
+                        </div>
+                        <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                          298 giveaways • 93% trust
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              )}
+            </div>
           </nav>
 
           {/* Right Side */}
