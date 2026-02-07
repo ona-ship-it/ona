@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Header from '@/components/Header';
 import { 
   Users, Trophy, Heart, TrendingUp, Clock, Share2, 
   ExternalLink, Check, Flame, Star, Gift, Ticket,
@@ -221,9 +222,11 @@ const ProfilePageClient = () => {
   ];
 
   return (
-    <div className="profile-container">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap');
+    <>
+      <Header />
+      <div className="profile-container">
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap');
 
         * {
           margin: 0;
@@ -1108,6 +1111,7 @@ const ProfilePageClient = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 
