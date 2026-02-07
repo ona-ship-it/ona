@@ -8,7 +8,7 @@ import {
   Award, DollarSign, Target, Zap
 } from 'lucide-react';
 
-const ProfilePageClient = () => {
+const ONAGUIProfilePage = () => {
   const [activeSection, setActiveSection] = useState('live');
 
   // Profile data
@@ -1111,4 +1111,4 @@ const ProfilePageClient = () => {
   );
 };
 
-export default ProfilePageClient;
+export default ONAGUIProfilePage;
