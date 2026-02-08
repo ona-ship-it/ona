@@ -148,7 +148,7 @@ export default function Home() {
   }
 
   return (
-    <>
+    <div className="landing-page">
       {/* Search Bar - Mobile Only */}
       <div className="p-4 md:hidden">
         <input 
@@ -232,6 +232,6 @@ export default function Home() {
           }
         }
       `}</style>
-    </>
+    </div>
   )
 }

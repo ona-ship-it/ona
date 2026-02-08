@@ -16,8 +16,8 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, menuOpen }) => {
       top: 0,
       left: 0,
       right: 0,
-      background: 'var(--bg-primary)',
-      borderBottom: '1px solid var(--border-light)',
+      background: 'var(--bg-secondary)',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
       padding: '1rem 1.25rem',
       zIndex: 50,
     }}>

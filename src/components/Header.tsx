@@ -33,8 +33,8 @@ export default function Header() {
 
   return (
     <header className="border-b sticky top-0 z-50 backdrop-blur-xl" style={{ 
-      background: 'rgba(11, 14, 17, 0.95)',
-      borderColor: 'var(--border)'
+      background: 'var(--bg-secondary)',
+      borderColor: 'rgba(255, 255, 255, 0.08)'
     }}>
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
