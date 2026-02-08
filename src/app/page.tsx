@@ -167,7 +167,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--primary-bg)' }}>
+    <div className="min-h-screen" style={{ background: 'var(--bg-secondary)' }}>
       <Header />
       
       {/* Hero Section */}
