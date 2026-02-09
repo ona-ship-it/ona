@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Header from '@/components/Header'
 import Hero from '@/components/Hero'
+import { TrendingUp, CheckCircle, Star, ShoppingCart } from 'lucide-react'
 
 type Giveaway = {
   id: string
@@ -166,6 +167,23 @@ export default function HomePage() {
     return `${hours}h`
   }
 
+  const getRatingData = (seed: string) => {
+    let hash = 0
+    for (let i = 0; i < seed.length; i += 1) {
+      hash = (hash * 31 + seed.charCodeAt(i)) >>> 0
+    }
+
+    const rating = 4.3 + (hash % 70) / 100
+    const count = 50 + (hash % 200)
+
+    return {
+      rating: rating.toFixed(1),
+      count
+    }
+  }
+
+  const raffleFallbackImage = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop'
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg-secondary)' }}>
       <Header />
@@ -196,79 +214,80 @@ export default function HomePage() {
               <Link
                 key={giveaway.id}
                 href={`/giveaways/${giveaway.id}`}
-                className="card group cursor-pointer"
+                className="bc-game-card group"
               >
                 {/* Image */}
-                <div className="relative h-40 overflow-hidden rounded-t-lg" style={{ background: 'var(--tertiary-bg)' }}>
+                <div className="bc-card-image-wrapper">
                   {giveaway.image_url ? (
-                    <Image src={giveaway.image_url} alt={giveaway.title} fill className="object-cover" />
+                    <Image
+                      src={giveaway.image_url}
+                      alt={giveaway.title}
+                      fill
+                      className="bc-card-image"
+                    />
                   ) : (
-                    <div className="flex items-center justify-center h-full text-5xl">
-                      {giveaway.emoji}
+                    <Image
+                      src={raffleFallbackImage}
+                      alt={giveaway.title}
+                      fill
+                      className="bc-card-image"
+                    />
+                  )}
+
+                  <div className="bc-image-overlay"></div>
+
+                  {giveaway.tickets_sold > 5000 && (
+                    <div className="bc-trending-badge">
+                      <TrendingUp size={14} />
+                      <span>TRENDING</span>
                     </div>
                   )}
-                  
-                  {/* Timer Badge */}
-                  <div 
-                    className="absolute top-2 right-2 px-2 py-1 rounded text-xs font-semibold"
-                    style={{ background: 'rgba(11, 14, 17, 0.8)', color: 'var(--accent-red)' }}
-                  >
-                    {getTimeRemaining(giveaway.end_date)}
+
+                  <div className="bc-verified-icon">
+                    <CheckCircle size={20} fill="#00d4d4" stroke="#0f1419" />
                   </div>
 
-                  {/* Free/Paid Badge */}
-                  {giveaway.is_free && (
-                    <div 
-                      className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold"
-                      style={{ background: 'var(--accent-green)', color: 'var(--text-primary)' }}
-                    >
-                      FREE
-                    </div>
-                  )}
+                  <div className="bc-condition-tag">GIVEAWAY</div>
                 </div>
 
                 {/* Content */}
-                <div className="p-4">
-                  <h3 className="font-semibold mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity text-sm" style={{ color: 'var(--text-primary)' }}>
-                    {giveaway.title}
-                  </h3>
-
-                  {/* Prize Value */}
-                  <div className="mb-3">
-                    <div className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      Prize Value
-                    </div>
-                    <div className="text-lg font-bold" style={{ color: 'var(--accent-green)' }}>
-                      ${giveaway.prize_value.toLocaleString()}
+                <div className="bc-card-body">
+                  <div className="bc-rating-row">
+                    <div className="bc-rating-display">
+                      <Star size={12} fill="#ff8800" stroke="none" />
+                      <span className="rating-value">
+                        {getRatingData(giveaway.id).rating}
+                      </span>
+                      <span className="rating-count">
+                        ({getRatingData(giveaway.id).count})
+                      </span>
                     </div>
                   </div>
 
-                  {/* Progress Bar */}
-                  <div className="mb-3">
-                    <div className="flex justify-between text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      <span>{getProgressPercentage(giveaway.tickets_sold, giveaway.total_tickets).toFixed(0)}%</span>
-                      <span>{giveaway.tickets_sold} entries</span>
-                    </div>
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--tertiary-bg)' }}>
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${getProgressPercentage(giveaway.tickets_sold, giveaway.total_tickets)}%`,
-                          background: 'var(--accent-blue)'
-                        }}
-                      />
+                  <h3 className="bc-card-title">{giveaway.title}</h3>
+
+                  <p className="bc-card-subtitle">
+                    {giveaway.description?.substring(0, 50) || 'Exclusive giveaway'}...
+                  </p>
+
+                  <div className="bc-host-info">
+                    <span>by</span>
+                    <span className="bc-host-name">ONAGUI</span>
+                  </div>
+
+                  <div className="bc-price-section">
+                    <div className="bc-price-display">
+                      <span className="bc-currency">$</span>
+                      <span className="bc-price-value">
+                        {giveaway.prize_value.toLocaleString()}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Enter Button */}
-                  <button 
-                    className="w-full py-2.5 rounded-md text-sm font-semibold transition-all hover:brightness-110"
-                    style={{ 
-                      background: '#00d4d4',
-                      color: '#0A0E13'
-                    }}
-                  >
-                    {giveaway.is_free ? 'Enter Free' : `${giveaway.ticket_price} USDC`}
+                  <button className="bc-action-button">
+                    <ShoppingCart size={16} />
+                    <span>ENTER NOW</span>
+                    <div className="bc-btn-glow"></div>
                   </button>
                 </div>
               </Link>
@@ -296,63 +315,71 @@ export default function HomePage() {
               <Link
                 key={raffle.id}
                 href={`/raffles/${raffle.id}`}
-                className="card group cursor-pointer"
+                className="bc-game-card group"
               >
                 {/* Image */}
-                <div className="relative h-40 overflow-hidden rounded-t-lg flex items-center justify-center" style={{ background: 'var(--gradient-blue)' }}>
-                  <div className="text-6xl">{raffle.emoji}</div>
-                  
-                  {/* Sold Badge */}
-                  <div 
-                    className="absolute top-2 right-2 px-2 py-1 rounded text-xs font-semibold"
-                    style={{ background: 'rgba(11, 14, 17, 0.8)', color: 'var(--accent-green)' }}
-                  >
-                    {raffle.tickets_sold}/{raffle.total_tickets}
+                <div className="bc-card-image-wrapper">
+                  <Image
+                    src={raffleFallbackImage}
+                    alt={raffle.title}
+                    fill
+                    className="bc-card-image"
+                  />
+
+                  <div className="bc-image-overlay"></div>
+
+                  {raffle.tickets_sold > 2500 && (
+                    <div className="bc-trending-badge">
+                      <TrendingUp size={14} />
+                      <span>TRENDING</span>
+                    </div>
+                  )}
+
+                  <div className="bc-verified-icon">
+                    <CheckCircle size={20} fill="#00d4d4" stroke="#0f1419" />
                   </div>
+
+                  <div className="bc-condition-tag">RAFFLE</div>
                 </div>
 
                 {/* Content */}
-                <div className="p-4">
-                  <h3 className="font-semibold mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity text-sm" style={{ color: 'var(--text-primary)' }}>
-                    {raffle.title}
-                  </h3>
-
-                  {/* Prize Value */}
-                  <div className="mb-3">
-                    <div className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      Prize Value
-                    </div>
-                    <div className="text-lg font-bold" style={{ color: 'var(--accent-green)' }}>
-                      ${raffle.prize_value.toLocaleString()}
+                <div className="bc-card-body">
+                  <div className="bc-rating-row">
+                    <div className="bc-rating-display">
+                      <Star size={12} fill="#ff8800" stroke="none" />
+                      <span className="rating-value">
+                        {getRatingData(raffle.id).rating}
+                      </span>
+                      <span className="rating-count">
+                        ({getRatingData(raffle.id).count})
+                      </span>
                     </div>
                   </div>
 
-                  {/* Progress Bar */}
-                  <div className="mb-3">
-                    <div className="flex justify-between text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      <span>{getProgressPercentage(raffle.tickets_sold, raffle.total_tickets).toFixed(0)}% sold</span>
-                      <span>{raffle.tickets_sold} tickets</span>
-                    </div>
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--tertiary-bg)' }}>
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${getProgressPercentage(raffle.tickets_sold, raffle.total_tickets)}%`,
-                          background: 'var(--gradient-blue)'
-                        }}
-                      />
+                  <h3 className="bc-card-title">{raffle.title}</h3>
+
+                  <p className="bc-card-subtitle">
+                    {raffle.tickets_sold} of {raffle.total_tickets} tickets sold
+                  </p>
+
+                  <div className="bc-host-info">
+                    <span>by</span>
+                    <span className="bc-host-name">ONAGUI</span>
+                  </div>
+
+                  <div className="bc-price-section">
+                    <div className="bc-price-display">
+                      <span className="bc-currency">$</span>
+                      <span className="bc-price-value">
+                        {raffle.prize_value.toLocaleString()}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Buy Button */}
-                  <button 
-                    className="w-full py-2.5 rounded-md text-sm font-semibold transition-all"
-                    style={{ 
-                      background: 'var(--accent-blue)',
-                      color: 'var(--text-primary)'
-                    }}
-                  >
-                    ${raffle.base_ticket_price}/ticket
+                  <button className="bc-action-button">
+                    <ShoppingCart size={16} />
+                    <span>BUY TICKET</span>
+                    <div className="bc-btn-glow"></div>
                   </button>
                 </div>
               </Link>
@@ -380,51 +407,71 @@ export default function HomePage() {
               <Link
                 key={item.id}
                 href={`/marketplace/${item.id}`}
-                className="card group cursor-pointer"
+                className="bc-game-card group"
               >
                 {/* Image */}
-                <div className="relative h-40 overflow-hidden rounded-t-lg" style={{ background: 'var(--tertiary-bg)' }}>
-                  <Image src={item.image} alt={item.title} fill className="object-cover" />
-                  
-                  {/* Category Badge */}
-                  <div 
-                    className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold"
-                    style={{ background: 'rgba(11, 14, 17, 0.8)', color: 'var(--accent-orange)' }}
-                  >
-                    {item.category}
+                <div className="bc-card-image-wrapper">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    className="bc-card-image"
+                  />
+
+                  <div className="bc-image-overlay"></div>
+
+                  {item.price > 1000 && (
+                    <div className="bc-trending-badge">
+                      <TrendingUp size={14} />
+                      <span>TRENDING</span>
+                    </div>
+                  )}
+
+                  <div className="bc-verified-icon">
+                    <CheckCircle size={20} fill="#00d4d4" stroke="#0f1419" />
                   </div>
+
+                  <div className="bc-condition-tag">MARKETPLACE</div>
                 </div>
 
                 {/* Content */}
-                <div className="p-4">
-                  <h3 className="font-semibold mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity text-sm" style={{ color: 'var(--text-primary)' }}>
-                    {item.title}
-                  </h3>
-
-                  {/* Price */}
-                  <div className="mb-3">
-                    <div className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      Price
-                    </div>
-                    <div className="text-lg font-bold" style={{ color: 'var(--accent-green)' }}>
-                      ${item.price.toLocaleString()}
+                <div className="bc-card-body">
+                  <div className="bc-rating-row">
+                    <div className="bc-rating-display">
+                      <Star size={12} fill="#ff8800" stroke="none" />
+                      <span className="rating-value">
+                        {getRatingData(item.id).rating}
+                      </span>
+                      <span className="rating-count">
+                        ({getRatingData(item.id).count})
+                      </span>
                     </div>
                   </div>
 
-                  {/* Seller */}
-                  <div className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-                    by {item.seller}
+                  <h3 className="bc-card-title">{item.title}</h3>
+
+                  <p className="bc-card-subtitle">
+                    {item.category} listing by {item.seller}
+                  </p>
+
+                  <div className="bc-host-info">
+                    <span>by</span>
+                    <span className="bc-host-name">{item.seller}</span>
                   </div>
 
-                  {/* Buy Button */}
-                  <button 
-                    className="w-full py-2.5 rounded-md text-sm font-semibold transition-all"
-                    style={{ 
-                      background: 'var(--accent-blue)',
-                      color: 'var(--text-primary)'
-                    }}
-                  >
-                    Buy Now
+                  <div className="bc-price-section">
+                    <div className="bc-price-display">
+                      <span className="bc-currency">$</span>
+                      <span className="bc-price-value">
+                        {item.price.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button className="bc-action-button">
+                    <ShoppingCart size={16} />
+                    <span>BUY NOW</span>
+                    <div className="bc-btn-glow"></div>
                   </button>
                 </div>
               </Link>
