@@ -746,4 +746,58 @@ header button:focus-visible {
   box-shadow: 0 8px 30px rgba(0, 212, 212, 0.5);
 }
 
+.bc-action-stack {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.bc-action-secondary {
+  width: 100%;
+  border: 1px solid rgba(0, 212, 212, 0.5);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: rgba(0, 212, 212, 0.08);
+  color: #00d4d4;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.bc-action-secondary:hover {
+  background: rgba(0, 212, 212, 0.18);
+  transform: translateY(-1px);
+}
+
+.bc-action-note {
+  font-size: 12px;
+  color: #718096;
+  text-align: center;
+  letter-spacing: 0.4px;
+}
+
+.bc-metric-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.bc-metric-label {
+  font-size: 12px;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.bc-metric-value {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
 

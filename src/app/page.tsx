@@ -22,6 +22,7 @@ type Giveaway = {
   is_free: boolean
   status: string
   end_date: string
+  creator_id?: string | null
 }
 
 type Raffle = {
@@ -35,11 +36,22 @@ type Raffle = {
   status: string
 }
 
+type TopProfile = {
+  id: string
+  username: string | null
+  full_name: string | null
+  avatar_url: string | null
+  created_at: string | null
+  giveawaysHosted: number
+  totalEntries: number
+}
+
 export default function HomePage() {
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
   const [giveaways, setGiveaways] = useState<Giveaway[]>([])
   const [raffles, setRaffles] = useState<Raffle[]>([])
+  const [topProfiles, setTopProfiles] = useState<TopProfile[]>([])
 
   useEffect(() => {
     fetchData()
@@ -64,8 +76,61 @@ export default function HomePage() {
         .order('tickets_sold', { ascending: false })
         .limit(4)
 
+      const { data: creatorGiveaways, error: creatorGiveawaysError } = await supabase
+        .from('giveaways')
+        .select('creator_id, tickets_sold')
+        .eq('status', 'active')
+        .limit(200)
+
+      if (creatorGiveawaysError) {
+        console.error('Error fetching creator giveaways:', creatorGiveawaysError)
+      }
+
+      const creatorStats = new Map<string, { giveawaysHosted: number; totalEntries: number }>()
+      ;(creatorGiveaways || []).forEach((giveaway) => {
+        if (!giveaway.creator_id) return
+        const current = creatorStats.get(giveaway.creator_id) || { giveawaysHosted: 0, totalEntries: 0 }
+        creatorStats.set(giveaway.creator_id, {
+          giveawaysHosted: current.giveawaysHosted + 1,
+          totalEntries: current.totalEntries + (giveaway.tickets_sold || 0)
+        })
+      })
+
+      const topCreatorIds = [...creatorStats.entries()]
+        .sort((a, b) => b[1].totalEntries - a[1].totalEntries)
+        .slice(0, 4)
+        .map(([id]) => id)
+
+      let profilesData: { id: string; username: string | null; full_name: string | null; avatar_url: string | null; created_at: string | null }[] = []
+      if (topCreatorIds.length > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('onagui_profiles')
+          .select('id, username, full_name, avatar_url, created_at')
+          .in('id', topCreatorIds)
+
+        if (profilesError) {
+          console.error('Error fetching top profiles:', profilesError)
+        } else {
+          profilesData = profiles || []
+        }
+      }
+
+      const rankedProfiles = topCreatorIds
+        .map((id) => {
+          const profile = profilesData.find((item) => item.id === id)
+          const stats = creatorStats.get(id)
+          if (!profile || !stats) return null
+          return {
+            ...profile,
+            giveawaysHosted: stats.giveawaysHosted,
+            totalEntries: stats.totalEntries
+          }
+        })
+        .filter((profile): profile is TopProfile => !!profile)
+
       setGiveaways(giveawaysData || [])
       setRaffles(rafflesData || [])
+      setTopProfiles(rankedProfiles)
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -183,6 +248,7 @@ export default function HomePage() {
   }
 
   const raffleFallbackImage = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop'
+  const profileFallbackImage = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=600&auto=format&fit=crop'
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg-secondary)' }}>
@@ -284,11 +350,15 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  <button className="bc-action-button">
-                    <ShoppingCart size={16} />
-                    <span>ENTER NOW</span>
-                    <div className="bc-btn-glow"></div>
-                  </button>
+                  <div className="bc-action-stack">
+                    <button className="bc-action-button">
+                      <ShoppingCart size={16} />
+                      <span>CLAIM FREE TICKET</span>
+                      <div className="bc-btn-glow"></div>
+                    </button>
+                    <button className="bc-action-secondary">BUY TICKET 1 USDC</button>
+                    <div className="bc-action-note">1 chance per user</div>
+                  </div>
                 </div>
               </Link>
             ))}
@@ -556,6 +626,85 @@ export default function HomePage() {
                     }}
                   >
                     Donate Now
+                  </button>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* ROW 5: TOP PROFILES */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              Most Popular Profiles
+            </h2>
+            <Link
+              href="/profiles"
+              className="text-sm font-medium hover:opacity-80 transition-opacity"
+              style={{ color: 'var(--accent-blue)' }}
+            >
+              View More →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {topProfiles.map((profile) => (
+              <Link
+                key={profile.id}
+                href="/profiles"
+                className="bc-game-card group"
+              >
+                <div className="bc-card-image-wrapper">
+                  <Image
+                    src={profile.avatar_url || profileFallbackImage}
+                    alt={profile.full_name || profile.username || 'Profile'}
+                    fill
+                    className="bc-card-image"
+                  />
+
+                  <div className="bc-image-overlay"></div>
+
+                  <div className="bc-trending-badge">
+                    <TrendingUp size={14} />
+                    <span>TOP CREATOR</span>
+                  </div>
+
+                  <div className="bc-verified-icon">
+                    <CheckCircle size={20} fill="#00d4d4" stroke="#0f1419" />
+                  </div>
+
+                  <div className="bc-condition-tag">PROFILE</div>
+                </div>
+
+                <div className="bc-card-body">
+                  <h3 className="bc-card-title">
+                    {profile.full_name || profile.username || 'Onagui Creator'}
+                  </h3>
+
+                  <p className="bc-card-subtitle">@{profile.username || 'onagui'}</p>
+
+                  <div className="bc-host-info">
+                    <span>Giveaways hosted</span>
+                    <span className="bc-host-name">{profile.giveawaysHosted}</span>
+                  </div>
+
+                  <div className="bc-metric-row">
+                    <div>
+                      <div className="bc-metric-label">Total entries</div>
+                      <div className="bc-metric-value">{profile.totalEntries.toLocaleString()}</div>
+                    </div>
+                    <div>
+                      <div className="bc-metric-label">Member since</div>
+                      <div className="bc-metric-value">
+                        {profile.created_at ? new Date(profile.created_at).getFullYear() : '2024'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button className="bc-action-button">
+                    <span>VIEW PROFILE</span>
+                    <div className="bc-btn-glow"></div>
                   </button>
                 </div>
               </Link>
