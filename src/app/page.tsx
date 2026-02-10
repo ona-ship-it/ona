@@ -23,6 +23,10 @@ type Giveaway = {
   status: string
   end_date: string
   creator_id?: string | null
+  paid_ticket_count?: number
+  paid_ticket_revenue?: number
+  prize_boost?: number
+  onagui_subs?: number
 }
 
 type Raffle = {
@@ -104,6 +108,24 @@ export default function HomePage() {
         .eq('status', 'active')
         .order('tickets_sold', { ascending: false })
         .limit(4)
+
+      const { data: paidTickets, error: paidTicketsError } = await supabase
+        .from('tickets')
+        .select('giveaway_id, quantity')
+        .eq('is_free', false)
+
+      if (paidTicketsError) {
+        console.error('Error fetching paid tickets:', paidTicketsError)
+      }
+
+      const paidTicketCounts = new Map<string, number>()
+      ;(paidTickets || []).forEach((ticket) => {
+        if (!ticket.giveaway_id) return
+        paidTicketCounts.set(
+          ticket.giveaway_id,
+          (paidTicketCounts.get(ticket.giveaway_id) || 0) + (ticket.quantity || 1)
+        )
+      })
 
       const { data: marketplaceData, error: marketplaceError } = await supabase
         .from('marketplace_listings')
@@ -218,7 +240,20 @@ export default function HomePage() {
         })
         .filter((profile): profile is TopProfile => !!profile)
 
-      setGiveaways(giveawaysData || [])
+      const enrichedGiveaways = (giveawaysData || []).map((giveaway) => {
+        const ticketPrice = giveaway.ticket_price || 0
+        const paidCount = paidTicketCounts.get(giveaway.id) || 0
+        const paidRevenue = paidCount * ticketPrice
+        return {
+          ...giveaway,
+          paid_ticket_count: paidCount,
+          paid_ticket_revenue: paidRevenue,
+          prize_boost: paidRevenue * 0.4,
+          onagui_subs: paidRevenue * 0.1,
+        }
+      })
+
+      setGiveaways(enrichedGiveaways)
       setRaffles(rafflesData || [])
       setMarketplaceListings(enrichedMarketplace)
       setTopProfiles(rankedProfiles)
@@ -503,10 +538,21 @@ export default function HomePage() {
 
                   <div className="bc-price-section">
                     <div className="bc-price-display">
-                      <span className="bc-currency">{item.currency === 'USD' ? '$' : item.currency}</span>
+                      <span className="bc-currency">{giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}</span>
                       <span className="bc-price-value">
                         {giveaway.prize_value.toLocaleString()}
                       </span>
+                    </div>
+                  </div>
+
+                  <div className="bc-commission-row">
+                    <div className="bc-commission-item">
+                      <span>Prize boost (40%)</span>
+                      <strong>+${(giveaway.prize_boost || 0).toFixed(2)}</strong>
+                    </div>
+                    <div className="bc-commission-item">
+                      <span>ONAGUI Subs (10%)</span>
+                      <strong>${(giveaway.onagui_subs || 0).toFixed(2)}</strong>
                     </div>
                   </div>
 

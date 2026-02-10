@@ -760,6 +760,26 @@ header button:focus-visible {
   box-shadow: 0 8px 30px rgba(0, 212, 212, 0.5);
 }
 
+.bc-commission-row {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.bc-commission-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bc-commission-item strong {
+  color: #00d4d4;
+  font-weight: 700;
+}
+
 .bc-action-stack {
   display: grid;
   gap: 0.5rem;

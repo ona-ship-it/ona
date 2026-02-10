@@ -15,6 +15,10 @@ interface Giveaway {
   ends_at?: string;
   ticket_price?: number;
   prize_pool_usdt?: number;
+  paid_ticket_count?: number;
+  paid_ticket_revenue?: number;
+  prize_boost?: number;
+  onagui_subs?: number;
 }
 
 export default function GiveawaysClient() {
@@ -182,6 +186,17 @@ export default function GiveawaysClient() {
                   <span className="bc-price-value">
                     {giveaway.prize_amount || 0}
                   </span>
+                </div>
+              </div>
+
+              <div className="bc-commission-row">
+                <div className="bc-commission-item">
+                  <span>Prize boost (40%)</span>
+                  <strong>+${(giveaway.prize_boost || 0).toFixed(2)}</strong>
+                </div>
+                <div className="bc-commission-item">
+                  <span>ONAGUI Subs (10%)</span>
+                  <strong>${(giveaway.onagui_subs || 0).toFixed(2)}</strong>
                 </div>
               </div>
               
@@ -409,6 +424,26 @@ export default function GiveawaysClient() {
           font-size: 40px;
           font-weight: 700;
           color: #ff8800;
+        }
+
+        .bc-commission-row {
+          display: grid;
+          gap: 8px;
+          margin-bottom: 20px;
+          font-size: 12px;
+          color: #94a3b8;
+        }
+
+        .bc-commission-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+        }
+
+        .bc-commission-item strong {
+          color: #00d4d4;
+          font-weight: 700;
         }
         
         .bc-action-button {
