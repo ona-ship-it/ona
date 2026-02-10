@@ -23,6 +23,8 @@ type Giveaway = {
   status: string
   end_date: string
   creator_id?: string | null
+  creator_name?: string | null
+  creator_avatar_url?: string | null
   paid_ticket_count?: number
   paid_ticket_revenue?: number
   prize_boost?: number
@@ -126,6 +128,24 @@ export default function HomePage() {
           (paidTicketCounts.get(ticket.giveaway_id) || 0) + (ticket.quantity || 1)
         )
       })
+
+      const giveawayCreatorIds = (giveawaysData || [])
+        .map((giveaway) => giveaway.creator_id)
+        .filter((id): id is string => !!id)
+
+      let giveawayCreators: { id: string; username: string | null; full_name: string | null; avatar_url: string | null }[] = []
+      if (giveawayCreatorIds.length > 0) {
+        const { data: creators, error: creatorsError } = await supabase
+          .from('onagui_profiles')
+          .select('id, username, full_name, avatar_url')
+          .in('id', giveawayCreatorIds)
+
+        if (creatorsError) {
+          console.error('Error fetching giveaway creators:', creatorsError)
+        } else {
+          giveawayCreators = creators || []
+        }
+      }
 
       const { data: marketplaceData, error: marketplaceError } = await supabase
         .from('marketplace_listings')
@@ -244,12 +264,15 @@ export default function HomePage() {
         const ticketPrice = giveaway.ticket_price || 0
         const paidCount = paidTicketCounts.get(giveaway.id) || 0
         const paidRevenue = paidCount * ticketPrice
+        const creator = giveawayCreators.find((item) => item.id === giveaway.creator_id)
         return {
           ...giveaway,
           paid_ticket_count: paidCount,
           paid_ticket_revenue: paidRevenue,
           prize_boost: paidRevenue * 0.4,
           onagui_subs: paidRevenue * 0.1,
+          creator_name: creator?.full_name || creator?.username || null,
+          creator_avatar_url: creator?.avatar_url || null,
         }
       })
 
@@ -525,15 +548,30 @@ export default function HomePage() {
 
                   <div className="bc-highlight">{getGiveawayHighlight(giveaway)}</div>
 
-                  <h3 className="bc-card-title">{giveaway.title}</h3>
-
-                  <p className="bc-card-subtitle">
-                    {giveaway.description?.substring(0, 50) || 'Exclusive giveaway'}...
-                  </p>
+                  <div className="bc-title-row">
+                    <div className="bc-creator-column">
+                      <Image
+                        src={giveaway.creator_avatar_url || profileFallbackImage}
+                        alt={giveaway.creator_name || 'Creator'}
+                        width={32}
+                        height={32}
+                        className="bc-creator-avatar"
+                      />
+                      <span className="bc-subs-badge">
+                        {Math.round(giveaway.onagui_subs || 0)} subs
+                      </span>
+                    </div>
+                    <div className="bc-title-stack">
+                      <h3 className="bc-card-title">{giveaway.title}</h3>
+                      <p className="bc-card-subtitle">
+                        {giveaway.description?.substring(0, 50) || 'Exclusive giveaway'}...
+                      </p>
+                    </div>
+                  </div>
 
                   <div className="bc-host-info">
                     <span>by</span>
-                    <span className="bc-host-name">ONAGUI</span>
+                    <span className="bc-host-name">{giveaway.creator_name || 'ONAGUI'}</span>
                   </div>
 
                   <div className="bc-price-section">
@@ -545,14 +583,18 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  <div className="bc-commission-row">
-                    <div className="bc-commission-item">
-                      <span>Prize boost (40%)</span>
-                      <strong>+${(giveaway.prize_boost || 0).toFixed(2)}</strong>
-                    </div>
-                    <div className="bc-commission-item">
-                      <span>ONAGUI Subs (10%)</span>
-                      <strong>${(giveaway.onagui_subs || 0).toFixed(2)}</strong>
+                  <div className="bc-prize-progression">
+                    <span>Prize boost</span>
+                    <div className="bc-progression-values">
+                      <span>
+                        {giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}
+                        {giveaway.prize_value.toLocaleString()}
+                      </span>
+                      <span className="bc-progression-arrow">→</span>
+                      <span>
+                        {giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}
+                        {(giveaway.prize_value + (giveaway.prize_boost || 0)).toLocaleString()}
+                      </span>
                     </div>
                   </div>
 

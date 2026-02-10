@@ -11,6 +11,8 @@ interface Giveaway {
   status?: string;
   created_at?: string;
   creator_id?: string;
+  creator_name?: string | null;
+  creator_avatar_url?: string | null;
   media_url?: string;
   ends_at?: string;
   ticket_price?: number;
@@ -164,19 +166,31 @@ export default function GiveawaysClient() {
               </div>
               
               {/* Title */}
-              <h3 className="bc-card-title">
-                {giveaway.title || 'Untitled Giveaway'}
-              </h3>
-              
-              {/* Subtitle */}
-              <p className="bc-card-subtitle">
-                {giveaway.description?.substring(0, 50) || 'Amazing prize giveaway'}...
-              </p>
+              <div className="bc-title-row">
+                <div className="bc-creator-column">
+                  <img
+                    src={giveaway.creator_avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=600&auto=format&fit=crop'}
+                    alt={giveaway.creator_name || 'Creator'}
+                    className="bc-creator-avatar"
+                  />
+                  <span className="bc-subs-badge">
+                    {Math.round(giveaway.onagui_subs || 0)} subs
+                  </span>
+                </div>
+                <div className="bc-title-stack">
+                  <h3 className="bc-card-title">
+                    {giveaway.title || 'Untitled Giveaway'}
+                  </h3>
+                  <p className="bc-card-subtitle">
+                    {giveaway.description?.substring(0, 50) || 'Amazing prize giveaway'}...
+                  </p>
+                </div>
+              </div>
               
               {/* Host Info */}
               <div className="bc-host-info">
                 <span>by</span>
-                <span className="bc-host-name">ONAGUI</span>
+                <span className="bc-host-name">{giveaway.creator_name || 'ONAGUI'}</span>
               </div>
               
               {/* Price */}
@@ -189,14 +203,14 @@ export default function GiveawaysClient() {
                 </div>
               </div>
 
-              <div className="bc-commission-row">
-                <div className="bc-commission-item">
-                  <span>Prize boost (40%)</span>
-                  <strong>+${(giveaway.prize_boost || 0).toFixed(2)}</strong>
-                </div>
-                <div className="bc-commission-item">
-                  <span>ONAGUI Subs (10%)</span>
-                  <strong>${(giveaway.onagui_subs || 0).toFixed(2)}</strong>
+              <div className="bc-prize-progression">
+                <span>Prize boost</span>
+                <div className="bc-progression-values">
+                  <span>${(giveaway.prize_amount || 0).toLocaleString()}</span>
+                  <span className="bc-progression-arrow">→</span>
+                  <span>
+                    ${((giveaway.prize_amount || 0) + (giveaway.prize_boost || 0)).toLocaleString()}
+                  </span>
                 </div>
               </div>
               

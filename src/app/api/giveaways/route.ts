@@ -38,6 +38,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const creatorIds = (giveaways || [])
+      .map((giveaway) => giveaway.creator_id)
+      .filter((id): id is string => !!id)
+
+    let creators: { id: string; username: string | null; full_name: string | null; avatar_url: string | null }[] = []
+    if (creatorIds.length > 0) {
+      const { data: creatorData, error: creatorError } = await supabase
+        .from('onagui_profiles')
+        .select('id, username, full_name, avatar_url')
+        .in('id', creatorIds)
+
+      if (creatorError) {
+        console.error('Error fetching giveaway creators:', creatorError);
+      } else {
+        creators = creatorData || [];
+      }
+    }
+
     const { data: paidTickets, error: paidTicketsError } = await supabase
       .from('tickets')
       .select('giveaway_id, quantity')
@@ -60,8 +78,11 @@ export async function GET(request: NextRequest) {
       const ticketPrice = giveaway.ticket_price || 0;
       const paidCount = paidTicketCounts.get(giveaway.id) || 0;
       const paidRevenue = paidCount * ticketPrice;
+      const creator = creators.find((item) => item.id === giveaway.creator_id);
       return {
         ...giveaway,
+        creator_name: creator?.full_name || creator?.username || null,
+        creator_avatar_url: creator?.avatar_url || null,
         paid_ticket_count: paidCount,
         paid_ticket_revenue: paidRevenue,
         prize_boost: paidRevenue * 0.4,
