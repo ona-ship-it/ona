@@ -19,6 +19,19 @@ type Analytics = {
   }>
 }
 
+type ParticipationSummary = {
+  totalEvents: number
+  eventsByType: Record<string, number>
+  recentEvents: Array<{
+    id: string
+    event_type: string | null
+    entity_type: string | null
+    entity_id: string | null
+    created_at: string | null
+    metadata: Record<string, unknown> | null
+  }>
+}
+
 export default function AdminAnalyticsPage() {
   const router = useRouter()
   const supabase = createClient()
@@ -31,10 +44,17 @@ export default function AdminAnalyticsPage() {
     averageTicketPrice: 0,
     topGiveaways: [],
   })
+  const [participation, setParticipation] = useState<ParticipationSummary>({
+    totalEvents: 0,
+    eventsByType: {},
+    recentEvents: [],
+  })
+  const [eventTypeFilter, setEventTypeFilter] = useState('all')
+  const [dateRangeFilter, setDateRangeFilter] = useState<'7' | '30'>('7')
 
   useEffect(() => {
     checkAuth()
-  }, [])
+  }, [dateRangeFilter])
 
   async function checkAuth() {
     const { data: { session } } = await supabase.auth.getSession()
@@ -50,6 +70,7 @@ export default function AdminAnalyticsPage() {
     }
 
     await fetchAnalytics()
+    await fetchParticipation()
     setLoading(false)
   }
 
@@ -101,6 +122,56 @@ export default function AdminAnalyticsPage() {
     } catch (error) {
       console.error('Error fetching analytics:', error)
     }
+  }
+
+  async function fetchParticipation() {
+    try {
+      const response = await fetch(`/api/admin/participation-events?range=${dateRangeFilter}`)
+      if (!response.ok) {
+        console.error('Failed to fetch participation events')
+        return
+      }
+
+      const data = await response.json()
+      setParticipation({
+        totalEvents: data.totalEvents || 0,
+        eventsByType: data.eventsByType || {},
+        recentEvents: data.recentEvents || [],
+      })
+    } catch (error) {
+      console.error('Error fetching participation events:', error)
+    }
+  }
+
+  const filteredEvents = participation.recentEvents.filter((event) => {
+    if (eventTypeFilter === 'all') return true
+    return event.event_type === eventTypeFilter
+  })
+
+  const exportEvents = () => {
+    if (filteredEvents.length === 0) return
+
+    const header = ['event_type', 'entity_type', 'entity_id', 'created_at']
+    const rows = filteredEvents.map((event) => [
+      event.event_type || '',
+      event.entity_type || '',
+      event.entity_id || '',
+      event.created_at || '',
+    ])
+
+    const csv = [header, ...rows]
+      .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `participation-events-${dateRangeFilter}d.csv`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
   }
 
   if (loading) {
@@ -193,6 +264,79 @@ export default function AdminAnalyticsPage() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Participation Analytics */}
+        <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 mt-10">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+            <div>
+              <h3 className="text-2xl font-bold text-white">Participation Analytics</h3>
+              <p className="text-slate-400 text-sm">Last {dateRangeFilter} days</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="text-slate-300 text-sm">Total events: {participation.totalEvents}</div>
+              <select
+                value={dateRangeFilter}
+                onChange={(event) => setDateRangeFilter(event.target.value as '7' | '30')}
+                className="bg-slate-800/60 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-2"
+              >
+                <option value="7">Last 7 days</option>
+                <option value="30">Last 30 days</option>
+              </select>
+              <select
+                value={eventTypeFilter}
+                onChange={(event) => setEventTypeFilter(event.target.value)}
+                className="bg-slate-800/60 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-2"
+              >
+                <option value="all">All events</option>
+                {Object.keys(participation.eventsByType).map((key) => (
+                  <option key={key} value={key}>{key}</option>
+                ))}
+              </select>
+              <button
+                onClick={exportEvents}
+                className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-2 transition-all"
+              >
+                Export CSV
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {Object.entries(participation.eventsByType).length === 0 ? (
+              <div className="col-span-full text-center py-6 text-slate-400">No events recorded yet.</div>
+            ) : (
+              Object.entries(participation.eventsByType).map(([type, count]) => (
+                <div key={type} className="bg-slate-800/50 rounded-2xl p-5 border border-slate-700">
+                  <div className="text-xs uppercase text-slate-400 mb-2">{type.replace(/_/g, ' ')}</div>
+                  <div className="text-2xl font-black text-white">{count}</div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div>
+            <h4 className="text-lg font-semibold text-white mb-4">Recent Events</h4>
+            {filteredEvents.length === 0 ? (
+              <div className="text-slate-400">No recent events.</div>
+            ) : (
+              <div className="space-y-3">
+                {filteredEvents.map((event) => (
+                  <div key={event.id} className="flex flex-wrap items-center justify-between gap-3 bg-slate-800/40 rounded-xl p-4">
+                    <div>
+                      <div className="text-white font-semibold">{event.event_type || 'unknown'}</div>
+                      <div className="text-xs text-slate-400">
+                        {event.entity_type || 'n/a'} • {event.entity_id || 'n/a'}
+                      </div>
+                    </div>
+                    <div className="text-xs text-slate-400">
+                      {event.created_at ? new Date(event.created_at).toLocaleString() : 'unknown'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

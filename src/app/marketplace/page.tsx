@@ -1,11 +1,33 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from '@/components/Header'
+import { createClient } from '@/lib/supabase'
+
+type MarketplaceListing = {
+  id: string
+  title: string
+  description: string | null
+  price: number
+  currency: string
+  category: string | null
+  image_url: string | null
+  seller_id: string | null
+  views: number
+  sales: number
+}
+
+type MarketplaceSeller = {
+  id: string
+  username: string | null
+  full_name: string | null
+}
 
 export default function Marketplace() {
   const [category, setCategory] = useState('all')
   const [sortBy, setSortBy] = useState('popular')
+  const [listings, setListings] = useState<MarketplaceListing[]>([])
+  const [loading, setLoading] = useState(true)
 
   const products = [
     { id: 1, name: 'Limited Edition NFT', price: 0.5, currency: 'ETH', seller: 'CryptoArt', rating: 4.8, sales: 45, image: '🎨', category: 'digital' },
@@ -23,6 +45,74 @@ export default function Marketplace() {
     { id: 'collectibles', name: 'Collectibles', icon: '🏆' },
     { id: 'merch', name: 'Merch', icon: '👕' },
   ]
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      setLoading(true)
+      try {
+        const supabase = createClient()
+        const { data: listingsData, error: listingsError } = await supabase
+          .from('marketplace_listings')
+          .select('id, title, description, price, currency, category, image_url, seller_id, views, sales')
+          .eq('status', 'active')
+          .order('views', { ascending: false })
+          .limit(50)
+
+        if (listingsError) {
+          console.error('Marketplace listings error:', listingsError)
+          return
+        }
+
+        const sellerIds = (listingsData || [])
+          .map((listing) => listing.seller_id)
+          .filter((id): id is string => !!id)
+
+        let sellers: MarketplaceSeller[] = []
+        if (sellerIds.length > 0) {
+          const { data: sellersData, error: sellersError } = await supabase
+            .from('onagui_profiles')
+            .select('id, username, full_name')
+            .in('id', sellerIds)
+
+          if (sellersError) {
+            console.error('Marketplace sellers error:', sellersError)
+          } else {
+            sellers = sellersData || []
+          }
+        }
+
+        const normalized = (listingsData || []).map((listing) => {
+          const seller = sellers.find((item) => item.id === listing.seller_id)
+          return {
+            ...listing,
+            seller: seller?.full_name || seller?.username || 'Onagui Seller',
+          }
+        })
+
+        setListings(normalized)
+      } catch (error) {
+        console.error('Marketplace fetch error:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchListings()
+  }, [])
+
+  const displayProducts = listings.length > 0
+    ? listings.map((listing) => ({
+        id: listing.id,
+        name: listing.title,
+        price: listing.price,
+        currency: listing.currency,
+        seller: (listing as { seller?: string }).seller || 'Onagui Seller',
+        rating: listing.sales > 0 ? 4.7 : 4.5,
+        sales: listing.sales || 0,
+        image: listing.image_url || '🛍️',
+        category: listing.category || 'digital',
+      }))
+    : products
 
   return (
     <div className="min-h-screen bg-[#0f0f23] text-white">
@@ -140,7 +230,7 @@ export default function Marketplace() {
             {/* Controls */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
-                <div className="text-gray-400">Showing {products.length} items</div>
+                <div className="text-gray-400">Showing {displayProducts.length} items</div>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-400">Sort by:</span>
@@ -160,7 +250,7 @@ export default function Marketplace() {
 
             {/* Products Grid */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
+              {displayProducts.map((product) => (
                 <div
                   key={product.id}
                   className="bg-[#1a1a2e] rounded-2xl overflow-hidden border border-white/10 hover:border-blue-500/50 transition-all group"

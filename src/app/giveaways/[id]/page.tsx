@@ -40,7 +40,7 @@ export default function GiveawayDetailPage() {
   const [user, setUser] = useState<any>(null)
   const [entering, setEntering] = useState(false)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
-  const [quantity, setQuantity] = useState(1)
+  const [quantity] = useState(1)
 
   useEffect(() => {
     checkAuth()
@@ -76,7 +76,7 @@ export default function GiveawayDetailPage() {
     }
   }
 
-  async function handleEnter() {
+  async function handleEnter(entryType: 'free' | 'paid') {
     if (!user) {
       router.push('/login')
       return
@@ -84,8 +84,7 @@ export default function GiveawayDetailPage() {
 
     if (!giveaway) return
 
-    // If paid giveaway, require wallet
-    if (!giveaway.is_free) {
+    if (entryType === 'paid') {
       if (!walletAddress) {
         alert('Please connect your wallet first')
         return
@@ -101,48 +100,25 @@ export default function GiveawayDetailPage() {
     setEntering(true)
 
     try {
-      let transactionHash = null
-
-      // Handle payment for paid giveaways
-      if (!giveaway.is_free && giveaway.ticket_price > 0) {
-        const totalAmount = giveaway.ticket_price * quantity
-        
-        const paymentResult = await payWithUSDC(totalAmount)
-        
+      if (entryType === 'paid') {
+        const paymentResult = await payWithUSDC(1)
         if (!paymentResult.success) {
           throw new Error(paymentResult.error || 'Payment failed')
         }
-
-        transactionHash = paymentResult.txHash
       }
 
-      // Create tickets
-      for (let i = 0; i < quantity; i++) {
-        const { error: ticketError } = await supabase
-          .from('tickets')
-          .insert({
-            giveaway_id: giveaway.id,
-            user_id: user.id,
-            is_free: giveaway.is_free,
-          })
+      const response = await fetch('/api/entries/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ giveawayId: giveaway.id, entryType }),
+      })
 
-        if (ticketError) throw ticketError
+      const result = await response.json()
+      if (!response.ok) {
+        throw new Error(result.error || 'Entry failed')
       }
 
-      // Record transaction if paid
-      if (!giveaway.is_free && transactionHash) {
-        await supabase.from('transactions').insert({
-          user_id: user.id,
-          giveaway_id: giveaway.id,
-          amount: giveaway.ticket_price * quantity,
-          currency: 'USDC',
-          status: 'completed',
-          transaction_hash: transactionHash,
-          blockchain: 'Polygon',
-        })
-      }
-
-      alert(`Success! You've entered the giveaway with ${quantity} ticket${quantity > 1 ? 's' : ''}!`)
+      alert(result.message || 'Entry successful!')
       
       // Refresh giveaway data
       await fetchGiveaway()
@@ -257,53 +233,47 @@ export default function GiveawayDetailPage() {
 
             {/* Entry Form */}
             <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-6">
-              <h3 className="text-xl font-bold text-white mb-4">
-                {giveaway.is_free ? 'Enter Free' : 'Buy Tickets'}
-              </h3>
+              <h3 className="text-xl font-bold text-white mb-4">Get Your Tickets</h3>
 
-              {!giveaway.is_free && (
-                <>
-                  {/* Quantity Selector */}
-                  <div className="mb-4">
-                    <label className="text-sm text-slate-400 mb-2 block">Quantity</label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="100"
-                      value={quantity}
-                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-center text-2xl font-bold focus:outline-none focus:border-blue-500"
-                    />
+              <div className="mb-6">
+                <div className="text-sm text-slate-400 mb-2">Free entry</div>
+                <button
+                  onClick={() => handleEnter('free')}
+                  disabled={entering || giveaway.status !== 'active'}
+                  className="w-full py-4 hover:brightness-110 disabled:from-slate-700 disabled:to-slate-700 text-white font-bold rounded-xl text-lg transition-all disabled:cursor-not-allowed"
+                  style={{ background: entering || giveaway.status !== 'active' ? '#334155' : '#00d4d4', color: entering || giveaway.status !== 'active' ? '#fff' : '#0A0E13' }}
+                >
+                  {entering ? 'Processing...' : 'Claim Free Ticket'}
+                </button>
+                <p className="text-xs text-slate-400 mt-2">One free ticket per user.</p>
+              </div>
+
+              <div className="mb-4">
+                <div className="text-sm text-slate-400 mb-2">Paid entry</div>
+                <div className="mb-4 p-4 bg-slate-800/50 rounded-xl">
+                  <div className="flex justify-between text-slate-400 text-sm mb-2">
+                    <span>Price per ticket</span>
+                    <span>$1 USDC</span>
                   </div>
-
-                  {/* Price */}
-                  <div className="mb-4 p-4 bg-slate-800/50 rounded-xl">
-                    <div className="flex justify-between text-slate-400 text-sm mb-2">
-                      <span>Price per ticket</span>
-                      <span>${giveaway.ticket_price} USDC</span>
-                    </div>
-                    <div className="flex justify-between text-white text-lg font-bold pt-2 border-t border-slate-700">
-                      <span>Total</span>
-                      <span>${(giveaway.ticket_price * quantity).toFixed(2)} USDC</span>
-                    </div>
+                  <div className="flex justify-between text-white text-lg font-bold pt-2 border-t border-slate-700">
+                    <span>Total</span>
+                    <span>$1.00 USDC</span>
                   </div>
+                </div>
 
-                  {/* Wallet Connect */}
-                  <div className="mb-4">
-                    <WalletConnect onConnect={setWalletAddress} />
-                  </div>
-                </>
-              )}
+                <div className="mb-4">
+                  <WalletConnect onConnect={setWalletAddress} />
+                </div>
 
-              {/* Enter Button */}
-              <button
-                onClick={handleEnter}
-                disabled={entering || giveaway.status !== 'active' || (!giveaway.is_free && !walletAddress)}
-                className="w-full py-4 hover:brightness-110 disabled:from-slate-700 disabled:to-slate-700 text-white font-bold rounded-xl text-lg transition-all disabled:cursor-not-allowed"
-                style={{ background: entering || giveaway.status !== 'active' ? '#334155' : '#00d4d4', color: entering || giveaway.status !== 'active' ? '#fff' : '#0A0E13' }}
-              >
-                {entering ? 'Processing...' : giveaway.is_free ? 'Enter Free' : `Buy ${quantity} Ticket${quantity > 1 ? 's' : ''}`}
-              </button>
+                <button
+                  onClick={() => handleEnter('paid')}
+                  disabled={entering || giveaway.status !== 'active' || !walletAddress}
+                  className="w-full py-4 hover:brightness-110 disabled:from-slate-700 disabled:to-slate-700 text-white font-bold rounded-xl text-lg transition-all disabled:cursor-not-allowed"
+                  style={{ background: entering || giveaway.status !== 'active' ? '#334155' : '#0ea5e9', color: '#fff' }}
+                >
+                  {entering ? 'Processing...' : 'Buy Ticket 1 USDC'}
+                </button>
+              </div>
 
               {!user && (
                 <p className="text-center text-sm text-slate-400 mt-3">

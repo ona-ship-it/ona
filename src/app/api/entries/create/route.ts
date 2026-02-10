@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
-    const { giveawayId } = await request.json()
+    const { giveawayId, entryType } = await request.json()
 
     if (!giveawayId) {
       return NextResponse.json({ error: 'Giveaway ID required' }, { status: 400 })
@@ -65,9 +65,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Giveaway is sold out' }, { status: 400 })
     }
 
-    // Only handle free entries for now
-    if (!giveaway.is_free) {
-      return NextResponse.json({ error: 'Paid entries require wallet connection' }, { status: 400 })
+    const normalizedEntryType = entryType === 'paid' ? 'paid' : 'free'
+
+    if (normalizedEntryType === 'free') {
+      const { data: existingFreeTicket, error: existingFreeTicketError } = await supabase
+        .from('tickets')
+        .select('id')
+        .eq('giveaway_id', giveawayId)
+        .eq('user_id', user.id)
+        .eq('is_free', true)
+        .maybeSingle()
+
+      if (existingFreeTicketError) {
+        return NextResponse.json({ error: 'Failed to validate free entry' }, { status: 500 })
+      }
+
+      if (existingFreeTicket) {
+        return NextResponse.json({ error: 'Free entry already claimed' }, { status: 400 })
+      }
     }
 
     // Create ticket entry
@@ -77,9 +92,11 @@ export async function POST(request: Request) {
         {
           giveaway_id: giveawayId,
           user_id: user.id,
-          purchase_price: 0,
-          payment_currency: 'FREE',
-          payment_method: 'free',
+          is_free: normalizedEntryType === 'free',
+          quantity: 1,
+          purchase_price: normalizedEntryType === 'free' ? 0 : 1,
+          payment_currency: normalizedEntryType === 'free' ? 'FREE' : 'USDC',
+          payment_method: normalizedEntryType === 'free' ? 'free' : 'usdc',
         },
       ])
       .select()
@@ -97,17 +114,27 @@ export async function POST(request: Request) {
         giveaway_id: giveawayId,
         ticket_id: ticket.id,
         transaction_type: 'ticket_purchase',
-        amount: 0,
-        currency: 'FREE',
-        payment_method: 'free',
+        amount: normalizedEntryType === 'free' ? 0 : 1,
+        currency: normalizedEntryType === 'free' ? 'FREE' : 'USDC',
+        payment_method: normalizedEntryType === 'free' ? 'free' : 'usdc',
         status: 'completed',
+      },
+    ])
+
+    await supabase.from('participation_events').insert([
+      {
+        event_type: 'giveaway_entry',
+        entity_type: 'giveaway',
+        entity_id: giveawayId,
+        user_id: user.id,
+        metadata: { entry_type: normalizedEntryType },
       },
     ])
 
     return NextResponse.json({ 
       success: true, 
       ticket,
-      message: 'Entry successful!' 
+      message: normalizedEntryType === 'free' ? 'Free ticket claimed!' : 'Paid ticket purchased!'
     })
   } catch (error: any) {
     console.error('Entry error:', error)

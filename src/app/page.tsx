@@ -36,6 +36,21 @@ type Raffle = {
   status: string
 }
 
+type MarketplaceListing = {
+  id: string
+  title: string
+  description: string | null
+  price: number
+  currency: string
+  category: string | null
+  image_url: string | null
+  seller_id: string | null
+  seller_name: string | null
+  views: number
+  sales: number
+  created_at: string | null
+}
+
 type TopProfile = {
   id: string
   username: string | null
@@ -44,17 +59,31 @@ type TopProfile = {
   created_at: string | null
   giveawaysHosted: number
   totalEntries: number
+  followers: number
 }
 
 export default function HomePage() {
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
+  const [analyticsSessionId, setAnalyticsSessionId] = useState<string | null>(null)
   const [giveaways, setGiveaways] = useState<Giveaway[]>([])
   const [raffles, setRaffles] = useState<Raffle[]>([])
+  const [marketplaceListings, setMarketplaceListings] = useState<MarketplaceListing[]>([])
   const [topProfiles, setTopProfiles] = useState<TopProfile[]>([])
 
   useEffect(() => {
     fetchData()
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    let sessionId = window.localStorage.getItem('onagui_session_id')
+    if (!sessionId) {
+      sessionId = crypto.randomUUID()
+      window.localStorage.setItem('onagui_session_id', sessionId)
+    }
+    setAnalyticsSessionId(sessionId)
+    trackEvent('landing_view', undefined, undefined, { page: 'home' }, sessionId)
   }, [])
 
   async function fetchData() {
@@ -76,6 +105,58 @@ export default function HomePage() {
         .order('tickets_sold', { ascending: false })
         .limit(4)
 
+      const { data: marketplaceData, error: marketplaceError } = await supabase
+        .from('marketplace_listings')
+        .select('id, title, description, price, currency, category, image_url, seller_id, views, sales, created_at')
+        .eq('status', 'active')
+        .order('views', { ascending: false })
+        .limit(4)
+
+      if (marketplaceError) {
+        console.error('Error fetching marketplace listings:', marketplaceError)
+      }
+
+      const sellerIds = (marketplaceData || [])
+        .map((listing) => listing.seller_id)
+        .filter((id): id is string => !!id)
+
+      let sellersData: { id: string; username: string | null; full_name: string | null }[] = []
+      if (sellerIds.length > 0) {
+        const { data: sellers, error: sellersError } = await supabase
+          .from('onagui_profiles')
+          .select('id, username, full_name')
+          .in('id', sellerIds)
+
+        if (sellersError) {
+          console.error('Error fetching marketplace sellers:', sellersError)
+        } else {
+          sellersData = sellers || []
+        }
+      }
+
+      const enrichedMarketplace = (marketplaceData || []).map((listing) => {
+        const seller = sellersData.find((item) => item.id === listing.seller_id)
+        return {
+          ...listing,
+          seller_name: seller?.full_name || seller?.username || null
+        }
+      })
+
+      const { data: followerRows, error: followerError } = await supabase
+        .from('profile_followers')
+        .select('profile_id')
+        .limit(1000)
+
+      if (followerError) {
+        console.error('Error fetching follower data:', followerError)
+      }
+
+      const followerCounts = new Map<string, number>()
+      ;(followerRows || []).forEach((row) => {
+        if (!row.profile_id) return
+        followerCounts.set(row.profile_id, (followerCounts.get(row.profile_id) || 0) + 1)
+      })
+
       const { data: creatorGiveaways, error: creatorGiveawaysError } = await supabase
         .from('giveaways')
         .select('creator_id, tickets_sold')
@@ -96,17 +177,24 @@ export default function HomePage() {
         })
       })
 
-      const topCreatorIds = [...creatorStats.entries()]
+      const rankedByFollowers = [...followerCounts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 4)
+        .map(([id]) => id)
+
+      const rankedByEntries = [...creatorStats.entries()]
         .sort((a, b) => b[1].totalEntries - a[1].totalEntries)
         .slice(0, 4)
         .map(([id]) => id)
 
+      const topProfileIds = rankedByFollowers.length > 0 ? rankedByFollowers : rankedByEntries
+
       let profilesData: { id: string; username: string | null; full_name: string | null; avatar_url: string | null; created_at: string | null }[] = []
-      if (topCreatorIds.length > 0) {
+      if (topProfileIds.length > 0) {
         const { data: profiles, error: profilesError } = await supabase
           .from('onagui_profiles')
           .select('id, username, full_name, avatar_url, created_at')
-          .in('id', topCreatorIds)
+          .in('id', topProfileIds)
 
         if (profilesError) {
           console.error('Error fetching top profiles:', profilesError)
@@ -115,21 +203,24 @@ export default function HomePage() {
         }
       }
 
-      const rankedProfiles = topCreatorIds
+      const rankedProfiles = topProfileIds
         .map((id) => {
           const profile = profilesData.find((item) => item.id === id)
           const stats = creatorStats.get(id)
-          if (!profile || !stats) return null
+          const followers = followerCounts.get(id) || 0
+          if (!profile) return null
           return {
             ...profile,
-            giveawaysHosted: stats.giveawaysHosted,
-            totalEntries: stats.totalEntries
+            giveawaysHosted: stats?.giveawaysHosted || 0,
+            totalEntries: stats?.totalEntries || 0,
+            followers
           }
         })
         .filter((profile): profile is TopProfile => !!profile)
 
       setGiveaways(giveawaysData || [])
       setRaffles(rafflesData || [])
+      setMarketplaceListings(enrichedMarketplace)
       setTopProfiles(rankedProfiles)
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -173,6 +264,23 @@ export default function HomePage() {
       seller: 'AudioTech'
     }
   ]
+
+  const marketplaceItems: MarketplaceListing[] = marketplaceListings.length > 0
+    ? marketplaceListings
+    : mockMarketplace.map((item) => ({
+        id: item.id,
+        title: item.title,
+        description: null,
+        price: item.price,
+        currency: 'USD',
+        category: item.category,
+        image_url: item.image,
+        seller_id: null,
+        seller_name: item.seller,
+        views: 0,
+        sales: 0,
+        created_at: null,
+      }))
 
   // Mock data for fundraise (TODO: Remove when real data is ready)
   const mockFundraise = [
@@ -247,8 +355,57 @@ export default function HomePage() {
     }
   }
 
+  const getGiveawayHighlight = (giveaway: Giveaway) => {
+    const endTime = new Date(giveaway.end_date).getTime()
+    const hoursLeft = (endTime - Date.now()) / (1000 * 60 * 60)
+    if (hoursLeft > 0 && hoursLeft <= 24) return 'Ending Soon'
+    if (giveaway.total_tickets > 0 && giveaway.tickets_sold / giveaway.total_tickets >= 0.7) return 'Most Entered'
+    return 'Hot Right Now'
+  }
+
+  const getRaffleHighlight = (raffle: Raffle) => {
+    if (raffle.total_tickets > 0 && raffle.tickets_sold / raffle.total_tickets >= 0.8) return 'Almost Sold Out'
+    if (raffle.total_tickets > 0 && raffle.tickets_sold / raffle.total_tickets >= 0.5) return 'Popular Raffle'
+    return 'New Raffle'
+  }
+
+  const getMarketplaceHighlight = (listing: MarketplaceListing) => {
+    if (listing.sales >= 50) return 'Best Seller'
+    if (listing.views >= 1000) return 'Most Viewed'
+    return 'New Listing'
+  }
+
+  const getProfileHighlight = (profile: TopProfile) => {
+    if (profile.followers >= 1000) return 'Most Followed'
+    if (profile.totalEntries >= 10000) return 'Top Entries'
+    return 'Top Creator'
+  }
+
   const raffleFallbackImage = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop'
   const profileFallbackImage = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=600&auto=format&fit=crop'
+
+  const trackEvent = (
+    eventType: string,
+    entityType?: string,
+    entityId?: string,
+    metadata?: Record<string, unknown>,
+    sessionOverride?: string | null
+  ) => {
+    const sessionId = sessionOverride ?? analyticsSessionId
+    fetch('/api/analytics/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        eventType,
+        entityType,
+        entityId,
+        sessionId,
+        metadata,
+      }),
+    }).catch((error) => {
+      console.error('Analytics tracking error:', error)
+    })
+  }
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg-secondary)' }}>
@@ -281,6 +438,7 @@ export default function HomePage() {
                 key={giveaway.id}
                 href={`/giveaways/${giveaway.id}`}
                 className="bc-game-card group"
+                onClick={() => trackEvent('card_click', 'giveaway', giveaway.id)}
               >
                 {/* Image */}
                 <div className="bc-card-image-wrapper">
@@ -330,6 +488,8 @@ export default function HomePage() {
                     </div>
                   </div>
 
+                  <div className="bc-highlight">{getGiveawayHighlight(giveaway)}</div>
+
                   <h3 className="bc-card-title">{giveaway.title}</h3>
 
                   <p className="bc-card-subtitle">
@@ -343,7 +503,7 @@ export default function HomePage() {
 
                   <div className="bc-price-section">
                     <div className="bc-price-display">
-                      <span className="bc-currency">$</span>
+                      <span className="bc-currency">{item.currency === 'USD' ? '$' : item.currency}</span>
                       <span className="bc-price-value">
                         {giveaway.prize_value.toLocaleString()}
                       </span>
@@ -351,12 +511,20 @@ export default function HomePage() {
                   </div>
 
                   <div className="bc-action-stack">
-                    <button className="bc-action-button">
+                    <button
+                      className="bc-action-button"
+                      onClick={() => trackEvent('cta_click', 'giveaway', giveaway.id, { cta: 'claim_free_ticket' })}
+                    >
                       <ShoppingCart size={16} />
                       <span>CLAIM FREE TICKET</span>
                       <div className="bc-btn-glow"></div>
                     </button>
-                    <button className="bc-action-secondary">BUY TICKET 1 USDC</button>
+                    <button
+                      className="bc-action-secondary"
+                      onClick={() => trackEvent('cta_click', 'giveaway', giveaway.id, { cta: 'buy_ticket_1usdc' })}
+                    >
+                      BUY TICKET 1 USDC
+                    </button>
                     <div className="bc-action-note">1 chance per user</div>
                   </div>
                 </div>
@@ -386,6 +554,7 @@ export default function HomePage() {
                 key={raffle.id}
                 href={`/raffles/${raffle.id}`}
                 className="bc-game-card group"
+                onClick={() => trackEvent('card_click', 'raffle', raffle.id)}
               >
                 {/* Image */}
                 <div className="bc-card-image-wrapper">
@@ -425,6 +594,8 @@ export default function HomePage() {
                       </span>
                     </div>
                   </div>
+
+                  <div className="bc-highlight">{getRaffleHighlight(raffle)}</div>
 
                   <h3 className="bc-card-title">{raffle.title}</h3>
 
@@ -473,16 +644,17 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {mockMarketplace.map((item) => (
+            {marketplaceItems.map((item) => (
               <Link
                 key={item.id}
                 href={`/marketplace/${item.id}`}
                 className="bc-game-card group"
+                onClick={() => trackEvent('card_click', 'marketplace', item.id)}
               >
                 {/* Image */}
                 <div className="bc-card-image-wrapper">
                   <Image
-                    src={item.image}
+                    src={item.image_url || raffleFallbackImage}
                     alt={item.title}
                     fill
                     className="bc-card-image"
@@ -518,22 +690,24 @@ export default function HomePage() {
                     </div>
                   </div>
 
+                  <div className="bc-highlight">{getMarketplaceHighlight(item)}</div>
+
                   <h3 className="bc-card-title">{item.title}</h3>
 
                   <p className="bc-card-subtitle">
-                    {item.category} listing by {item.seller}
+                    {item.category || 'Marketplace'} listing by {item.seller_name || 'Onagui Seller'}
                   </p>
 
                   <div className="bc-host-info">
                     <span>by</span>
-                    <span className="bc-host-name">{item.seller}</span>
+                    <span className="bc-host-name">{item.seller_name || 'Onagui Seller'}</span>
                   </div>
 
                   <div className="bc-price-section">
                     <div className="bc-price-display">
                       <span className="bc-currency">$</span>
                       <span className="bc-price-value">
-                        {item.price.toLocaleString()}
+                        {item.currency === 'USD' ? item.price.toLocaleString() : `${item.price}`}
                       </span>
                     </div>
                   </div>
@@ -654,6 +828,7 @@ export default function HomePage() {
                 key={profile.id}
                 href="/profiles"
                 className="bc-game-card group"
+                onClick={() => trackEvent('card_click', 'profile', profile.id)}
               >
                 <div className="bc-card-image-wrapper">
                   <Image
@@ -678,6 +853,7 @@ export default function HomePage() {
                 </div>
 
                 <div className="bc-card-body">
+                  <div className="bc-highlight">{getProfileHighlight(profile)}</div>
                   <h3 className="bc-card-title">
                     {profile.full_name || profile.username || 'Onagui Creator'}
                   </h3>
@@ -691,14 +867,12 @@ export default function HomePage() {
 
                   <div className="bc-metric-row">
                     <div>
-                      <div className="bc-metric-label">Total entries</div>
-                      <div className="bc-metric-value">{profile.totalEntries.toLocaleString()}</div>
+                      <div className="bc-metric-label">Followers</div>
+                      <div className="bc-metric-value">{profile.followers.toLocaleString()}</div>
                     </div>
                     <div>
-                      <div className="bc-metric-label">Member since</div>
-                      <div className="bc-metric-value">
-                        {profile.created_at ? new Date(profile.created_at).getFullYear() : '2024'}
-                      </div>
+                      <div className="bc-metric-label">Total entries</div>
+                      <div className="bc-metric-value">{profile.totalEntries.toLocaleString()}</div>
                     </div>
                   </div>
 

@@ -640,6 +640,20 @@ header button:focus-visible {
   color: #ff8800;
 }
 
+.bc-highlight {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(0, 212, 212, 0.12);
+  color: #00d4d4;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  margin-bottom: 12px;
+}
+
 .rating-value {
   color: #ff8800;
 }
