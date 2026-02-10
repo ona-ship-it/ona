@@ -95,6 +95,24 @@
   --z-modal: 1050;
   --z-popover: 1060;
   --z-tooltip: 1070;
+
+  /* Legacy aliases for existing UI styles */
+  --primary-bg: var(--bg-primary);
+  --secondary-bg: var(--bg-secondary);
+  --tertiary-bg: var(--bg-tertiary);
+  --card-bg: var(--surface-default);
+  --border: var(--border-default);
+  --accent-blue: var(--brand-primary);
+  --accent-green: var(--accent-success);
+  --accent-red: var(--accent-error);
+  --accent-yellow: var(--accent-warning);
+  --brand-cyan: #00d4d4;
+  --brand-cyan-hover: #00ffff;
+  --brand-cyan-dark: #00b6b6;
+  --brand-cyan-light: rgba(0, 212, 212, 0.12);
+  --brand-cyan-darker: rgba(0, 212, 212, 0.22);
+  --shadow-cyan: 0 4px 20px rgba(0, 212, 212, 0.3);
+  --shadow-cyan-lg: 0 8px 30px rgba(0, 212, 212, 0.5);
 }
 
 /* Gradients */
