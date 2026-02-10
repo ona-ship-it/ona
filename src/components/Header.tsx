@@ -36,48 +36,48 @@ export default function Header() {
       background: 'var(--bg-secondary)',
       borderColor: 'var(--border)'
     }}>
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {/* Logo - Always clickable to home */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--accent-blue)' }}>
+            <h1 className="text-xl sm:text-2xl font-bold" style={{ color: 'var(--accent-blue)' }}>
               ONAGUI
             </h1>
           </Link>
 
           {/* Navigation */}
-          <nav className="flex items-center gap-6">
+          <nav className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
             <Link 
               href="/" 
-              className="text-sm font-medium transition-colors"
+              className="text-xs sm:text-sm font-medium transition-colors"
               style={{ color: isActive('/') ? 'var(--text-primary)' : 'var(--text-secondary)' }}
             >
               Home
             </Link>
             <Link 
               href="/giveaways" 
-              className="text-sm font-medium transition-colors hover:opacity-80"
+              className="text-xs sm:text-sm font-medium transition-colors hover:opacity-80"
               style={{ color: isActive('/giveaways') ? 'var(--text-primary)' : 'var(--text-secondary)' }}
             >
               Giveaways
             </Link>
             <Link 
               href="/raffles" 
-              className="text-sm font-medium transition-colors hover:opacity-80"
+              className="text-xs sm:text-sm font-medium transition-colors hover:opacity-80"
               style={{ color: isActive('/raffles') ? 'var(--text-primary)' : 'var(--text-secondary)' }}
             >
               Raffles
             </Link>
             <Link 
               href="/fundraise" 
-              className="text-sm font-medium transition-colors hover:opacity-80"
+              className="text-xs sm:text-sm font-medium transition-colors hover:opacity-80"
               style={{ color: isActive('/fundraise') ? 'var(--text-primary)' : 'var(--text-secondary)' }}
             >
               Fundraise
             </Link>
             <Link 
               href="/marketplace" 
-              className="text-sm font-medium transition-colors hover:opacity-80"
+              className="text-xs sm:text-sm font-medium transition-colors hover:opacity-80"
               style={{ color: isActive('/marketplace') ? 'var(--text-primary)' : 'var(--text-secondary)' }}
             >
               Marketplace
@@ -90,7 +90,7 @@ export default function Header() {
               onMouseLeave={() => setShowProfilesMenu(false)}
             >
               <div
-                className="text-sm font-medium transition-colors hover:opacity-80 cursor-pointer"
+                className="text-xs sm:text-sm font-medium transition-colors hover:opacity-80 cursor-pointer"
                 style={{ color: isActive('/profiles') ? 'var(--text-primary)' : 'var(--text-secondary)' }}
               >
                 Profiles
@@ -249,12 +249,12 @@ export default function Header() {
           </nav>
 
           {/* Right Side */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             {/* Sign Up Button - Only show when NOT logged in */}
             {!isLoggedIn && (
               <Link href="/signup">
                 <button
-                  className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all hover:opacity-90"
+                  className="px-4 py-2 text-xs sm:px-5 sm:py-2.5 sm:text-sm font-semibold rounded-md transition-all hover:opacity-90"
                   style={{ 
                     background: 'var(--accent-blue)',
                     color: 'var(--text-primary)'
@@ -270,7 +270,7 @@ export default function Header() {
               <button
                 onMouseEnter={() => setShowCreateMenu(true)}
                 onMouseLeave={() => setShowCreateMenu(false)}
-                className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all hover:opacity-90"
+                className="px-4 py-2 text-xs sm:px-5 sm:py-2.5 sm:text-sm font-semibold rounded-md transition-all hover:opacity-90"
                 style={{ 
                   background: 'var(--accent-green)',
                   color: 'var(--text-primary)'

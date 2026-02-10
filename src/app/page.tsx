@@ -473,12 +473,12 @@ export default function HomePage() {
       <Hero />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
         
         {/* ROW 1: POPULAR GIVEAWAYS */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+        <div className="mb-8 sm:mb-12">
+          <div className="flex items-center justify-between mb-5 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
               Popular Giveaways
             </h2>
             <Link 
@@ -490,7 +490,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {giveaways.map((giveaway) => (
               <Link
                 key={giveaway.id}
@@ -622,9 +622,9 @@ export default function HomePage() {
         </div>
 
         {/* ROW 2: POPULAR RAFFLES */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+        <div className="mb-8 sm:mb-12">
+          <div className="flex items-center justify-between mb-5 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
               Popular Raffles
             </h2>
             <Link 
@@ -636,7 +636,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {raffles.map((raffle) => (
               <Link
                 key={raffle.id}
@@ -717,9 +717,9 @@ export default function HomePage() {
         </div>
 
         {/* ROW 3: MARKETPLACE (MOCK DATA - TODO: REMOVE) */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+        <div className="mb-8 sm:mb-12">
+          <div className="flex items-center justify-between mb-5 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
               Marketplace
             </h2>
             <Link 
@@ -731,7 +731,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {marketplaceItems.map((item) => (
               <Link
                 key={item.id}
@@ -812,9 +812,9 @@ export default function HomePage() {
         </div>
 
         {/* ROW 4: FUNDRAISE (MOCK DATA - TODO: REMOVE) */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+        <div className="mb-8 sm:mb-12">
+          <div className="flex items-center justify-between mb-5 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
               Fundraising Campaigns
             </h2>
             <Link 
@@ -826,7 +826,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {mockFundraise.map((campaign) => (
               <Link
                 key={campaign.id}
@@ -896,9 +896,9 @@ export default function HomePage() {
         </div>
 
         {/* ROW 5: TOP PROFILES */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+        <div className="mb-8 sm:mb-12">
+          <div className="flex items-center justify-between mb-5 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
               Most Popular Profiles
             </h2>
             <Link
@@ -910,7 +910,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {topProfiles.map((profile) => (
               <Link
                 key={profile.id}
