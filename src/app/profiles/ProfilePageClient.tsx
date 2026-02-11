@@ -1,7 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Header from '@/components/Header';
+import { createClient } from '@/lib/supabase';
+import CreatorCommissionDisplay, {
+  CommissionHistoryItem,
+  CommissionTotals,
+} from '@/components/CreatorCommissionDisplay';
 import { 
   Users, Trophy, Heart, TrendingUp, Clock, Share2, 
   ExternalLink, Check, Flame, Star, Gift, Ticket,
@@ -9,31 +14,211 @@ import {
   Award, DollarSign, Target, Zap
 } from 'lucide-react';
 
+type ProfileRecord = {
+  id: string
+  username: string | null
+  full_name: string | null
+  avatar_url: string | null
+  bio: string | null
+  twitter_url: string | null
+  instagram_url: string | null
+  tiktok_url: string | null
+  website_url: string | null
+  created_at: string | null
+}
+
 const ONAGUIProfilePage = () => {
   const [activeSection, setActiveSection] = useState('live');
+  const [profileData, setProfileData] = useState<ProfileRecord | null>(null);
+  const [commissionTotals, setCommissionTotals] = useState<CommissionTotals>({
+    totalEarned: 0,
+    paidOut: 0,
+    pending: 0,
+  });
+  const [commissionHistory, setCommissionHistory] = useState<CommissionHistoryItem[]>([]);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [creatorStats, setCreatorStats] = useState({
+    totalGiveaways: 0,
+    totalWinners: 0,
+    totalValue: 0,
+  });
 
-  // Profile data
-  const profile = {
-    username: "TechKing",
-    displayName: "Tech King | Giveaway Master",
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=400&fit=crop",
-    bio: "Verified creator giving back to the community. 500+ giveaways hosted, $2M+ in prizes distributed.",
-    verified: true,
-    joinDate: "Jan 2023",
-    location: "Los Angeles, CA",
-    stats: {
-      totalGiveaways: 547,
-      totalWinners: 1243,
-      totalValue: "2.3M",
-      followers: 125400,
-      credibilityScore: 98
-    },
-    social: {
-      twitter: "@techking",
-      instagram: "@techking.official",
-      tiktok: "@techkingofficial"
-    }
-  };
+  useEffect(() => {
+    const loadProfile = async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session?.user) {
+        return;
+      }
+
+      const userId = session.user.id;
+
+      const [{ data: profileRow }, { data: onaguiProfile }] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url, bio, twitter_url, instagram_url, tiktok_url, website_url')
+          .eq('id', userId)
+          .single(),
+        supabase
+          .from('onagui_profiles')
+          .select('id, username, full_name, avatar_url, created_at')
+          .eq('id', userId)
+          .single(),
+      ]);
+
+      const mergedProfile: ProfileRecord = {
+        id: userId,
+        username: onaguiProfile?.username || null,
+        full_name: profileRow?.full_name || onaguiProfile?.full_name || null,
+        avatar_url: profileRow?.avatar_url || onaguiProfile?.avatar_url || null,
+        bio: profileRow?.bio || null,
+        twitter_url: profileRow?.twitter_url || null,
+        instagram_url: profileRow?.instagram_url || null,
+        tiktok_url: profileRow?.tiktok_url || null,
+        website_url: profileRow?.website_url || null,
+        created_at: onaguiProfile?.created_at || null,
+      };
+
+      setProfileData(mergedProfile);
+
+      const { count: followers } = await supabase
+        .from('profile_followers')
+        .select('*', { count: 'exact', head: true })
+        .eq('profile_id', userId);
+
+      setFollowersCount(followers || 0);
+
+      const { data: creatorGiveaways } = await supabase
+        .from('giveaways')
+        .select('id, title, prize_value, status, created_at, ticket_price')
+        .eq('creator_id', userId)
+        .order('created_at', { ascending: false });
+
+      const giveaways = creatorGiveaways || [];
+      const totalValue = giveaways.reduce((sum, giveaway) => sum + (giveaway.prize_value || 0), 0);
+
+      setCreatorStats({
+        totalGiveaways: giveaways.length,
+        totalWinners: giveaways.length,
+        totalValue,
+      });
+
+      if (giveaways.length === 0) {
+        setCommissionTotals({ totalEarned: 0, paidOut: 0, pending: 0 });
+        setCommissionHistory([]);
+        return;
+      }
+
+      const giveawayIds = giveaways.map((giveaway) => giveaway.id);
+      const ticketPriceMap = new Map<string, number>();
+      giveaways.forEach((giveaway) => {
+        ticketPriceMap.set(giveaway.id, giveaway.ticket_price || 0);
+      });
+
+      const { data: paidTickets } = await supabase
+        .from('tickets')
+        .select('giveaway_id, quantity')
+        .eq('is_free', false)
+        .in('giveaway_id', giveawayIds);
+
+      const revenueByGiveaway = new Map<string, number>();
+      (paidTickets || []).forEach((ticket) => {
+        if (!ticket.giveaway_id) return;
+        const ticketPrice = ticketPriceMap.get(ticket.giveaway_id) || 0;
+        const quantity = ticket.quantity || 1;
+        revenueByGiveaway.set(
+          ticket.giveaway_id,
+          (revenueByGiveaway.get(ticket.giveaway_id) || 0) + ticketPrice * quantity
+        );
+      });
+
+      let totalEarned = 0;
+      let paidOut = 0;
+      let pending = 0;
+
+      const historyItems: CommissionHistoryItem[] = giveaways.slice(0, 6).map((giveaway) => {
+        const revenue = revenueByGiveaway.get(giveaway.id) || 0;
+        const subs = revenue * 0.1;
+        totalEarned += subs;
+        if (giveaway.status === 'completed') {
+          paidOut += subs;
+        } else {
+          pending += subs;
+        }
+        return {
+          id: giveaway.id,
+          title: giveaway.title || 'Giveaway',
+          amount: subs,
+          status: giveaway.status === 'completed' ? 'paid' : 'pending',
+        };
+      });
+
+      setCommissionTotals({ totalEarned, paidOut, pending });
+      setCommissionHistory(historyItems);
+    };
+
+    loadProfile();
+  }, []);
+
+  const profile = useMemo(() => {
+    const fallback = {
+      username: "TechKing",
+      displayName: "Tech King | Giveaway Master",
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=400&fit=crop",
+      bio: "Verified creator giving back to the community. 500+ giveaways hosted, $2M+ in prizes distributed.",
+      verified: true,
+      joinDate: "Jan 2023",
+      location: "Onagui",
+      stats: {
+        totalGiveaways: 547,
+        totalWinners: 1243,
+        totalValue: "2.3M",
+        followers: 125400,
+        credibilityScore: 98
+      },
+      social: {
+        twitter: "@techking",
+        instagram: "@techking.official",
+        tiktok: "@techkingofficial"
+      }
+    };
+
+    if (!profileData) return fallback;
+
+    const joinDate = profileData.created_at
+      ? new Date(profileData.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      : fallback.joinDate;
+
+    const totalValueLabel = creatorStats.totalValue >= 1000000
+      ? `${(creatorStats.totalValue / 1000000).toFixed(1)}M`
+      : creatorStats.totalValue.toLocaleString();
+
+    return {
+      username: profileData.username || fallback.username,
+      displayName: profileData.full_name || profileData.username || fallback.displayName,
+      avatar: profileData.avatar_url || fallback.avatar,
+      bio: profileData.bio || fallback.bio,
+      verified: true,
+      joinDate,
+      location: fallback.location,
+      stats: {
+        totalGiveaways: creatorStats.totalGiveaways || fallback.stats.totalGiveaways,
+        totalWinners: creatorStats.totalWinners || fallback.stats.totalWinners,
+        totalValue: totalValueLabel || fallback.stats.totalValue,
+        followers: followersCount || fallback.stats.followers,
+        credibilityScore: Math.min(99, 70 + Math.min(creatorStats.totalGiveaways, 20)) || fallback.stats.credibilityScore
+      },
+      social: {
+        twitter: profileData.twitter_url || null,
+        instagram: profileData.instagram_url || null,
+        tiktok: profileData.tiktok_url || null,
+      }
+    };
+  }, [profileData, creatorStats, followersCount]);
+
+  const formatSocialLabel = (value: string) =>
+    value.replace(/^https?:\/\//, '').replace(/\/$/, '')
 
   // Current live posts
   const livePosts = [
@@ -825,21 +1010,36 @@ const ONAGUIProfilePage = () => {
 
               <div className="social-links">
                 {profile.social.twitter && (
-                  <a href="#" className="social-btn twitter">
+                  <a
+                    href={profile.social.twitter}
+                    className="social-btn twitter"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     <Twitter size={16} />
-                    <span>{profile.social.twitter}</span>
+                    <span>{formatSocialLabel(profile.social.twitter)}</span>
                   </a>
                 )}
                 {profile.social.instagram && (
-                  <a href="#" className="social-btn instagram">
+                  <a
+                    href={profile.social.instagram}
+                    className="social-btn instagram"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     <Instagram size={16} />
-                    <span>{profile.social.instagram}</span>
+                    <span>{formatSocialLabel(profile.social.instagram)}</span>
                   </a>
                 )}
                 {profile.social.tiktok && (
-                  <a href="#" className="social-btn tiktok">
+                  <a
+                    href={profile.social.tiktok}
+                    className="social-btn tiktok"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     <Music2 size={16} />
-                    <span>{profile.social.tiktok}</span>
+                    <span>{formatSocialLabel(profile.social.tiktok)}</span>
                   </a>
                 )}
               </div>
@@ -871,6 +1071,11 @@ const ONAGUIProfilePage = () => {
         </div>
 
         {/* Section Navigation */}
+        {profileData && (
+          <div style={{ marginBottom: '32px' }}>
+            <CreatorCommissionDisplay totals={commissionTotals} history={commissionHistory} />
+          </div>
+        )}
         <div className="section-nav">
           <button 
             className={`nav-tab ${activeSection === 'live' ? 'active' : ''}`}
