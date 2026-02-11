@@ -11,6 +11,7 @@ export default function SettingsPage() {
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [saveNotice, setSaveNotice] = useState<string | null>(null)
   const [user, setUser] = useState<any>(null)
   const [formData, setFormData] = useState({
     full_name: '',
@@ -64,6 +65,7 @@ export default function SettingsPage() {
   }
 
   async function handleSave() {
+    setSaveNotice(null)
     setSaving(true)
     try {
       const updatePayload = {
@@ -78,6 +80,7 @@ export default function SettingsPage() {
         website_url: formData.website_url,
       }
 
+      let usedFallback = false
       let { error } = await supabase
         .from('profiles')
         .update(updatePayload)
@@ -85,6 +88,7 @@ export default function SettingsPage() {
 
       if (error && error.message?.includes('bio') && error.message?.includes('schema cache')) {
         // Retry without bio if schema cache is behind
+        usedFallback = true
         const { error: retryError } = await supabase
           .from('profiles')
           .update({
@@ -104,6 +108,10 @@ export default function SettingsPage() {
       if (error) throw error
       
       alert('✅ Profile updated successfully!')
+
+      if (usedFallback) {
+        setSaveNotice('Bio will appear after the database cache refreshes. Your other changes were saved.')
+      }
       
     } catch (error: any) {
       console.error('Error:', error)
@@ -335,6 +343,11 @@ export default function SettingsPage() {
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
+          {saveNotice && (
+            <p className="text-xs mt-3" style={{ color: 'var(--text-secondary)' }}>
+              {saveNotice}
+            </p>
+          )}
         </div>
       </div>
     </div>
