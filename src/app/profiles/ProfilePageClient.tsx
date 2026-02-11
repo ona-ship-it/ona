@@ -59,6 +59,8 @@ const ONAGUIProfilePage = () => {
   const [followerPage, setFollowerPage] = useState(1);
   const [followingPage, setFollowingPage] = useState(1);
   const pageSize = 12;
+  const [followersLoading, setFollowersLoading] = useState(false);
+  const [followingLoading, setFollowingLoading] = useState(false);
   const [creatorStats, setCreatorStats] = useState({
     totalGiveaways: 0,
     totalWinners: 0,
@@ -205,6 +207,8 @@ const ONAGUIProfilePage = () => {
     setFollowingPage(1);
     setFollowersList([]);
     setFollowingList([]);
+    setFollowersLoading(true);
+    setFollowingLoading(true);
   }, [profileId]);
 
   useEffect(() => {
@@ -272,6 +276,9 @@ const ONAGUIProfilePage = () => {
       if (typeof totalFollowing === 'number') {
         setFollowingCount(totalFollowing);
       }
+
+      setFollowersLoading(false);
+      setFollowingLoading(false);
     };
 
     loadCommunity();
@@ -841,6 +848,15 @@ const ONAGUIProfilePage = () => {
 
         .load-more-btn:hover {
           background: rgba(0, 255, 136, 0.2);
+        }
+
+        .mini-spinner {
+          width: 14px;
+          height: 14px;
+          border-radius: 999px;
+          border: 2px solid rgba(0, 255, 136, 0.35);
+          border-top-color: #00ff88;
+          animation: spin 0.8s linear infinite;
         }
 
         .community-avatar {
@@ -1619,10 +1635,13 @@ const ONAGUIProfilePage = () => {
               />
               <button
                 className="load-more-btn"
-                onClick={() => setFollowerPage((prev) => prev + 1)}
+                onClick={() => {
+                  setFollowersLoading(true)
+                  setFollowerPage((prev) => prev + 1)
+                }}
                 disabled={followersList.length >= followersCount}
               >
-                {followersList.length >= followersCount ? 'All loaded' : 'Load more'}
+                {followersList.length >= followersCount ? 'All loaded' : followersLoading ? 'Loading...' : 'Load more'}
               </button>
             </div>
             <div className="empty-community" style={{ marginBottom: '12px' }}>
@@ -1630,7 +1649,9 @@ const ONAGUIProfilePage = () => {
             </div>
             <div className="community-grid">
               {filteredFollowers.length === 0 ? (
-                <div className="empty-community">No followers found.</div>
+                <div className="empty-community">
+                  {followersLoading ? 'Loading followers...' : 'No followers found.'}
+                </div>
               ) : (
                 filteredFollowers.map((person) => (
                   <a key={person.id} href={`/profiles?id=${person.id}`} className="community-card">
@@ -1668,10 +1689,13 @@ const ONAGUIProfilePage = () => {
               />
               <button
                 className="load-more-btn"
-                onClick={() => setFollowingPage((prev) => prev + 1)}
+                onClick={() => {
+                  setFollowingLoading(true)
+                  setFollowingPage((prev) => prev + 1)
+                }}
                 disabled={followingList.length >= followingCount}
               >
-                {followingList.length >= followingCount ? 'All loaded' : 'Load more'}
+                {followingList.length >= followingCount ? 'All loaded' : followingLoading ? 'Loading...' : 'Load more'}
               </button>
             </div>
             <div className="empty-community" style={{ marginBottom: '12px' }}>
@@ -1679,7 +1703,9 @@ const ONAGUIProfilePage = () => {
             </div>
             <div className="community-grid">
               {filteredFollowing.length === 0 ? (
-                <div className="empty-community">No following found.</div>
+                <div className="empty-community">
+                  {followingLoading ? 'Loading following...' : 'No following found.'}
+                </div>
               ) : (
                 filteredFollowing.map((person) => (
                   <a key={person.id} href={`/profiles?id=${person.id}`} className="community-card">
