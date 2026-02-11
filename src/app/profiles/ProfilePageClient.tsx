@@ -1641,7 +1641,12 @@ const ONAGUIProfilePage = () => {
                 }}
                 disabled={followersList.length >= followersCount}
               >
-                {followersList.length >= followersCount ? 'All loaded' : followersLoading ? 'Loading...' : 'Load more'}
+                {followersList.length >= followersCount ? 'All loaded' : (
+                  <>
+                    {followersLoading && <span className="mini-spinner" />}
+                    <span>{followersLoading ? 'Loading...' : 'Load more'}</span>
+                  </>
+                )}
               </button>
             </div>
             <div className="empty-community" style={{ marginBottom: '12px' }}>
@@ -1695,7 +1700,12 @@ const ONAGUIProfilePage = () => {
                 }}
                 disabled={followingList.length >= followingCount}
               >
-                {followingList.length >= followingCount ? 'All loaded' : followingLoading ? 'Loading...' : 'Load more'}
+                {followingList.length >= followingCount ? 'All loaded' : (
+                  <>
+                    {followingLoading && <span className="mini-spinner" />}
+                    <span>{followingLoading ? 'Loading...' : 'Load more'}</span>
+                  </>
+                )}
               </button>
             </div>
             <div className="empty-community" style={{ marginBottom: '12px' }}>
