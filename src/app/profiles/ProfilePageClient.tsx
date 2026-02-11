@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase';
 import CreatorCommissionDisplay, {
@@ -28,7 +29,10 @@ type ProfileRecord = {
 }
 
 const ONAGUIProfilePage = () => {
+  const searchParams = useSearchParams();
+  const requestedProfileId = searchParams.get('id');
   const [activeSection, setActiveSection] = useState('live');
+  const [viewerId, setViewerId] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<ProfileRecord | null>(null);
   const [commissionTotals, setCommissionTotals] = useState<CommissionTotals>({
     totalEarned: 0,
@@ -37,6 +41,8 @@ const ONAGUIProfilePage = () => {
   });
   const [commissionHistory, setCommissionHistory] = useState<CommissionHistoryItem[]>([]);
   const [followersCount, setFollowersCount] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
   const [creatorStats, setCreatorStats] = useState({
     totalGiveaways: 0,
     totalWinners: 0,
@@ -48,11 +54,14 @@ const ONAGUIProfilePage = () => {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
 
-      if (!session?.user) {
+      if (!session?.user && !requestedProfileId) {
         return;
       }
 
-      const userId = session.user.id;
+      const userId = requestedProfileId || session?.user?.id;
+      if (!userId) return;
+
+      setViewerId(session?.user?.id || null);
 
       const [{ data: profileRow }, { data: onaguiProfile }] = await Promise.all([
         supabase
@@ -88,6 +97,18 @@ const ONAGUIProfilePage = () => {
         .eq('profile_id', userId);
 
       setFollowersCount(followers || 0);
+
+      if (session?.user?.id && session.user.id !== userId) {
+        const { data: followRow } = await supabase
+          .from('profile_followers')
+          .select('profile_id')
+          .eq('profile_id', userId)
+          .eq('follower_id', session.user.id)
+          .maybeSingle();
+        setIsFollowing(!!followRow);
+      } else {
+        setIsFollowing(false);
+      }
 
       const { data: creatorGiveaways } = await supabase
         .from('giveaways')
@@ -159,7 +180,36 @@ const ONAGUIProfilePage = () => {
     };
 
     loadProfile();
-  }, []);
+  }, [requestedProfileId]);
+
+  const handleFollowToggle = async () => {
+    if (!viewerId || !profileData || followLoading || viewerId === profileData.id) return;
+    const supabase = createClient();
+    setFollowLoading(true);
+    try {
+      if (isFollowing) {
+        const { error } = await supabase
+          .from('profile_followers')
+          .delete()
+          .eq('profile_id', profileData.id)
+          .eq('follower_id', viewerId);
+        if (error) throw error;
+        setIsFollowing(false);
+        setFollowersCount((prev) => Math.max(prev - 1, 0));
+      } else {
+        const { error } = await supabase
+          .from('profile_followers')
+          .insert({ profile_id: profileData.id, follower_id: viewerId });
+        if (error) throw error;
+        setIsFollowing(true);
+        setFollowersCount((prev) => prev + 1);
+      }
+    } catch (error) {
+      console.error('Follow error:', error);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   const profile = useMemo(() => {
     const fallback = {
@@ -596,6 +646,34 @@ const ONAGUIProfilePage = () => {
         .social-btn.twitter { color: #1DA1F2; border-color: rgba(29, 161, 242, 0.3); }
         .social-btn.instagram { color: #E4405F; border-color: rgba(228, 64, 95, 0.3); }
         .social-btn.tiktok { color: #00f2ea; border-color: rgba(0, 242, 234, 0.3); }
+
+        .follow-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          background: linear-gradient(135deg, #00ff88 0%, #00ffaa 100%);
+          color: #0f1419;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 10px;
+          font-family: 'Rajdhani', sans-serif;
+          font-weight: 700;
+          letter-spacing: 1px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .follow-btn.is-following {
+          background: rgba(0, 255, 136, 0.1);
+          color: #00ff88;
+          border: 1px solid rgba(0, 255, 136, 0.4);
+        }
+
+        .follow-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
 
         .stats-grid {
           display: grid;
@@ -1042,6 +1120,15 @@ const ONAGUIProfilePage = () => {
                     <span>{formatSocialLabel(profile.social.tiktok)}</span>
                   </a>
                 )}
+                {profileData && viewerId && viewerId !== profileData.id && (
+                  <button
+                    className={`follow-btn ${isFollowing ? 'is-following' : ''}`}
+                    onClick={handleFollowToggle}
+                    disabled={followLoading}
+                  >
+                    {followLoading ? 'Working...' : isFollowing ? 'Following' : 'Follow'}
+                  </button>
+                )}
               </div>
 
               <div className="stats-grid">
@@ -1071,7 +1158,7 @@ const ONAGUIProfilePage = () => {
         </div>
 
         {/* Section Navigation */}
-        {profileData && (
+        {profileData && viewerId === profileData.id && (
           <div style={{ marginBottom: '32px' }}>
             <CreatorCommissionDisplay totals={commissionTotals} history={commissionHistory} />
           </div>
