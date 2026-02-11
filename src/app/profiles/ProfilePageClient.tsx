@@ -39,6 +39,7 @@ const ONAGUIProfilePage = () => {
   const searchParams = useSearchParams();
   const requestedProfileId = searchParams.get('id');
   const [activeSection, setActiveSection] = useState('live');
+  const [profileId, setProfileId] = useState<string | null>(null);
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<ProfileRecord | null>(null);
   const [commissionTotals, setCommissionTotals] = useState<CommissionTotals>({
@@ -52,6 +53,10 @@ const ONAGUIProfilePage = () => {
   const [followLoading, setFollowLoading] = useState(false);
   const [followersList, setFollowersList] = useState<CommunityProfile[]>([]);
   const [followingList, setFollowingList] = useState<CommunityProfile[]>([]);
+  const [followerSearch, setFollowerSearch] = useState('');
+  const [followingSearch, setFollowingSearch] = useState('');
+  const [followerLimit, setFollowerLimit] = useState(12);
+  const [followingLimit, setFollowingLimit] = useState(12);
   const [creatorStats, setCreatorStats] = useState({
     totalGiveaways: 0,
     totalWinners: 0,
@@ -71,6 +76,7 @@ const ONAGUIProfilePage = () => {
       if (!userId) return;
 
       setViewerId(session?.user?.id || null);
+      setProfileId(userId);
 
       const [{ data: profileRow }, { data: onaguiProfile }] = await Promise.all([
         supabase
@@ -106,30 +112,6 @@ const ONAGUIProfilePage = () => {
         .eq('profile_id', userId);
 
       setFollowersCount(followers || 0);
-
-      const [{ data: followerRows }, { data: followingRows }] = await Promise.all([
-        supabase
-          .from('profile_followers')
-          .select('follower_id, follower:follower_id (id, username, full_name, avatar_url)')
-          .eq('profile_id', userId)
-          .limit(12),
-        supabase
-          .from('profile_followers')
-          .select('profile_id, profile:profile_id (id, username, full_name, avatar_url)')
-          .eq('follower_id', userId)
-          .limit(12),
-      ]);
-
-      setFollowersList(
-        (followerRows || [])
-          .map((row: any) => row.follower)
-          .filter(Boolean)
-      );
-      setFollowingList(
-        (followingRows || [])
-          .map((row: any) => row.profile)
-          .filter(Boolean)
-      );
 
       if (session?.user?.id && session.user.id !== userId) {
         const { data: followRow } = await supabase
@@ -214,6 +196,40 @@ const ONAGUIProfilePage = () => {
 
     loadProfile();
   }, [requestedProfileId]);
+
+  useEffect(() => {
+    if (!profileId) return;
+    const loadCommunity = async () => {
+      const supabase = createClient();
+      const [{ data: followerRows }, { data: followingRows }] = await Promise.all([
+        supabase
+          .from('profile_followers')
+          .select('follower_id, follower:follower_id (id, username, full_name, avatar_url)')
+          .eq('profile_id', profileId)
+          .order('created_at', { ascending: false })
+          .limit(followerLimit),
+        supabase
+          .from('profile_followers')
+          .select('profile_id, profile:profile_id (id, username, full_name, avatar_url)')
+          .eq('follower_id', profileId)
+          .order('created_at', { ascending: false })
+          .limit(followingLimit),
+      ]);
+
+      setFollowersList(
+        (followerRows || [])
+          .map((row: any) => row.follower)
+          .filter(Boolean)
+      );
+      setFollowingList(
+        (followingRows || [])
+          .map((row: any) => row.profile)
+          .filter(Boolean)
+      );
+    };
+
+    loadCommunity();
+  }, [profileId, followerLimit, followingLimit]);
 
   const handleFollowToggle = async () => {
     if (!viewerId || !profileData || followLoading || viewerId === profileData.id) return;
@@ -305,6 +321,16 @@ const ONAGUIProfilePage = () => {
 
   const formatFollowerCount = (count: number) =>
     count >= 1000 ? `${(count / 1000).toFixed(1)}K` : `${count}`
+
+  const filteredFollowers = followersList.filter((person) => {
+    const label = `${person.full_name || ''} ${person.username || ''}`.toLowerCase()
+    return label.includes(followerSearch.toLowerCase())
+  })
+
+  const filteredFollowing = followingList.filter((person) => {
+    const label = `${person.full_name || ''} ${person.username || ''}`.toLowerCase()
+    return label.includes(followingSearch.toLowerCase())
+  })
 
   // Current live posts
   const livePosts = [
@@ -732,6 +758,43 @@ const ONAGUIProfilePage = () => {
           border-color: rgba(0, 255, 136, 0.4);
           transform: translateY(-2px);
           box-shadow: 0 8px 25px rgba(0, 255, 136, 0.15);
+        }
+
+        .community-search {
+          display: flex;
+          gap: 12px;
+          margin-bottom: 20px;
+        }
+
+        .community-search input {
+          flex: 1;
+          background: rgba(15, 20, 25, 0.9);
+          border: 1px solid rgba(0, 255, 136, 0.2);
+          border-radius: 10px;
+          padding: 10px 14px;
+          color: #ffffff;
+          font-size: 14px;
+        }
+
+        .community-search input::placeholder {
+          color: #718096;
+        }
+
+        .load-more-btn {
+          background: rgba(0, 255, 136, 0.12);
+          border: 1px solid rgba(0, 255, 136, 0.4);
+          color: #00ff88;
+          padding: 10px 18px;
+          border-radius: 10px;
+          font-family: 'Rajdhani', sans-serif;
+          font-weight: 700;
+          letter-spacing: 1px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .load-more-btn:hover {
+          background: rgba(0, 255, 136, 0.2);
         }
 
         .community-avatar {
@@ -1500,50 +1563,82 @@ const ONAGUIProfilePage = () => {
         )}
 
         {activeSection === 'followers' && (
-          <div className="community-grid">
-            {followersList.length === 0 ? (
-              <div className="empty-community">No followers yet.</div>
-            ) : (
-              followersList.map((person) => (
-                <a key={person.id} href={`/profiles?id=${person.id}`} className="community-card">
-                  <img
-                    src={person.avatar_url || profile.avatar}
-                    alt={person.full_name || person.username || 'Profile'}
-                    className="community-avatar"
-                  />
-                  <div>
-                    <div className="community-name">
-                      {person.full_name || person.username || 'Onagui Member'}
+          <div>
+            <div className="community-search">
+              <input
+                type="text"
+                placeholder="Search followers"
+                value={followerSearch}
+                onChange={(event) => setFollowerSearch(event.target.value)}
+              />
+              <button
+                className="load-more-btn"
+                onClick={() => setFollowerLimit((prev) => prev + 12)}
+              >
+                Load more
+              </button>
+            </div>
+            <div className="community-grid">
+              {filteredFollowers.length === 0 ? (
+                <div className="empty-community">No followers found.</div>
+              ) : (
+                filteredFollowers.map((person) => (
+                  <a key={person.id} href={`/profiles?id=${person.id}`} className="community-card">
+                    <img
+                      src={person.avatar_url || profile.avatar}
+                      alt={person.full_name || person.username || 'Profile'}
+                      className="community-avatar"
+                    />
+                    <div>
+                      <div className="community-name">
+                        {person.full_name || person.username || 'Onagui Member'}
+                      </div>
+                      <div className="community-handle">@{person.username || 'onagui'}</div>
                     </div>
-                    <div className="community-handle">@{person.username || 'onagui'}</div>
-                  </div>
-                </a>
-              ))
-            )}
+                  </a>
+                ))
+              )}
+            </div>
           </div>
         )}
 
         {activeSection === 'following' && (
-          <div className="community-grid">
-            {followingList.length === 0 ? (
-              <div className="empty-community">Not following anyone yet.</div>
-            ) : (
-              followingList.map((person) => (
-                <a key={person.id} href={`/profiles?id=${person.id}`} className="community-card">
-                  <img
-                    src={person.avatar_url || profile.avatar}
-                    alt={person.full_name || person.username || 'Profile'}
-                    className="community-avatar"
-                  />
-                  <div>
-                    <div className="community-name">
-                      {person.full_name || person.username || 'Onagui Member'}
+          <div>
+            <div className="community-search">
+              <input
+                type="text"
+                placeholder="Search following"
+                value={followingSearch}
+                onChange={(event) => setFollowingSearch(event.target.value)}
+              />
+              <button
+                className="load-more-btn"
+                onClick={() => setFollowingLimit((prev) => prev + 12)}
+              >
+                Load more
+              </button>
+            </div>
+            <div className="community-grid">
+              {filteredFollowing.length === 0 ? (
+                <div className="empty-community">No following found.</div>
+              ) : (
+                filteredFollowing.map((person) => (
+                  <a key={person.id} href={`/profiles?id=${person.id}`} className="community-card">
+                    <img
+                      src={person.avatar_url || profile.avatar}
+                      alt={person.full_name || person.username || 'Profile'}
+                      className="community-avatar"
+                    />
+                    <div>
+                      <div className="community-name">
+                        {person.full_name || person.username || 'Onagui Member'}
+                      </div>
+                      <div className="community-handle">@{person.username || 'onagui'}</div>
                     </div>
-                    <div className="community-handle">@{person.username || 'onagui'}</div>
-                  </div>
-                </a>
-              ))
-            )}
+                  </a>
+                ))
+              )}
+            </div>
           </div>
         )}
       </div>
