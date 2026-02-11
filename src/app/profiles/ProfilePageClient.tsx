@@ -49,6 +49,7 @@ const ONAGUIProfilePage = () => {
   });
   const [commissionHistory, setCommissionHistory] = useState<CommissionHistoryItem[]>([]);
   const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
   const [followersList, setFollowersList] = useState<CommunityProfile[]>([]);
@@ -201,7 +202,7 @@ const ONAGUIProfilePage = () => {
     if (!profileId) return;
     const loadCommunity = async () => {
       const supabase = createClient();
-      const [{ data: followerRows }, { data: followingRows }] = await Promise.all([
+      const [{ data: followerRows }, { data: followingRows }, { count: totalFollowers }, { count: totalFollowing }] = await Promise.all([
         supabase
           .from('profile_followers')
           .select('follower_id, follower:follower_id (id, username, full_name, avatar_url)')
@@ -214,6 +215,14 @@ const ONAGUIProfilePage = () => {
           .eq('follower_id', profileId)
           .order('created_at', { ascending: false })
           .limit(followingLimit),
+        supabase
+          .from('profile_followers')
+          .select('*', { count: 'exact', head: true })
+          .eq('profile_id', profileId),
+        supabase
+          .from('profile_followers')
+          .select('*', { count: 'exact', head: true })
+          .eq('follower_id', profileId),
       ]);
 
       setFollowersList(
@@ -226,6 +235,13 @@ const ONAGUIProfilePage = () => {
           .map((row: any) => row.profile)
           .filter(Boolean)
       );
+
+      if (typeof totalFollowers === 'number') {
+        setFollowersCount(totalFollowers);
+      }
+      if (typeof totalFollowing === 'number') {
+        setFollowingCount(totalFollowing);
+      }
     };
 
     loadCommunity();
@@ -1574,9 +1590,13 @@ const ONAGUIProfilePage = () => {
               <button
                 className="load-more-btn"
                 onClick={() => setFollowerLimit((prev) => prev + 12)}
+                disabled={followersList.length >= followersCount}
               >
-                Load more
+                {followersList.length >= followersCount ? 'All loaded' : 'Load more'}
               </button>
+            </div>
+            <div className="empty-community" style={{ marginBottom: '12px' }}>
+              Showing {filteredFollowers.length} of {followersCount} followers
             </div>
             <div className="community-grid">
               {filteredFollowers.length === 0 ? (
@@ -1599,6 +1619,11 @@ const ONAGUIProfilePage = () => {
                 ))
               )}
             </div>
+            {followersList.length >= followersCount && followersCount > 0 && (
+              <div className="empty-community" style={{ marginTop: '16px' }}>
+                End of followers list
+              </div>
+            )}
           </div>
         )}
 
@@ -1614,9 +1639,13 @@ const ONAGUIProfilePage = () => {
               <button
                 className="load-more-btn"
                 onClick={() => setFollowingLimit((prev) => prev + 12)}
+                disabled={followingList.length >= followingCount}
               >
-                Load more
+                {followingList.length >= followingCount ? 'All loaded' : 'Load more'}
               </button>
+            </div>
+            <div className="empty-community" style={{ marginBottom: '12px' }}>
+              Showing {filteredFollowing.length} of {followingCount} following
             </div>
             <div className="community-grid">
               {filteredFollowing.length === 0 ? (
@@ -1639,6 +1668,11 @@ const ONAGUIProfilePage = () => {
                 ))
               )}
             </div>
+            {followingList.length >= followingCount && followingCount > 0 && (
+              <div className="empty-community" style={{ marginTop: '16px' }}>
+                End of following list
+              </div>
+            )}
           </div>
         )}
       </div>
