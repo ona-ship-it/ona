@@ -56,8 +56,9 @@ const ONAGUIProfilePage = () => {
   const [followingList, setFollowingList] = useState<CommunityProfile[]>([]);
   const [followerSearch, setFollowerSearch] = useState('');
   const [followingSearch, setFollowingSearch] = useState('');
-  const [followerLimit, setFollowerLimit] = useState(12);
-  const [followingLimit, setFollowingLimit] = useState(12);
+  const [followerPage, setFollowerPage] = useState(1);
+  const [followingPage, setFollowingPage] = useState(1);
+  const pageSize = 12;
   const [creatorStats, setCreatorStats] = useState({
     totalGiveaways: 0,
     totalWinners: 0,
@@ -200,21 +201,34 @@ const ONAGUIProfilePage = () => {
 
   useEffect(() => {
     if (!profileId) return;
+    setFollowerPage(1);
+    setFollowingPage(1);
+    setFollowersList([]);
+    setFollowingList([]);
+  }, [profileId]);
+
+  useEffect(() => {
+    if (!profileId) return;
     const loadCommunity = async () => {
       const supabase = createClient();
+      const followerFrom = (followerPage - 1) * pageSize;
+      const followerTo = followerFrom + pageSize - 1;
+      const followingFrom = (followingPage - 1) * pageSize;
+      const followingTo = followingFrom + pageSize - 1;
+
       const [{ data: followerRows }, { data: followingRows }, { count: totalFollowers }, { count: totalFollowing }] = await Promise.all([
         supabase
           .from('profile_followers')
           .select('follower_id, follower:follower_id (id, username, full_name, avatar_url)')
           .eq('profile_id', profileId)
           .order('created_at', { ascending: false })
-          .limit(followerLimit),
+          .range(followerFrom, followerTo),
         supabase
           .from('profile_followers')
           .select('profile_id, profile:profile_id (id, username, full_name, avatar_url)')
           .eq('follower_id', profileId)
           .order('created_at', { ascending: false })
-          .limit(followingLimit),
+          .range(followingFrom, followingTo),
         supabase
           .from('profile_followers')
           .select('*', { count: 'exact', head: true })
@@ -225,16 +239,32 @@ const ONAGUIProfilePage = () => {
           .eq('follower_id', profileId),
       ]);
 
-      setFollowersList(
-        (followerRows || [])
-          .map((row: any) => row.follower)
-          .filter(Boolean)
-      );
-      setFollowingList(
-        (followingRows || [])
-          .map((row: any) => row.profile)
-          .filter(Boolean)
-      );
+      const nextFollowers = (followerRows || [])
+        .map((row: any) => row.follower)
+        .filter(Boolean);
+      const nextFollowing = (followingRows || [])
+        .map((row: any) => row.profile)
+        .filter(Boolean);
+
+      setFollowersList((prev) => {
+        const merged = followerPage === 1 ? nextFollowers : [...prev, ...nextFollowers];
+        const seen = new Set<string>();
+        return merged.filter((person) => {
+          if (seen.has(person.id)) return false;
+          seen.add(person.id);
+          return true;
+        });
+      });
+
+      setFollowingList((prev) => {
+        const merged = followingPage === 1 ? nextFollowing : [...prev, ...nextFollowing];
+        const seen = new Set<string>();
+        return merged.filter((person) => {
+          if (seen.has(person.id)) return false;
+          seen.add(person.id);
+          return true;
+        });
+      });
 
       if (typeof totalFollowers === 'number') {
         setFollowersCount(totalFollowers);
@@ -245,7 +275,7 @@ const ONAGUIProfilePage = () => {
     };
 
     loadCommunity();
-  }, [profileId, followerLimit, followingLimit]);
+  }, [profileId, followerPage, followingPage]);
 
   const handleFollowToggle = async () => {
     if (!viewerId || !profileData || followLoading || viewerId === profileData.id) return;
@@ -1589,7 +1619,7 @@ const ONAGUIProfilePage = () => {
               />
               <button
                 className="load-more-btn"
-                onClick={() => setFollowerLimit((prev) => prev + 12)}
+                onClick={() => setFollowerPage((prev) => prev + 1)}
                 disabled={followersList.length >= followersCount}
               >
                 {followersList.length >= followersCount ? 'All loaded' : 'Load more'}
@@ -1638,7 +1668,7 @@ const ONAGUIProfilePage = () => {
               />
               <button
                 className="load-more-btn"
-                onClick={() => setFollowingLimit((prev) => prev + 12)}
+                onClick={() => setFollowingPage((prev) => prev + 1)}
                 disabled={followingList.length >= followingCount}
               >
                 {followingList.length >= followingCount ? 'All loaded' : 'Load more'}
