@@ -29,6 +29,12 @@ export default function SettingsPage() {
     checkAuth()
   }, [])
 
+  useEffect(() => {
+    if (!saveNotice) return
+    const timer = window.setTimeout(() => setSaveNotice(null), 6000)
+    return () => window.clearTimeout(timer)
+  }, [saveNotice])
+
   async function checkAuth() {
     const { data: { session } } = await supabase.auth.getSession()
     
