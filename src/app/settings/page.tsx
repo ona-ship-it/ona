@@ -66,20 +66,40 @@ export default function SettingsPage() {
   async function handleSave() {
     setSaving(true)
     try {
-      const { error } = await supabase
+      const updatePayload = {
+        full_name: formData.full_name,
+        bio: formData.bio,
+        twitter_url: formData.twitter_url,
+        instagram_url: formData.instagram_url,
+        facebook_url: formData.facebook_url,
+        linkedin_url: formData.linkedin_url,
+        tiktok_url: formData.tiktok_url,
+        youtube_url: formData.youtube_url,
+        website_url: formData.website_url,
+      }
+
+      let { error } = await supabase
         .from('profiles')
-        .update({
-          full_name: formData.full_name,
-          bio: formData.bio,
-          twitter_url: formData.twitter_url,
-          instagram_url: formData.instagram_url,
-          facebook_url: formData.facebook_url,
-          linkedin_url: formData.linkedin_url,
-          tiktok_url: formData.tiktok_url,
-          youtube_url: formData.youtube_url,
-          website_url: formData.website_url,
-        })
+        .update(updatePayload)
         .eq('id', user.id)
+
+      if (error && error.message?.includes('bio') && error.message?.includes('schema cache')) {
+        // Retry without bio if schema cache is behind
+        const { error: retryError } = await supabase
+          .from('profiles')
+          .update({
+            full_name: updatePayload.full_name,
+            twitter_url: updatePayload.twitter_url,
+            instagram_url: updatePayload.instagram_url,
+            facebook_url: updatePayload.facebook_url,
+            linkedin_url: updatePayload.linkedin_url,
+            tiktok_url: updatePayload.tiktok_url,
+            youtube_url: updatePayload.youtube_url,
+            website_url: updatePayload.website_url,
+          })
+          .eq('id', user.id)
+        error = retryError || null
+      }
 
       if (error) throw error
       
