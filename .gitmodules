@@ -1,3 +1,7 @@
 [submodule "ona-production"]
 	path = ona-production
 	url = https://github.com/ona-ship-it/ona/repo.git
+
+[submodule "onagui"]
+	path = onagui
+	url = https://github.com/org/repo.git
