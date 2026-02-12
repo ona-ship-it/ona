@@ -5,3 +5,7 @@
 [submodule "onagui"]
 	path = onagui
 	url = https://github.com/org/repo.git
+
+[submodule "onagui-clean"]
+	path = onagui-clean
+	url = https://github.com/ona-ship-it/ona/clean
