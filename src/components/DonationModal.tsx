@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
 import { IconX, IconWallet, IconCheck, IconChevronDown } from '@tabler/icons-react';
 import { ethers } from 'ethers';
-import { SUPPORTED_CRYPTOS, getCryptoById, ERC20_ABI, type CryptoNetwork } from '@/lib/cryptoConfig';
+import { SUPPORTED_CRYPTOS, type CryptoNetwork } from '@/lib/cryptoConfig';
 import { connectPhantomWallet, sendSolanaTransaction, getSolanaExplorerUrl } from '@/lib/solanaWallet';
 import { connectUnisatWallet, btcToSatoshis, getBitcoinExplorerUrl } from '@/lib/bitcoinWallet';
 
@@ -38,6 +38,8 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
   const [txHash, setTxHash] = useState('');
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
+  const [verificationStatus, setVerificationStatus] = useState<'confirmed' | 'pending' | 'failed' | null>(null);
+  const [txExplorerUrl, setTxExplorerUrl] = useState('');
 
   const presetAmounts = [10, 25, 50, 100, 250, 500];
   
@@ -48,6 +50,40 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
   useEffect(() => {
     checkWalletConnection();
   }, []);
+
+  const submitDonation = async (payload: {
+    transactionHash: string
+    blockchain: string
+    currency: string
+    walletAddress: string
+  }) => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const response = await fetch('/api/donations/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fundraiserId: fundraiser.id,
+        userId: user?.id || null,
+        amount: parseFloat(amount),
+        currency: payload.currency,
+        transactionHash: payload.transactionHash,
+        walletAddress: payload.walletAddress,
+        blockchain: payload.blockchain,
+        donorName: isAnonymous ? null : (donorName || 'Anonymous'),
+        message: message || null,
+        isAnonymous,
+      }),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || 'Donation verification failed');
+    }
+
+    setVerificationStatus(result.status || (result.verified ? 'confirmed' : 'pending'));
+  };
 
   async function checkWalletConnection() {
     if (typeof window.ethereum !== 'undefined') {
@@ -120,10 +156,6 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
       setLoading(true);
       setStep('payment');
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
-
       // Validate platform wallet is configured
       if (!selectedCrypto.platformWallet) {
         alert('Platform wallet not configured for ' + selectedCrypto.name);
@@ -178,33 +210,13 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
 
         const receipt = await tx.wait();
         setTxHash(receipt.transactionHash);
-
-        // Save to database
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        const donationAmount = parseFloat(amount);
-        const platformFee = calculatePlatformFee(donationAmount);
-        const netAmount = calculateNetAmount(donationAmount);
-        
-        await supabase.from('donations').insert([
-          {
-            fundraiser_id: fundraiser.id,
-            user_id: user?.id || null,
-            amount: donationAmount,
-            platform_fee: platformFee,
-            net_amount: netAmount,
-            currency: selectedCrypto.symbol,
-            donor_name: isAnonymous ? null : (donorName || 'Anonymous'),
-            message: message || null,
-            is_anonymous: isAnonymous,
-            transaction_hash: receipt.transactionHash,
-            wallet_address: walletAddress,
-            blockchain: selectedCrypto.id,
-            status: 'confirmed',
-            confirmed_at: new Date().toISOString(),
-          },
-        ]);
+        setTxExplorerUrl(`${selectedCrypto.explorerUrl}/tx/${receipt.transactionHash}`);
+        await submitDonation({
+          transactionHash: receipt.transactionHash,
+          blockchain: selectedCrypto.id,
+          currency: selectedCrypto.symbol,
+          walletAddress: walletAddress,
+        });
       } else {
         // Bitcoin and Solana - different wallet connectors
         if (selectedCrypto.id === 'solana') {
@@ -218,33 +230,13 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
           );
           
           setTxHash(signature);
-
-          // Save to database
-          const supabase = createClient();
-          const { data: { user } } = await supabase.auth.getUser();
-          
-          const donationAmount = parseFloat(amount);
-          const platformFee = calculatePlatformFee(donationAmount);
-          const netAmount = calculateNetAmount(donationAmount);
-          
-          await supabase.from('donations').insert([
-            {
-              fundraiser_id: fundraiser.id,
-              user_id: user?.id || null,
-              amount: donationAmount,
-              platform_fee: platformFee,
-              net_amount: netAmount,
-              currency: 'SOL',
-              donor_name: isAnonymous ? null : (donorName || 'Anonymous'),
-              message: message || null,
-              is_anonymous: isAnonymous,
-              transaction_hash: signature,
-              wallet_address: wallet.publicKey?.toString() || '',
-              blockchain: 'solana',
-              status: 'confirmed',
-              confirmed_at: new Date().toISOString(),
-            },
-          ]);
+          setTxExplorerUrl(getSolanaExplorerUrl(signature));
+          await submitDonation({
+            transactionHash: signature,
+            blockchain: 'solana',
+            currency: 'SOL',
+            walletAddress: wallet.publicKey?.toString() || '',
+          });
         } else if (selectedCrypto.id === 'bitcoin') {
           const wallet = await connectUnisatWallet();
           if (!wallet) throw new Error('Failed to connect Bitcoin wallet');
@@ -253,59 +245,15 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
           const txid = await wallet.sendBitcoin(selectedCrypto.platformWallet, amountSats);
           
           setTxHash(txid);
-
-          // Save to database
-          const supabase = createClient();
-          const { data: { user } } = await supabase.auth.getUser();
-          
-          const donationAmount = parseFloat(amount);
-          const platformFee = calculatePlatformFee(donationAmount);
-          const netAmount = calculateNetAmount(donationAmount);
-          
-          await supabase.from('donations').insert([
-            {
-              fundraiser_id: fundraiser.id,
-              user_id: user?.id || null,
-              amount: donationAmount,
-              platform_fee: platformFee,
-              net_amount: netAmount,
-              currency: 'BTC',
-              donor_name: isAnonymous ? null : (donorName || 'Anonymous'),
-              message: message || null,
-              is_anonymous: isAnonymous,
-              transaction_hash: txid,
-              wallet_address: wallet.address,
-              blockchain: 'bitcoin',
-              status: 'confirmed',
-              confirmed_at: new Date().toISOString(),
-            },
-          ]);
+          setTxExplorerUrl(getBitcoinExplorerUrl(txid));
+          await submitDonation({
+            transactionHash: txid,
+            blockchain: 'bitcoin',
+            currency: 'BTC',
+            walletAddress: wallet.address,
+          });
         }
       }
-
-      // Save donation to database with fee tracking
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      await supabase.from('donations').insert([
-        {
-          fundraiser_id: fundraiser.id,
-          user_id: user?.id || null,
-          amount: donationAmount,
-          platform_fee: platformFee,
-          net_amount: netAmount,
-          currency: 'USDC',
-          donor_name: isAnonymous ? null : (donorName || 'Anonymous'),
-          message: message || null,
-          is_anonymous: isAnonymous,
-          transaction_hash: receipt.transactionHash,
-          wallet_address: walletAddress,
-          blockchain: 'polygon',
-          status: 'confirmed',
-          escrow_status: 'held',
-          confirmed_at: new Date().toISOString(),
-        },
-      ]);
 
       setStep('success');
       setTimeout(() => {
@@ -528,17 +476,25 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
                 <IconCheck size={48} className="text-green-600" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Thank You!</h3>
-              <p className="text-gray-600 mb-4">Your donation was successful</p>
+              <p className="text-gray-600 mb-4">
+                {verificationStatus === 'confirmed'
+                  ? 'Your donation was verified'
+                  : 'Your donation is pending verification'}
+              </p>
               <div className="bg-gray-50 rounded-lg p-4 mb-4">
                 <p className="text-sm text-gray-600 mb-1">Transaction Hash:</p>
-                <a
-                  href={`https://polygonscan.com/tx/${txHash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-mono text-green-600 hover:underline break-all"
-                >
-                  {txHash}
-                </a>
+                {txExplorerUrl ? (
+                  <a
+                    href={txExplorerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-mono text-green-600 hover:underline break-all"
+                  >
+                    {txHash}
+                  </a>
+                ) : (
+                  <span className="text-xs font-mono text-green-600 break-all">{txHash}</span>
+                )}
               </div>
               <p className="text-sm text-gray-500">Closing in 3 seconds...</p>
             </div>

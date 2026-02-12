@@ -35,9 +35,73 @@ type CommunityProfile = {
   avatar_url: string | null
 }
 
-const ONAGUIProfilePage = () => {
+type LivePost = {
+  id: string
+  type: 'giveaway' | 'raffle'
+  title: string
+  image: string
+  prize: string
+  entries?: number
+  tickets?: number
+  soldTickets?: number
+  timeLeft: string
+  status: string
+  views: number
+}
+
+type HistoryPost = {
+  id: string
+  type: 'giveaway' | 'raffle'
+  title: string
+  image: string
+  prize: string
+  entries?: number
+  tickets?: number
+  winner: string
+  endDateValue: string
+  endDate: string
+  status: string
+}
+
+type PopularPost = {
+  id: string
+  title: string
+  image: string
+  prize: string
+  entries?: number
+  tickets?: number
+  subs: number
+  status: string
+}
+
+type WinnerEntry = {
+  id: string
+  username: string
+  avatar: string
+  prize: string
+  value: string
+  date: string
+  verified: boolean
+}
+
+type FundraiseEntry = {
+  id: string
+  title: string
+  image: string
+  raised: number
+  goal: number
+  donors: number
+  contribution: number
+  date: string
+}
+
+type ProfilePageClientProps = {
+  profileIdOverride?: string | null
+}
+
+const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps) => {
   const searchParams = useSearchParams();
-  const requestedProfileId = searchParams.get('id');
+  const requestedProfileId = profileIdOverride || searchParams.get('id');
   const [activeSection, setActiveSection] = useState('live');
   const [profileId, setProfileId] = useState<string | null>(null);
   const [viewerId, setViewerId] = useState<string | null>(null);
@@ -66,6 +130,12 @@ const ONAGUIProfilePage = () => {
     totalWinners: 0,
     totalValue: 0,
   });
+  const fallbackImage = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop';
+  const [livePosts, setLivePosts] = useState<LivePost[]>([]);
+  const [historyPosts, setHistoryPosts] = useState<HistoryPost[]>([]);
+  const [popularPosts, setPopularPosts] = useState<PopularPost[]>([]);
+  const [recentWinners, setRecentWinners] = useState<WinnerEntry[]>([]);
+  const [supportedFundraises, setSupportedFundraises] = useState<FundraiseEntry[]>([]);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -284,6 +354,290 @@ const ONAGUIProfilePage = () => {
     loadCommunity();
   }, [profileId, followerPage, followingPage]);
 
+  useEffect(() => {
+    if (!profileId) return;
+    const supabase = createClient();
+
+    const formatCurrency = (value: number | null | undefined, currency?: string | null) => {
+      const safeValue = typeof value === 'number' && Number.isFinite(value) ? value : 0;
+      const formatted = safeValue.toLocaleString(undefined, { maximumFractionDigits: 0 });
+      if (currency) {
+        return `${formatted} ${currency}`;
+      }
+      return `$${formatted}`;
+    };
+
+    const formatTimeLeft = (endDate?: string | null) => {
+      if (!endDate) return 'Live';
+      const diffMs = new Date(endDate).getTime() - Date.now();
+      if (diffMs <= 0) return 'Ended';
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const days = Math.floor(diffHours / 24);
+      const hours = diffHours % 24;
+      if (days > 0) return `${days}d ${hours}h`;
+      return `${hours}h`;
+    };
+
+    const formatShortDate = (dateString?: string | null) => {
+      if (!dateString) return 'Unknown';
+      return new Date(dateString).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    };
+
+    const loadProfileContent = async () => {
+      const now = new Date();
+
+      const [{ data: giveaways }, { data: raffles }] = await Promise.all([
+        supabase
+          .from('giveaways')
+          .select('id, title, image_url, prize_value, prize_currency, tickets_sold, total_tickets, ticket_price, ticket_currency, status, end_date, created_at, winner_id, winner_drawn_at')
+          .eq('creator_id', profileId)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('raffles')
+          .select('id, title, image_urls, prize_value, prize_currency, tickets_sold, total_tickets, base_ticket_price, status, view_count, created_at, winner_id, winner_drawn_at')
+          .eq('creator_id', profileId)
+          .order('created_at', { ascending: false }),
+      ]);
+
+      const giveawayRows = giveaways || [];
+      const raffleRows = raffles || [];
+      const giveawayIds = giveawayRows.map((giveaway) => giveaway.id);
+
+      const subsByGiveaway = new Map<string, number>();
+      if (giveawayIds.length > 0) {
+        const { data: paidTickets } = await supabase
+          .from('tickets')
+          .select('giveaway_id, quantity')
+          .eq('is_free', false)
+          .in('giveaway_id', giveawayIds);
+
+        const ticketPriceMap = new Map<string, number>();
+        giveawayRows.forEach((giveaway) => {
+          ticketPriceMap.set(giveaway.id, giveaway.ticket_price || 0);
+        });
+
+        (paidTickets || []).forEach((ticket) => {
+          if (!ticket.giveaway_id) return;
+          const price = ticketPriceMap.get(ticket.giveaway_id) || 0;
+          const quantity = ticket.quantity || 1;
+          const revenue = price * quantity;
+          const subs = revenue * 0.1;
+          subsByGiveaway.set(
+            ticket.giveaway_id,
+            (subsByGiveaway.get(ticket.giveaway_id) || 0) + subs
+          );
+        });
+      }
+
+      const liveGiveaways = giveawayRows.filter((giveaway) => {
+        if (giveaway.status !== 'active') return false;
+        if (!giveaway.end_date) return true;
+        return new Date(giveaway.end_date) > now;
+      });
+
+      const liveRaffles = raffleRows.filter((raffle) => raffle.status === 'active');
+
+      const nextLivePosts: LivePost[] = [
+        ...liveGiveaways.map((giveaway) => ({
+          id: giveaway.id,
+          type: 'giveaway',
+          title: giveaway.title || 'Giveaway',
+          image: giveaway.image_url || profileData?.avatar_url || fallbackImage,
+          prize: formatCurrency(giveaway.prize_value, giveaway.prize_currency),
+          entries: giveaway.tickets_sold || 0,
+          timeLeft: formatTimeLeft(giveaway.end_date),
+          status: giveaway.status,
+          views: giveaway.tickets_sold || 0,
+        })),
+        ...liveRaffles.map((raffle) => ({
+          id: raffle.id,
+          type: 'raffle',
+          title: raffle.title || 'Raffle',
+          image: raffle.image_urls?.[0] || profileData?.avatar_url || fallbackImage,
+          prize: formatCurrency(raffle.prize_value, raffle.prize_currency),
+          tickets: raffle.total_tickets || 0,
+          soldTickets: raffle.tickets_sold || 0,
+          timeLeft: 'Live',
+          status: raffle.status,
+          views: raffle.view_count || raffle.tickets_sold || 0,
+        })),
+      ].sort((a, b) => (b.status === 'active' ? 1 : 0) - (a.status === 'active' ? 1 : 0));
+
+      const historyGiveaways = giveawayRows.filter((giveaway) => {
+        if (giveaway.winner_id) return true;
+        if (giveaway.status === 'completed') return true;
+        if (!giveaway.end_date) return false;
+        return new Date(giveaway.end_date) <= now;
+      });
+
+      const historyRaffles = raffleRows.filter((raffle) => {
+        if (raffle.winner_id) return true;
+        return raffle.status === 'completed';
+      });
+
+      const winnerIds = Array.from(
+        new Set(
+          [
+            ...historyGiveaways.map((giveaway) => giveaway.winner_id),
+            ...historyRaffles.map((raffle) => raffle.winner_id),
+          ].filter((id): id is string => !!id)
+        )
+      );
+
+      let winnerProfiles: CommunityProfile[] = [];
+      if (winnerIds.length > 0) {
+        const { data: winners } = await supabase
+          .from('onagui_profiles')
+          .select('id, username, full_name, avatar_url')
+          .in('id', winnerIds);
+        winnerProfiles = winners || [];
+      }
+
+      const winnerMap = new Map(
+        winnerProfiles.map((winner) => [
+          winner.id,
+          {
+            username: winner.username || winner.full_name || 'winner',
+            avatar: winner.avatar_url || profileData?.avatar_url || '',
+          },
+        ])
+      );
+
+      const nextHistoryPosts: HistoryPost[] = [
+        ...historyGiveaways.map((giveaway) => ({
+          id: giveaway.id,
+          type: 'giveaway',
+          title: giveaway.title || 'Giveaway',
+          image: giveaway.image_url || profileData?.avatar_url || fallbackImage,
+          prize: formatCurrency(giveaway.prize_value, giveaway.prize_currency),
+          entries: giveaway.tickets_sold || 0,
+          winner: giveaway.winner_id
+            ? `@${winnerMap.get(giveaway.winner_id)?.username || 'winner'}`
+            : 'Pending',
+          endDateValue: giveaway.winner_drawn_at || giveaway.end_date || giveaway.created_at,
+          endDate: formatShortDate(giveaway.winner_drawn_at || giveaway.end_date),
+          status: giveaway.status,
+        })),
+        ...historyRaffles.map((raffle) => ({
+          id: raffle.id,
+          type: 'raffle',
+          title: raffle.title || 'Raffle',
+          image: raffle.image_urls?.[0] || profileData?.avatar_url || fallbackImage,
+          prize: formatCurrency(raffle.prize_value, raffle.prize_currency),
+          tickets: raffle.total_tickets || 0,
+          winner: raffle.winner_id
+            ? `@${winnerMap.get(raffle.winner_id)?.username || 'winner'}`
+            : 'Pending',
+          endDateValue: raffle.winner_drawn_at || raffle.created_at,
+          endDate: formatShortDate(raffle.winner_drawn_at || raffle.created_at),
+          status: raffle.status,
+        })),
+      ].sort((a, b) => new Date(b.endDateValue).getTime() - new Date(a.endDateValue).getTime());
+
+      const nextPopularPosts: PopularPost[] = giveawayRows
+        .map((giveaway) => ({
+          id: giveaway.id,
+          title: giveaway.title || 'Giveaway',
+          image: giveaway.image_url || profileData?.avatar_url || fallbackImage,
+          prize: formatCurrency(giveaway.prize_value, giveaway.prize_currency),
+          entries: giveaway.tickets_sold || 0,
+          subs: Math.round(subsByGiveaway.get(giveaway.id) || 0),
+          status: giveaway.status,
+        }))
+        .sort((a, b) => b.subs - a.subs)
+        .slice(0, 3);
+
+      const nextWinners: WinnerEntry[] = [
+        ...historyGiveaways
+          .filter((giveaway) => giveaway.winner_id)
+          .map((giveaway) => ({
+            id: giveaway.id,
+            username: winnerMap.get(giveaway.winner_id || '')?.username || 'winner',
+            avatar: winnerMap.get(giveaway.winner_id || '')?.avatar || profileData?.avatar_url || fallbackImage,
+            prize: giveaway.title || 'Giveaway',
+            value: formatCurrency(giveaway.prize_value, giveaway.prize_currency),
+            date: formatShortDate(giveaway.winner_drawn_at || giveaway.end_date),
+            verified: false,
+          })),
+        ...historyRaffles
+          .filter((raffle) => raffle.winner_id)
+          .map((raffle) => ({
+            id: raffle.id,
+            username: winnerMap.get(raffle.winner_id || '')?.username || 'winner',
+            avatar: winnerMap.get(raffle.winner_id || '')?.avatar || profileData?.avatar_url || fallbackImage,
+            prize: raffle.title || 'Raffle',
+            value: formatCurrency(raffle.prize_value, raffle.prize_currency),
+            date: formatShortDate(raffle.winner_drawn_at || raffle.created_at),
+            verified: false,
+          })),
+      ]
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 6);
+
+      const { data: donations } = await supabase
+        .from('donations')
+        .select('fundraiser_id, amount, created_at')
+        .eq('user_id', profileId)
+        .eq('status', 'confirmed')
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      const fundraiserIds = Array.from(
+        new Set((donations || []).map((donation) => donation.fundraiser_id).filter(Boolean))
+      );
+
+      let fundraisers: any[] = [];
+      if (fundraiserIds.length > 0) {
+        const { data: fundraiserRows } = await supabase
+          .from('fundraisers')
+          .select('id, title, cover_image, raised_amount, goal_amount, total_donors, created_at')
+          .in('id', fundraiserIds);
+        fundraisers = fundraiserRows || [];
+      }
+
+      const donationTotals = new Map<string, { total: number; lastDate: string }>();
+      (donations || []).forEach((donation) => {
+        if (!donation.fundraiser_id) return;
+        const current = donationTotals.get(donation.fundraiser_id) || {
+          total: 0,
+          lastDate: donation.created_at,
+        };
+        const nextTotal = current.total + (Number(donation.amount) || 0);
+        const lastDate = new Date(donation.created_at) > new Date(current.lastDate)
+          ? donation.created_at
+          : current.lastDate;
+        donationTotals.set(donation.fundraiser_id, { total: nextTotal, lastDate });
+      });
+
+      const nextFundraises: FundraiseEntry[] = fundraisers.map((fundraiser) => {
+        const contribution = donationTotals.get(fundraiser.id)?.total || 0;
+        const lastDate = donationTotals.get(fundraiser.id)?.lastDate || fundraiser.created_at;
+        return {
+          id: fundraiser.id,
+          title: fundraiser.title || 'Fundraiser',
+          image: fundraiser.cover_image || profileData?.avatar_url || fallbackImage,
+          raised: Number(fundraiser.raised_amount) || 0,
+          goal: Number(fundraiser.goal_amount) || 0,
+          donors: fundraiser.total_donors || 0,
+          contribution,
+          date: formatShortDate(lastDate),
+        };
+      });
+
+      setLivePosts(nextLivePosts);
+      setHistoryPosts(nextHistoryPosts);
+      setPopularPosts(nextPopularPosts);
+      setRecentWinners(nextWinners);
+      setSupportedFundraises(nextFundraises);
+    };
+
+    loadProfileContent();
+  }, [profileId, profileData]);
+
   const handleFollowToggle = async () => {
     if (!viewerId || !profileData || followLoading || viewerId === profileData.id) return;
     const supabase = createClient();
@@ -385,191 +739,6 @@ const ONAGUIProfilePage = () => {
     return label.includes(followingSearch.toLowerCase())
   })
 
-  // Current live posts
-  const livePosts = [
-    {
-      id: 1,
-      type: "giveaway",
-      title: "iPhone 15 Pro Max Giveaway",
-      image: "https://images.unsplash.com/photo-1696446702403-69e5f8ab97ec?w=600&h=400&fit=crop",
-      prize: "$1,299",
-      entries: 15432,
-      timeLeft: "2d 14h",
-      status: "live",
-      views: 45200
-    },
-    {
-      id: 2,
-      type: "raffle",
-      title: "MacBook Pro M3 Raffle",
-      image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&h=400&fit=crop",
-      prize: "$2,499",
-      tickets: 2500,
-      soldTickets: 1847,
-      timeLeft: "5d 8h",
-      status: "live",
-      views: 32100
-    },
-    {
-      id: 3,
-      type: "giveaway",
-      title: "PlayStation 5 Bundle",
-      image: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=600&h=400&fit=crop",
-      prize: "$650",
-      entries: 8921,
-      timeLeft: "1d 4h",
-      status: "live",
-      views: 28400
-    }
-  ];
-
-  // History of past posts
-  const historyPosts = [
-    {
-      id: 1,
-      type: "giveaway",
-      title: "Gaming PC RTX 4090 Giveaway",
-      image: "https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=600&h=400&fit=crop",
-      prize: "$3,500",
-      entries: 23456,
-      winner: "@luckyuser123",
-      endDate: "Feb 1, 2026",
-      status: "completed"
-    },
-    {
-      id: 2,
-      type: "raffle",
-      title: "Tesla Model 3 Raffle",
-      image: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=600&h=400&fit=crop",
-      prize: "$45,000",
-      tickets: 5000,
-      winner: "@teslaowner2026",
-      endDate: "Jan 28, 2026",
-      status: "completed"
-    },
-    {
-      id: 3,
-      type: "giveaway",
-      title: "AirPods Pro 2 Giveaway",
-      image: "https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7?w=600&h=400&fit=crop",
-      prize: "$299",
-      entries: 12340,
-      winner: "@musiclover",
-      endDate: "Jan 25, 2026",
-      status: "completed"
-    }
-  ];
-
-  // Most popular posts
-  const popularPosts = [
-    {
-      id: 1,
-      type: "giveaway",
-      title: "Tesla Cybertruck Giveaway",
-      image: "https://images.unsplash.com/photo-1617788138017-80ad40651399?w=600&h=400&fit=crop",
-      prize: "$80,000",
-      entries: 156789,
-      views: 2340000,
-      engagement: "94%",
-      status: "completed"
-    },
-    {
-      id: 2,
-      type: "raffle",
-      title: "$100K Cash Raffle",
-      image: "https://images.unsplash.com/photo-1634704784915-aacf363b021f?w=600&h=400&fit=crop",
-      prize: "$100,000",
-      tickets: 10000,
-      views: 1850000,
-      engagement: "91%",
-      status: "completed"
-    },
-    {
-      id: 3,
-      type: "giveaway",
-      title: "Dream Gaming Setup",
-      image: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=600&h=400&fit=crop",
-      prize: "$15,000",
-      entries: 98456,
-      views: 1200000,
-      engagement: "88%",
-      status: "completed"
-    }
-  ];
-
-  // Recent winners
-  const recentWinners = [
-    {
-      id: 1,
-      username: "luckyuser123",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-      prize: "Gaming PC RTX 4090",
-      value: "$3,500",
-      date: "Feb 1, 2026",
-      verified: true
-    },
-    {
-      id: 2,
-      username: "teslaowner2026",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-      prize: "Tesla Model 3",
-      value: "$45,000",
-      date: "Jan 28, 2026",
-      verified: true
-    },
-    {
-      id: 3,
-      username: "musiclover",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-      prize: "AirPods Pro 2",
-      value: "$299",
-      date: "Jan 25, 2026",
-      verified: true
-    },
-    {
-      id: 4,
-      username: "gamergirl2024",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
-      prize: "PlayStation 5 Bundle",
-      value: "$650",
-      date: "Jan 20, 2026",
-      verified: false
-    }
-  ];
-
-  // Supported fundraises
-  const supportedFundraises = [
-    {
-      id: 1,
-      title: "Clean Water for Africa",
-      image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600&h=400&fit=crop",
-      raised: "45,000",
-      goal: "100,000",
-      donors: 1234,
-      contribution: "5,000",
-      date: "Jan 2026"
-    },
-    {
-      id: 2,
-      title: "Animal Shelter Support",
-      image: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=600&h=400&fit=crop",
-      raised: "12,500",
-      goal: "25,000",
-      donors: 543,
-      contribution: "2,500",
-      date: "Dec 2025"
-    },
-    {
-      id: 3,
-      title: "Medical Aid for Children",
-      image: "https://images.unsplash.com/photo-1559757175-5700dde675bc?w=600&h=400&fit=crop",
-      raised: "67,000",
-      goal: "80,000",
-      donors: 2156,
-      contribution: "3,000",
-      date: "Nov 2025"
-    }
-  ];
 
   return (
     <>
@@ -1523,12 +1692,12 @@ const ONAGUIProfilePage = () => {
                   </div>
                   <div className="card-stats-overlay">
                     <div className="overlay-stat">
-                      <Eye size={14} />
-                      <span>{(post.views / 1000000).toFixed(1)}M</span>
+                      <DollarSign size={14} />
+                      <span>{post.subs.toLocaleString()} subs</span>
                     </div>
                     <div className="overlay-stat">
-                      <MessageCircle size={14} />
-                      <span>{post.engagement}</span>
+                      <Users size={14} />
+                      <span>{post.entries ? `${post.entries.toLocaleString()} entries` : '0 entries'}</span>
                     </div>
                   </div>
                 </div>
@@ -1584,7 +1753,9 @@ const ONAGUIProfilePage = () => {
         {activeSection === 'fundraise' && (
           <div className="content-grid">
             {supportedFundraises.map(fundraise => {
-              const progress = (parseFloat(fundraise.raised.replace(/,/g, '')) / parseFloat(fundraise.goal.replace(/,/g, ''))) * 100;
+              const progress = fundraise.goal > 0
+                ? Math.min((fundraise.raised / fundraise.goal) * 100, 100)
+                : 0;
               return (
                 <div key={fundraise.id} className="fundraise-card">
                   <div className="card-image">
@@ -1594,8 +1765,8 @@ const ONAGUIProfilePage = () => {
                     <h3 className="card-title">{fundraise.title}</h3>
                     <div className="progress-header">
                       <div>
-                        <div className="raised-amount">${fundraise.raised}</div>
-                        <div className="goal-amount">of ${fundraise.goal} goal</div>
+                        <div className="raised-amount">${fundraise.raised.toLocaleString()}</div>
+                        <div className="goal-amount">of ${fundraise.goal.toLocaleString()} goal</div>
                       </div>
                     </div>
                     <div className="progress-bar-container">
@@ -1614,7 +1785,7 @@ const ONAGUIProfilePage = () => {
                     <div style={{ marginTop: '16px' }}>
                       <div className="contribution-badge">
                         <Heart size={16} />
-                        <span>Contributed ${fundraise.contribution}</span>
+                        <span>Contributed ${fundraise.contribution.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -1659,7 +1830,7 @@ const ONAGUIProfilePage = () => {
                 </div>
               ) : (
                 filteredFollowers.map((person) => (
-                  <a key={person.id} href={`/profiles?id=${person.id}`} className="community-card">
+                  <a key={person.id} href={`/profiles/${person.id}`} className="community-card">
                     <img
                       src={person.avatar_url || profile.avatar}
                       alt={person.full_name || person.username || 'Profile'}
@@ -1718,7 +1889,7 @@ const ONAGUIProfilePage = () => {
                 </div>
               ) : (
                 filteredFollowing.map((person) => (
-                  <a key={person.id} href={`/profiles?id=${person.id}`} className="community-card">
+                  <a key={person.id} href={`/profiles/${person.id}`} className="community-card">
                     <img
                       src={person.avatar_url || profile.avatar}
                       alt={person.full_name || person.username || 'Profile'}

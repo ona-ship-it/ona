@@ -45,6 +45,7 @@
     "onagui/**/*",
     "onagui-*/**/*",
     "supabase/**/*",
-    "temp-restore/**/*"
+    "temp-restore/**/*",
+    "tests/e2e/**/*"
   ]
 }

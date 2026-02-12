@@ -57,6 +57,19 @@ type MarketplaceListing = {
   created_at: string | null
 }
 
+type Fundraiser = {
+  id: string
+  title: string
+  cover_image: string | null
+  category: string | null
+  goal_amount: number
+  raised_amount: number
+  currency: string
+  total_donors: number
+  status: string
+  created_at: string | null
+}
+
 type TopProfile = {
   id: string
   username: string | null
@@ -75,6 +88,7 @@ export default function HomePage() {
   const [giveaways, setGiveaways] = useState<Giveaway[]>([])
   const [raffles, setRaffles] = useState<Raffle[]>([])
   const [marketplaceListings, setMarketplaceListings] = useState<MarketplaceListing[]>([])
+  const [fundraisers, setFundraisers] = useState<Fundraiser[]>([])
   const [topProfiles, setTopProfiles] = useState<TopProfile[]>([])
 
   useEffect(() => {
@@ -184,6 +198,17 @@ export default function HomePage() {
         }
       })
 
+      const { data: fundraiserData, error: fundraiserError } = await supabase
+        .from('fundraisers')
+        .select('id, title, cover_image, category, goal_amount, raised_amount, currency, total_donors, status, created_at')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(4)
+
+      if (fundraiserError) {
+        console.error('Error fetching fundraisers:', fundraiserError)
+      }
+
       const { data: followerRows, error: followerError } = await supabase
         .from('profile_followers')
         .select('profile_id')
@@ -279,6 +304,7 @@ export default function HomePage() {
       setGiveaways(enrichedGiveaways)
       setRaffles(rafflesData || [])
       setMarketplaceListings(enrichedMarketplace)
+      setFundraisers(fundraiserData || [])
       setTopProfiles(rankedProfiles)
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -286,99 +312,6 @@ export default function HomePage() {
       setLoading(false)
     }
   }
-
-  // Mock data for marketplace (TODO: Remove when real data is ready)
-  const mockMarketplace = [
-    {
-      id: '1',
-      title: 'iPhone 15 Pro Max',
-      price: 1299,
-      image: 'https://images.unsplash.com/photo-1696446702403-69e5f8ab97ec?w=400',
-      category: 'Electronics',
-      seller: 'TechStore'
-    },
-    {
-      id: '2',
-      title: 'Sony PS5 Console',
-      price: 499,
-      image: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400',
-      category: 'Gaming',
-      seller: 'GameHub'
-    },
-    {
-      id: '3',
-      title: 'MacBook Pro M3',
-      price: 2499,
-      image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400',
-      category: 'Computers',
-      seller: 'AppleStore'
-    },
-    {
-      id: '4',
-      title: 'AirPods Pro 2',
-      price: 249,
-      image: 'https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7?w=400',
-      category: 'Audio',
-      seller: 'AudioTech'
-    }
-  ]
-
-  const marketplaceItems: MarketplaceListing[] = marketplaceListings.length > 0
-    ? marketplaceListings
-    : mockMarketplace.map((item) => ({
-        id: item.id,
-        title: item.title,
-        description: null,
-        price: item.price,
-        currency: 'USD',
-        category: item.category,
-        image_url: item.image,
-        seller_id: null,
-        seller_name: item.seller,
-        views: 0,
-        sales: 0,
-        created_at: null,
-      }))
-
-  // Mock data for fundraise (TODO: Remove when real data is ready)
-  const mockFundraise = [
-    {
-      id: '1',
-      title: 'Help Build Clean Water Wells in Africa',
-      raised: 45000,
-      goal: 100000,
-      image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=400',
-      category: 'Charity',
-      donors: 1234
-    },
-    {
-      id: '2',
-      title: 'Support Local Animal Shelter',
-      raised: 12500,
-      goal: 25000,
-      image: 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=400',
-      category: 'Animals',
-      donors: 543
-    },
-    {
-      id: '3',
-      title: 'Medical Treatment for Children',
-      raised: 67000,
-      goal: 80000,
-      image: 'https://images.unsplash.com/photo-1559757175-5700dde675bc?w=400',
-      category: 'Medical',
-      donors: 2156
-    },
-    {
-      id: '4',
-      title: 'Education Fund for Underprivileged Kids',
-      raised: 33000,
-      goal: 50000,
-      image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400',
-      category: 'Education',
-      donors: 876
-    }
-  ]
 
   const getProgressPercentage = (sold: number, total: number) => {
     return Math.min((sold / total) * 100, 100)
@@ -732,82 +665,88 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {marketplaceItems.map((item) => (
-              <Link
-                key={item.id}
-                href={`/marketplace/${item.id}`}
-                className="bc-game-card group"
-                onClick={() => trackEvent('card_click', 'marketplace', item.id)}
-              >
-                {/* Image */}
-                <div className="bc-card-image-wrapper">
-                  <Image
-                    src={item.image_url || raffleFallbackImage}
-                    alt={item.title}
-                    fill
-                    className="bc-card-image"
-                  />
+            {marketplaceListings.length === 0 ? (
+              <div className="card p-6 text-center" style={{ background: 'var(--secondary-bg)', color: 'var(--text-secondary)' }}>
+                No marketplace listings yet.
+              </div>
+            ) : (
+              marketplaceListings.map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/marketplace/${item.id}`}
+                  className="bc-game-card group"
+                  onClick={() => trackEvent('card_click', 'marketplace', item.id)}
+                >
+                  {/* Image */}
+                  <div className="bc-card-image-wrapper">
+                    <Image
+                      src={item.image_url || raffleFallbackImage}
+                      alt={item.title}
+                      fill
+                      className="bc-card-image"
+                    />
 
-                  <div className="bc-image-overlay"></div>
+                    <div className="bc-image-overlay"></div>
 
-                  {item.price > 1000 && (
-                    <div className="bc-trending-badge">
-                      <TrendingUp size={14} />
-                      <span>TRENDING</span>
+                    {item.price > 1000 && (
+                      <div className="bc-trending-badge">
+                        <TrendingUp size={14} />
+                        <span>TRENDING</span>
+                      </div>
+                    )}
+
+                    <div className="bc-verified-icon">
+                      <CheckCircle size={20} fill="#00d4d4" stroke="#0f1419" />
                     </div>
-                  )}
 
-                  <div className="bc-verified-icon">
-                    <CheckCircle size={20} fill="#00d4d4" stroke="#0f1419" />
+                    <div className="bc-condition-tag">MARKETPLACE</div>
                   </div>
 
-                  <div className="bc-condition-tag">MARKETPLACE</div>
-                </div>
-
-                {/* Content */}
-                <div className="bc-card-body">
-                  <div className="bc-rating-row">
-                    <div className="bc-rating-display">
-                      <Star size={12} fill="#ff8800" stroke="none" />
-                      <span className="rating-value">
-                        {getRatingData(item.id).rating}
-                      </span>
-                      <span className="rating-count">
-                        ({getRatingData(item.id).count})
-                      </span>
+                  {/* Content */}
+                  <div className="bc-card-body">
+                    <div className="bc-rating-row">
+                      <div className="bc-rating-display">
+                        <Star size={12} fill="#ff8800" stroke="none" />
+                        <span className="rating-value">
+                          {getRatingData(item.id).rating}
+                        </span>
+                        <span className="rating-count">
+                          ({getRatingData(item.id).count})
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="bc-highlight">{getMarketplaceHighlight(item)}</div>
+                    <div className="bc-highlight">{getMarketplaceHighlight(item)}</div>
 
-                  <h3 className="bc-card-title">{item.title}</h3>
+                    <h3 className="bc-card-title">{item.title}</h3>
 
-                  <p className="bc-card-subtitle">
-                    {item.category || 'Marketplace'} listing by {item.seller_name || 'Onagui Seller'}
-                  </p>
+                    <p className="bc-card-subtitle">
+                      {item.category || 'Marketplace'} listing by {item.seller_name || 'Onagui Seller'}
+                    </p>
 
-                  <div className="bc-host-info">
-                    <span>by</span>
-                    <span className="bc-host-name">{item.seller_name || 'Onagui Seller'}</span>
-                  </div>
-
-                  <div className="bc-price-section">
-                    <div className="bc-price-display">
-                      <span className="bc-currency">$</span>
-                      <span className="bc-price-value">
-                        {item.currency === 'USD' ? item.price.toLocaleString() : `${item.price}`}
-                      </span>
+                    <div className="bc-host-info">
+                      <span>by</span>
+                      <span className="bc-host-name">{item.seller_name || 'Onagui Seller'}</span>
                     </div>
-                  </div>
 
-                  <button className="bc-action-button">
-                    <ShoppingCart size={16} />
-                    <span>BUY NOW</span>
-                    <div className="bc-btn-glow"></div>
-                  </button>
-                </div>
-              </Link>
-            ))}
+                    <div className="bc-price-section">
+                      <div className="bc-price-display">
+                        <span className="bc-currency">$</span>
+                        <span className="bc-price-value">
+                          {item.currency === 'USD' ? item.price.toLocaleString() : `${item.price}`}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button className="bc-action-button">
+                      <ShoppingCart size={16} />
+                      <span>BUY NOW</span>
+                      <div className="bc-btn-glow"></div>
+                    </button>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         </div>
 
@@ -827,71 +766,88 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {mockFundraise.map((campaign) => (
-              <Link
-                key={campaign.id}
-                href={`/fundraise/${campaign.id}`}
-                className="card group cursor-pointer"
-              >
-                {/* Image */}
-                <div className="relative h-40 overflow-hidden rounded-t-lg" style={{ background: 'var(--tertiary-bg)' }}>
-                  <Image src={campaign.image} alt={campaign.title} fill className="object-cover" />
-                  
-                  {/* Category Badge */}
-                  <div 
-                    className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold"
-                    style={{ background: 'rgba(11, 14, 17, 0.8)', color: 'var(--accent-green)' }}
+            {fundraisers.length === 0 ? (
+              <div className="card p-6 text-center" style={{ background: 'var(--secondary-bg)', color: 'var(--text-secondary)' }}>
+                No fundraisers yet.
+              </div>
+            ) : (
+              fundraisers.map((campaign) => {
+                const progress = campaign.goal_amount > 0
+                  ? Math.min((campaign.raised_amount / campaign.goal_amount) * 100, 100)
+                  : 0
+                const currency = campaign.currency === 'USD' ? '$' : campaign.currency
+                return (
+                  <Link
+                    key={campaign.id}
+                    href={`/fundraise/${campaign.id}`}
+                    className="card group cursor-pointer"
                   >
-                    {campaign.category}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-4">
-                  <h3 className="font-semibold mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity text-sm" style={{ color: 'var(--text-primary)' }}>
-                    {campaign.title}
-                  </h3>
-
-                  {/* Raised Amount */}
-                  <div className="mb-3">
-                    <div className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      Raised
-                    </div>
-                    <div className="text-lg font-bold" style={{ color: 'var(--accent-green)' }}>
-                      ${campaign.raised.toLocaleString()}
-                    </div>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="mb-3">
-                    <div className="flex justify-between text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      <span>{Math.round((campaign.raised / campaign.goal) * 100)}%</span>
-                      <span>{campaign.donors} donors</span>
-                    </div>
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--tertiary-bg)' }}>
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${(campaign.raised / campaign.goal) * 100}%`,
-                          background: 'var(--accent-green)'
-                        }}
+                    {/* Image */}
+                    <div className="relative h-40 overflow-hidden rounded-t-lg" style={{ background: 'var(--tertiary-bg)' }}>
+                      <Image
+                        src={campaign.cover_image || raffleFallbackImage}
+                        alt={campaign.title}
+                        fill
+                        className="object-cover"
                       />
+                      
+                      {/* Category Badge */}
+                      <div 
+                        className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold"
+                        style={{ background: 'rgba(11, 14, 17, 0.8)', color: 'var(--accent-green)' }}
+                      >
+                        {campaign.category || 'Fundraise'}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Donate Button */}
-                  <button 
-                    className="w-full py-2.5 rounded-md text-sm font-semibold transition-all"
-                    style={{ 
-                      background: 'var(--accent-green)',
-                      color: 'var(--text-primary)'
-                    }}
-                  >
-                    Donate Now
-                  </button>
-                </div>
-              </Link>
-            ))}
+                    {/* Content */}
+                    <div className="p-4">
+                      <h3 className="font-semibold mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity text-sm" style={{ color: 'var(--text-primary)' }}>
+                        {campaign.title}
+                      </h3>
+
+                      {/* Raised Amount */}
+                      <div className="mb-3">
+                        <div className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
+                          Raised
+                        </div>
+                        <div className="text-lg font-bold" style={{ color: 'var(--accent-green)' }}>
+                          {currency}{campaign.raised_amount.toLocaleString()}
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="mb-3">
+                        <div className="flex justify-between text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
+                          <span>{Math.round(progress)}%</span>
+                          <span>{campaign.total_donors} donors</span>
+                        </div>
+                        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--tertiary-bg)' }}>
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${progress}%`,
+                              background: 'var(--accent-green)'
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Donate Button */}
+                      <button 
+                        className="w-full py-2.5 rounded-md text-sm font-semibold transition-all"
+                        style={{ 
+                          background: 'var(--accent-green)',
+                          color: 'var(--text-primary)'
+                        }}
+                      >
+                        Donate Now
+                      </button>
+                    </div>
+                  </Link>
+                )
+              })
+            )}
           </div>
         </div>
 

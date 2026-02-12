@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { isAdmin } from '@/lib/admin'
-import type { Database } from '@/types/supabase'
 
 export async function GET(request: NextRequest) {
   try {
     const rangeParam = request.nextUrl.searchParams.get('range')
     const rangeDays = rangeParam === '30' ? 30 : 7
     const cookieStore = await cookies()
-    const supabase = createServerClient<Database>(
+    const supabase = createServerClient<any>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -44,7 +43,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { createClient } = await import('@supabase/supabase-js')
-    const service = createClient<Database>(url, key)
+    const service = createClient<any>(url, key)
 
     const { data: events, error: eventsError } = await service
       .from('participation_events')
@@ -59,7 +58,7 @@ export async function GET(request: NextRequest) {
     const now = Date.now()
     const rangeStart = now - rangeDays * 24 * 60 * 60 * 1000
 
-    const recentEvents = (events || []).map((event) => ({
+    const recentEvents = (events || []).map((event: any) => ({
       ...event,
       created_at: event.created_at || null,
     }))
