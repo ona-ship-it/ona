@@ -9,3 +9,7 @@
 [submodule "onagui-clean"]
 	path = onagui-clean
 	url = https://github.com/ona-ship-it/ona/clean
+
+[submodule "onagui-new"]
+	path = onagui-new
+	url = https://github.com/ona-ship-it/ona/new-onagui.git
