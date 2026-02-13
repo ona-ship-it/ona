@@ -43,9 +43,6 @@ export default function Header() {
     }}>
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-  useEffect(() => {
-    setShowMobileMenu(false)
-  }, [pathname])
           {/* Logo - Always clickable to home */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <h1 className="text-2xl font-bold" style={{ color: 'var(--accent-blue)' }}>
@@ -378,6 +375,7 @@ export default function Header() {
             style={{ color: 'var(--text-primary)', border: '1px solid var(--border)' }}
             onClick={() => setShowMobileMenu((prev) => !prev)}
             aria-label="Toggle navigation"
+            aria-expanded={showMobileMenu}
           >
             <span className="text-lg">{showMobileMenu ? '✕' : '☰'}</span>
           </button>
@@ -394,7 +392,7 @@ export default function Header() {
               </Link>
               <Link href="/raffles" className="text-sm font-medium" onClick={() => setShowMobileMenu(false)}>
                 Raffles
-            <span className="text-lg">{showMobileMenu ? '✕' : '☰'}</span>
+              </Link>
               <Link href="/fundraise" className="text-sm font-medium" onClick={() => setShowMobileMenu(false)}>
                 Fundraise
               </Link>
