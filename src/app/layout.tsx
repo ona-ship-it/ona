@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import '@/styles/theme.css'
@@ -7,6 +8,7 @@ import '@/styles/overrides.css'
 import './globals.css'
 import { WalletProvider } from '@/hooks/useWallet'
 import { ThemeProvider } from '@/components/ThemeContext'
+import BottomNav from '@/components/BottomNav';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,6 +30,7 @@ export default function RootLayout({
             {children}
           </WalletProvider>
         </ThemeProvider>
+        <BottomNav />
       </body>
     </html>
   )
