@@ -1,3 +1,4 @@
+'use client';
 // src/app/marketplace/page.tsx
 import Link from 'next/link';
 
