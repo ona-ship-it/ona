@@ -9,6 +9,7 @@ import ProfilePicture from '@/components/ProfilePicture'
 export default function Header() {
   const [showCreateMenu, setShowCreateMenu] = useState(false)
   const [showProfilesMenu, setShowProfilesMenu] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const pathname = usePathname()
   const supabase = createClient()
@@ -24,6 +25,10 @@ export default function Header() {
     return () => subscription.unsubscribe()
   }, [])
 
+  useEffect(() => {
+    setShowMobileMenu(false)
+  }, [pathname])
+
   async function checkAuth() {
     const { data: { session } } = await supabase.auth.getSession()
     setIsLoggedIn(!!session)
@@ -38,6 +43,9 @@ export default function Header() {
     }}>
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
+  useEffect(() => {
+    setShowMobileMenu(false)
+  }, [pathname])
           {/* Logo - Always clickable to home */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <h1 className="text-2xl font-bold" style={{ color: 'var(--accent-blue)' }}>
@@ -46,7 +54,7 @@ export default function Header() {
           </Link>
 
           {/* Navigation */}
-          <nav className="flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-6">
             <Link 
               href="/" 
               className="text-sm font-medium transition-colors"
@@ -249,7 +257,7 @@ export default function Header() {
           </nav>
 
           {/* Right Side */}
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             {/* Sign Up Button - Only show when NOT logged in */}
             {!isLoggedIn && (
               <Link href="/signup">
@@ -362,7 +370,71 @@ export default function Header() {
               </Link>
             )}
           </div>
+
+          {/* Mobile Menu Toggle */}
+          <button
+            type="button"
+            className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-md"
+            style={{ color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+            onClick={() => setShowMobileMenu((prev) => !prev)}
+            aria-label="Toggle navigation"
+          >
+            <span className="text-lg">{showMobileMenu ? '✕' : '☰'}</span>
+          </button>
         </div>
+
+        {showMobileMenu && (
+          <div className="md:hidden mt-4 rounded-lg border" style={{ borderColor: 'var(--border)', background: 'var(--secondary-bg)' }}>
+            <div className="flex flex-col px-4 py-3 gap-3">
+              <Link href="/" className="text-sm font-medium" onClick={() => setShowMobileMenu(false)}>
+                Home
+              </Link>
+              <Link href="/giveaways" className="text-sm font-medium" onClick={() => setShowMobileMenu(false)}>
+                Giveaways
+              </Link>
+              <Link href="/raffles" className="text-sm font-medium" onClick={() => setShowMobileMenu(false)}>
+                Raffles
+            <span className="text-lg">{showMobileMenu ? '✕' : '☰'}</span>
+              <Link href="/fundraise" className="text-sm font-medium" onClick={() => setShowMobileMenu(false)}>
+                Fundraise
+              </Link>
+              <Link href="/marketplace" className="text-sm font-medium" onClick={() => setShowMobileMenu(false)}>
+                Marketplace
+              </Link>
+              <Link href="/profiles" className="text-sm font-medium" onClick={() => setShowMobileMenu(false)}>
+                Profiles
+              </Link>
+
+              <div className="h-px" style={{ background: 'var(--border)' }} />
+
+              {!isLoggedIn && (
+                <Link href="/signup" onClick={() => setShowMobileMenu(false)}>
+                  <button
+                    className="w-full px-4 py-2.5 text-sm font-semibold rounded-md"
+                    style={{ background: 'var(--accent-blue)', color: 'var(--text-primary)' }}
+                  >
+                    Sign Up
+                  </button>
+                </Link>
+              )}
+
+              <Link href="/create" onClick={() => setShowMobileMenu(false)}>
+                <button
+                  className="w-full px-4 py-2.5 text-sm font-semibold rounded-md"
+                  style={{ background: 'var(--accent-green)', color: 'var(--text-primary)' }}
+                >
+                  + Create
+                </button>
+              </Link>
+
+              {isLoggedIn && (
+                <Link href="/dashboard" onClick={() => setShowMobileMenu(false)} className="text-sm font-medium">
+                  Dashboard
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </header>
   )
