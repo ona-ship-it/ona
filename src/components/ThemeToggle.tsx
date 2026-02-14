@@ -3,9 +3,22 @@
 
 import { useTheme } from '@/components/ThemeContext';
 import { Sun, Moon } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function ThemeToggle() {
+  const [mounted, setMounted] = useState(false);
+  
+  // Only render after mounting to avoid SSR issues
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { theme, toggleTheme } = useTheme();
+
+  // Don't render anything until mounted on client
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <>
