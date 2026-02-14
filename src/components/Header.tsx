@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import ProfilePicture from '@/components/ProfilePicture'
+import ThemeToggle from './ThemeToggle'
 
 export default function Header() {
   const [showCreateMenu, setShowCreateMenu] = useState(false)
@@ -255,6 +256,9 @@ export default function Header() {
 
           {/* Right Side */}
           <div className="hidden md:flex items-center gap-4">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+            
             {/* Sign Up Button - Only show when NOT logged in */}
             {!isLoggedIn && (
               <Link href="/signup">
@@ -395,6 +399,14 @@ export default function Header() {
             }}
           >
             <div className="flex flex-col py-2">
+              {/* Theme Toggle - Mobile */}
+              <div className="px-4 py-3 flex items-center justify-between">
+                <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Theme</span>
+                <ThemeToggle />
+              </div>
+              
+              <div className="my-2 h-px" style={{ background: 'rgba(148, 163, 184, 0.2)' }} />
+
               {[
                 { href: '/', label: 'Home' },
                 { href: '/giveaways', label: 'Giveaways' },

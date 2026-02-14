@@ -85,14 +85,14 @@ export default function BottomNav() {
           left: 0;
           right: 0;
           z-index: 1000;
-          background: rgba(10, 25, 41, 0.95);
+          background: var(--bg-card);
           backdrop-filter: blur(20px) saturate(180%);
           -webkit-backdrop-filter: blur(20px) saturate(180%);
-          border-top: 0.5px solid rgba(0, 212, 212, 0.1);
+          border-top: 1px solid var(--border-primary);
           display: flex;
           justify-content: space-around;
           padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-          box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+          box-shadow: var(--shadow-md);
         }
 
         /* Nav Item */
@@ -102,7 +102,7 @@ export default function BottomNav() {
           align-items: center;
           gap: 4px;
           padding: 8px 16px;
-          color: rgba(148, 163, 184, 0.8);
+          color: var(--text-muted);
           text-decoration: none;
           border-radius: 12px;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -125,7 +125,7 @@ export default function BottomNav() {
 
         /* Hover State */
         .nav-item:hover {
-          color: rgba(0, 212, 212, 0.8);
+          color: var(--accent-primary);
           background: rgba(0, 212, 212, 0.05);
         }
 
@@ -135,7 +135,7 @@ export default function BottomNav() {
 
         /* Active State - iOS Style */
         .nav-item.active {
-          color: #00D4D4;
+          color: var(--accent-primary);
           background: rgba(0, 212, 212, 0.1);
         }
 
