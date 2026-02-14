@@ -78,21 +78,21 @@ export default function BottomNav() {
       </nav>
 
       <style jsx>{`
-        /* Bottom Navigation */
+        /* Bottom Navigation - Always Dark Theme */
         .bottom-nav {
           position: fixed;
           bottom: 0;
           left: 0;
           right: 0;
           z-index: 1000;
-          background: var(--bg-card);
+          background: rgba(10, 25, 41, 0.95);
           backdrop-filter: blur(20px) saturate(180%);
           -webkit-backdrop-filter: blur(20px) saturate(180%);
-          border-top: 1px solid var(--border-primary);
+          border-top: 1px solid rgba(0, 212, 212, 0.1);
           display: flex;
           justify-content: space-around;
           padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-          box-shadow: var(--shadow-md);
+          box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
         }
 
         /* Nav Item */
@@ -102,7 +102,7 @@ export default function BottomNav() {
           align-items: center;
           gap: 4px;
           padding: 8px 16px;
-          color: var(--text-muted);
+          color: rgba(148, 163, 184, 0.8);
           text-decoration: none;
           border-radius: 12px;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -125,7 +125,7 @@ export default function BottomNav() {
 
         /* Hover State */
         .nav-item:hover {
-          color: var(--accent-primary);
+          color: rgba(0, 212, 212, 0.8);
           background: rgba(0, 212, 212, 0.05);
         }
 
@@ -135,7 +135,7 @@ export default function BottomNav() {
 
         /* Active State - iOS Style */
         .nav-item.active {
-          color: var(--accent-primary);
+          color: #00D4D4;
           background: rgba(0, 212, 212, 0.1);
         }
 
