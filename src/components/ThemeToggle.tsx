@@ -3,21 +3,20 @@
 
 import { useTheme } from '@/components/ThemeContext';
 import { Sun, Moon } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  
-  // Only render after mounting to avoid SSR issues
+
+  // Only render after mounting to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const { theme, toggleTheme } = useTheme();
-
   // Don't render anything until mounted on client
   if (!mounted) {
-    return null;
+    return <div style={{ width: '60px', height: '32px' }} />;
   }
 
   return (

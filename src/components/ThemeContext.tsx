@@ -44,11 +44,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
-  // Prevent flash of wrong theme
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
+  // Always provide the context, even before mounting
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
@@ -59,10 +55,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    // During SSR or outside provider, return safe defaults
-    if (typeof window === 'undefined') {
-      return { theme: 'dark' as const, toggleTheme: () => {} };
-    }
     throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;
