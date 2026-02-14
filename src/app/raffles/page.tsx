@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 import Image from 'next/image'
 import Header from '@/components/Header'
+import LikeSaveButtons from '@/components/LikeSaveButtons'
 
 type Raffle = {
   id: string
@@ -268,6 +269,21 @@ export default function RafflesPage() {
                           )}
                         </div>
                       </div>
+                    </div>
+
+                    <div
+                      className="mb-4"
+                      onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                      }}
+                    >
+                      <LikeSaveButtons
+                        postId={raffle.id}
+                        postType="raffle"
+                        showCount={false}
+                        size="sm"
+                      />
                     </div>
 
                     {/* Title */}

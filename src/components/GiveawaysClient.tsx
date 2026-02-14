@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { TrendingUp, CheckCircle, Star, ShoppingCart } from 'lucide-react';
+import LikeSaveButtons from '@/components/LikeSaveButtons';
 
 interface Giveaway {
   id: string;
@@ -163,6 +164,12 @@ export default function GiveawaysClient() {
                     ({Math.floor(50 + Math.random() * 200)})
                   </span>
                 </div>
+                <LikeSaveButtons
+                  postId={giveaway.id}
+                  postType="giveaway"
+                  showCount={false}
+                  size="sm"
+                />
               </div>
               
               {/* Title */}

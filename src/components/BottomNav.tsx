@@ -3,12 +3,18 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Home, Gift, Ticket, Heart, User } from 'lucide-react';
+import { Home, Gift, Heart, User } from 'lucide-react';
 
 export default function BottomNav() {
   const pathname = usePathname();
   
-  const navItems = [
+  const navItems: Array<{
+    href: string;
+    label: string;
+    active: boolean;
+    icon: typeof Home | 'plus';
+    special?: boolean;
+  }> = [
     {
       href: '/',
       icon: Home,
@@ -22,10 +28,11 @@ export default function BottomNav() {
       active: pathname === '/giveaways' || pathname.startsWith('/giveaways/')
     },
     {
-      href: '/raffles',
-      icon: Ticket,
-      label: 'Raffles',
-      active: pathname === '/raffles' || pathname.startsWith('/raffles/')
+      href: '/create',
+      icon: 'plus',
+      label: 'Create',
+      active: pathname === '/create' || pathname.startsWith('/create/'),
+      special: true
     },
     {
       href: '/saved',
@@ -46,14 +53,24 @@ export default function BottomNav() {
       {/* Bottom Navigation - Mobile Only */}
       <nav className="bottom-nav">
         {navItems.map((item) => {
-          const Icon = item.icon;
+          const isSpecial = item.special;
+          const Icon = item.icon === 'plus' ? null : item.icon;
+
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`nav-item ${item.active ? 'active' : ''}`}
+              className={`nav-item ${item.active ? 'active' : ''} ${isSpecial ? 'create-btn' : ''}`}
             >
-              <Icon size={24} strokeWidth={2} />
+              {isSpecial ? (
+                <div className="create-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                  </svg>
+                </div>
+              ) : (
+                Icon && <Icon size={24} strokeWidth={2} />
+              )}
               <span className="nav-label">{item.label}</span>
             </Link>
           );
@@ -146,6 +163,56 @@ export default function BottomNav() {
         .nav-item:active {
           transform: scale(0.95);
           background: rgba(0, 212, 212, 0.15);
+        }
+
+        /* Create Button Special Style */
+        .nav-item.create-btn {
+          position: relative;
+        }
+
+        .nav-item.create-btn .create-icon {
+          width: 40px;
+          height: 40px;
+          background: linear-gradient(135deg, #00D4D4 0%, #10b981 100%);
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #0a1929;
+          box-shadow: 0 4px 15px rgba(0, 212, 212, 0.4);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+        }
+
+        .nav-item.create-btn:hover .create-icon {
+          transform: scale(1.1);
+          box-shadow: 0 6px 20px rgba(0, 212, 212, 0.6);
+        }
+
+        .nav-item.create-btn.active .create-icon {
+          transform: scale(1.05);
+          box-shadow: 0 6px 25px rgba(0, 212, 212, 0.8);
+        }
+
+        .nav-item.create-btn .nav-label {
+          color: #00D4D4;
+          font-weight: 700;
+        }
+
+        /* Create button pulse animation */
+        .nav-item.create-btn .create-icon::before {
+          content: '';
+          position: absolute;
+          inset: -4px;
+          background: linear-gradient(135deg, #00D4D4 0%, #10b981 100%);
+          border-radius: 14px;
+          opacity: 0;
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 0; transform: scale(1); }
+          50% { opacity: 0.3; transform: scale(1.1); }
         }
 
         /* Hide on Desktop */

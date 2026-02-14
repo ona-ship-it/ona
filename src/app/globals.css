@@ -73,21 +73,51 @@ button:not(.btn):hover,
   cursor: pointer;
 }
 
-/* View More links (homepage sections) */
-section a[href]:not([class*="card"]):not([class*="nav"]):not([class*="btn"]) {
+/* ============================================================================
+   VIEW MORE LINKS - SUPER VISIBLE EN DARK MODE
+   ============================================================================ */
+
+/* Force all View More links to be bright cyan */
+a:not([class*="nav"]):not([class*="btn"]):not([class*="card"]) {
   color: #00D4D4 !important;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  text-shadow: 0 0 10px rgba(0, 212, 212, 0.3) !important;
 }
 
-section a[href]:hover:not([class*="card"]):not([class*="nav"]):not([class*="btn"]) {
+a:not([class*="nav"]):not([class*="btn"]):not([class*="card"]):hover {
+  color: #00e5e5 !important;
+  text-shadow: 0 0 20px rgba(0, 212, 212, 0.6) !important;
+}
+
+/* Homepage section links */
+section h2 + a,
+section .flex a:not([class]) {
+  color: #00D4D4 !important;
+  font-weight: 700 !important;
+  font-size: 1.125rem !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  text-shadow: 0 0 15px rgba(0, 212, 212, 0.4) !important;
+  transition: all 0.3s ease !important;
+}
+
+section h2 + a:hover,
+section .flex a:not([class]):hover {
   color: #10b981 !important;
+  text-shadow: 0 0 25px rgba(16, 185, 129, 0.6) !important;
+  gap: 0.75rem !important;
 }
 
+/* Mobile - extra visibility */
 @media (max-width: 768px) {
-  section a[href]:not([class*="card"]):not([class*="nav"]) {
-    font-size: 1rem !important;
+  section h2 + a,
+  section .flex a:not([class]) {
+    font-size: 1.25rem !important;
+    font-weight: 800 !important;
+    padding: 0.5rem 0 !important;
   }
 }
 
