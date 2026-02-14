@@ -73,6 +73,24 @@ button:not(.btn):hover,
   cursor: pointer;
 }
 
+/* View More links (homepage sections) */
+section a[href]:not([class*="card"]):not([class*="nav"]):not([class*="btn"]) {
+  color: #00D4D4 !important;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+section a[href]:hover:not([class*="card"]):not([class*="nav"]):not([class*="btn"]) {
+  color: #10b981 !important;
+}
+
+@media (max-width: 768px) {
+  section a[href]:not([class*="card"]):not([class*="nav"]) {
+    font-size: 1rem !important;
+  }
+}
+
 /* ============================================
    HEADER HOVER EFFECTS
    All clickable text turns cyan on hover

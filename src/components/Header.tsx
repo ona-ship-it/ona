@@ -41,7 +41,7 @@ export default function Header() {
       background: 'var(--bg-secondary)',
       borderColor: 'var(--border)'
     }}>
-      <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="max-w-7xl mx-auto px-4 py-4 relative">
         <div className="flex items-center justify-between">
           {/* Logo - Always clickable to home */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
@@ -371,8 +371,12 @@ export default function Header() {
           {/* Mobile Menu Toggle */}
           <button
             type="button"
-            className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-md"
-            style={{ color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+            className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-full"
+            style={{ 
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border)',
+              background: 'rgba(10, 25, 41, 0.6)'
+            }}
             onClick={() => setShowMobileMenu((prev) => !prev)}
             aria-label="Toggle navigation"
             aria-expanded={showMobileMenu}
@@ -382,54 +386,67 @@ export default function Header() {
         </div>
 
         {showMobileMenu && (
-          <div className="md:hidden mt-4 rounded-lg border" style={{ borderColor: 'var(--border)', background: 'var(--secondary-bg)' }}>
-            <div className="flex flex-col px-4 py-3 gap-3">
-              <Link href="/" className="text-sm font-medium" onClick={() => setShowMobileMenu(false)}>
-                Home
-              </Link>
-              <Link href="/giveaways" className="text-sm font-medium" onClick={() => setShowMobileMenu(false)}>
-                Giveaways
-              </Link>
-              <Link href="/raffles" className="text-sm font-medium" onClick={() => setShowMobileMenu(false)}>
-                Raffles
-              </Link>
-              <Link href="/fundraise" className="text-sm font-medium" onClick={() => setShowMobileMenu(false)}>
-                Fundraise
-              </Link>
-              <Link href="/marketplace" className="text-sm font-medium" onClick={() => setShowMobileMenu(false)}>
-                Marketplace
-              </Link>
-              <Link href="/profiles" className="text-sm font-medium" onClick={() => setShowMobileMenu(false)}>
-                Profiles
-              </Link>
+          <div
+            className="md:hidden absolute right-4 top-full mt-3 w-64 rounded-2xl shadow-2xl"
+            style={{ 
+              background: 'rgba(12, 20, 30, 0.92)',
+              border: '1px solid rgba(0, 212, 212, 0.18)',
+              backdropFilter: 'blur(18px) saturate(160%)'
+            }}
+          >
+            <div className="flex flex-col py-2">
+              {[
+                { href: '/', label: 'Home' },
+                { href: '/giveaways', label: 'Giveaways' },
+                { href: '/raffles', label: 'Raffles' },
+                { href: '/fundraise', label: 'Fundraise' },
+                { href: '/marketplace', label: 'Marketplace' },
+                { href: '/profiles', label: 'Profiles' }
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setShowMobileMenu(false)}
+                  className="px-4 py-3 text-sm font-semibold flex items-center justify-between"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <span>{link.label}</span>
+                  <span
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{ background: isActive(link.href) ? 'var(--accent-blue)' : 'rgba(148, 163, 184, 0.4)' }}
+                  />
+                </Link>
+              ))}
 
-              <div className="h-px" style={{ background: 'var(--border)' }} />
+              <div className="my-2 h-px" style={{ background: 'rgba(148, 163, 184, 0.2)' }} />
 
-              {!isLoggedIn && (
-                <Link href="/signup" onClick={() => setShowMobileMenu(false)}>
+              <div className="px-4 pb-4 flex flex-col gap-2">
+                {!isLoggedIn && (
+                  <Link href="/signup" onClick={() => setShowMobileMenu(false)}>
+                    <button
+                      className="w-full px-4 py-2.5 text-sm font-semibold rounded-full"
+                      style={{ background: 'var(--accent-blue)', color: 'var(--text-primary)' }}
+                    >
+                      Sign Up
+                    </button>
+                  </Link>
+                )}
+
+                <Link href="/create" onClick={() => setShowMobileMenu(false)}>
                   <button
-                    className="w-full px-4 py-2.5 text-sm font-semibold rounded-md"
-                    style={{ background: 'var(--accent-blue)', color: 'var(--text-primary)' }}
+                    className="w-full px-4 py-2.5 text-sm font-semibold rounded-full"
+                    style={{ background: 'var(--accent-green)', color: 'var(--text-primary)' }}
                   >
-                    Sign Up
+                    + Create
                   </button>
                 </Link>
-              )}
 
-              <Link href="/create" onClick={() => setShowMobileMenu(false)}>
-                <button
-                  className="w-full px-4 py-2.5 text-sm font-semibold rounded-md"
-                  style={{ background: 'var(--accent-green)', color: 'var(--text-primary)' }}
-                >
-                  + Create
-                </button>
-              </Link>
-
-              {isLoggedIn && (
-                <Link href="/dashboard" onClick={() => setShowMobileMenu(false)} className="text-sm font-medium">
-                  Dashboard
-                </Link>
-              )}
+                {isLoggedIn && (
+                  <Link href="/dashboard" onClick={() => setShowMobileMenu(false)} className="text-sm font-medium text-center">
+                    Dashboard
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         )}
