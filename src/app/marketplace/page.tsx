@@ -1,335 +1,384 @@
-'use client'
+'use client';
+// src/app/marketplace/page.tsx
+import Link from 'next/link';
 
-import { useEffect, useState } from 'react'
-import Header from '@/components/Header'
-import { createClient } from '@/lib/supabase'
-
-type MarketplaceListing = {
-  id: string
-  title: string
-  description: string | null
-  price: number
-  currency: string
-  category: string | null
-  image_url: string | null
-  seller_id: string | null
-  views: number
-  sales: number
-}
-
-type MarketplaceSeller = {
-  id: string
-  username: string | null
-  full_name: string | null
-}
-
-export default function Marketplace() {
-  const [category, setCategory] = useState('all')
-  const [sortBy, setSortBy] = useState('popular')
-  const [listings, setListings] = useState<MarketplaceListing[]>([])
-  const [loading, setLoading] = useState(true)
-
-  const products = [
-    { id: 1, name: 'Limited Edition NFT', price: 0.5, currency: 'ETH', seller: 'CryptoArt', rating: 4.8, sales: 45, image: '🎨', category: 'digital' },
-    { id: 2, name: 'Gaming Headset Pro', price: 149.99, currency: 'USD', seller: 'TechStore', rating: 4.9, sales: 234, image: '🎧', category: 'gaming' },
-    { id: 3, name: 'Rare Collectible Card', price: 299.99, currency: 'USD', seller: 'CardMaster', rating: 5.0, sales: 12, image: '🃏', category: 'collectibles' },
-    { id: 4, name: 'Premium Merch Bundle', price: 79.99, currency: 'USD', seller: 'BrandStore', rating: 4.7, sales: 156, image: '👕', category: 'merch' },
-    { id: 5, name: 'Digital Art Pack', price: 0.25, currency: 'ETH', seller: 'PixelPro', rating: 4.6, sales: 89, image: '🖼️', category: 'digital' },
-    { id: 6, name: 'Mechanical Keyboard', price: 199.99, currency: 'USD', seller: 'KeyboardKing', rating: 4.9, sales: 167, image: '⌨️', category: 'gaming' },
-  ]
-
-  const categories = [
-    { id: 'all', name: 'All Items', icon: '🏪' },
-    { id: 'digital', name: 'Digital', icon: '💎' },
-    { id: 'gaming', name: 'Gaming', icon: '🎮' },
-    { id: 'collectibles', name: 'Collectibles', icon: '🏆' },
-    { id: 'merch', name: 'Merch', icon: '👕' },
-  ]
-
-  useEffect(() => {
-    const fetchListings = async () => {
-      setLoading(true)
-      try {
-        const supabase = createClient()
-        const { data: listingsData, error: listingsError } = await supabase
-          .from('marketplace_listings')
-          .select('id, title, description, price, currency, category, image_url, seller_id, views, sales')
-          .eq('status', 'active')
-          .order('views', { ascending: false })
-          .limit(50)
-
-        if (listingsError) {
-          console.error('Marketplace listings error:', listingsError)
-          return
-        }
-
-        const sellerIds = (listingsData || [])
-          .map((listing) => listing.seller_id)
-          .filter((id): id is string => !!id)
-
-        let sellers: MarketplaceSeller[] = []
-        if (sellerIds.length > 0) {
-          const { data: sellersData, error: sellersError } = await supabase
-            .from('onagui_profiles')
-            .select('id, username, full_name')
-            .in('id', sellerIds)
-
-          if (sellersError) {
-            console.error('Marketplace sellers error:', sellersError)
-          } else {
-            sellers = sellersData || []
-          }
-        }
-
-        const normalized = (listingsData || []).map((listing) => {
-          const seller = sellers.find((item) => item.id === listing.seller_id)
-          return {
-            ...listing,
-            seller: seller?.full_name || seller?.username || 'Onagui Seller',
-          }
-        })
-
-        setListings(normalized)
-      } catch (error) {
-        console.error('Marketplace fetch error:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchListings()
-  }, [])
-
-  const displayProducts = listings.length > 0
-    ? listings.map((listing) => ({
-        id: listing.id,
-        name: listing.title,
-        price: listing.price,
-        currency: listing.currency,
-        seller: (listing as { seller?: string }).seller || 'Onagui Seller',
-        rating: listing.sales > 0 ? 4.7 : 4.5,
-        sales: listing.sales || 0,
-        image: listing.image_url || '🛍️',
-        category: listing.category || 'digital',
-      }))
-    : products
-
+export default function MarketplacePage() {
   return (
-    <div className="min-h-screen bg-[#0f0f23] text-white">
-      {/* Use shared Header component */}
-      <Header />
-
-      {/* Marketplace Title Section */}
-      <div className="bg-[#0f0f23]/95 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                ONAGUI MARKETPLACE
-              </h1>
-              <p className="text-gray-400 text-sm mt-1">Buy and sell exclusive items</p>
-            </div>
-            <button className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 rounded-lg px-6 py-2.5 font-semibold transition-all">
-              Sell Item
+    <div className="construction-page">
+      <div className="construction-content">
+        {/* Animated Construction Icon */}
+        <div className="icon-wrapper">
+          <div className="icon">🏗️</div>
+          <div className="glow"></div>
+        </div>
+        
+        {/* Title */}
+        <h1 className="title">Marketplace Coming Soon</h1>
+        
+        {/* Description */}
+        <p className="description">
+          We're building something amazing! The ONAGUI Marketplace 
+          will let you buy and sell items directly with <strong>crypto payments</strong>.
+        </p>
+        
+        {/* Progress Bar */}
+        <div className="progress-section">
+          <div className="progress-bar">
+            <div className="progress-fill" />
+          </div>
+          <span className="progress-text">Development in Progress...</span>
+        </div>
+        
+        {/* Features Grid */}
+        <div className="features-grid">
+          <div className="feature-card">
+            <div className="feature-icon">💰</div>
+            <h3>Crypto Payments</h3>
+            <p>Buy & sell with USDC, ETH, and more</p>
+          </div>
+          
+          <div className="feature-card">
+            <div className="feature-icon">🔒</div>
+            <h3>Escrow Protection</h3>
+            <p>Secure transactions for both parties</p>
+          </div>
+          
+          <div className="feature-card">
+            <div className="feature-icon">⭐</div>
+            <h3>Seller Ratings</h3>
+            <p>Trust system for verified sellers</p>
+          </div>
+          
+          <div className="feature-card">
+            <div className="feature-icon">🚀</div>
+            <h3>Launching Soon</h3>
+            <p>Be the first to know when we launch</p>
+          </div>
+        </div>
+        
+        {/* CTA Card */}
+        <div className="cta-card">
+          <h3>Get Notified</h3>
+          <p>Want early access when we launch?</p>
+          <div className="email-form">
+            <input 
+              type="email" 
+              placeholder="Enter your email"
+              className="email-input"
+            />
+            <button className="notify-btn">
+              Notify Me 🔔
             </button>
           </div>
         </div>
+        
+        {/* Back Link */}
+        <Link href="/" className="back-link">
+          ← Back to Home
+        </Link>
       </div>
 
-      {/* Stats Banner */}
-      <div className="bg-gradient-to-r from-blue-950/40 via-blue-900/40 to-blue-950/40 border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-400">2,547</div>
-              <div className="text-sm text-gray-400">Active Listings</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-400">$125K</div>
-              <div className="text-sm text-gray-400">Volume (24h)</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-400">1,234</div>
-              <div className="text-sm text-gray-400">Sellers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-400">8,456</div>
-              <div className="text-sm text-gray-400">Items Sold</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <style jsx>{`
+        .construction-page {
+          min-height: 100vh;
+          background: linear-gradient(135deg, #0a1929 0%, #1e293b 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem 1rem;
+          position: relative;
+          overflow: hidden;
+        }
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex gap-8">
-          {/* Sidebar Filters */}
-          <aside className="w-64 flex-shrink-0 space-y-6">
-            {/* Categories */}
-            <div className="bg-[#1a1a2e] rounded-2xl p-6 border border-white/10">
-              <h3 className="font-bold mb-4">Categories</h3>
-              <div className="space-y-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setCategory(cat.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${
-                      category === cat.id
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white/5 hover:bg-white/10 text-gray-300'
-                    }`}
-                  >
-                    <span className="text-xl">{cat.icon}</span>
-                    <span className="font-medium">{cat.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+        /* Animated Background */
+        .construction-page::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle, rgba(0, 212, 212, 0.1) 1px, transparent 1px);
+          background-size: 50px 50px;
+          animation: moveGrid 20s linear infinite;
+        }
 
-            {/* Price Range */}
-            <div className="bg-[#1a1a2e] rounded-2xl p-6 border border-white/10">
-              <h3 className="font-bold mb-4">Price Range</h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm text-gray-400 mb-1 block">Min Price</label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500/50"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-gray-400 mb-1 block">Max Price</label>
-                  <input
-                    type="number"
-                    placeholder="Any"
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500/50"
-                  />
-                </div>
-                <button className="w-full bg-blue-600 hover:bg-blue-700 rounded-lg py-2 text-sm font-medium transition-all">
-                  Apply Filter
-                </button>
-              </div>
-            </div>
+        @keyframes moveGrid {
+          0% { transform: translate(0, 0); }
+          100% { transform: translate(50px, 50px); }
+        }
 
-            {/* Payment Methods */}
-            <div className="bg-[#1a1a2e] rounded-2xl p-6 border border-white/10">
-              <h3 className="font-bold mb-4">Payment Methods</h3>
-              <div className="space-y-2">
-                {['USD', 'ETH', 'USDC', 'MATIC'].map((method) => (
-                  <label key={method} className="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" className="w-4 h-4 rounded border-gray-600 text-blue-600 focus:ring-blue-500" />
-                    <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{method}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </aside>
+        .construction-content {
+          max-width: 800px;
+          width: 100%;
+          text-align: center;
+          position: relative;
+          z-index: 1;
+        }
 
-          {/* Main Content */}
-          <div className="flex-1">
-            {/* Controls */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className="text-gray-400">Showing {displayProducts.length} items</div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-400">Sort by:</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500/50"
-                >
-                  <option value="popular">Most Popular</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="newest">Newest First</option>
-                  <option value="rating">Highest Rated</option>
-                </select>
-              </div>
-            </div>
+        /* Icon Animation */
+        .icon-wrapper {
+          position: relative;
+          display: inline-block;
+          margin-bottom: 2rem;
+        }
 
-            {/* Products Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="bg-[#1a1a2e] rounded-2xl overflow-hidden border border-white/10 hover:border-blue-500/50 transition-all group"
-                >
-                  {/* Image */}
-                  <div className="relative aspect-square bg-gradient-to-br from-blue-950/60 to-blue-900/60 flex items-center justify-center overflow-hidden">
-                    <div className="text-8xl group-hover:scale-110 transition-transform duration-300">{product.image}</div>
-                    
-                    {/* Quick Actions */}
-                    <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="w-10 h-10 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-lg flex items-center justify-center transition-all">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                      </button>
-                      <button className="w-10 h-10 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-lg flex items-center justify-center transition-all">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                        </svg>
-                      </button>
-                    </div>
+        .icon {
+          font-size: 6rem;
+          animation: bounce 2s ease-in-out infinite;
+        }
 
-                    {/* Badge */}
-                    {product.rating >= 4.8 && (
-                      <div className="absolute top-3 left-3 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                        🔥 Hot
-                      </div>
-                    )}
-                  </div>
+        .glow {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 150px;
+          height: 150px;
+          background: radial-gradient(circle, rgba(0, 212, 212, 0.3), transparent 70%);
+          border-radius: 50%;
+          animation: pulse 2s ease-in-out infinite;
+        }
 
-                  {/* Content */}
-                  <div className="p-5">
-                    <div className="mb-3">
-                      <h3 className="font-bold text-lg mb-1 group-hover:text-blue-400 transition-colors">
-                        {product.name}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-400">
-                        <span>by {product.seller}</span>
-                        <span>•</span>
-                        <div className="flex items-center gap-1">
-                          <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                          <span>{product.rating}</span>
-                        </div>
-                      </div>
-                    </div>
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-20px); }
+        }
 
-                    {/* Stats */}
-                    <div className="flex items-center gap-3 mb-4 text-sm text-gray-400">
-                      <span>{product.sales} sold</span>
-                    </div>
+        @keyframes pulse {
+          0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+          50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
+        }
 
-                    {/* Price & Action */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-xs text-gray-400 mb-1">Price</div>
-                        <div className="text-xl font-bold text-blue-400">
-                          {product.currency === 'ETH' ? `${product.price} ETH` : `$${product.price}`}
-                        </div>
-                      </div>
-                      <button className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 rounded-lg px-6 py-2.5 font-semibold transition-all shadow-lg shadow-blue-500/25">
-                        Buy Now
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+        /* Typography */
+        .title {
+          font-size: 3rem;
+          font-weight: 800;
+          background: linear-gradient(135deg, #00D4D4 0%, #10b981 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 1rem;
+          line-height: 1.2;
+        }
 
-            {/* Load More */}
-            <div className="text-center mt-12">
-              <button className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-8 py-3 font-medium transition-all">
-                Load More Items
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+        .description {
+          font-size: 1.25rem;
+          color: #94a3b8;
+          margin-bottom: 3rem;
+          line-height: 1.6;
+          max-width: 600px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .description strong {
+          color: #00D4D4;
+          font-weight: 700;
+        }
+
+        /* Progress Bar */
+        .progress-section {
+          margin-bottom: 4rem;
+        }
+
+        .progress-bar {
+          width: 100%;
+          height: 10px;
+          background: rgba(30, 41, 59, 0.8);
+          border-radius: 10px;
+          overflow: hidden;
+          margin-bottom: 1rem;
+          border: 1px solid rgba(0, 212, 212, 0.2);
+        }
+
+        .progress-fill {
+          height: 100%;
+          width: 45%;
+          background: linear-gradient(90deg, #00D4D4 0%, #10b981 100%);
+          border-radius: 10px;
+          animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+
+        .progress-text {
+          font-size: 0.875rem;
+          color: #64748b;
+          font-weight: 600;
+        }
+
+        /* Features Grid */
+        .features-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 3rem;
+        }
+
+        .feature-card {
+          background: rgba(30, 41, 59, 0.6);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(0, 212, 212, 0.2);
+          border-radius: 1rem;
+          padding: 2rem 1.5rem;
+          transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+          transform: translateY(-5px);
+          border-color: rgba(0, 212, 212, 0.5);
+          box-shadow: 0 10px 30px rgba(0, 212, 212, 0.2);
+        }
+
+        .feature-icon {
+          font-size: 3rem;
+          margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+          color: #fff;
+          font-size: 1.125rem;
+          font-weight: 700;
+          margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+          color: #94a3b8;
+          font-size: 0.875rem;
+          line-height: 1.5;
+        }
+
+        /* CTA Card */
+        .cta-card {
+          background: linear-gradient(135deg, rgba(0, 212, 212, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+          border: 2px solid rgba(0, 212, 212, 0.3);
+          border-radius: 1.5rem;
+          padding: 2.5rem 2rem;
+          margin-bottom: 2rem;
+          backdrop-filter: blur(10px);
+        }
+
+        .cta-card h3 {
+          font-size: 1.5rem;
+          color: #fff;
+          margin-bottom: 0.5rem;
+          font-weight: 700;
+        }
+
+        .cta-card p {
+          color: #94a3b8;
+          margin-bottom: 1.5rem;
+        }
+
+        .email-form {
+          display: flex;
+          gap: 1rem;
+          flex-direction: column;
+        }
+
+        .email-input {
+          width: 100%;
+          padding: 1rem 1.5rem;
+          background: rgba(10, 25, 41, 0.8);
+          border: 1px solid rgba(0, 212, 212, 0.3);
+          border-radius: 0.75rem;
+          color: #fff;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+        }
+
+        .email-input:focus {
+          outline: none;
+          border-color: #00D4D4;
+          box-shadow: 0 0 0 3px rgba(0, 212, 212, 0.1);
+        }
+
+        .email-input::placeholder {
+          color: #64748b;
+        }
+
+        .notify-btn {
+          width: 100%;
+          padding: 1rem 2rem;
+          background: linear-gradient(135deg, #00D4D4 0%, #10b981 100%);
+          color: #0a1929;
+          border: none;
+          border-radius: 0.75rem;
+          font-size: 1rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .notify-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 30px rgba(0, 212, 212, 0.4);
+        }
+
+        .notify-btn:active {
+          transform: translateY(0);
+        }
+
+        /* Back Link */
+        .back-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: #00D4D4;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+          gap: 0.75rem;
+          color: #10b981;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+          .title {
+            font-size: 2rem;
+          }
+
+          .icon {
+            font-size: 4rem;
+          }
+
+          .description {
+            font-size: 1rem;
+          }
+
+          .features-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+
+          .email-form {
+            flex-direction: column;
+          }
+        }
+
+        @media (min-width: 640px) {
+          .email-form {
+            flex-direction: row;
+          }
+          
+          .email-input {
+            flex: 1;
+          }
+          
+          .notify-btn {
+            width: auto;
+            white-space: nowrap;
+          }
+        }
+      `}</style>
     </div>
-  )
+  );
 }

@@ -1,66 +1,52 @@
+// src/components/ThemeContext.tsx
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'white' | 'dark' | 'darker';
+type Theme = 'light' | 'dark';
 
 interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
-  isDarker: boolean;
-  isWhite: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const THEME_STORAGE_KEY = 'onagui-theme-preference';
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Initialize theme from localStorage if available, otherwise default to 'dark'
   const [theme, setTheme] = useState<Theme>('dark');
-  const isDarker = theme === 'darker';
-  const isWhite = theme === 'white';
+  const [mounted, setMounted] = useState(false);
 
-  // Load saved theme from localStorage on initial render
+  // Load theme from localStorage on mount
   useEffect(() => {
-    // Force dark mode for now
-    setTheme('dark');
-    document.documentElement.classList.add('dark');
-    
-    // Uncomment this when you want to restore saved theme functionality
-    // const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as Theme;
-    // if (savedTheme && (savedTheme === 'white' || savedTheme === 'dark' || savedTheme === 'darker')) {
-    //   setTheme(savedTheme);
-    // }
+    setMounted(true);
+    const savedTheme = localStorage.getItem('onagui-theme') as Theme;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    } else {
+      // Check system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const initialTheme = prefersDark ? 'dark' : 'light';
+      setTheme(initialTheme);
+      document.documentElement.setAttribute('data-theme', initialTheme);
+    }
   }, []);
 
+  // Update theme
+  useEffect(() => {
+    if (mounted) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('onagui-theme', theme);
+    }
+  }, [theme, mounted]);
+
   const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'darker' : theme === 'darker' ? 'white' : 'dark';
-    setTheme(newTheme);
-    // Save to localStorage
-    localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
-  useEffect(() => {
-    if (theme === 'white') {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.removeAttribute('data-theme');
-      console.log('Switching to white theme');
-    } else {
-      document.documentElement.classList.add('dark');
-      
-      if (theme === 'darker') {
-        document.documentElement.setAttribute('data-theme', 'darker');
-        console.log('Switching to darker theme');
-      } else {
-        document.documentElement.removeAttribute('data-theme');
-        console.log('Switching to dark theme');
-      }
-    }
-  }, [theme]);
-
+  // Always provide the context, even before mounting
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, isDarker, isWhite }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );

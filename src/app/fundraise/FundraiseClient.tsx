@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase';
 import { IconHeart, IconSearch, IconPlus, IconTrendingUp } from '@tabler/icons-react';
+import LikeSaveButtons from '@/components/LikeSaveButtons';
 import Header from '@/components/Header';
 
 interface Fundraiser {
@@ -347,6 +348,21 @@ export default function FundraiseClient() {
                     >
                       {fundraiser.title}
                     </h3>
+
+                    <div
+                      className="mb-4"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }}
+                    >
+                      <LikeSaveButtons
+                        postId={fundraiser.id}
+                        postType="fundraiser"
+                        showCount={false}
+                        size="sm"
+                      />
+                    </div>
 
                     {/* Story Preview */}
                     <p className="text-sm mb-4 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
