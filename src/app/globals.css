@@ -906,3 +906,25 @@ header button:focus-visible {
   }
 }
 
+/* ============================================================================
+   FIX: View More Links - Dark Mode
+   ============================================================================ */
+
+/* All "View More" links on homepage */
+section a[href]:not([class*="card"]):not([class*="nav"]):not([class*="btn"]) {
+  color: #00D4D4 !important;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+section a[href]:hover:not([class*="card"]):not([class*="nav"]):not([class*="btn"]) {
+  color: #10b981 !important;
+}
+
+/* Mobile specific */
+@media (max-width: 768px) {
+  section a[href]:not([class*="card"]):not([class*="nav"]) {
+    font-size: 1rem !important;
+  }
+}
