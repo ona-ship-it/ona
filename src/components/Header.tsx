@@ -46,7 +46,7 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Logo - Always clickable to home */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--accent-blue)' }}>
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--text-secondary)' }}>
               ONAGUI
             </h1>
           </Link>
@@ -144,7 +144,7 @@ export default function Header() {
                     onClick={() => setShowProfilesMenu(false)}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-xs font-bold">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-xs font-bold">
                         1
                       </div>
                       <div>
@@ -265,7 +265,7 @@ export default function Header() {
                 <button
                   className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all hover:opacity-90"
                   style={{ 
-                    background: 'var(--accent-blue)',
+                    background: 'var(--text-secondary)',
                     color: 'var(--text-primary)'
                   }}
                 >
@@ -394,7 +394,7 @@ export default function Header() {
             className="md:hidden absolute right-4 top-full mt-3 w-64 rounded-2xl shadow-2xl"
             style={{ 
               background: 'rgba(12, 20, 30, 0.92)',
-              border: '1px solid rgba(0, 212, 212, 0.18)',
+              border: '1px solid rgba(148, 163, 184, 0.3)',
               backdropFilter: 'blur(18px) saturate(160%)'
             }}
           >
@@ -425,7 +425,7 @@ export default function Header() {
                   <span>{link.label}</span>
                   <span
                     className="h-1.5 w-1.5 rounded-full"
-                    style={{ background: isActive(link.href) ? 'var(--accent-blue)' : 'rgba(148, 163, 184, 0.4)' }}
+                    style={{ background: isActive(link.href) ? 'var(--text-secondary)' : 'rgba(148, 163, 184, 0.4)' }}
                   />
                 </Link>
               ))}
@@ -437,7 +437,7 @@ export default function Header() {
                   <Link href="/signup" onClick={() => setShowMobileMenu(false)}>
                     <button
                       className="w-full px-4 py-2.5 text-sm font-semibold rounded-full"
-                      style={{ background: 'var(--accent-blue)', color: 'var(--text-primary)' }}
+                      style={{ background: 'var(--text-secondary)', color: 'var(--text-primary)' }}
                     >
                       Sign Up
                     </button>
@@ -447,7 +447,7 @@ export default function Header() {
                 <Link href="/create" onClick={() => setShowMobileMenu(false)}>
                   <button
                     className="w-full px-4 py-2.5 text-sm font-semibold rounded-full"
-                    style={{ background: 'var(--accent-green)', color: 'var(--text-primary)' }}
+                    style={{ background: 'var(--text-secondary)', color: 'var(--text-primary)' }}
                   >
                     + Create
                   </button>
