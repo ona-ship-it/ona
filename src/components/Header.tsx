@@ -56,35 +56,35 @@ export default function Header() {
             <Link 
               href="/" 
               className="text-sm font-medium transition-colors"
-              style={{ color: 'var(--text-secondary)' }}
+              style={{ color: '#e0e0e0' }}
             >
               Home
             </Link>
             <Link 
               href="/giveaways" 
               className="text-sm font-medium transition-colors hover:opacity-80"
-              style={{ color: 'var(--text-secondary)' }}
+              style={{ color: '#e0e0e0' }}
             >
               Giveaways
             </Link>
             <Link 
               href="/raffles" 
               className="text-sm font-medium transition-colors hover:opacity-80"
-              style={{ color: 'var(--text-secondary)' }}
+              style={{ color: '#e0e0e0' }}
             >
               Raffles
             </Link>
             <Link 
               href="/fundraise" 
               className="text-sm font-medium transition-colors hover:opacity-80"
-              style={{ color: 'var(--text-secondary)' }}
+              style={{ color: '#e0e0e0' }}
             >
               Fundraise
             </Link>
             <Link 
               href="/marketplace" 
               className="text-sm font-medium transition-colors hover:opacity-80"
-              style={{ color: 'var(--text-secondary)' }}
+              style={{ color: '#e0e0e0' }}
             >
               Marketplace
             </Link>
@@ -97,7 +97,7 @@ export default function Header() {
             >
               <div
                 className="text-sm font-medium transition-colors hover:opacity-80 cursor-pointer"
-                style={{ color: 'var(--text-secondary)' }}
+                style={{ color: '#e0e0e0' }}
               >
                 Profiles
               </div>
@@ -266,7 +266,7 @@ export default function Header() {
                   className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all hover:opacity-90"
                   style={{ 
                     background: 'var(--text-secondary)',
-                    color: 'var(--text-primary)'
+                    color: '#ffffff'
                   }}
                 >
                   Sign Up
@@ -282,7 +282,7 @@ export default function Header() {
                 className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all hover:opacity-90"
                 style={{ 
                   background: 'var(--text-secondary)',
-                  color: 'var(--text-primary)'
+                  color: '#ffffff'
                 }}
               >
                 + Create
@@ -437,7 +437,7 @@ export default function Header() {
                   <Link href="/signup" onClick={() => setShowMobileMenu(false)}>
                     <button
                       className="w-full px-4 py-2.5 text-sm font-semibold rounded-full"
-                      style={{ background: 'var(--text-secondary)', color: 'var(--text-primary)' }}
+                      style={{ background: 'var(--text-secondary)', color: '#ffffff' }}
                     >
                       Sign Up
                     </button>
@@ -447,7 +447,7 @@ export default function Header() {
                 <Link href="/create" onClick={() => setShowMobileMenu(false)}>
                   <button
                     className="w-full px-4 py-2.5 text-sm font-semibold rounded-full"
-                    style={{ background: 'var(--text-secondary)', color: 'var(--text-primary)' }}
+                    style={{ background: 'var(--text-secondary)', color: '#ffffff' }}
                   >
                     + Create
                   </button>
