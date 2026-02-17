@@ -81,7 +81,7 @@ export default function FundraiseClient() {
       const supabase = createClient();
       let query = supabase
         .from('fundraisers')
-        .select('*')
+        .select('id, title, story, category, goal_amount, raised_amount, cover_image, location, total_donors, created_at, user_id')
         .eq('status', 'active');
 
       if (selectedCategory !== 'All') {

@@ -17,7 +17,6 @@ interface Fundraiser {
   location: string | null;
   total_donors: number;
   total_donations: number;
-  wallet_address: string;
   beneficiary_name: string | null;
   created_at: string;
   status: string;
@@ -78,7 +77,7 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
       console.log('Fetching fundraiser with ID:', fundraiserId);
       const { data, error } = await supabase
         .from('fundraisers')
-        .select('*')
+        .select('id, user_id, title, story, category, goal_amount, raised_amount, cover_image, location, total_donors, total_donations, beneficiary_name, created_at, status')
         .eq('id', fundraiserId)
         .single();
 
@@ -427,14 +426,6 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
                         <li>✓ Lower fees than traditional</li>
                         <li>✓ USDC on Polygon network</li>
                       </ul>
-                    </div>
-
-                    {/* Wallet Info */}
-                    <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-600 mb-1">Funds go directly to:</p>
-                      <p className="text-xs font-mono text-gray-900 break-all">
-                        {fundraiser.wallet_address}
-                      </p>
                     </div>
                   </div>
                 </div>

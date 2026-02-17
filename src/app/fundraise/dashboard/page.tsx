@@ -78,7 +78,7 @@ export default function FundraiserDashboard() {
   async function fetchFundraisers(userId: string) {
     const { data, error } = await supabase
       .from('fundraisers')
-      .select('*')
+      .select('id, user_id, title, category, goal_amount, raised_amount, platform_fees, escrow_balance, status, kyc_verified, created_at, cover_image')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 

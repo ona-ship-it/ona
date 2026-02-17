@@ -47,7 +47,7 @@ export default function MyFundraisersClient() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from('fundraisers')
-        .select('*')
+        .select('id, title, category, goal_amount, raised_amount, status, total_donors, total_donations, created_at, cover_image')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
