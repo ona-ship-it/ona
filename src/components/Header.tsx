@@ -56,35 +56,35 @@ export default function Header() {
             <Link 
               href="/" 
               className="text-sm font-medium transition-colors"
-              style={{ color: 'var(--accent-blue)' }}
+              style={{ color: 'var(--text-secondary)' }}
             >
               Home
             </Link>
             <Link 
               href="/giveaways" 
               className="text-sm font-medium transition-colors hover:opacity-80"
-              style={{ color: 'var(--accent-blue)' }}
+              style={{ color: 'var(--text-secondary)' }}
             >
               Giveaways
             </Link>
             <Link 
               href="/raffles" 
               className="text-sm font-medium transition-colors hover:opacity-80"
-              style={{ color: 'var(--accent-blue)' }}
+              style={{ color: 'var(--text-secondary)' }}
             >
               Raffles
             </Link>
             <Link 
               href="/fundraise" 
               className="text-sm font-medium transition-colors hover:opacity-80"
-              style={{ color: 'var(--accent-blue)' }}
+              style={{ color: 'var(--text-secondary)' }}
             >
               Fundraise
             </Link>
             <Link 
               href="/marketplace" 
               className="text-sm font-medium transition-colors hover:opacity-80"
-              style={{ color: 'var(--accent-blue)' }}
+              style={{ color: 'var(--text-secondary)' }}
             >
               Marketplace
             </Link>
@@ -97,7 +97,7 @@ export default function Header() {
             >
               <div
                 className="text-sm font-medium transition-colors hover:opacity-80 cursor-pointer"
-                style={{ color: 'var(--accent-blue)' }}
+                style={{ color: 'var(--text-secondary)' }}
               >
                 Profiles
               </div>
@@ -281,7 +281,7 @@ export default function Header() {
                 onMouseLeave={() => setShowCreateMenu(false)}
                 className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all hover:opacity-90"
                 style={{ 
-                  background: 'var(--accent-blue)',
+                  background: 'var(--text-secondary)',
                   color: 'var(--text-primary)'
                 }}
               >
