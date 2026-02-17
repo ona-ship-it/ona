@@ -12,7 +12,6 @@ interface DonationModalProps {
   fundraiser: {
     id: string;
     title: string;
-    wallet_address: string;
   };
   onClose: () => void;
   onSuccess: () => void;

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Header from '@/components/Header'
 import Hero from '@/components/Hero'
+import LikeSaveButtons from '@/components/LikeSaveButtons'
 import { TrendingUp, CheckCircle, Star, ShoppingCart } from 'lucide-react'
 
 type Giveaway = {
@@ -477,6 +478,20 @@ export default function HomePage() {
                         ({getRatingData(giveaway.id).count})
                       </span>
                     </div>
+                    <div
+                      style={{ marginLeft: 'auto' }}
+                      onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                      }}
+                    >
+                      <LikeSaveButtons
+                        postId={giveaway.id}
+                        postType="giveaway"
+                        showCount={false}
+                        size="sm"
+                      />
+                    </div>
                   </div>
 
                   <div className="bc-highlight">{getGiveawayHighlight(giveaway)}</div>
@@ -614,6 +629,20 @@ export default function HomePage() {
                         ({getRatingData(raffle.id).count})
                       </span>
                     </div>
+                    <div
+                      style={{ marginLeft: 'auto' }}
+                      onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                      }}
+                    >
+                      <LikeSaveButtons
+                        postId={raffle.id}
+                        postType="raffle"
+                        showCount={false}
+                        size="sm"
+                      />
+                    </div>
                   </div>
 
                   <div className="bc-highlight">{getRaffleHighlight(raffle)}</div>
@@ -714,6 +743,20 @@ export default function HomePage() {
                           ({getRatingData(item.id).count})
                         </span>
                       </div>
+                      <div
+                        style={{ marginLeft: 'auto' }}
+                        onClick={(event) => {
+                          event.preventDefault()
+                          event.stopPropagation()
+                        }}
+                      >
+                        <LikeSaveButtons
+                          postId={item.id}
+                          postType="marketplace"
+                          showCount={false}
+                          size="sm"
+                        />
+                      </div>
                     </div>
 
                     <div className="bc-highlight">{getMarketplaceHighlight(item)}</div>
@@ -805,6 +848,21 @@ export default function HomePage() {
                       <h3 className="font-semibold mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity text-sm" style={{ color: 'var(--text-primary)' }}>
                         {campaign.title}
                       </h3>
+
+                      <div
+                        className="mb-3"
+                        onClick={(event) => {
+                          event.preventDefault()
+                          event.stopPropagation()
+                        }}
+                      >
+                        <LikeSaveButtons
+                          postId={campaign.id}
+                          postType="fundraiser"
+                          showCount={false}
+                          size="sm"
+                        />
+                      </div>
 
                       {/* Raised Amount */}
                       <div className="mb-3">

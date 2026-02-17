@@ -5,10 +5,12 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import ProfilePicture from '@/components/ProfilePicture'
+import ThemeToggle from './ThemeToggle'
 
 export default function Header() {
   const [showCreateMenu, setShowCreateMenu] = useState(false)
   const [showProfilesMenu, setShowProfilesMenu] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const pathname = usePathname()
   const supabase = createClient()
@@ -24,6 +26,10 @@ export default function Header() {
     return () => subscription.unsubscribe()
   }, [])
 
+  useEffect(() => {
+    setShowMobileMenu(false)
+  }, [pathname])
+
   async function checkAuth() {
     const { data: { session } } = await supabase.auth.getSession()
     setIsLoggedIn(!!session)
@@ -36,7 +42,7 @@ export default function Header() {
       background: 'var(--bg-secondary)',
       borderColor: 'var(--border)'
     }}>
-      <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="max-w-7xl mx-auto px-4 py-4 relative">
         <div className="flex items-center justify-between">
           {/* Logo - Always clickable to home */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
@@ -46,7 +52,7 @@ export default function Header() {
           </Link>
 
           {/* Navigation */}
-          <nav className="flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-6">
             <Link 
               href="/" 
               className="text-sm font-medium transition-colors"
@@ -249,7 +255,10 @@ export default function Header() {
           </nav>
 
           {/* Right Side */}
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+            
             {/* Sign Up Button - Only show when NOT logged in */}
             {!isLoggedIn && (
               <Link href="/signup">
@@ -362,7 +371,97 @@ export default function Header() {
               </Link>
             )}
           </div>
+
+          {/* Mobile Menu Toggle */}
+          <button
+            type="button"
+            className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-full"
+            style={{ 
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border)',
+              background: 'rgba(10, 25, 41, 0.6)'
+            }}
+            onClick={() => setShowMobileMenu((prev) => !prev)}
+            aria-label="Toggle navigation"
+            aria-expanded={showMobileMenu}
+          >
+            <span className="text-lg">{showMobileMenu ? '✕' : '☰'}</span>
+          </button>
         </div>
+
+        {showMobileMenu && (
+          <div
+            className="md:hidden absolute right-4 top-full mt-3 w-64 rounded-2xl shadow-2xl"
+            style={{ 
+              background: 'rgba(12, 20, 30, 0.92)',
+              border: '1px solid rgba(0, 212, 212, 0.18)',
+              backdropFilter: 'blur(18px) saturate(160%)'
+            }}
+          >
+            <div className="flex flex-col py-2">
+              {/* Theme Toggle - Mobile */}
+              <div className="px-4 py-3 flex items-center justify-between">
+                <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Theme</span>
+                <ThemeToggle />
+              </div>
+              
+              <div className="my-2 h-px" style={{ background: 'rgba(148, 163, 184, 0.2)' }} />
+
+              {[
+                { href: '/', label: 'Home' },
+                { href: '/giveaways', label: 'Giveaways' },
+                { href: '/raffles', label: 'Raffles' },
+                { href: '/fundraise', label: 'Fundraise' },
+                { href: '/marketplace', label: 'Marketplace' },
+                { href: '/profiles', label: 'Profiles' }
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setShowMobileMenu(false)}
+                  className="px-4 py-3 text-sm font-semibold flex items-center justify-between"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <span>{link.label}</span>
+                  <span
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{ background: isActive(link.href) ? 'var(--accent-blue)' : 'rgba(148, 163, 184, 0.4)' }}
+                  />
+                </Link>
+              ))}
+
+              <div className="my-2 h-px" style={{ background: 'rgba(148, 163, 184, 0.2)' }} />
+
+              <div className="px-4 pb-4 flex flex-col gap-2">
+                {!isLoggedIn && (
+                  <Link href="/signup" onClick={() => setShowMobileMenu(false)}>
+                    <button
+                      className="w-full px-4 py-2.5 text-sm font-semibold rounded-full"
+                      style={{ background: 'var(--accent-blue)', color: 'var(--text-primary)' }}
+                    >
+                      Sign Up
+                    </button>
+                  </Link>
+                )}
+
+                <Link href="/create" onClick={() => setShowMobileMenu(false)}>
+                  <button
+                    className="w-full px-4 py-2.5 text-sm font-semibold rounded-full"
+                    style={{ background: 'var(--accent-green)', color: 'var(--text-primary)' }}
+                  >
+                    + Create
+                  </button>
+                </Link>
+
+                {isLoggedIn && (
+                  <Link href="/dashboard" onClick={() => setShowMobileMenu(false)} className="text-sm font-medium text-center">
+                    Dashboard
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   )

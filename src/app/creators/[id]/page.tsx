@@ -83,7 +83,7 @@ export default function CreatorProfilePage() {
     try {
       const { data: creatorData, error } = await supabase
         .from('creator_profiles')
-        .select('*')
+        .select('id, user_id, display_name, bio, avatar_url, cover_image_url, verification_level, country, city, total_raffles_created, total_raffles_completed, total_funds_raised, follower_count, average_rating, total_reviews, successful_completion_rate, average_delivery_days, badges, website, twitter, instagram, tier')
         .eq('user_id', params.id)
         .single()
 

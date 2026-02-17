@@ -670,7 +670,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
   const profile = useMemo(() => {
     const fallback = {
       username: "TechKing",
-      displayName: "Tech King | Giveaway Master",
+      displayName: "@TechKing",  // Changed: Use only username for public display
       avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=400&fit=crop",
       bio: "Verified creator giving back to the community. 500+ giveaways hosted, $2M+ in prizes distributed.",
       verified: true,
@@ -702,7 +702,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
 
     return {
       username: profileData.username || fallback.username,
-      displayName: profileData.full_name || profileData.username || fallback.displayName,
+      displayName: `@${profileData.username || fallback.username}`,  // Changed: Use username with @ prefix only
       avatar: profileData.avatar_url || fallback.avatar,
       bio: profileData.bio || fallback.bio,
       verified: true,
