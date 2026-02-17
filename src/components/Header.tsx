@@ -46,7 +46,7 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Logo - Always clickable to home */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--text-secondary)' }}>
+            <h1 className="text-2xl font-bold" style={{ color: '#e0e0e0' }}>
               ONAGUI
             </h1>
           </Link>
@@ -265,7 +265,7 @@ export default function Header() {
                 <button
                   className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all hover:opacity-90"
                   style={{ 
-                    background: 'var(--text-secondary)',
+                    background: '#1a1a2e',
                     color: '#ffffff'
                   }}
                 >
@@ -281,7 +281,7 @@ export default function Header() {
                 onMouseLeave={() => setShowCreateMenu(false)}
                 className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all hover:opacity-90"
                 style={{ 
-                  background: 'var(--text-secondary)',
+                  background: '#1a1a2e',
                   color: '#ffffff'
                 }}
               >
@@ -437,7 +437,7 @@ export default function Header() {
                   <Link href="/signup" onClick={() => setShowMobileMenu(false)}>
                     <button
                       className="w-full px-4 py-2.5 text-sm font-semibold rounded-full"
-                      style={{ background: 'var(--text-secondary)', color: '#ffffff' }}
+                      style={{ background: '#1a1a2e', color: '#ffffff' }}
                     >
                       Sign Up
                     </button>
@@ -447,7 +447,7 @@ export default function Header() {
                 <Link href="/create" onClick={() => setShowMobileMenu(false)}>
                   <button
                     className="w-full px-4 py-2.5 text-sm font-semibold rounded-full"
-                    style={{ background: 'var(--text-secondary)', color: '#ffffff' }}
+                    style={{ background: '#1a1a2e', color: '#ffffff' }}
                   >
                     + Create
                   </button>

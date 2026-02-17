@@ -197,21 +197,9 @@ button:not(.btn):hover,
    VIEW MORE LINKS - SUPER VISIBLE EN DARK MODE
    ============================================================================ */
 
-/* View More links */
-a:not([class*="nav"]):not([class*="btn"]):not([class*="card"]) {
-  color: var(--accent-primary) !important;
-  font-weight: 600 !important;
-  text-decoration: none !important;
-}
-
-a:not([class*="nav"]):not([class*="btn"]):not([class*="card"]):hover {
-  opacity: 0.8 !important;
-}
-
 /* Homepage section links */
 section h2 + a,
 section .flex a:not([class]) {
-  color: var(--accent-primary) !important;
   font-weight: 600 !important;
   font-size: 1.125rem !important;
   text-decoration: none !important;
@@ -943,7 +931,7 @@ header button:focus-visible {
   transition: all 0.3s ease;
   overflow: hidden;
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: #0f1419;
+  color: #ffffff;
   box-shadow: 0 4px 20px rgba(0, 212, 212, 0.3);
 }
 
@@ -1058,18 +1046,6 @@ header button:focus-visible {
 /* ============================================================================
    FIX: View More Links - Dark Mode
    ============================================================================ */
-
-/* All "View More" links on homepage */
-section a[href]:not([class*="card"]):not([class*="nav"]):not([class*="btn"]) {
-  color: #3b82f6 !important;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-section a[href]:hover:not([class*="card"]):not([class*="nav"]):not([class*="btn"]) {
-  color: #10b981 !important;
-}
 
 /* Mobile specific */
 @media (max-width: 768px) {

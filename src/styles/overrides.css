@@ -43,6 +43,12 @@ nav a:hover,
   color: var(--brand-cyan);
 }
 
+/* Keep header navigation hover consistent with header styling */
+header nav a:hover,
+header .navigation a:hover {
+  color: #e0e0e0;
+}
+
 /* Card titles when clickable */
 .card a:hover h3,
 .card a:hover h4,
