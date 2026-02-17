@@ -56,35 +56,35 @@ export default function Header() {
             <Link 
               href="/" 
               className="text-sm font-medium transition-colors"
-              style={{ color: isActive('/') ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+              style={{ color: 'var(--accent-blue)' }}
             >
               Home
             </Link>
             <Link 
               href="/giveaways" 
               className="text-sm font-medium transition-colors hover:opacity-80"
-              style={{ color: isActive('/giveaways') ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+              style={{ color: 'var(--accent-blue)' }}
             >
               Giveaways
             </Link>
             <Link 
               href="/raffles" 
               className="text-sm font-medium transition-colors hover:opacity-80"
-              style={{ color: isActive('/raffles') ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+              style={{ color: 'var(--accent-blue)' }}
             >
               Raffles
             </Link>
             <Link 
               href="/fundraise" 
               className="text-sm font-medium transition-colors hover:opacity-80"
-              style={{ color: isActive('/fundraise') ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+              style={{ color: 'var(--accent-blue)' }}
             >
               Fundraise
             </Link>
             <Link 
               href="/marketplace" 
               className="text-sm font-medium transition-colors hover:opacity-80"
-              style={{ color: isActive('/marketplace') ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+              style={{ color: 'var(--accent-blue)' }}
             >
               Marketplace
             </Link>
@@ -97,7 +97,7 @@ export default function Header() {
             >
               <div
                 className="text-sm font-medium transition-colors hover:opacity-80 cursor-pointer"
-                style={{ color: isActive('/profiles') ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+                style={{ color: 'var(--accent-blue)' }}
               >
                 Profiles
               </div>
@@ -281,7 +281,7 @@ export default function Header() {
                 onMouseLeave={() => setShowCreateMenu(false)}
                 className="px-5 py-2.5 text-sm font-semibold rounded-md transition-all hover:opacity-90"
                 style={{ 
-                  background: 'var(--accent-green)',
+                  background: 'var(--accent-blue)',
                   color: 'var(--text-primary)'
                 }}
               >
