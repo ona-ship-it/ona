@@ -10,17 +10,21 @@ type Fundraiser = {
   id: string
   title: string
   description: string
+  story?: string
   goal_amount: number
   raised_amount: number
   currency: string
   status: string
   category: string
   creator_id: string
+  user_id?: string
   creator_email?: string
   creator_name?: string
   created_at: string
   end_date: string
+  ends_at?: string
   donor_count: number
+  total_donors?: number
   platform_fees: number
   payout_status: string
   kyc_verified: boolean
@@ -105,7 +109,7 @@ export default function AdminFundraise() {
     try {
       let query = supabase
         .from('fundraisers')
-        .select('*, profiles:creator_id(email, full_name)')
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(100)
 
@@ -114,10 +118,39 @@ export default function AdminFundraise() {
       const { data, error } = await query
       if (error) throw error
 
+      const creatorIds = Array.from(
+        new Set(
+          (data || [])
+            .map((item: any) => item.user_id || item.creator_id)
+            .filter(Boolean)
+        )
+      )
+
+      let profileById = new Map<string, { email?: string; full_name?: string }>()
+
+      if (creatorIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, email, full_name')
+          .in('id', creatorIds)
+
+        if (profilesError) {
+          console.error('Error fetching fundraiser creator profiles:', profilesError)
+        } else {
+          profileById = new Map(
+            (profilesData || []).map((profile: any) => [profile.id, profile])
+          )
+        }
+      }
+
       const mapped = (data || []).map((item: any) => ({
         ...item,
-        creator_email: item.profiles?.email || 'Unknown',
-        creator_name: item.profiles?.full_name || 'Unknown',
+        creator_id: item.creator_id || item.user_id,
+        creator_email: profileById.get(item.user_id || item.creator_id)?.email || 'Unknown',
+        creator_name: profileById.get(item.user_id || item.creator_id)?.full_name || 'Unknown',
+        description: item.description || item.story || '',
+        donor_count: item.donor_count ?? item.total_donors ?? 0,
+        end_date: item.end_date || item.ends_at || '',
       }))
 
       setFundraisers(mapped)
