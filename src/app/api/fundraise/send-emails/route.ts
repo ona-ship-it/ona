@@ -4,10 +4,29 @@ import { sendFundraiserEmail, FundraiserEmailType, FundraiserEmailData } from '@
 
 export const dynamic = 'force-dynamic';
 
+function authorizeCron(request: NextRequest): NextResponse | null {
+  const cronSecret = process.env.CRON_SECRET
+
+  if (!cronSecret) {
+    console.error('CRON_SECRET is not configured')
+    return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
+  }
+
+  const authHeader = request.headers.get('authorization')
+  if (authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  return null
+}
+
 // This endpoint processes pending email notifications
 // Can be called manually or via cron job
 export async function POST(request: NextRequest) {
   try {
+    const authError = authorizeCron(request)
+    if (authError) return authError
+
     const supabase = await createServerSupabase();
 
     // Get pending email notifications (limit to 50 per batch)
@@ -109,6 +128,9 @@ export async function POST(request: NextRequest) {
 // GET endpoint to check email queue status
 export async function GET(request: NextRequest) {
   try {
+    const authError = authorizeCron(request)
+    if (authError) return authError
+
     const supabase = await createServerSupabase();
 
     const { data: stats, error } = await supabase
