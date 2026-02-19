@@ -225,6 +225,16 @@ export default function CreateGiveawayPage() {
     return rawMessage.includes('free_ticket_limit') && rawMessage.includes('schema cache')
   }
 
+  const isCreatorForeignKeyError = (err: any) => {
+    const rawMessage = (err?.message || '').toLowerCase()
+    const rawDetails = (err?.details || '').toLowerCase()
+    return (
+      rawMessage.includes('giveaways_creator_id_fkey')
+      || rawDetails.includes('giveaways_creator_id_fkey')
+      || (rawMessage.includes('creator_id') && rawMessage.includes('foreign key'))
+    )
+  }
+
   const getShareUrlForCode = (shareCode: string) => {
     if (typeof window === 'undefined') return `https://onagui.com/share/${shareCode}`
     return `${window.location.origin}/share/${shareCode}`
@@ -244,6 +254,13 @@ export default function CreateGiveawayPage() {
     setError('')
 
     try {
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      const authenticatedUser = authData?.user
+
+      if (authError || !authenticatedUser?.id) {
+        throw new Error('Your session is invalid. Please sign out and sign in again, then retry.')
+      }
+
       let imageUrl = formData.imageUrl
       if (formData.imageFile && !imageUrl) {
         throw new Error('Image upload failed. Please re-select your image and try again.')
@@ -256,7 +273,7 @@ export default function CreateGiveawayPage() {
       const endDateTime = new Date(`${formData.endDate}T${formData.endTime}`)
 
       const giveawayInsertPayload: Record<string, any> = {
-        creator_id: user?.id,
+        creator_id: authenticatedUser.id,
         title: formData.title,
         description: formData.description,
         emoji: formData.emoji,
@@ -288,6 +305,10 @@ export default function CreateGiveawayPage() {
 
         data = retryInsert.data
         insertError = retryInsert.error
+      }
+
+      if (insertError && isCreatorForeignKeyError(insertError)) {
+        throw new Error('Your account session is out of sync with database auth records. Please sign out, sign in again, and retry.')
       }
 
       if (insertError) throw insertError
