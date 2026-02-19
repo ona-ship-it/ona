@@ -9,18 +9,10 @@ import Image from 'next/image'
 
 const EMOJIS = ['🎁', '🎮', '💎', '🏆', '🎯', '⚡', '🔥', '⭐', '💰', '🎪', '🎨', '🚀', '🎭', '🎸', '🎬', '📱', '💻', '🎧', '👑', '🌟']
 
-const BLOCKCHAINS = [
-  { id: 'ethereum', name: 'Ethereum', icon: '⟠' },
-  { id: 'polygon', name: 'Polygon', icon: '🔷' },
-  { id: 'solana', name: 'Solana', icon: '◎' },
-  { id: 'base', name: 'Base', icon: '🔵' },
-]
-
-const CURRENCIES = [
-  { id: 'USDC', name: 'USDC', symbol: '$' },
-  { id: 'ETH', name: 'ETH', symbol: 'Ξ' },
-  { id: 'MATIC', name: 'MATIC', symbol: '◇' },
-]
+const GIVEAWAY_IMAGE_BUCKET = 'giveaway-images'
+const DONATION_TICKET_PRICE_USDC = 1
+const DONATION_TICKET_CURRENCY = 'USDC'
+const UNLIMITED_TICKETS = 0
 
 export default function CreateGiveawayPage() {
   const { user, loading: authLoading } = useAuth()
@@ -43,11 +35,7 @@ export default function CreateGiveawayPage() {
     imageUrl: '',
     prizeValue: '',
     prizeCurrency: 'USD',
-    totalTickets: '',
-    ticketPrice: '',
-    ticketCurrency: 'USDC',
-    isFree: true,
-    blockchain: 'ethereum',
+    freeTicketLimit: '',
     endDate: '',
     endTime: '',
   })
@@ -63,19 +51,62 @@ export default function CreateGiveawayPage() {
     setError('')
   }
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const uploadImage = async (file: File) => {
+    if (!user) return null
+
+    setUploadingImage(true)
+    try {
+      const fileExt = file.name.split('.').pop() || 'jpg'
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`
+      const filePath = `giveaways/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from(GIVEAWAY_IMAGE_BUCKET)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        })
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from(GIVEAWAY_IMAGE_BUCKET)
+        .getPublicUrl(filePath)
+
+      return publicUrl
+    } catch (err: any) {
+      const rawMessage = err?.message || 'Unknown upload error'
+      const normalizedMessage = rawMessage.toLowerCase()
+
+      if (normalizedMessage.includes('bucket') && normalizedMessage.includes('not found')) {
+        setError(`Image upload is not configured: storage bucket "${GIVEAWAY_IMAGE_BUCKET}" was not found.`)
+      } else if (normalizedMessage.includes('row-level security') || normalizedMessage.includes('permission') || normalizedMessage.includes('unauthorized')) {
+        setError('Image upload permission denied. Please check storage policies for authenticated uploads.')
+      } else {
+        setError(`Failed to upload image: ${rawMessage}`)
+      }
+
+      return null
+    } finally {
+      setUploadingImage(false)
+    }
+  }
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
       setError('Please select an image file')
+      if (fileInputRef.current) fileInputRef.current.value = ''
       return
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       setError('Image must be less than 5MB')
+      if (fileInputRef.current) fileInputRef.current.value = ''
       return
     }
 
@@ -86,10 +117,28 @@ export default function CreateGiveawayPage() {
         ...prev,
         imageFile: file,
         imagePreview: reader.result as string,
+        imageUrl: '',
       }))
     }
     reader.readAsDataURL(file)
     setError('')
+
+    const uploadedUrl = await uploadImage(file)
+    if (!uploadedUrl) {
+      setFormData(prev => ({
+        ...prev,
+        imageFile: null,
+        imagePreview: '',
+        imageUrl: '',
+      }))
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      imageUrl: uploadedUrl,
+    }))
   }
 
   const removeImage = () => {
@@ -101,38 +150,6 @@ export default function CreateGiveawayPage() {
     }))
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
-    }
-  }
-
-  const uploadImage = async () => {
-    if (!formData.imageFile || !user) return null
-
-    setUploadingImage(true)
-    try {
-      const fileExt = formData.imageFile.name.split('.').pop()
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`
-      const filePath = `giveaways/${fileName}`
-
-      const { error: uploadError, data } = await supabase.storage
-        .from('giveaway-images')
-        .upload(filePath, formData.imageFile, {
-          cacheControl: '3600',
-          upsert: false,
-        })
-
-      if (uploadError) throw uploadError
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('giveaway-images')
-        .getPublicUrl(filePath)
-
-      return publicUrl
-    } catch (err: any) {
-      console.error('Image upload error:', err)
-      setError('Failed to upload image: ' + err.message)
-      return null
-    } finally {
-      setUploadingImage(false)
     }
   }
 
@@ -152,15 +169,12 @@ export default function CreateGiveawayPage() {
         setError('Please enter a valid prize value')
         return false
       }
-      if (!formData.totalTickets || parseInt(formData.totalTickets) <= 0) {
-        setError('Please enter valid number of tickets')
-        return false
-      }
     }
     if (step === 3) {
-      if (!formData.isFree) {
-        if (!formData.ticketPrice || parseFloat(formData.ticketPrice) <= 0) {
-          setError('Please enter a valid ticket price')
+      if (formData.freeTicketLimit.trim() !== '') {
+        const parsedLimit = parseInt(formData.freeTicketLimit, 10)
+        if (!Number.isInteger(parsedLimit) || parsedLimit <= 0) {
+          setError('Free ticket limit must be a whole number greater than 0')
           return false
         }
       }
@@ -196,15 +210,14 @@ export default function CreateGiveawayPage() {
     setError('')
 
     try {
-      // Upload image if provided
       let imageUrl = formData.imageUrl
-      if (formData.imageFile) {
-        const uploadedUrl = await uploadImage()
-        if (!uploadedUrl) {
-          throw new Error('Failed to upload image')
-        }
-        imageUrl = uploadedUrl
+      if (formData.imageFile && !imageUrl) {
+        throw new Error('Image upload failed. Please re-select your image and try again.')
       }
+
+      const parsedFreeTicketLimit = formData.freeTicketLimit.trim() === ''
+        ? null
+        : parseInt(formData.freeTicketLimit, 10)
 
       const endDateTime = new Date(`${formData.endDate}T${formData.endTime}`)
 
@@ -219,11 +232,11 @@ export default function CreateGiveawayPage() {
             image_url: imageUrl,
             prize_value: parseFloat(formData.prizeValue),
             prize_currency: formData.prizeCurrency,
-            total_tickets: parseInt(formData.totalTickets),
-            ticket_price: formData.isFree ? 0 : parseFloat(formData.ticketPrice),
-            ticket_currency: formData.ticketCurrency,
-            is_free: formData.isFree,
-            blockchain: formData.blockchain,
+            total_tickets: UNLIMITED_TICKETS,
+            ticket_price: DONATION_TICKET_PRICE_USDC,
+            ticket_currency: DONATION_TICKET_CURRENCY,
+            is_free: false,
+            free_ticket_limit: parsedFreeTicketLimit,
             status: status,
             end_date: endDateTime.toISOString(),
           },
@@ -232,12 +245,12 @@ export default function CreateGiveawayPage() {
 
       if (insertError) throw insertError
 
-      // Create escrow account if paid giveaway
-      if (!formData.isFree && data && data[0]) {
+      // Create escrow account for automatic paid donation tickets
+      if (data && data[0]) {
         await supabase.from('escrow_accounts').insert([
           {
             giveaway_id: data[0].id,
-            currency: formData.ticketCurrency,
+            currency: DONATION_TICKET_CURRENCY,
           },
         ])
       }
@@ -478,18 +491,14 @@ export default function CreateGiveawayPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Total Number of Tickets
+                  Ticket Rules
                 </label>
-                <input
-                  type="number"
-                  value={formData.totalTickets}
-                  onChange={(e) => handleChange('totalTickets', e.target.value)}
-                  placeholder="1000"
-                  className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 focus:outline-none transition"
-                />
-                <p className="mt-2 text-sm text-slate-500">
-                  Maximum number of participants that can enter
-                </p>
+                <div className="p-4 bg-slate-800/40 border border-slate-700 rounded-xl text-sm space-y-2">
+                  <p className="text-slate-200">• Unlimited entries overall</p>
+                  <p className="text-slate-200">• One free ticket per user (automatic)</p>
+                  <p className="text-slate-200">• Optional creator-set cap for total free tickets</p>
+                  <p className="text-slate-200">• Paid donation tickets enabled automatically at 1 USDC</p>
+                </div>
               </div>
             </div>
           )}
@@ -499,108 +508,56 @@ export default function CreateGiveawayPage() {
             <div className="space-y-6">
               <div>
                 <h2 className="text-3xl font-bold text-white mb-2">Ticket Settings</h2>
-                <p className="text-slate-400">How will people enter?</p>
+                <p className="text-slate-400">ONAGUI uses automatic ticket rules for giveaways</p>
               </div>
 
               <div className="space-y-4">
-                <button
-                  type="button"
-                  onClick={() => handleChange('isFree', true)}
-                  className={`w-full p-6 rounded-2xl border-2 transition-all text-left ${
-                    formData.isFree
-                      ? 'border-blue-500 bg-blue-500/10'
-                      : 'border-slate-700 bg-slate-800/30 hover:border-slate-600'
-                  }`}
-                >
+                <div className="w-full p-6 rounded-2xl border-2 border-green-500/40 bg-green-500/10 text-left">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center text-2xl">
                       🎁
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-1">Free Entry</h3>
-                      <p className="text-slate-400 text-sm">
-                        Anyone can enter for free. Great for building community!
+                      <h3 className="text-xl font-bold text-white mb-1">Free Entry (Automatic)</h3>
+                      <p className="text-slate-300 text-sm">
+                        Every giveaway includes one free ticket per user automatically.
                       </p>
-                    </div>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleChange('isFree', false)}
-                  className={`w-full p-6 rounded-2xl border-2 transition-all text-left ${
-                    !formData.isFree
-                      ? 'border-blue-500 bg-blue-500/10'
-                      : 'border-slate-700 bg-slate-800/30 hover:border-slate-600'
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-yellow-600 rounded-xl flex items-center justify-center text-2xl">
-                      💰
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-1">Paid Entry</h3>
-                      <p className="text-slate-400 text-sm">
-                        Charge for tickets with crypto. Perfect for fundraising!
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              </div>
-
-              {!formData.isFree && (
-                <div className="pt-4 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Ticket Price
-                    </label>
-                    <div className="flex gap-3">
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={formData.ticketPrice}
-                        onChange={(e) => handleChange('ticketPrice', e.target.value)}
-                        placeholder="5.00"
-                        className="flex-1 px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 focus:outline-none transition"
-                      />
-                      <select
-                        value={formData.ticketCurrency}
-                        onChange={(e) => handleChange('ticketCurrency', e.target.value)}
-                        className="px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 focus:outline-none transition"
-                      >
-                        {CURRENCIES.map((currency) => (
-                          <option key={currency.id} value={currency.id}>
-                            {currency.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Blockchain
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {BLOCKCHAINS.map((blockchain) => (
-                        <button
-                          key={blockchain.id}
-                          type="button"
-                          onClick={() => handleChange('blockchain', blockchain.id)}
-                          className={`p-4 rounded-xl border-2 transition-all ${
-                            formData.blockchain === blockchain.id
-                              ? 'border-blue-500 bg-blue-500/10'
-                              : 'border-slate-700 bg-slate-800/30 hover:border-slate-600'
-                          }`}
-                        >
-                          <div className="text-3xl mb-2">{blockchain.icon}</div>
-                          <div className="text-white font-semibold">{blockchain.name}</div>
-                        </button>
-                      ))}
                     </div>
                   </div>
                 </div>
-              )}
+
+                <div className="w-full p-6 rounded-2xl border-2 border-blue-500/40 bg-blue-500/10 text-left">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-2xl">
+                      💰
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-white mb-1">Donation Tickets (Automatic)</h3>
+                      <p className="text-slate-300 text-sm">
+                        Paid donation tickets are automatically enabled at 1 USDC.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Free Ticket Limit (Optional)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={formData.freeTicketLimit}
+                    onChange={(e) => handleChange('freeTicketLimit', e.target.value)}
+                    placeholder="Leave empty for unlimited free tickets"
+                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 focus:outline-none transition"
+                  />
+                  <p className="mt-2 text-sm text-slate-500">
+                    Optional: after this many free tickets are claimed, only paid donation tickets remain.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -659,7 +616,9 @@ export default function CreateGiveawayPage() {
                   <div className="p-4">
                     <h4 className="text-xl font-bold text-white mb-1">{formData.title || 'Your Giveaway'}</h4>
                     <p className="text-slate-400 text-sm mb-3">
-                      {formData.isFree ? 'Free Entry' : `${formData.ticketPrice} ${formData.ticketCurrency}`}
+                      {formData.freeTicketLimit.trim() !== ''
+                        ? `1 free ticket per user (max ${formData.freeTicketLimit} free tickets) + paid donation tickets (1 USDC)`
+                        : '1 free ticket per user + paid donation tickets (1 USDC)'}
                     </p>
                     <p className="text-slate-300 text-sm mb-3">
                       {formData.description || 'Your description will appear here'}
@@ -674,7 +633,7 @@ export default function CreateGiveawayPage() {
                       <div>
                         <span className="text-slate-500">Tickets:</span>
                         <span className="text-white ml-2 font-semibold">
-                          {formData.totalTickets || '0'}
+                          Unlimited
                         </span>
                       </div>
                     </div>

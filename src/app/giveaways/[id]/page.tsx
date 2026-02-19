@@ -143,6 +143,7 @@ export default function GiveawayDetailPage() {
   const timeRemaining = new Date(giveaway.end_date).getTime() - new Date().getTime()
   const daysLeft = Math.floor(timeRemaining / (1000 * 60 * 60 * 24))
   const hoursLeft = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const totalTicketsLabel = giveaway.total_tickets > 0 ? giveaway.total_tickets.toLocaleString() : 'Unlimited'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
@@ -227,7 +228,7 @@ export default function GiveawayDetailPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Total Tickets</span>
-                <span className="text-white font-bold">{giveaway.total_tickets.toLocaleString()}</span>
+                <span className="text-white font-bold">{totalTicketsLabel}</span>
               </div>
             </div>
 
