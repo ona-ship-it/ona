@@ -206,7 +206,7 @@ export default function AdminGiveawaysPage() {
                         <h3 className="text-2xl font-bold text-white mb-1">{giveaway.title}</h3>
                         <p className="text-slate-400 text-sm mb-3">{giveaway.description}</p>
                         <div className="flex items-center gap-4 text-sm">
-                          <span className="text-yellow-400 font-semibold">
+                          <span className="text-green-400 font-semibold">
                             ${giveaway.prize_value} {giveaway.prize_currency}
                           </span>
                           <span className="text-slate-400">

@@ -499,12 +499,12 @@ export default function RaffleDetailPage() {
             )}
 
             {/* Prize Value */}
-            <div className="bg-gradient-to-br from-yellow-900/30 to-orange-900/30 border-2 border-yellow-500/50 rounded-3xl p-6">
-              <div className="text-sm text-yellow-400 mb-2">Prize Value</div>
+            <div className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-2 border-green-500/50 rounded-3xl p-6">
+              <div className="text-sm text-green-400 mb-2">Prize Value</div>
               <div className="text-4xl font-black text-white mb-1">
                 ${raffle.prize_value.toLocaleString()}
               </div>
-              <div className="text-yellow-400 font-semibold">{raffle.prize_currency}</div>
+              <div className="text-green-400 font-semibold">{raffle.prize_currency}</div>
             </div>
 
             {/* Progress */}

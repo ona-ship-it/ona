@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 
 export default function Hero() {
   const [mounted, setMounted] = useState(false)
@@ -31,20 +30,6 @@ export default function Hero() {
             <p className="hero-subtitle animate-fade-in">
               Statistically, Onagui is your best chance to win
             </p>
-
-            {/* CTA Buttons */}
-            <div className="hero-cta animate-slide-up">
-              <Link href="/giveaways" className="btn btn-primary btn-xl glow-cyan">
-                Browse Giveaways
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </Link>
-              
-              <Link href="/raffles" className="btn btn-secondary btn-xl">
-                View Raffles
-              </Link>
-            </div>
 
             {/* Trust indicators */}
             <div className="hero-trust animate-fade-in">

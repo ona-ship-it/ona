@@ -251,7 +251,7 @@ export default function AdminRafflesPage() {
                         </div>
                         <p className="text-slate-400 text-sm mb-3">{raffle.description}</p>
                         <div className="flex items-center gap-6 text-sm">
-                          <span className="text-yellow-400 font-semibold">
+                          <span className="text-green-400 font-semibold">
                             ${raffle.prize_value.toLocaleString()} {raffle.prize_currency}
                           </span>
                           <span className="text-slate-400">

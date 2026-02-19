@@ -344,9 +344,6 @@ export default function UserDashboard() {
                   <div className="text-6xl mb-4">🎁</div>
                   <h3 className="text-2xl font-bold text-white mb-2">No Entries Yet</h3>
                   <p className="text-slate-400 mb-6">Start entering giveaways to see them here!</p>
-                  <Link href="/" className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl">
-                    Browse Giveaways
-                  </Link>
                 </div>
               ) : (
                 giveawayEntries.map((entry) => (
@@ -385,9 +382,6 @@ export default function UserDashboard() {
                   <div className="text-6xl mb-4">🎟️</div>
                   <h3 className="text-2xl font-bold text-white mb-2">No Raffle Tickets</h3>
                   <p className="text-slate-400 mb-6">Buy raffle tickets to see them here!</p>
-                  <Link href="/raffles" className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl">
-                    Browse Raffles
-                  </Link>
                 </div>
               ) : (
                 raffleTickets.map((ticket) => (

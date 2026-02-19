@@ -304,7 +304,7 @@ function RaffleWinnersContent() {
                     <div className="text-6xl">{selectedRaffleData?.emoji}</div>
                     <div className="flex-1">
                       <h3 className="text-3xl font-black text-white mb-1">{selectedRaffleData?.title}</h3>
-                      <p className="text-purple-400 font-semibold">
+                      <p className="text-green-400 font-semibold">
                         ${selectedRaffleData?.prize_value} {selectedRaffleData?.prize_currency}
                       </p>
                     </div>

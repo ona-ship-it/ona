@@ -270,7 +270,7 @@ function WinnersContent() {
                     <div className="text-6xl">{selectedGiveawayData?.emoji}</div>
                     <div className="flex-1">
                       <h3 className="text-3xl font-black text-white mb-1">{selectedGiveawayData?.title}</h3>
-                      <p className="text-blue-400 font-semibold">
+                      <p className="text-green-400 font-semibold">
                         ${selectedGiveawayData?.prize_value} {selectedGiveawayData?.prize_currency}
                       </p>
                     </div>
