@@ -101,29 +101,30 @@ export default function SettingsPage() {
         .update(updatePayload)
         .eq('id', user.id)
 
-      if (error && error.message?.includes('bio') && error.message?.includes('schema cache')) {
-        // Retry without bio if schema cache is behind
+      if (error && error.message?.includes('schema cache')) {
+        // Retry without columns missing from schema cache
         usedFallback = true
+        const retryPayload: any = {
+          ...updatePayload,
+        }
+
+        if (error.message?.includes('username')) {
+          delete retryPayload.username
+        }
+        if (error.message?.includes('bio')) {
+          delete retryPayload.bio
+        }
+
         const { error: retryError } = await supabase
           .from('profiles')
-          .update({
-            full_name: updatePayload.full_name,
-            username: updatePayload.username,
-            twitter_url: updatePayload.twitter_url,
-            instagram_url: updatePayload.instagram_url,
-            facebook_url: updatePayload.facebook_url,
-            linkedin_url: updatePayload.linkedin_url,
-            tiktok_url: updatePayload.tiktok_url,
-            youtube_url: updatePayload.youtube_url,
-            website_url: updatePayload.website_url,
-          })
+          .update(retryPayload)
           .eq('id', user.id)
         error = retryError || null
       }
 
       if (error) throw error
 
-      const { error: onaguiProfilesError } = await supabase
+      let { error: onaguiProfilesError } = await supabase
         .from('onagui_profiles')
         .update({
           full_name: updatePayload.full_name,
@@ -131,7 +132,18 @@ export default function SettingsPage() {
         })
         .eq('id', user.id)
 
-      if (onaguiProfilesError && !onaguiProfilesError.message?.includes('schema cache')) {
+      if (onaguiProfilesError && onaguiProfilesError.message?.includes('schema cache')) {
+        usedFallback = true
+        const { error: onaguiRetryError } = await supabase
+          .from('onagui_profiles')
+          .update({
+            full_name: updatePayload.full_name,
+          })
+          .eq('id', user.id)
+        onaguiProfilesError = onaguiRetryError || null
+      }
+
+      if (onaguiProfilesError) {
         throw onaguiProfilesError
       }
 
@@ -143,7 +155,7 @@ export default function SettingsPage() {
       alert('✅ Profile updated successfully!')
 
       if (usedFallback) {
-        setSaveNotice('Bio will appear after the database cache refreshes. Your other changes were saved.')
+        setSaveNotice('Some fields were saved with compatibility mode while database schema cache refreshes.')
       }
       
     } catch (error: any) {
