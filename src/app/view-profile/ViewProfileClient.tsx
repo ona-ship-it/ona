@@ -76,8 +76,8 @@ export default function ViewProfileClient() {
     };
   }, []);
 
-  const initials = (name?: string | null, email?: string | null) => {
-    const src = (name || email || "") as string;
+  const initials = (name?: string | null, userId?: string | null) => {
+    const src = (name || userId || "") as string;
     const parts = src.trim().split(/\s+/);
     const first = parts[0]?.[0] || "";
     const second = parts[1]?.[0] || "";
@@ -86,7 +86,7 @@ export default function ViewProfileClient() {
 
   const primaryName = () => {
     const fullName = (user?.user_metadata?.["full_name"] as string) || "";
-    return fullName || user?.email || "Your Profile";
+    return fullName || "Your Profile";
   };
 
   return (
@@ -122,21 +122,11 @@ export default function ViewProfileClient() {
                 />
               ) : (
                 <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-gray-2 00 font-semibold text-xl">
-                  {initials(primaryName(), user?.email)}
+                  {initials(primaryName(), user?.id || null)}
                 </div>
               )}
               <div>
                 <h2 className="text-lg font-semibold text-gray-100">{primaryName()}</h2>
-                {user?.email && (
-                  <p className="text-sm">
-                    <a
-                      href={`mailto:${user.email}`}
-                      className="text-blue-400 hover:text-blue-300 underline underline-offset-2"
-                    >
-                      {user.email}
-                    </a>
-                  </p>
-                )}
                 {avatarUrl && (
                   <p className="text-gray-500 text-xs">Photo from your sign‑in provider</p>
                 )}

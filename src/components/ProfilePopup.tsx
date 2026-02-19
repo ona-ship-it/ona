@@ -16,6 +16,11 @@ type SupabaseUser = {
   email: string | null;
 };
 
+function getUserLabel(user: SupabaseUser | null): string {
+  if (!user?.id) return 'Member';
+  return `Member ${user.id.slice(0, 6)}`;
+}
+
 export default function ProfilePopup({ isOpen, onClose }: ProfilePopupProps) {
   const { isDarker, isWhite } = useTheme();
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -76,11 +81,11 @@ export default function ProfilePopup({ isOpen, onClose }: ProfilePopupProps) {
       <div className="p-4">
         <div className="flex items-center space-x-3 mb-4">
           <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-500 text-xl font-bold">
-            {user?.email?.charAt(0)?.toUpperCase() || '?'}
+            {getUserLabel(user).charAt(0).toUpperCase()}
           </div>
           <div>
             <div className={`font-medium ${isWhite ? 'text-gray-900' : 'text-white'}`}>
-              {user?.email || 'sa***@gmail.com'}
+              {getUserLabel(user)}
             </div>
             <div className={`text-sm ${isWhite ? 'text-gray-500' : 'text-gray-400'}`}>
               Regular User
