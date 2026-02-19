@@ -3,26 +3,28 @@
 import { useState, useEffect } from 'react';
 import { TrendingUp, CheckCircle, Star, ShoppingCart } from 'lucide-react';
 import LikeSaveButtons from '@/components/LikeSaveButtons';
+import Link from 'next/link';
 
 interface Giveaway {
   id: string;
-  title?: string;
-  description?: string;
-  prize_amount?: number;
-  status?: string;
-  created_at?: string;
-  creator_id?: string;
+  title: string;
+  description: string;
+  image_url: string | null;
+  prize_value: number;
+  prize_currency: string;
+  tickets_sold: number;
+  total_tickets: number;
+  status: string;
   creator_name?: string | null;
   creator_avatar_url?: string | null;
-  media_url?: string;
-  ends_at?: string;
-  ticket_price?: number;
-  prize_pool_usdt?: number;
   paid_ticket_count?: number;
   paid_ticket_revenue?: number;
   prize_boost?: number;
   onagui_subs?: number;
 }
+
+const CARD_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop';
+const PROFILE_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=600&auto=format&fit=crop';
 
 export default function GiveawaysClient() {
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
@@ -55,6 +57,28 @@ export default function GiveawaysClient() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getRatingData = (seed: string) => {
+    let hash = 0;
+    for (let i = 0; i < seed.length; i += 1) {
+      hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+    }
+
+    const rating = 4.3 + (hash % 70) / 100;
+    const count = 50 + (hash % 200);
+
+    return {
+      rating: rating.toFixed(1),
+      count,
+    };
+  };
+
+  const getGiveawayHighlight = (giveaway: Giveaway) => {
+    if (giveaway.total_tickets > 0 && giveaway.tickets_sold / giveaway.total_tickets >= 0.7) {
+      return 'Most Entered';
+    }
+    return 'Hot Right Now';
   };
 
   if (loading) {
@@ -107,26 +131,27 @@ export default function GiveawaysClient() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {giveaways.map((giveaway, index) => (
-          <div
+        {giveaways.map((giveaway) => (
+          <Link
             key={giveaway.id}
+            href={`/giveaways/${giveaway.id}`}
             className="bc-game-card group"
           >
             {/* Image Section */}
             <div className="bc-card-image-wrapper">
-              {giveaway.media_url ? (
+              {giveaway.image_url ? (
                 <img
-                  src={giveaway.media_url}
+                  src={giveaway.image_url}
                   alt={giveaway.title || 'Giveaway'}
                   className="bc-card-image"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = 'https://images.unsplash.com/photo-1513104890138-7c749659a591';
+                    target.src = CARD_FALLBACK_IMAGE;
                   }}
                 />
               ) : (
                 <img
-                  src="https://images.unsplash.com/photo-1513104890138-7c749659a591"
+                  src={CARD_FALLBACK_IMAGE}
                   alt="Default"
                   className="bc-card-image"
                 />
@@ -135,7 +160,7 @@ export default function GiveawaysClient() {
               <div className="bc-image-overlay"></div>
               
               {/* Trending Badge */}
-              {index % 3 === 0 && (
+              {giveaway.tickets_sold > 5000 && (
                 <div className="bc-trending-badge">
                   <TrendingUp size={14} />
                   <span>TRENDING</span>
@@ -148,7 +173,7 @@ export default function GiveawaysClient() {
               </div>
               
               {/* Condition Tag */}
-              <div className="bc-condition-tag">NEW</div>
+              <div className="bc-condition-tag">GIVEAWAY</div>
             </div>
             
             {/* Card Body */}
@@ -158,10 +183,10 @@ export default function GiveawaysClient() {
                 <div className="bc-rating-display">
                   <Star size={12} fill="#ff8800" stroke="none" />
                   <span className="rating-value">
-                    {(4.5 + Math.random() * 0.5).toFixed(1)}
+                    {getRatingData(giveaway.id).rating}
                   </span>
                   <span className="rating-count">
-                    ({Math.floor(50 + Math.random() * 200)})
+                    ({getRatingData(giveaway.id).count})
                   </span>
                 </div>
                 <LikeSaveButtons
@@ -171,12 +196,16 @@ export default function GiveawaysClient() {
                   size="sm"
                 />
               </div>
+
+              <div className="bc-card-subtitle" style={{ marginBottom: 8 }}>
+                {getGiveawayHighlight(giveaway)}
+              </div>
               
               {/* Title */}
               <div className="bc-title-row">
                 <div className="bc-creator-column">
                   <img
-                    src={giveaway.creator_avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=600&auto=format&fit=crop'}
+                    src={giveaway.creator_avatar_url || PROFILE_FALLBACK_IMAGE}
                     alt={giveaway.creator_name || 'Creator'}
                     className="bc-creator-avatar"
                   />
@@ -203,9 +232,9 @@ export default function GiveawaysClient() {
               {/* Price */}
               <div className="bc-price-section">
                 <div className="bc-price-display">
-                  <span className="bc-currency">$</span>
+                  <span className="bc-currency">{giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}</span>
                   <span className="bc-price-value">
-                    {giveaway.prize_amount || 0}
+                    {(giveaway.prize_value || 0).toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -213,10 +242,14 @@ export default function GiveawaysClient() {
               <div className="bc-prize-progression">
                 <span>Prize boost</span>
                 <div className="bc-progression-values">
-                  <span>${(giveaway.prize_amount || 0).toLocaleString()}</span>
+                  <span>
+                    {giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}
+                    {(giveaway.prize_value || 0).toLocaleString()}
+                  </span>
                   <span className="bc-progression-arrow">→</span>
                   <span>
-                    ${((giveaway.prize_amount || 0) + (giveaway.prize_boost || 0)).toLocaleString()}
+                    {giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}
+                    {((giveaway.prize_value || 0) + (giveaway.prize_boost || 0)).toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -224,11 +257,11 @@ export default function GiveawaysClient() {
               {/* Button */}
               <button className="bc-action-button">
                 <ShoppingCart size={16} />
-                <span>ENTER NOW</span>
+                <span>CLAIM FREE TICKET</span>
                 <div className="bc-btn-glow"></div>
               </button>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
       
