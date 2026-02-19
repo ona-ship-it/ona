@@ -13,6 +13,8 @@ const GIVEAWAY_IMAGE_BUCKET = 'giveaway-images'
 const DONATION_TICKET_PRICE_USDC = 1
 const DONATION_TICKET_CURRENCY = 'USDC'
 const UNLIMITED_TICKETS = 0
+const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024
+const MAX_IMAGE_SIZE_LABEL = '20MB'
 
 export default function CreateGiveawayPage() {
   const { user, loading: authLoading } = useAuth()
@@ -103,9 +105,9 @@ export default function CreateGiveawayPage() {
       return
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image must be less than 5MB')
+    // Validate file size
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      setError(`Image must be less than ${MAX_IMAGE_SIZE_LABEL}`)
       if (fileInputRef.current) fileInputRef.current.value = ''
       return
     }
@@ -388,7 +390,7 @@ export default function CreateGiveawayPage() {
                     </div>
                     <div className="text-center">
                       <p className="text-white font-semibold mb-1">Click to upload image</p>
-                      <p className="text-slate-500 text-sm">PNG, JPG, GIF up to 5MB</p>
+                      <p className="text-slate-500 text-sm">Any image format up to {MAX_IMAGE_SIZE_LABEL}</p>
                     </div>
                   </div>
                 )}
