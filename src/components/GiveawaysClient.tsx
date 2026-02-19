@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { TrendingUp, CheckCircle, Star, ShoppingCart } from 'lucide-react';
 import LikeSaveButtons from '@/components/LikeSaveButtons';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface Giveaway {
   id: string;
@@ -27,6 +28,7 @@ const CARD_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1513104890138-7c7
 const PROFILE_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=600&auto=format&fit=crop';
 
 export default function GiveawaysClient() {
+  const router = useRouter();
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -261,7 +263,14 @@ export default function GiveawaysClient() {
                 <div className="bc-btn-glow"></div>
               </button>
 
-              <button className="bc-action-secondary">
+              <button
+                className="bc-action-secondary"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  router.push(`/giveaways/${giveaway.id}?entry=paid`);
+                }}
+              >
                 BUY TICKET 1 USDC
               </button>
 

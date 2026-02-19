@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import WalletConnect from '@/components/WalletConnect'
@@ -44,6 +44,7 @@ const PROFILE_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1535713875002-
 export default function GiveawayDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
   
   const [loading, setLoading] = useState(true)
@@ -52,12 +53,26 @@ export default function GiveawayDetailPage() {
   const [entering, setEntering] = useState(false)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
   const [freeTicketsClaimed, setFreeTicketsClaimed] = useState(0)
+  const [preferredEntryType, setPreferredEntryType] = useState<'free' | 'paid'>('free')
   const [quantity] = useState(1)
 
   useEffect(() => {
     checkAuth()
     fetchGiveaway()
   }, [params.id])
+
+  useEffect(() => {
+    const entryIntent = searchParams.get('entry')
+    if (entryIntent === 'paid') {
+      setPreferredEntryType('paid')
+      setTimeout(() => {
+        const paidSection = document.getElementById('paid-entry-section')
+        paidSection?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 80)
+    } else {
+      setPreferredEntryType('free')
+    }
+  }, [searchParams])
 
   async function checkAuth() {
     const { data: { session } } = await supabase.auth.getSession()
@@ -315,7 +330,10 @@ export default function GiveawayDetailPage() {
               <div className="mb-6">
                 <div className="text-sm text-slate-400 mb-2">Free entry</div>
                 <button
-                  onClick={() => handleEnter('free')}
+                  onClick={() => {
+                    setPreferredEntryType('free')
+                    handleEnter('free')
+                  }}
                   disabled={entering || giveaway.status !== 'active' || (hasFreeTicketCap && freeTicketsRemaining === 0)}
                   className="w-full py-4 hover:brightness-110 disabled:from-slate-700 disabled:to-slate-700 text-white font-bold rounded-xl text-lg transition-all disabled:cursor-not-allowed"
                   style={{ background: entering || giveaway.status !== 'active' || (hasFreeTicketCap && freeTicketsRemaining === 0) ? '#334155' : '#00d4d4', color: entering || giveaway.status !== 'active' || (hasFreeTicketCap && freeTicketsRemaining === 0) ? '#fff' : '#0A0E13' }}
@@ -329,7 +347,10 @@ export default function GiveawayDetailPage() {
                 </p>
               </div>
 
-              <div className="mb-4">
+              <div
+                id="paid-entry-section"
+                className={`mb-4 ${preferredEntryType === 'paid' ? 'ring-2 ring-blue-500/60 rounded-xl p-2' : ''}`}
+              >
                 <div className="text-sm text-slate-400 mb-2">Paid entry</div>
                 <div className="mb-4 p-4 bg-slate-800/50 rounded-xl">
                   <div className="flex justify-between text-slate-400 text-sm mb-2">
@@ -347,12 +368,15 @@ export default function GiveawayDetailPage() {
                 </div>
 
                 <button
-                  onClick={() => handleEnter('paid')}
+                  onClick={() => {
+                    setPreferredEntryType('paid')
+                    handleEnter('paid')
+                  }}
                   disabled={entering || giveaway.status !== 'active' || !walletAddress}
                   className="w-full py-4 hover:brightness-110 disabled:from-slate-700 disabled:to-slate-700 text-white font-bold rounded-xl text-lg transition-all disabled:cursor-not-allowed"
                   style={{ background: entering || giveaway.status !== 'active' ? '#334155' : '#0ea5e9', color: '#fff' }}
                 >
-                  {entering ? 'Processing...' : 'Buy Ticket 1 USDC'}
+                  {entering ? 'Processing...' : preferredEntryType === 'paid' ? 'Buy Ticket 1 USDC (Selected)' : 'Buy Ticket 1 USDC'}
                 </button>
               </div>
 
