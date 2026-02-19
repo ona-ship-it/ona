@@ -22,6 +22,7 @@ type Giveaway = {
   total_tickets: number
   ticket_price: number
   is_free: boolean
+  free_ticket_limit: number | null
   status: string
   end_date: string
   winner_id: string | null
@@ -40,6 +41,7 @@ export default function GiveawayDetailPage() {
   const [user, setUser] = useState<any>(null)
   const [entering, setEntering] = useState(false)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
+  const [freeTicketsClaimed, setFreeTicketsClaimed] = useState(0)
   const [quantity] = useState(1)
 
   useEffect(() => {
@@ -67,6 +69,18 @@ export default function GiveawayDetailPage() {
         return
       }
 
+      let claimedFreeTickets = 0
+      if ((data.free_ticket_limit || 0) > 0) {
+        const { count } = await supabase
+          .from('tickets')
+          .select('id', { count: 'exact', head: true })
+          .eq('giveaway_id', data.id)
+          .eq('is_free', true)
+
+        claimedFreeTickets = count || 0
+      }
+
+      setFreeTicketsClaimed(claimedFreeTickets)
       setGiveaway(data)
     } catch (error) {
       console.error('Error fetching giveaway:', error)
@@ -144,6 +158,10 @@ export default function GiveawayDetailPage() {
   const daysLeft = Math.floor(timeRemaining / (1000 * 60 * 60 * 24))
   const hoursLeft = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
   const totalTicketsLabel = giveaway.total_tickets > 0 ? giveaway.total_tickets.toLocaleString() : 'Unlimited'
+  const hasFreeTicketCap = (giveaway.free_ticket_limit || 0) > 0
+  const freeTicketsRemaining = hasFreeTicketCap
+    ? Math.max((giveaway.free_ticket_limit || 0) - freeTicketsClaimed, 0)
+    : null
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
@@ -240,13 +258,17 @@ export default function GiveawayDetailPage() {
                 <div className="text-sm text-slate-400 mb-2">Free entry</div>
                 <button
                   onClick={() => handleEnter('free')}
-                  disabled={entering || giveaway.status !== 'active'}
+                  disabled={entering || giveaway.status !== 'active' || (hasFreeTicketCap && freeTicketsRemaining === 0)}
                   className="w-full py-4 hover:brightness-110 disabled:from-slate-700 disabled:to-slate-700 text-white font-bold rounded-xl text-lg transition-all disabled:cursor-not-allowed"
-                  style={{ background: entering || giveaway.status !== 'active' ? '#334155' : '#00d4d4', color: entering || giveaway.status !== 'active' ? '#fff' : '#0A0E13' }}
+                  style={{ background: entering || giveaway.status !== 'active' || (hasFreeTicketCap && freeTicketsRemaining === 0) ? '#334155' : '#00d4d4', color: entering || giveaway.status !== 'active' || (hasFreeTicketCap && freeTicketsRemaining === 0) ? '#fff' : '#0A0E13' }}
                 >
                   {entering ? 'Processing...' : 'Claim Free Ticket'}
                 </button>
-                <p className="text-xs text-slate-400 mt-2">One free ticket per user.</p>
+                <p className="text-xs text-slate-400 mt-2">
+                  {hasFreeTicketCap
+                    ? `${freeTicketsRemaining} free tickets remaining. One free ticket per user.`
+                    : 'Unlimited free tickets available. One free ticket per user.'}
+                </p>
               </div>
 
               <div className="mb-4">
