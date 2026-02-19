@@ -15,6 +15,7 @@ export default function SettingsPage() {
   const [user, setUser] = useState<any>(null)
   const [formData, setFormData] = useState({
     full_name: '',
+    username: '',
     bio: '',
     twitter_url: '',
     instagram_url: '',
@@ -58,6 +59,7 @@ export default function SettingsPage() {
     if (data) {
       setFormData({
         full_name: data.full_name || '',
+        username: data.username || '',
         bio: data.bio || '',
         twitter_url: data.twitter_url || '',
         instagram_url: data.instagram_url || '',
@@ -74,8 +76,15 @@ export default function SettingsPage() {
     setSaveNotice(null)
     setSaving(true)
     try {
+      const normalizedHandle = formData.username.trim().replace(/^@+/, '').toLowerCase()
+
+      if (normalizedHandle && !/^[a-z0-9_]{3,20}$/.test(normalizedHandle)) {
+        throw new Error('Handle must be 3-20 characters and use only letters, numbers, and underscores.')
+      }
+
       const updatePayload = {
         full_name: formData.full_name,
+        username: normalizedHandle || null,
         bio: formData.bio,
         twitter_url: formData.twitter_url,
         instagram_url: formData.instagram_url,
@@ -99,6 +108,7 @@ export default function SettingsPage() {
           .from('profiles')
           .update({
             full_name: updatePayload.full_name,
+            username: updatePayload.username,
             twitter_url: updatePayload.twitter_url,
             instagram_url: updatePayload.instagram_url,
             facebook_url: updatePayload.facebook_url,
@@ -112,6 +122,23 @@ export default function SettingsPage() {
       }
 
       if (error) throw error
+
+      const { error: onaguiProfilesError } = await supabase
+        .from('onagui_profiles')
+        .update({
+          full_name: updatePayload.full_name,
+          username: updatePayload.username,
+        })
+        .eq('id', user.id)
+
+      if (onaguiProfilesError && !onaguiProfilesError.message?.includes('schema cache')) {
+        throw onaguiProfilesError
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        username: normalizedHandle,
+      }))
       
       alert('✅ Profile updated successfully!')
 
@@ -175,6 +202,23 @@ export default function SettingsPage() {
               placeholder="Enter your full name"
               className="w-full"
             />
+          </div>
+
+          {/* Handle */}
+          <div className="mb-6">
+            <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+              Handle
+            </label>
+            <input
+              type="text"
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              placeholder="@yourhandle"
+              className="w-full"
+            />
+            <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+              Example: @theo (letters, numbers, underscores, 3-20 chars)
+            </p>
           </div>
 
           {/* Email (Read-only) */}
