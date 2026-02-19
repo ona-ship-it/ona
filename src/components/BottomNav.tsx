@@ -28,10 +28,10 @@ export default function BottomNav() {
       active: pathname === '/giveaways' || pathname.startsWith('/giveaways/')
     },
     {
-      href: '/create',
+      href: '/create-giveaway',
       icon: 'plus',
       label: 'Create',
-      active: pathname === '/create' || pathname.startsWith('/create/'),
+      active: pathname === '/create-giveaway' || pathname.startsWith('/create-giveaway/'),
       special: true
     },
     {
