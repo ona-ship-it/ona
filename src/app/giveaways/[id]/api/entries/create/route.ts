@@ -60,14 +60,49 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Giveaway has ended' }, { status: 400 })
     }
 
-    // Check if not sold out
-    if (giveaway.tickets_sold >= giveaway.total_tickets) {
+    const hasTicketLimit = Number(giveaway.total_tickets) > 0
+
+    // Check if not sold out (0 means unlimited)
+    if (hasTicketLimit && giveaway.tickets_sold >= giveaway.total_tickets) {
       return NextResponse.json({ error: 'Giveaway is sold out' }, { status: 400 })
     }
 
     // Only handle free entries for now
     if (!giveaway.is_free) {
       return NextResponse.json({ error: 'Paid entries require wallet connection' }, { status: 400 })
+    }
+
+    const freeTicketLimit = Number(giveaway.free_ticket_limit || 0)
+    if (freeTicketLimit > 0) {
+      const { count: claimedFreeTickets, error: freeTicketCountError } = await supabase
+        .from('tickets')
+        .select('id', { count: 'exact', head: true })
+        .eq('giveaway_id', giveawayId)
+        .eq('is_free', true)
+
+      if (freeTicketCountError) {
+        return NextResponse.json({ error: 'Failed to validate free ticket limit' }, { status: 500 })
+      }
+
+      if ((claimedFreeTickets || 0) >= freeTicketLimit) {
+        return NextResponse.json({ error: 'Free tickets are fully claimed for this giveaway' }, { status: 400 })
+      }
+    }
+
+    const { data: existingFreeTicket, error: existingFreeTicketError } = await supabase
+      .from('tickets')
+      .select('id')
+      .eq('giveaway_id', giveawayId)
+      .eq('user_id', user.id)
+      .eq('is_free', true)
+      .maybeSingle()
+
+    if (existingFreeTicketError) {
+      return NextResponse.json({ error: 'Failed to validate free entry' }, { status: 500 })
+    }
+
+    if (existingFreeTicket) {
+      return NextResponse.json({ error: 'Free entry already claimed' }, { status: 400 })
     }
 
     // Create ticket entry
@@ -77,6 +112,8 @@ export async function POST(request: Request) {
         {
           giveaway_id: giveawayId,
           user_id: user.id,
+          is_free: true,
+          quantity: 1,
           purchase_price: 0,
           payment_currency: 'FREE',
           payment_method: 'free',

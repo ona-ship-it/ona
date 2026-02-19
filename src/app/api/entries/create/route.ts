@@ -60,14 +60,34 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Giveaway has ended' }, { status: 400 })
     }
 
-    // Check if not sold out
-    if (giveaway.tickets_sold >= giveaway.total_tickets) {
+    const hasTicketLimit = Number(giveaway.total_tickets) > 0
+
+    // Check if not sold out (0 means unlimited)
+    if (hasTicketLimit && giveaway.tickets_sold >= giveaway.total_tickets) {
       return NextResponse.json({ error: 'Giveaway is sold out' }, { status: 400 })
     }
 
     const normalizedEntryType = entryType === 'paid' ? 'paid' : 'free'
 
     if (normalizedEntryType === 'free') {
+      const freeTicketLimit = Number(giveaway.free_ticket_limit || 0)
+
+      if (freeTicketLimit > 0) {
+        const { count: claimedFreeTickets, error: freeTicketCountError } = await supabase
+          .from('tickets')
+          .select('id', { count: 'exact', head: true })
+          .eq('giveaway_id', giveawayId)
+          .eq('is_free', true)
+
+        if (freeTicketCountError) {
+          return NextResponse.json({ error: 'Failed to validate free ticket limit' }, { status: 500 })
+        }
+
+        if ((claimedFreeTickets || 0) >= freeTicketLimit) {
+          return NextResponse.json({ error: 'Free tickets are fully claimed for this giveaway' }, { status: 400 })
+        }
+      }
+
       const { data: existingFreeTicket, error: existingFreeTicketError } = await supabase
         .from('tickets')
         .select('id')
