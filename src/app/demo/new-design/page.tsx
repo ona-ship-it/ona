@@ -365,6 +365,16 @@ function BcGameCard({ type = "GIVEAWAY", title, price, host, highlight, small }:
 }
 
 function Header({ c, small }: { c: (typeof COLORS)["dark"]; small: boolean }) {
+  const [showCreateMenu, setShowCreateMenu] = useState(false);
+
+  const createItems = [
+    { label: "Giveaway", href: "/create-giveaway" },
+    { label: "Raffle", href: "/raffles/create" },
+    { label: "Fundraise", href: "/fundraise/create" },
+    { label: "Marketplace", href: "/marketplace" },
+    { label: "Profile", href: "/profile" },
+  ];
+
   return (
     <div style={{ background: c.bgPrimary, borderBottom: `1px solid ${c.border}`, padding: small ? "10px 12px" : "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
       <span style={{ fontWeight: 800, fontSize: small ? 16 : 20, color: c.textPrimary }}>ONAGUI</span>
@@ -379,7 +389,50 @@ function Header({ c, small }: { c: (typeof COLORS)["dark"]; small: boolean }) {
         {!small && (
           <button style={{ padding: "6px 14px", border: `1.5px solid ${c.border}`, borderRadius: 8, background: "transparent", color: c.textPrimary, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Sign Up</button>
         )}
-        <button style={{ padding: small ? "5px 10px" : "6px 14px", border: "none", borderRadius: 8, background: c.green, color: "#fff", fontSize: small ? 11 : 12, fontWeight: 600, cursor: "pointer" }}>+ Create</button>
+        <div style={{ position: "relative" }}>
+          <button
+            onClick={() => setShowCreateMenu((value) => !value)}
+            style={{ padding: small ? "5px 10px" : "6px 14px", border: "none", borderRadius: 8, background: c.green, color: "#fff", fontSize: small ? 11 : 12, fontWeight: 600, cursor: "pointer" }}
+          >
+            + Create
+          </button>
+
+          {showCreateMenu && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 8px)",
+                right: 0,
+                minWidth: small ? 160 : 180,
+                background: c.bgSecondary,
+                border: `1px solid ${c.border}`,
+                borderRadius: 10,
+                overflow: "hidden",
+                boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
+                zIndex: 100,
+              }}
+            >
+              {createItems.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setShowCreateMenu(false)}
+                  style={{
+                    display: "block",
+                    padding: "10px 12px",
+                    color: c.textPrimary,
+                    textDecoration: "none",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    borderBottom: `1px solid ${c.border}`,
+                  }}
+                >
+                  Create {item.label}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
         {small && <span style={{ fontSize: 18, color: c.textSecondary }}>☰</span>}
       </div>
     </div>

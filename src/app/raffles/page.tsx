@@ -156,7 +156,7 @@ export default function RafflesPage() {
             />
           </div>
 
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4 flex-wrap">
             <button
               onClick={() => setFilter('all')}
               className={`px-8 py-3 rounded-xl font-bold transition-all ${
@@ -177,6 +177,12 @@ export default function RafflesPage() {
             >
               ⚡ Powered by Onagui
             </button>
+            <Link
+              href="/raffles/create"
+              className="px-8 py-3 rounded-xl font-bold transition-all bg-green-600 text-white hover:bg-green-700"
+            >
+              + Create Raffle
+            </Link>
           </div>
         </div>
 
