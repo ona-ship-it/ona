@@ -29,7 +29,17 @@ type Giveaway = {
   winner_drawn_at: string | null
   share_code: string | null
   share_url: string | null
+  creator_id?: string | null
+  creator_name?: string | null
+  creator_avatar_url?: string | null
+  paid_ticket_count?: number
+  paid_ticket_revenue?: number
+  prize_boost?: number
+  onagui_subs?: number
 }
+
+const CARD_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop'
+const PROFILE_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=600&auto=format&fit=crop'
 
 export default function GiveawayDetailPage() {
   const params = useParams()
@@ -80,8 +90,37 @@ export default function GiveawayDetailPage() {
         claimedFreeTickets = count || 0
       }
 
+      const { data: paidTickets } = await supabase
+        .from('tickets')
+        .select('quantity')
+        .eq('giveaway_id', data.id)
+        .eq('is_free', false)
+
+      let creator: { id: string; username: string | null; full_name: string | null; avatar_url: string | null } | null = null
+      if (data.creator_id) {
+        const { data: creatorData } = await supabase
+          .from('onagui_profiles')
+          .select('id, username, full_name, avatar_url')
+          .eq('id', data.creator_id)
+          .maybeSingle()
+        creator = creatorData || null
+      }
+
+      const paidCount = (paidTickets || []).reduce((sum, row) => sum + (row.quantity || 1), 0)
+      const paidRevenue = paidCount * (data.ticket_price || 0)
+
+      const enrichedGiveaway: Giveaway = {
+        ...data,
+        creator_name: creator?.full_name || creator?.username || null,
+        creator_avatar_url: creator?.avatar_url || null,
+        paid_ticket_count: paidCount,
+        paid_ticket_revenue: paidRevenue,
+        prize_boost: paidRevenue * 0.4,
+        onagui_subs: paidRevenue * 0.1,
+      }
+
       setFreeTicketsClaimed(claimedFreeTickets)
-      setGiveaway(data)
+      setGiveaway(enrichedGiveaway)
     } catch (error) {
       console.error('Error fetching giveaway:', error)
       router.push('/')
@@ -189,12 +228,28 @@ export default function GiveawayDetailPage() {
                 {giveaway.image_url ? (
                   <Image src={giveaway.image_url} alt={giveaway.title} fill className="object-cover" />
                 ) : (
-                  <div className="flex items-center justify-center h-full text-9xl">{giveaway.emoji}</div>
+                  <Image src={CARD_FALLBACK_IMAGE} alt={giveaway.title} fill className="object-cover" />
                 )}
               </div>
             </div>
 
             <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-8">
+              <div className="flex items-center gap-3 mb-4">
+                <Image
+                  src={giveaway.creator_avatar_url || PROFILE_FALLBACK_IMAGE}
+                  alt={giveaway.creator_name || 'Creator'}
+                  width={40}
+                  height={40}
+                  className="rounded-full"
+                />
+                <div>
+                  <div className="text-slate-400 text-sm">by</div>
+                  <div className="text-white font-semibold">{giveaway.creator_name || 'ONAGUI'}</div>
+                </div>
+                <div className="ml-auto text-cyan-400 text-sm font-semibold">
+                  {Math.round(giveaway.onagui_subs || 0)} subs
+                </div>
+              </div>
               <h1 className="text-4xl font-black text-white mb-4">{giveaway.title}</h1>
               <p className="text-slate-300 text-lg">{giveaway.description}</p>
             </div>
@@ -228,6 +283,9 @@ export default function GiveawayDetailPage() {
                 ${giveaway.prize_value.toLocaleString()}
               </div>
               <div className="text-yellow-400 font-semibold">{giveaway.prize_currency}</div>
+              <div className="text-xs text-slate-400 mt-2">
+                Prize boost: ${giveaway.prize_value.toLocaleString()} → ${(giveaway.prize_value + (giveaway.prize_boost || 0)).toLocaleString()}
+              </div>
             </div>
 
             {/* Timer */}
