@@ -299,7 +299,7 @@ export default function Header() {
                   }}
                 >
                   <Link
-                    href="/create"
+                    href="/create-giveaway"
                     className="block px-4 py-3 transition-colors cursor-pointer"
                     style={{ borderBottom: '1px solid var(--border)' }}
                     onMouseEnter={(e) => e.currentTarget.style.background = 'var(--tertiary-bg)'}
@@ -444,7 +444,7 @@ export default function Header() {
                   </Link>
                 )}
 
-                <Link href="/create" onClick={() => setShowMobileMenu(false)}>
+                <Link href="/create-giveaway" onClick={() => setShowMobileMenu(false)}>
                   <button
                     className="w-full px-4 py-2.5 text-sm font-semibold rounded-full"
                     style={{ background: '#1a1a2e', color: '#ffffff' }}
