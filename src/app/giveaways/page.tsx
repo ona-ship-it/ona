@@ -27,7 +27,7 @@ export default function Page() {
               </p>
             </div>
             <Link
-              href="/giveaways/new"
+              href="/create-giveaway"
               className="px-6 py-3 rounded-lg font-semibold transition-all"
               style={{ background: 'var(--accent-green)', color: 'var(--text-primary)' }}
             >
