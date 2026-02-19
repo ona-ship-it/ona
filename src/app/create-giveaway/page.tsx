@@ -220,6 +220,11 @@ export default function CreateGiveawayPage() {
     setError('')
   }
 
+  const isMissingFreeTicketLimitColumnError = (err: any) => {
+    const rawMessage = (err?.message || '').toLowerCase()
+    return rawMessage.includes('free_ticket_limit') && rawMessage.includes('schema cache')
+  }
+
   const getShareUrlForCode = (shareCode: string) => {
     if (typeof window === 'undefined') return `https://onagui.com/share/${shareCode}`
     return `${window.location.origin}/share/${shareCode}`
@@ -250,27 +255,40 @@ export default function CreateGiveawayPage() {
 
       const endDateTime = new Date(`${formData.endDate}T${formData.endTime}`)
 
-      const { data, error: insertError } = await supabase
+      const giveawayInsertPayload: Record<string, any> = {
+        creator_id: user?.id,
+        title: formData.title,
+        description: formData.description,
+        emoji: formData.emoji,
+        image_url: imageUrl,
+        prize_value: parseFloat(formData.prizeValue),
+        prize_currency: formData.prizeCurrency,
+        total_tickets: UNLIMITED_TICKETS,
+        ticket_price: DONATION_TICKET_PRICE_USDC,
+        ticket_currency: DONATION_TICKET_CURRENCY,
+        is_free: false,
+        free_ticket_limit: parsedFreeTicketLimit,
+        status: status,
+        end_date: endDateTime.toISOString(),
+      }
+
+      let { data, error: insertError } = await supabase
         .from('giveaways')
-        .insert([
-          {
-            creator_id: user?.id,
-            title: formData.title,
-            description: formData.description,
-            emoji: formData.emoji,
-            image_url: imageUrl,
-            prize_value: parseFloat(formData.prizeValue),
-            prize_currency: formData.prizeCurrency,
-            total_tickets: UNLIMITED_TICKETS,
-            ticket_price: DONATION_TICKET_PRICE_USDC,
-            ticket_currency: DONATION_TICKET_CURRENCY,
-            is_free: false,
-            free_ticket_limit: parsedFreeTicketLimit,
-            status: status,
-            end_date: endDateTime.toISOString(),
-          },
-        ])
+        .insert([giveawayInsertPayload])
         .select()
+
+      if (insertError && isMissingFreeTicketLimitColumnError(insertError)) {
+        const { free_ticket_limit: omittedFreeTicketLimit, ...legacyPayload } = giveawayInsertPayload
+        console.warn('free_ticket_limit missing in schema cache; retrying giveaway creation without that column')
+
+        const retryInsert = await supabase
+          .from('giveaways')
+          .insert([legacyPayload])
+          .select()
+
+        data = retryInsert.data
+        insertError = retryInsert.error
+      }
 
       if (insertError) throw insertError
       if (!data || !data[0]) throw new Error('Giveaway created but data could not be loaded')
