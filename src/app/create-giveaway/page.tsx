@@ -15,6 +15,19 @@ const DONATION_TICKET_CURRENCY = 'USDC'
 const UNLIMITED_TICKETS = 0
 const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024
 const MAX_IMAGE_SIZE_LABEL = '20MB'
+const DONATION_SPLIT = {
+  onagui: 50,
+  giveawayValue: 40,
+  creator: 10,
+}
+
+type CreatedGiveawaySummary = {
+  id: string
+  title: string
+  shareCode: string
+  shareUrl: string
+  freeTicketLimit: number | null
+}
 
 export default function CreateGiveawayPage() {
   const { user, loading: authLoading } = useAuth()
@@ -26,6 +39,8 @@ export default function CreateGiveawayPage() {
   const [loading, setLoading] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [error, setError] = useState('')
+  const [createdGiveaway, setCreatedGiveaway] = useState<CreatedGiveawaySummary | null>(null)
+  const [copiedShareLink, setCopiedShareLink] = useState(false)
 
   // Form data
   const [formData, setFormData] = useState({
@@ -205,6 +220,18 @@ export default function CreateGiveawayPage() {
     setError('')
   }
 
+  const getShareUrlForCode = (shareCode: string) => {
+    if (typeof window === 'undefined') return `https://onagui.com/share/${shareCode}`
+    return `${window.location.origin}/share/${shareCode}`
+  }
+
+  const copyShareLink = async () => {
+    if (!createdGiveaway) return
+    await navigator.clipboard.writeText(createdGiveaway.shareUrl)
+    setCopiedShareLink(true)
+    setTimeout(() => setCopiedShareLink(false), 2000)
+  }
+
   const handleSubmit = async (status: 'draft' | 'active') => {
     if (!validateStep()) return
 
@@ -246,15 +273,38 @@ export default function CreateGiveawayPage() {
         .select()
 
       if (insertError) throw insertError
+      if (!data || !data[0]) throw new Error('Giveaway created but data could not be loaded')
+
+      const created = data[0] as any
+      const generatedShareCode = created.share_code || ''
+      const canonicalShareUrl = generatedShareCode ? getShareUrlForCode(generatedShareCode) : ''
+
+      if (generatedShareCode && created.share_url !== canonicalShareUrl) {
+        await supabase
+          .from('giveaways')
+          .update({ share_url: canonicalShareUrl })
+          .eq('id', created.id)
+      }
 
       // Create escrow account for automatic paid donation tickets
-      if (data && data[0]) {
+      if (created) {
         await supabase.from('escrow_accounts').insert([
           {
-            giveaway_id: data[0].id,
+            giveaway_id: created.id,
             currency: DONATION_TICKET_CURRENCY,
           },
         ])
+      }
+
+      if (status === 'active' && generatedShareCode) {
+        setCreatedGiveaway({
+          id: created.id,
+          title: created.title || formData.title,
+          shareCode: generatedShareCode,
+          shareUrl: canonicalShareUrl,
+          freeTicketLimit: parsedFreeTicketLimit,
+        })
+        return
       }
 
       router.push('/profile')
@@ -277,6 +327,71 @@ export default function CreateGiveawayPage() {
   }
 
   if (!user) return null
+
+  if (createdGiveaway) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
+        <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl relative z-10">
+          <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-3">
+              <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                ONAGUI
+              </h1>
+            </Link>
+          </div>
+        </header>
+
+        <div className="relative z-10 max-w-4xl mx-auto px-4 py-12">
+          <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl p-8 space-y-6">
+            <div>
+              <h2 className="text-3xl font-bold text-white mb-2">Giveaway Published ✅</h2>
+              <p className="text-slate-300">
+                Your share link is generated automatically. Any user with this link can claim one free ticket for this giveaway.
+              </p>
+            </div>
+
+            <div className="p-4 bg-slate-800/40 border border-slate-700 rounded-xl space-y-2 text-sm">
+              <p className="text-slate-200">• Share link is unique to this giveaway: <span className="font-mono">{createdGiveaway.shareCode}</span></p>
+              <p className="text-slate-200">• One free ticket per user from this link</p>
+              <p className="text-slate-200">
+                • {createdGiveaway.freeTicketLimit ? `Free-ticket cap active: ${createdGiveaway.freeTicketLimit} total free tickets` : 'No free-ticket cap set (unlimited free tickets)'}
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <input
+                type="text"
+                readOnly
+                value={createdGiveaway.shareUrl}
+                className="flex-1 px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white"
+              />
+              <button
+                onClick={copyShareLink}
+                className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all"
+              >
+                {copiedShareLink ? 'Copied!' : 'Copy Link'}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <Link
+                href={`/giveaways/${createdGiveaway.id}`}
+                className="text-center py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all"
+              >
+                Open Giveaway
+              </Link>
+              <Link
+                href="/profile"
+                className="text-center py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition-all border border-slate-700"
+              >
+                Go to Profile
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
@@ -540,6 +655,28 @@ export default function CreateGiveawayPage() {
                       </p>
                     </div>
                   </div>
+                </div>
+
+                <div className="w-full p-6 rounded-2xl border-2 border-cyan-500/40 bg-cyan-500/10 text-left">
+                  <h3 className="text-xl font-bold text-white mb-2">Share Link (Automatic)</h3>
+                  <p className="text-slate-200 text-sm mb-2">
+                    A unique share link is generated when you publish. Anyone with that link can claim one free ticket for this giveaway.
+                  </p>
+                  <p className="text-slate-300 text-sm">
+                    If you set a free-ticket limit, the link still works but free claims stop once that limit is reached.
+                  </p>
+                </div>
+
+                <div className="w-full p-6 rounded-2xl border-2 border-yellow-500/40 bg-yellow-500/10 text-left">
+                  <h3 className="text-xl font-bold text-white mb-2">Donation Split (Internal Rules)</h3>
+                  <p className="text-slate-200 text-sm mb-2">
+                    Paid donation tickets are split automatically according to ONAGUI internal rules:
+                  </p>
+                  <ul className="text-slate-200 text-sm space-y-1">
+                    <li>• {DONATION_SPLIT.onagui}% to ONAGUI platform</li>
+                    <li>• {DONATION_SPLIT.giveawayValue}% added to giveaway value / winners pool</li>
+                    <li>• {DONATION_SPLIT.creator}% to creator commission</li>
+                  </ul>
                 </div>
 
                 <div className="pt-2">

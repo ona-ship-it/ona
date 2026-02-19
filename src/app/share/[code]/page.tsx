@@ -19,6 +19,7 @@ type Giveaway = {
   end_date: string
   share_code: string
   creator_id: string
+  free_ticket_limit: number | null
 }
 
 export default function ShareLandingPage() {
@@ -80,7 +81,7 @@ export default function ShareLandingPage() {
   async function handleClaimTicket() {
     if (!user) {
       // Redirect to signup with return URL
-      router.push(`/signup?ref=${params.code}&return=/g/${params.code}`)
+      router.push(`/signup?ref=${params.code}&return=/share/${params.code}`)
       return
     }
 
@@ -103,17 +104,40 @@ export default function ShareLandingPage() {
       }
 
       // Check if already claimed
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from('tickets')
         .select('id')
         .eq('user_id', user.id)
         .eq('giveaway_id', giveaway.id)
-        .single()
+        .maybeSingle()
+
+      if (existingError) {
+        throw existingError
+      }
 
       if (existing) {
         alert('You already have a ticket for this giveaway!')
         setClaiming(false)
         return
+      }
+
+      const freeTicketLimit = Number(giveaway.free_ticket_limit || 0)
+      if (freeTicketLimit > 0) {
+        const { count: claimedFreeTickets, error: freeCountError } = await supabase
+          .from('tickets')
+          .select('id', { count: 'exact', head: true })
+          .eq('giveaway_id', giveaway.id)
+          .eq('is_free', true)
+
+        if (freeCountError) {
+          throw freeCountError
+        }
+
+        if ((claimedFreeTickets || 0) >= freeTicketLimit) {
+          alert('Free tickets are fully claimed for this giveaway.')
+          setClaiming(false)
+          return
+        }
       }
 
       // Create free ticket
@@ -239,7 +263,7 @@ export default function ShareLandingPage() {
 
                 {!user && (
                   <p className="text-center text-slate-400 text-sm mt-4">
-                    Already have an account? <Link href={`/login?ref=${params.code}&return=/g/${params.code}`} className="text-blue-400 hover:underline">Sign in</Link>
+                    Already have an account? <Link href={`/login?ref=${params.code}&return=/share/${params.code}`} className="text-blue-400 hover:underline">Sign in</Link>
                   </p>
                 )}
               </div>
