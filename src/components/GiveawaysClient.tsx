@@ -260,6 +260,12 @@ export default function GiveawaysClient() {
                 <span>CLAIM FREE TICKET</span>
                 <div className="bc-btn-glow"></div>
               </button>
+
+              <button className="bc-action-secondary">
+                BUY TICKET 1 USDC
+              </button>
+
+              <div className="bc-action-note">1 chance per user</div>
             </div>
           </Link>
         ))}
@@ -539,6 +545,33 @@ export default function GiveawaysClient() {
         .bc-action-button:hover {
           transform: translateY(-2px);
           box-shadow: 0 8px 30px rgba(0, 212, 212, 0.5);
+        }
+
+        .bc-action-secondary {
+          width: 100%;
+          margin-top: 10px;
+          padding: 10px 20px;
+          border-radius: 10px;
+          border: 1px solid rgba(37, 99, 235, 0.45);
+          background: rgba(37, 99, 235, 0.16);
+          color: #7dd3fc;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 1.2px;
+          cursor: pointer;
+          transition: all 0.25s ease;
+        }
+
+        .bc-action-secondary:hover {
+          background: rgba(37, 99, 235, 0.28);
+          color: #e0f2fe;
+        }
+
+        .bc-action-note {
+          margin-top: 8px;
+          text-align: center;
+          font-size: 11px;
+          color: #64748b;
         }
       `}</style>
     </div>
