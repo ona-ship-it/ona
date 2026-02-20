@@ -26,6 +26,8 @@ type GiveawayCardData = {
   highlight: string;
 };
 
+type RedesignView = "both" | "laptop" | "phone";
+
 const Icons = {
   home: (color: string) => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -329,9 +331,11 @@ const CARDS: GiveawayCardData[] = [
   { title: "$500 USDC Cash", price: "500", host: "CryptoKing", highlight: "Hot Right Now" },
 ];
 
-export default function OnaguiRedesign({ page }: { page?: string }) {
+export default function OnaguiRedesign({ page, view = "both" }: { page?: string; view?: RedesignView }) {
   const [theme, setTheme] = useState<ThemeMode>("dark");
   const c = C[theme];
+  const showLaptop = view === "both" || view === "laptop";
+  const showPhone = view === "both" || view === "phone";
 
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#060d16", minHeight: "100vh", padding: "16px" }}>
@@ -348,7 +352,7 @@ export default function OnaguiRedesign({ page }: { page?: string }) {
       </div>
 
       <div style={{ display: "flex", gap: 24, justifyContent: "center", alignItems: "flex-start", flexWrap: "wrap" }}>
-        <div>
+        {showLaptop && <div>
           <div style={{ textAlign: "center", marginBottom: 4 }}>
             <span style={{ color: "#64748b", fontSize: 11, fontWeight: 600 }}>Desktop</span>
           </div>
@@ -377,9 +381,9 @@ export default function OnaguiRedesign({ page }: { page?: string }) {
               </div>
             </div>
           </div>
-        </div>
+        </div>}
 
-        <div>
+        {showPhone && <div>
           <div style={{ textAlign: "center", marginBottom: 4 }}>
             <span style={{ color: "#64748b", fontSize: 11, fontWeight: 600 }}>Mobile</span>
           </div>
@@ -405,10 +409,10 @@ export default function OnaguiRedesign({ page }: { page?: string }) {
 
             <BottomNav c={c} theme={theme} />
           </div>
-        </div>
+        </div>}
       </div>
 
-      <div style={{ maxWidth: 740, margin: "20px auto 0", padding: 14, background: "rgba(34,211,238,0.04)", borderRadius: 10, border: "1px solid rgba(34,211,238,0.1)" }}>
+      <div style={{ maxWidth: view === "phone" ? 300 : 740, margin: "20px auto 0", padding: 14, background: "rgba(34,211,238,0.04)", borderRadius: 10, border: "1px solid rgba(34,211,238,0.1)" }}>
         <h3 style={{ color: "#22d3ee", fontSize: 12, fontWeight: 700, marginTop: 0, marginBottom: 6 }}>Changes from v2</h3>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, fontSize: 10, color: "#94a3b8" }}>
           <div>→ No emojis — SVG icons everywhere</div>
