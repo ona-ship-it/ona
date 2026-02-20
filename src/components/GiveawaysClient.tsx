@@ -180,29 +180,6 @@ export default function GiveawaysClient() {
             
             {/* Card Body */}
             <div className="bc-card-body">
-              {/* Rating */}
-              <div className="bc-rating-row">
-                <div className="bc-rating-display">
-                  <Star size={12} fill="#ff8800" stroke="none" />
-                  <span className="rating-value">
-                    {getRatingData(giveaway.id).rating}
-                  </span>
-                  <span className="rating-count">
-                    ({getRatingData(giveaway.id).count})
-                  </span>
-                </div>
-                <LikeSaveButtons
-                  postId={giveaway.id}
-                  postType="giveaway"
-                  showCount={false}
-                  size="sm"
-                />
-              </div>
-
-              <div className="bc-card-subtitle" style={{ marginBottom: 8 }}>
-                {getGiveawayHighlight(giveaway)}
-              </div>
-              
               {/* Title */}
               <div className="bc-title-row">
                 <div className="bc-creator-column">

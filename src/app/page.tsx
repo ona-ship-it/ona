@@ -468,34 +468,6 @@ export default function HomePage() {
 
                 {/* Content */}
                 <div className="bc-card-body">
-                  <div className="bc-rating-row">
-                    <div className="bc-rating-display">
-                      <Star size={12} fill="#ff8800" stroke="none" />
-                      <span className="rating-value">
-                        {getRatingData(giveaway.id).rating}
-                      </span>
-                      <span className="rating-count">
-                        ({getRatingData(giveaway.id).count})
-                      </span>
-                    </div>
-                    <div
-                      style={{ marginLeft: 'auto' }}
-                      onClick={(event) => {
-                        event.preventDefault()
-                        event.stopPropagation()
-                      }}
-                    >
-                      <LikeSaveButtons
-                        postId={giveaway.id}
-                        postType="giveaway"
-                        showCount={false}
-                        size="sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="bc-highlight">{getGiveawayHighlight(giveaway)}</div>
-
                   <div className="bc-title-row">
                     <div className="bc-creator-column">
                       <Image
