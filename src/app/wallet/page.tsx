@@ -1,8 +1,9 @@
-import OnaguiRedesign from '@/components/redesign/OnaguiRedesign';
-
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export default function WalletPage() {
-  return <OnaguiRedesign page="wallet" />;
+import React from 'react';
+import WalletClient from './WalletClient';
+
+export default function Page() {
+  return <WalletClient />;
 }

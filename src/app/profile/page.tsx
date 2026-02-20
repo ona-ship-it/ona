@@ -1,8 +1,9 @@
-import OnaguiRedesign from '@/components/redesign/OnaguiRedesign';
-
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+import ProfilePageClient from '../profiles/ProfilePageClient';
+
 export default function ProfilePage() {
-  return <OnaguiRedesign page="profile" />;
+  return <ProfilePageClient />;
 }
+

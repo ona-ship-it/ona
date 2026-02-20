@@ -1,8 +1,7 @@
-import OnaguiRedesign from '@/components/redesign/OnaguiRedesign';
+import SignUpClient from './SignUpClient';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 export default function SignUpPage() {
-  return <OnaguiRedesign page="auth" />;
+  return <SignUpClient />;
 }
