@@ -468,6 +468,21 @@ export default function HomePage() {
 
                 {/* Content */}
                 <div className="bc-card-body">
+                  <div
+                    className="bc-actions-row"
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                    }}
+                  >
+                    <LikeSaveButtons
+                      postId={giveaway.id}
+                      postType="giveaway"
+                      showCount={false}
+                      size="sm"
+                    />
+                  </div>
+
                   <div className="bc-price-section">
                     <div className="bc-price-display">
                       <span className="bc-currency">{giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}</span>
@@ -501,21 +516,6 @@ export default function HomePage() {
                   <div className="bc-host-info">
                     <span>by</span>
                     <span className="bc-host-name">{giveaway.creator_name || 'ONAGUI'}</span>
-                  </div>
-
-                  <div className="bc-prize-progression">
-                    <span>Prize boost</span>
-                    <div className="bc-progression-values">
-                      <span>
-                        {giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}
-                        {giveaway.prize_value.toLocaleString()}
-                      </span>
-                      <span className="bc-progression-arrow">→</span>
-                      <span>
-                        {giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}
-                        {(giveaway.prize_value + (giveaway.prize_boost || 0)).toLocaleString()}
-                      </span>
-                    </div>
                   </div>
 
                   <div className="bc-action-stack">
