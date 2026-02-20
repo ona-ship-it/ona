@@ -261,10 +261,7 @@ export default function SettingsPage() {
             {/* Twitter/X */}
             <div className="mb-4">
               <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                <span className="inline-flex items-center gap-2">
-                  <span className="text-lg">𝕏</span>
-                  Twitter / X
-                </span>
+                Twitter / X
               </label>
               <input
                 type="url"
@@ -278,10 +275,7 @@ export default function SettingsPage() {
             {/* Instagram */}
             <div className="mb-4">
               <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                <span className="inline-flex items-center gap-2">
-                  <span className="text-lg">📷</span>
-                  Instagram
-                </span>
+                Instagram
               </label>
               <input
                 type="url"
@@ -295,10 +289,7 @@ export default function SettingsPage() {
             {/* TikTok */}
             <div className="mb-4">
               <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                <span className="inline-flex items-center gap-2">
-                  <span className="text-lg">🎵</span>
-                  TikTok
-                </span>
+                TikTok
               </label>
               <input
                 type="url"
@@ -312,10 +303,7 @@ export default function SettingsPage() {
             {/* YouTube */}
             <div className="mb-4">
               <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                <span className="inline-flex items-center gap-2">
-                  <span className="text-lg">▶️</span>
-                  YouTube
-                </span>
+                YouTube
               </label>
               <input
                 type="url"
@@ -329,10 +317,7 @@ export default function SettingsPage() {
             {/* Facebook */}
             <div className="mb-4">
               <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                <span className="inline-flex items-center gap-2">
-                  <span className="text-lg">👥</span>
-                  Facebook
-                </span>
+                Facebook
               </label>
               <input
                 type="url"
@@ -346,10 +331,7 @@ export default function SettingsPage() {
             {/* LinkedIn */}
             <div className="mb-4">
               <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                <span className="inline-flex items-center gap-2">
-                  <span className="text-lg">💼</span>
-                  LinkedIn
-                </span>
+                LinkedIn
               </label>
               <input
                 type="url"
@@ -363,10 +345,7 @@ export default function SettingsPage() {
             {/* Website */}
             <div className="mb-4">
               <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                <span className="inline-flex items-center gap-2">
-                  <span className="text-lg">🌐</span>
-                  Website
-                </span>
+                Website
               </label>
               <input
                 type="url"
@@ -398,8 +377,8 @@ export default function SettingsPage() {
             disabled={saving}
             className="w-full py-3 rounded-md font-semibold transition-all"
             style={{ 
-              background: 'var(--accent-blue)',
-              color: 'var(--text-primary)',
+              background: 'var(--accent-green)',
+              color: '#ffffff',
               opacity: saving ? 0.5 : 1
             }}
           >

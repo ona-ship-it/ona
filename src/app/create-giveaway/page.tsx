@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 
-const EMOJIS = ['🎁', '🎮', '💎', '🏆', '🎯', '⚡', '🔥', '⭐', '💰', '🎪', '🎨', '🚀', '🎭', '🎸', '🎬', '📱', '💻', '🎧', '👑', '🌟']
+const EMOJIS = ['G', 'P', 'D', 'W', 'T', 'S', 'F', 'R', 'C', 'E']
 
 const GIVEAWAY_IMAGE_BUCKET = 'giveaway-images'
 const DONATION_TICKET_PRICE_USDC = 1
@@ -46,7 +46,7 @@ export default function CreateGiveawayPage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    emoji: '🎁',
+    emoji: 'G',
     imageFile: null as File | null,
     imagePreview: '',
     imageUrl: '',
@@ -540,7 +540,11 @@ export default function CreateGiveawayPage() {
                     className="w-full h-64 border-2 border-dashed border-slate-700 rounded-2xl bg-slate-800/30 hover:border-blue-500 hover:bg-slate-800/50 transition-all cursor-pointer flex flex-col items-center justify-center gap-4"
                   >
                     <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-3xl">
-                      📸
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                        <circle cx="8.5" cy="10" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                      </svg>
                     </div>
                     <div className="text-center">
                       <p className="text-white font-semibold mb-1">Click to upload image</p>
@@ -671,7 +675,11 @@ export default function CreateGiveawayPage() {
                 <div className="w-full p-6 rounded-2xl border-2 border-green-500/40 bg-green-500/10 text-left">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center text-2xl">
-                      🎁
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 12 20 22 4 22 4 12" />
+                        <rect x="2" y="7" width="20" height="5" />
+                        <line x1="12" y1="22" x2="12" y2="7" />
+                      </svg>
                     </div>
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-white mb-1">Free Entry (Automatic)</h3>
@@ -685,7 +693,10 @@ export default function CreateGiveawayPage() {
                 <div className="w-full p-6 rounded-2xl border-2 border-blue-500/40 bg-blue-500/10 text-left">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-2xl">
-                      💰
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23" />
+                        <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+                      </svg>
                     </div>
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-white mb-1">Donation Tickets (Automatic)</h3>

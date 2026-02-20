@@ -274,25 +274,21 @@ export default function UserDashboard() {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
-            <div className="text-4xl mb-3">🎫</div>
             <div className="text-3xl font-black text-white mb-1">{stats.totalEntries}</div>
             <div className="text-sm text-slate-400">Giveaway Entries</div>
           </div>
 
           <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
-            <div className="text-4xl mb-3">🎟️</div>
             <div className="text-3xl font-black text-blue-400 mb-1">{stats.totalRaffleTickets}</div>
             <div className="text-sm text-slate-400">Raffle Tickets</div>
           </div>
 
           <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
-            <div className="text-4xl mb-3">💰</div>
             <div className="text-3xl font-black text-yellow-400 mb-1">${stats.totalSpent.toFixed(2)}</div>
             <div className="text-sm text-slate-400">Total Spent</div>
           </div>
 
           <div className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-2 border-green-500/50 rounded-3xl p-6">
-            <div className="text-4xl mb-3">🏆</div>
             <div className="text-3xl font-black text-green-400 mb-1">{stats.totalWins}</div>
             <div className="text-sm text-green-400 font-semibold">Total Wins</div>
           </div>
@@ -303,7 +299,7 @@ export default function UserDashboard() {
           <button
             onClick={() => setActiveTab('entries')}
             className={`px-6 py-3 rounded-xl font-semibold whitespace-nowrap transition-all ${
-              activeTab === 'entries' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+              activeTab === 'entries' ? 'bg-green-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
             }`}
           >
             My Entries ({giveawayEntries.length})
@@ -311,7 +307,7 @@ export default function UserDashboard() {
           <button
             onClick={() => setActiveTab('raffles')}
             className={`px-6 py-3 rounded-xl font-semibold whitespace-nowrap transition-all ${
-              activeTab === 'raffles' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+              activeTab === 'raffles' ? 'bg-green-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
             }`}
           >
             My Raffle Tickets ({raffleTickets.length})
@@ -341,7 +337,6 @@ export default function UserDashboard() {
             <div className="space-y-4">
               {giveawayEntries.length === 0 ? (
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-12 text-center">
-                  <div className="text-6xl mb-4">🎁</div>
                   <h3 className="text-2xl font-bold text-white mb-2">No Entries Yet</h3>
                   <p className="text-slate-400 mb-6">Start entering giveaways to see them here!</p>
                 </div>
@@ -379,7 +374,6 @@ export default function UserDashboard() {
             <div className="space-y-4">
               {raffleTickets.length === 0 ? (
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-12 text-center">
-                  <div className="text-6xl mb-4">🎟️</div>
                   <h3 className="text-2xl font-bold text-white mb-2">No Raffle Tickets</h3>
                   <p className="text-slate-400 mb-6">Buy raffle tickets to see them here!</p>
                 </div>
@@ -431,7 +425,6 @@ export default function UserDashboard() {
             <div className="space-y-4">
               {allWins.length === 0 ? (
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-12 text-center">
-                  <div className="text-6xl mb-4">🏆</div>
                   <h3 className="text-2xl font-bold text-white mb-2">No Wins Yet</h3>
                   <p className="text-slate-400">Keep entering - your luck will turn!</p>
                 </div>
@@ -450,10 +443,9 @@ export default function UserDashboard() {
                           {'giveaway_id' in win ? win.giveaway_title : win.raffle_title}
                         </h3>
                         <p className="text-sm text-green-400 font-semibold">
-                          🏆 You won this {'giveaway_id' in win ? 'giveaway' : 'raffle'}!
+                          Winner • {'giveaway_id' in win ? 'giveaway' : 'raffle'}
                         </p>
                       </div>
-                      <div className="text-6xl">🎉</div>
                     </div>
                   </div>
                 ))
@@ -466,7 +458,6 @@ export default function UserDashboard() {
             <div className="space-y-4">
               {createdRaffles.length === 0 ? (
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-12 text-center">
-                  <div className="text-6xl mb-4">🎟️</div>
                   <h3 className="text-2xl font-bold text-white mb-2">No Raffles Created</h3>
                   <p className="text-slate-400 mb-6">Create your first raffle!</p>
                   <Link href="/raffles/create" className="inline-block px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl">

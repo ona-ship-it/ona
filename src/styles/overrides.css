@@ -431,3 +431,86 @@ header .navigation a:hover {
     text-shadow: none !important;
   }
 }
+
+/* ===== FUNCTIONAL PAGE REDESIGN REMAP ===== */
+
+/* Legacy dark utility surfaces -> design tokens */
+.bg-slate-900\/50,
+.bg-slate-900,
+.bg-gray-900 {
+  background: var(--bg-card) !important;
+}
+
+.bg-slate-800,
+.bg-slate-800\/50,
+.bg-slate-800\/40,
+.bg-gray-800,
+.bg-gray-700 {
+  background: var(--bg-secondary) !important;
+}
+
+.border-slate-800,
+.border-slate-700,
+.border-slate-600,
+.border-gray-700,
+.border-gray-600 {
+  border-color: var(--border) !important;
+}
+
+.text-slate-500,
+.text-slate-400,
+.text-slate-300,
+.text-gray-600,
+.text-gray-500,
+.text-gray-400,
+.text-gray-300 {
+  color: var(--text-secondary) !important;
+}
+
+.text-blue-400,
+.text-blue-500,
+.text-blue-600,
+.text-blue-700 {
+  color: var(--accent-blue) !important;
+}
+
+.text-pink-400,
+.text-pink-500,
+.bg-pink-600,
+.hover\:bg-pink-700:hover {
+  color: var(--accent-green) !important;
+  background: var(--accent-green) !important;
+}
+
+.bg-blue-600,
+.bg-blue-700,
+.hover\:bg-blue-700:hover,
+.hover\:bg-blue-800:hover {
+  background: var(--accent-green) !important;
+}
+
+.focus\:ring-blue-500:focus,
+.focus\:ring-blue-400:focus,
+.focus\:ring-pink-500:focus {
+  --tw-ring-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+.focus\:border-blue-500:focus,
+.focus\:border-blue-400:focus,
+.focus\:border-pink-500:focus {
+  border-color: var(--accent-green) !important;
+}
+
+.rounded-3xl,
+.rounded-2xl,
+.rounded-xl {
+  border-radius: 14px !important;
+}
+
+/* Real app card shell for dashboard/settings/create/auth */
+.bg-slate-900\/50.backdrop-blur-xl,
+.bg-gray-900.rounded-lg,
+.bg-gray-900.rounded-2xl {
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
