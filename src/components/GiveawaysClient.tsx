@@ -180,6 +180,16 @@ export default function GiveawaysClient() {
             
             {/* Card Body */}
             <div className="bc-card-body">
+              {/* Price */}
+              <div className="bc-price-section">
+                <div className="bc-price-display">
+                  <span className="bc-currency">{giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}</span>
+                  <span className="bc-price-value">
+                    {(giveaway.prize_value || 0).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
               {/* Title */}
               <div className="bc-title-row">
                 <div className="bc-creator-column">
@@ -206,16 +216,6 @@ export default function GiveawaysClient() {
               <div className="bc-host-info">
                 <span>by</span>
                 <span className="bc-host-name">{giveaway.creator_name || 'ONAGUI'}</span>
-              </div>
-              
-              {/* Price */}
-              <div className="bc-price-section">
-                <div className="bc-price-display">
-                  <span className="bc-currency">{giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}</span>
-                  <span className="bc-price-value">
-                    {(giveaway.prize_value || 0).toLocaleString()}
-                  </span>
-                </div>
               </div>
 
               <div className="bc-prize-progression">

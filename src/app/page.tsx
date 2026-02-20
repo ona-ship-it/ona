@@ -468,6 +468,15 @@ export default function HomePage() {
 
                 {/* Content */}
                 <div className="bc-card-body">
+                  <div className="bc-price-section">
+                    <div className="bc-price-display">
+                      <span className="bc-currency">{giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}</span>
+                      <span className="bc-price-value">
+                        {giveaway.prize_value.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+
                   <div className="bc-title-row">
                     <div className="bc-creator-column">
                       <Image
@@ -492,15 +501,6 @@ export default function HomePage() {
                   <div className="bc-host-info">
                     <span>by</span>
                     <span className="bc-host-name">{giveaway.creator_name || 'ONAGUI'}</span>
-                  </div>
-
-                  <div className="bc-price-section">
-                    <div className="bc-price-display">
-                      <span className="bc-currency">{giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}</span>
-                      <span className="bc-price-value">
-                        {giveaway.prize_value.toLocaleString()}
-                      </span>
-                    </div>
                   </div>
 
                   <div className="bc-prize-progression">
