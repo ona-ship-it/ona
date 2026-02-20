@@ -327,8 +327,8 @@ function BottomNavigation({ palette, active, theme }: { palette: Palette; active
 
 function GiveawayCard({ palette, title, price, host, tag, theme }: { palette: Palette; title: string; price: string; host: string; tag: string; theme: ThemeMode }) {
   return (
-    <div style={{ background: palette.bgCard, border: `1px solid ${palette.border}`, borderRadius: 14, overflow: "hidden", cursor: "pointer" }}>
-      <div style={{ position: "relative", height: 120, overflow: "hidden" }}>
+    <div style={{ background: palette.bgCard, border: `1px solid ${palette.border}`, borderRadius: 14, overflow: "hidden", cursor: "pointer", height: 320, display: "flex", flexDirection: "column" }}>
+      <div style={{ position: "relative", height: "50%", overflow: "hidden" }}>
         <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg,#0f2027,#203a43,#2c5364)" }} />
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "55%", background: "linear-gradient(to top,rgba(15,20,25,0.95),transparent)" }} />
         <div style={{ position: "absolute", top: 8, left: 8, display: "flex", alignItems: "center", gap: 3, background: "linear-gradient(135deg,#ff4400,#ff8800)", color: "#fff", padding: "2px 8px", borderRadius: 10, fontSize: 8, fontWeight: 700, letterSpacing: 0.6 }}>
@@ -338,17 +338,22 @@ function GiveawayCard({ palette, title, price, host, tag, theme }: { palette: Pa
           <Icon name="verified" color="#00d4d4" size={14} />
         </div>
       </div>
-      <div style={{ padding: "10px 12px 12px" }}>
+      <div style={{ padding: "10px 12px 12px", height: "50%", display: "flex", flexDirection: "column", gap: 6 }}>
         <div style={{ display: "inline-flex", padding: "1px 6px", borderRadius: 999, background: "rgba(0,212,212,0.1)", color: "#3b82f6", fontSize: 8, fontWeight: 600, marginBottom: 6 }}>{tag}</div>
         <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 13, fontWeight: 700, color: palette.text, lineHeight: 1.2 }}>{title}</div>
-        <div style={{ fontSize: 9, color: "#718096", marginTop: 1, marginBottom: 6 }}>by <span style={{ color: "#3b82f6", fontWeight: 600 }}>{host}</span></div>
-        <div style={{ textAlign: "center", marginBottom: 8 }}>
-          <span style={{ fontFamily: "'Rajdhani'", fontSize: 12, color: "#ff8800", fontWeight: 600 }}>$</span>
-          <span style={{ fontFamily: "'Rajdhani'", fontSize: 22, fontWeight: 700, color: "#ff8800" }}>{price}</span>
+        <div style={{ fontSize: 9, color: "#718096", marginTop: 1, marginBottom: 0 }}>by <span style={{ color: "#3b82f6", fontWeight: 600 }}>{host}</span></div>
+        <div style={{ textAlign: "center", marginBottom: 0 }}>
+          <span style={{ fontFamily: "'Rajdhani'", fontSize: 12, color: palette.green, fontWeight: 700 }}>$</span>
+          <span style={{ fontFamily: "'Rajdhani'", fontSize: 22, fontWeight: 800, color: palette.green }}>{price}</span>
         </div>
-        <button style={{ width: "100%", padding: "7px 0", border: "none", borderRadius: 7, background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "#fff", fontFamily: "'Rajdhani'", fontSize: 10, fontWeight: 700, letterSpacing: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-          <Icon name="cart" color="#fff" size={11} /> CLAIM FREE TICKET
-        </button>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: "auto" }}>
+          <button style={{ width: "100%", padding: "7px 0", border: "none", borderRadius: 7, background: "linear-gradient(135deg,#10b981,#059669)", color: "#fff", fontFamily: "'Rajdhani'", fontSize: 10, fontWeight: 700, letterSpacing: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+            <Icon name="cart" color="#fff" size={11} /> FREE
+          </button>
+          <button style={{ width: "100%", padding: "7px 0", border: "1px solid rgba(59,130,246,0.5)", borderRadius: 7, background: "rgba(59,130,246,0.1)", color: "#3b82f6", fontFamily: "'Rajdhani'", fontSize: 10, fontWeight: 700, letterSpacing: 1, cursor: "pointer" }}>
+            BUY 1 USDC
+          </button>
+        </div>
       </div>
     </div>
   );

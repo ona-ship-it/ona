@@ -512,7 +512,7 @@ export default function HomePage() {
                     <div className="bc-title-stack">
                       <h3 className="bc-card-title">{giveaway.title}</h3>
                       <p className="bc-card-subtitle">
-                        {giveaway.description?.substring(0, 50) || 'Exclusive giveaway'}...
+                        {(giveaway.description?.substring(0, 34) || 'Exclusive giveaway').trim()}...
                       </p>
                     </div>
                   </div>
@@ -520,6 +520,8 @@ export default function HomePage() {
                   <div className="bc-host-info">
                     <span>by</span>
                     <span className="bc-host-name">{giveaway.creator_name || 'ONAGUI'}</span>
+                    <span>•</span>
+                    <span>{Math.round(giveaway.onagui_subs || 0)} subs</span>
                   </div>
 
                   <div className="bc-price-section">
@@ -531,37 +533,21 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  <div className="bc-prize-progression">
-                    <span>Prize boost</span>
-                    <div className="bc-progression-values">
-                      <span>
-                        {giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}
-                        {giveaway.prize_value.toLocaleString()}
-                      </span>
-                      <span className="bc-progression-arrow">→</span>
-                      <span>
-                        {giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}
-                        {(giveaway.prize_value + (giveaway.prize_boost || 0)).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="bc-action-stack">
+                  <div className="bc-action-row">
                     <button
                       className="bc-action-button"
                       onClick={() => trackEvent('cta_click', 'giveaway', giveaway.id, { cta: 'claim_free_ticket' })}
                     >
                       <ShoppingCart size={16} />
-                      <span>CLAIM FREE TICKET</span>
+                      <span>FREE</span>
                       <div className="bc-btn-glow"></div>
                     </button>
                     <button
                       className="bc-action-secondary"
                       onClick={() => trackEvent('cta_click', 'giveaway', giveaway.id, { cta: 'buy_ticket_1usdc' })}
                     >
-                      BUY TICKET 1 USDC
+                      BUY 1 USDC
                     </button>
-                    <div className="bc-action-note">1 chance per user</div>
                   </div>
                 </div>
               </Link>

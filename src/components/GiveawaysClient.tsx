@@ -220,7 +220,7 @@ export default function GiveawaysClient() {
                     {giveaway.title || 'Untitled Giveaway'}
                   </h3>
                   <p className="bc-card-subtitle">
-                    {giveaway.description?.substring(0, 50) || 'Amazing prize giveaway'}...
+                    {(giveaway.description?.substring(0, 34) || 'Amazing prize giveaway').trim()}...
                   </p>
                 </div>
               </div>
@@ -229,6 +229,8 @@ export default function GiveawaysClient() {
               <div className="bc-host-info">
                 <span>by</span>
                 <span className="bc-host-name">{giveaway.creator_name || 'ONAGUI'}</span>
+                <span>•</span>
+                <span>{Math.round(giveaway.onagui_subs || 0)} subs</span>
               </div>
               
               {/* Price */}
@@ -241,40 +243,24 @@ export default function GiveawaysClient() {
                 </div>
               </div>
 
-              <div className="bc-prize-progression">
-                <span>Prize boost</span>
-                <div className="bc-progression-values">
-                  <span>
-                    {giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}
-                    {(giveaway.prize_value || 0).toLocaleString()}
-                  </span>
-                  <span className="bc-progression-arrow">→</span>
-                  <span>
-                    {giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}
-                    {((giveaway.prize_value || 0) + (giveaway.prize_boost || 0)).toLocaleString()}
-                  </span>
-                </div>
+              <div className="bc-action-row">
+                <button className="bc-action-button">
+                  <ShoppingCart size={16} />
+                  <span>FREE</span>
+                  <div className="bc-btn-glow"></div>
+                </button>
+
+                <button
+                  className="bc-action-secondary"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    router.push(`/giveaways/${giveaway.id}?entry=paid`);
+                  }}
+                >
+                  BUY 1 USDC
+                </button>
               </div>
-              
-              {/* Button */}
-              <button className="bc-action-button">
-                <ShoppingCart size={16} />
-                <span>CLAIM FREE TICKET</span>
-                <div className="bc-btn-glow"></div>
-              </button>
-
-              <button
-                className="bc-action-secondary"
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  router.push(`/giveaways/${giveaway.id}?entry=paid`);
-                }}
-              >
-                BUY TICKET 1 USDC
-              </button>
-
-              <div className="bc-action-note">1 chance per user</div>
             </div>
           </Link>
         ))}
@@ -290,6 +276,9 @@ export default function GiveawaysClient() {
           position: relative;
           backdrop-filter: blur(10px);
           cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          height: clamp(340px, 46vh, 420px);
         }
         
         .bc-game-card::before {
@@ -318,7 +307,8 @@ export default function GiveawaysClient() {
         .bc-card-image-wrapper {
           position: relative;
           width: 100%;
-          height: 220px;
+          height: 50%;
+          min-height: 160px;
           overflow: hidden;
         }
         
@@ -408,13 +398,17 @@ export default function GiveawaysClient() {
         }
         
         .bc-card-body {
-          padding: 24px;
+          padding: 14px;
+          height: 50%;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
         }
         
         .bc-rating-row {
           display: flex;
           justify-content: flex-start;
-          margin-bottom: 16px;
+          margin-bottom: 0;
         }
         
         .bc-rating-display {
@@ -441,18 +435,18 @@ export default function GiveawaysClient() {
         
         .bc-card-title {
           font-family: 'Rajdhani', sans-serif;
-          font-size: 22px;
+          font-size: 19px;
           font-weight: 700;
           color: #ffffff;
-          margin-bottom: 6px;
-          line-height: 1.3;
-          letter-spacing: 0.5px;
+          margin-bottom: 2px;
+          line-height: 1.15;
+          letter-spacing: 0.3px;
         }
         
         .bc-card-subtitle {
-          font-size: 14px;
+          font-size: 12px;
           color: #718096;
-          margin-bottom: 12px;
+          margin-bottom: 0;
           font-weight: 500;
         }
         
@@ -460,8 +454,8 @@ export default function GiveawaysClient() {
           display: flex;
           align-items: center;
           gap: 6px;
-          margin-bottom: 20px;
-          font-size: 13px;
+          margin-bottom: 0;
+          font-size: 12px;
           color: #718096;
         }
         
@@ -473,7 +467,7 @@ export default function GiveawaysClient() {
         .bc-price-section {
           display: flex;
           justify-content: center;
-          margin-bottom: 20px;
+          margin-bottom: 0;
         }
         
         .bc-price-display {
@@ -484,15 +478,15 @@ export default function GiveawaysClient() {
         }
         
         .bc-currency {
-          font-size: 24px;
-          color: #ff8800;
-          font-weight: 600;
+          font-size: 22px;
+          color: #10b981;
+          font-weight: 700;
         }
         
         .bc-price-value {
-          font-size: 40px;
-          font-weight: 700;
-          color: #ff8800;
+          font-size: 34px;
+          font-weight: 800;
+          color: #10b981;
         }
 
         .bc-commission-row {
@@ -518,13 +512,13 @@ export default function GiveawaysClient() {
         .bc-action-button {
           position: relative;
           width: 100%;
-          padding: 12px 24px;
+          padding: 9px 12px;
           border: none;
           border-radius: 10px;
           font-family: 'Rajdhani', sans-serif;
-          font-size: 14px;
+          font-size: 12px;
           font-weight: 700;
-          letter-spacing: 1.5px;
+          letter-spacing: 1px;
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -532,9 +526,9 @@ export default function GiveawaysClient() {
           gap: 8px;
           transition: all 0.3s ease;
           overflow: hidden;
-          background: linear-gradient(135deg, #00d4d4 0%, #00e6e6 100%);
-          color: #0f1419;
-          box-shadow: 0 4px 20px rgba(0, 212, 212, 0.3);
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: #ffffff;
+          box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
         }
         
         .bc-btn-glow {
@@ -553,20 +547,27 @@ export default function GiveawaysClient() {
         
         .bc-action-button:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 30px rgba(0, 212, 212, 0.5);
+          box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5);
+        }
+
+        .bc-action-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+          margin-top: auto;
         }
 
         .bc-action-secondary {
           width: 100%;
-          margin-top: 10px;
-          padding: 10px 20px;
+          margin-top: 0;
+          padding: 9px 12px;
           border-radius: 10px;
           border: 1px solid rgba(37, 99, 235, 0.45);
           background: rgba(37, 99, 235, 0.16);
           color: #7dd3fc;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 700;
-          letter-spacing: 1.2px;
+          letter-spacing: 1px;
           cursor: pointer;
           transition: all 0.25s ease;
         }
