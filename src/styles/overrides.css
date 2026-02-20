@@ -446,7 +446,7 @@ header .navigation a:hover {
 }
 
 .bc-card-image-wrapper {
-  height: 150px !important;
+  height: 200px !important;
 }
 
 .bc-game-card:hover .bc-card-image {
@@ -495,9 +495,30 @@ header .navigation a:hover {
 
 .bc-actions-row {
   display: flex !important;
-  justify-content: flex-end !important;
+  justify-content: space-between !important;
+  align-items: center !important;
   gap: 8px !important;
   margin-bottom: 8px !important;
+}
+
+.bc-identity-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.bc-identity-meta {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
+}
+
+.bc-handle-text {
+  font-size: 10px !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px !important;
+  line-height: 1 !important;
 }
 
 .bc-title-row {

@@ -187,6 +187,17 @@ export default function GiveawaysClient() {
                   event.stopPropagation();
                 }}
               >
+                <div className="bc-identity-row">
+                  <img
+                    src={giveaway.creator_avatar_url || PROFILE_FALLBACK_IMAGE}
+                    alt={giveaway.creator_name || 'Creator'}
+                    className="bc-creator-avatar"
+                  />
+                  <div className="bc-identity-meta">
+                    <span className="bc-handle-text">@{(giveaway.creator_name || 'onagui').toLowerCase().replace(/\s+/g, '')}</span>
+                    <span className="bc-subs-badge">{Math.round(giveaway.onagui_subs || 0)} subs</span>
+                  </div>
+                </div>
                 <LikeSaveButtons
                   postId={giveaway.id}
                   postType="giveaway"
@@ -207,16 +218,6 @@ export default function GiveawaysClient() {
 
               {/* Title */}
               <div className="bc-title-row">
-                <div className="bc-creator-column">
-                  <img
-                    src={giveaway.creator_avatar_url || PROFILE_FALLBACK_IMAGE}
-                    alt={giveaway.creator_name || 'Creator'}
-                    className="bc-creator-avatar"
-                  />
-                  <span className="bc-subs-badge">
-                    {Math.round(giveaway.onagui_subs || 0)} subs
-                  </span>
-                </div>
                 <div className="bc-title-stack">
                   <h3 className="bc-card-title">
                     {giveaway.title || 'Untitled Giveaway'}

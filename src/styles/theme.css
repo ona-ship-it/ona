@@ -676,7 +676,7 @@ header button:focus-visible {
   box-shadow: 0 16px 48px rgba(0, 212, 212, 0.2);
 }
 
-.bc-card-image-wrapper { position: relative; width: 100%; height: 150px; overflow: hidden; }
+.bc-card-image-wrapper { position: relative; width: 100%; height: 200px; overflow: hidden; }
 .bc-card-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
 .bc-game-card:hover .bc-card-image { transform: scale(1.08); }
 .bc-image-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 55%; background: linear-gradient(to top, rgba(15, 20, 25, 0.95) 0%, transparent 100%); }
@@ -711,9 +711,30 @@ header button:focus-visible {
 
 .bc-actions-row {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: 8px;
   margin-bottom: 8px;
+}
+
+.bc-identity-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bc-identity-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.bc-handle-text {
+  font-size: 10px;
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  line-height: 1;
 }
 
 .bc-actions-row svg {
