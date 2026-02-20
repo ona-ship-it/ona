@@ -460,7 +460,7 @@ export default function HomePage() {
                   )}
 
                   <div className="bc-verified-icon">
-                    <CheckCircle size={20} fill="#00d4d4" stroke="#0f1419" />
+                    <CheckCircle size={20} fill="#067a0d" stroke="#0f1419" />
                   </div>
 
                   <div className="bc-condition-tag">GIVEAWAY</div>

@@ -432,6 +432,168 @@ header .navigation a:hover {
   }
 }
 
+/* ===== FINAL GIVEAWAY CARD SPEC (HIGH PRIORITY) ===== */
+
+.bc-game-card {
+  border-radius: 16px !important;
+  box-shadow: none;
+}
+
+.bc-game-card:hover {
+  transform: translateY(-8px) !important;
+  border-color: rgba(0, 212, 212, 0.5) !important;
+  box-shadow: 0 16px 48px rgba(0, 212, 212, 0.2) !important;
+}
+
+.bc-card-image-wrapper {
+  height: 150px !important;
+}
+
+.bc-game-card:hover .bc-card-image {
+  transform: scale(1.08) !important;
+}
+
+.bc-image-overlay {
+  height: 55% !important;
+}
+
+.bc-trending-badge {
+  top: 10px !important;
+  left: 10px !important;
+  gap: 4px !important;
+  padding: 3px 10px !important;
+  font-size: 6px !important;
+  letter-spacing: 0.7px !important;
+}
+
+.bc-verified-icon {
+  top: 10px !important;
+  right: 10px !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-color: #067a0d !important;
+}
+
+.bc-verified-icon svg {
+  color: #067a0d !important;
+}
+
+.bc-condition-tag {
+  bottom: 10px !important;
+  left: 10px !important;
+  background: #067a0d !important;
+  color: #ffffff !important;
+  padding: 3px 10px !important;
+  border-radius: 6px !important;
+  font-size: 9px !important;
+  letter-spacing: 0.7px !important;
+}
+
+.bc-card-body {
+  padding: 20px !important;
+}
+
+.bc-actions-row {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+.bc-title-row {
+  gap: 8px !important;
+  align-items: flex-start !important;
+  margin-bottom: 6px !important;
+}
+
+.bc-creator-column {
+  gap: 3px !important;
+}
+
+.bc-creator-avatar {
+  width: 36px !important;
+  height: 36px !important;
+  border: 1.5px solid #067a0d !important;
+}
+
+.bc-subs-badge {
+  font-size: 7px !important;
+  color: #067a0d !important;
+}
+
+.bc-card-title {
+  font-size: 12px !important;
+  color: #067a0d !important;
+  margin-bottom: 2px !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.bc-card-subtitle {
+  font-size: 7px !important;
+  color: #ffffff !important;
+}
+
+.bc-host-info {
+  margin-bottom: 12px !important;
+  font-size: 10px !important;
+  color: #718096 !important;
+}
+
+.bc-host-name {
+  color: #fd8312 !important;
+}
+
+.bc-price-section {
+  margin-bottom: 12px !important;
+}
+
+.bc-currency,
+.bc-price-value {
+  font-size: 28px !important;
+  color: #067a0d !important;
+}
+
+.bc-action-button {
+  border-radius: 8px !important;
+  padding: 6px 24px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.5px !important;
+  background: linear-gradient(135deg, #2be937 0%, #067a0d 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 20px rgba(6, 122, 13, 0.3) !important;
+}
+
+.bc-action-button:hover {
+  box-shadow: 0 8px 30px rgba(6, 122, 13, 0.5) !important;
+}
+
+.bc-action-secondary {
+  border: 1px solid #fc8316 !important;
+  border-radius: 8px !important;
+  padding: 6px 16px !important;
+  font-size: 10px !important;
+  background: #fd8312 !important;
+  color: #ffffff !important;
+  margin-top: 6px !important;
+}
+
+.bc-action-stack {
+  gap: 0 !important;
+}
+
+.bc-action-note {
+  font-size: 9px !important;
+  color: #718096 !important;
+  margin-top: 4px !important;
+}
+
+.bc-rating-row,
+.bc-rating-display,
+.bc-highlight {
+  display: none !important;
+}
+
 /* ===== FUNCTIONAL PAGE REDESIGN REMAP ===== */
 
 /* Legacy dark utility surfaces -> design tokens */

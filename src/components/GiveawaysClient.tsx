@@ -171,7 +171,7 @@ export default function GiveawaysClient() {
               
               {/* Verified Icon */}
               <div className="bc-verified-icon">
-                <CheckCircle size={20} fill="#00d4d4" stroke="#0f1419" />
+                <CheckCircle size={20} fill="#067a0d" stroke="#0f1419" />
               </div>
               
               {/* Condition Tag */}
