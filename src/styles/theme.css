@@ -54,6 +54,11 @@
   --accent-primary: #3b82f6;
   --accent-secondary: #10b981;
 
+  /* Backward compatibility aliases used across route pages */
+  --primary-bg: var(--bg-primary);
+  --secondary-bg: var(--bg-secondary);
+  --tertiary-bg: var(--bg-tertiary);
+
   /* Semantic */
   --success: #10b981;
   --success-light: rgba(16, 185, 129, 0.1);
@@ -167,6 +172,11 @@
   --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.1);
   --shadow-cyan: 0 0 20px rgba(34, 211, 238, 0.1);
   --shadow-cyan-lg: 0 0 30px rgba(34, 211, 238, 0.15);
+
+  /* Backward compatibility aliases used across route pages */
+  --primary-bg: var(--bg-primary);
+  --secondary-bg: var(--bg-secondary);
+  --tertiary-bg: var(--bg-tertiary);
 }
 
 /* ============================================================================
