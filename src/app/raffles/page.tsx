@@ -242,7 +242,7 @@ export default function RafflesPage() {
             <BoltIcon /> Powered by Onagui
           </button>
           <Link
-            href="/create-raffle"
+            href="/raffles/create"
             style={{
               padding: '10px 24px',
               borderRadius: 10,
@@ -281,7 +281,7 @@ export default function RafflesPage() {
             <h3 style={{ fontSize: 22, fontWeight: 700, color: '#f8fafc', marginBottom: 8 }}>No Raffles Found</h3>
             <p style={{ color: '#94a3b8', marginBottom: 24 }}>Be the first to create a raffle!</p>
             <Link
-              href="/create-raffle"
+              href="/raffles/create"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
