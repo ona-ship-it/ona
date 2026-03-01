@@ -460,7 +460,7 @@ export default function HomePage() {
                   )}
 
                   <div className="bc-verified-icon">
-                    <CheckCircle size={20} fill="#00d4d4" stroke="#0f1419" />
+                    <CheckCircle size={20} fill="#067a0d" stroke="#0f1419" />
                   </div>
 
                   <div className="bc-condition-tag">GIVEAWAY</div>
@@ -468,58 +468,32 @@ export default function HomePage() {
 
                 {/* Content */}
                 <div className="bc-card-body">
-                  <div className="bc-rating-row">
-                    <div className="bc-rating-display">
-                      <Star size={12} fill="#ff8800" stroke="none" />
-                      <span className="rating-value">
-                        {getRatingData(giveaway.id).rating}
-                      </span>
-                      <span className="rating-count">
-                        ({getRatingData(giveaway.id).count})
-                      </span>
-                    </div>
-                    <div
-                      style={{ marginLeft: 'auto' }}
-                      onClick={(event) => {
-                        event.preventDefault()
-                        event.stopPropagation()
-                      }}
-                    >
-                      <LikeSaveButtons
-                        postId={giveaway.id}
-                        postType="giveaway"
-                        showCount={false}
-                        size="sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="bc-highlight">{getGiveawayHighlight(giveaway)}</div>
-
-                  <div className="bc-title-row">
-                    <div className="bc-creator-column">
+                  <div
+                    className="bc-actions-row"
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                    }}
+                  >
+                    <div className="bc-identity-row">
                       <Image
                         src={giveaway.creator_avatar_url || profileFallbackImage}
                         alt={giveaway.creator_name || 'Creator'}
-                        width={32}
-                        height={32}
+                        width={36}
+                        height={36}
                         className="bc-creator-avatar"
                       />
-                      <span className="bc-subs-badge">
-                        {Math.round(giveaway.onagui_subs || 0)} subs
-                      </span>
+                      <div className="bc-identity-meta">
+                        <span className="bc-handle-text">@{(giveaway.creator_name || 'onagui').toLowerCase().replace(/\s+/g, '')}</span>
+                        <span className="bc-subs-badge">{Math.round(giveaway.onagui_subs || 0)} subs</span>
+                      </div>
                     </div>
-                    <div className="bc-title-stack">
-                      <h3 className="bc-card-title">{giveaway.title}</h3>
-                      <p className="bc-card-subtitle">
-                        {giveaway.description?.substring(0, 50) || 'Exclusive giveaway'}...
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bc-host-info">
-                    <span>by</span>
-                    <span className="bc-host-name">{giveaway.creator_name || 'ONAGUI'}</span>
+                    <LikeSaveButtons
+                      postId={giveaway.id}
+                      postType="giveaway"
+                      showCount={false}
+                      size="sm"
+                    />
                   </div>
 
                   <div className="bc-price-section">
@@ -531,19 +505,18 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  <div className="bc-prize-progression">
-                    <span>Prize boost</span>
-                    <div className="bc-progression-values">
-                      <span>
-                        {giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}
-                        {giveaway.prize_value.toLocaleString()}
-                      </span>
-                      <span className="bc-progression-arrow">→</span>
-                      <span>
-                        {giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}
-                        {(giveaway.prize_value + (giveaway.prize_boost || 0)).toLocaleString()}
-                      </span>
+                  <div className="bc-title-row">
+                    <div className="bc-title-stack">
+                      <h3 className="bc-card-title">{giveaway.title}</h3>
+                      <p className="bc-card-subtitle">
+                        {giveaway.description?.substring(0, 50) || 'Exclusive giveaway'}...
+                      </p>
                     </div>
+                  </div>
+
+                  <div className="bc-host-info">
+                    <span>by</span>
+                    <span className="bc-host-name">{giveaway.creator_name || 'ONAGUI'}</span>
                   </div>
 
                   <div className="bc-action-stack">

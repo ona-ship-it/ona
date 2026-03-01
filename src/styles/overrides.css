@@ -431,3 +431,269 @@ header .navigation a:hover {
     text-shadow: none !important;
   }
 }
+
+/* ===== FINAL GIVEAWAY CARD SPEC (HIGH PRIORITY) ===== */
+
+.bc-game-card {
+  border-radius: 16px !important;
+  box-shadow: none;
+}
+
+.bc-game-card:hover {
+  transform: translateY(-8px) !important;
+  border-color: rgba(0, 212, 212, 0.5) !important;
+  box-shadow: 0 16px 48px rgba(0, 212, 212, 0.2) !important;
+}
+
+.bc-card-image-wrapper {
+  height: 200px !important;
+}
+
+.bc-game-card:hover .bc-card-image {
+  transform: scale(1.08) !important;
+}
+
+.bc-image-overlay {
+  height: 55% !important;
+}
+
+.bc-trending-badge {
+  top: 10px !important;
+  left: 10px !important;
+  gap: 4px !important;
+  padding: 3px 10px !important;
+  font-size: 6px !important;
+  letter-spacing: 0.7px !important;
+}
+
+.bc-verified-icon {
+  top: 10px !important;
+  right: 10px !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-color: #067a0d !important;
+}
+
+.bc-verified-icon svg {
+  color: #067a0d !important;
+}
+
+.bc-condition-tag {
+  bottom: 10px !important;
+  left: 10px !important;
+  background: #067a0d !important;
+  color: #ffffff !important;
+  padding: 3px 10px !important;
+  border-radius: 6px !important;
+  font-size: 9px !important;
+  letter-spacing: 0.7px !important;
+}
+
+.bc-card-body {
+  padding: 20px !important;
+}
+
+.bc-actions-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+.bc-identity-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.bc-identity-meta {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
+}
+
+.bc-handle-text {
+  font-size: 10px !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px !important;
+  line-height: 1 !important;
+}
+
+.bc-title-row {
+  gap: 8px !important;
+  align-items: flex-start !important;
+  margin-bottom: 6px !important;
+}
+
+.bc-creator-column {
+  gap: 3px !important;
+}
+
+.bc-creator-avatar {
+  width: 36px !important;
+  height: 36px !important;
+  border: 1.5px solid #067a0d !important;
+}
+
+.bc-subs-badge {
+  font-size: 7px !important;
+  color: #067a0d !important;
+}
+
+.bc-card-title {
+  font-size: 12px !important;
+  color: #067a0d !important;
+  margin-bottom: 2px !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.bc-card-subtitle {
+  font-size: 7px !important;
+  color: #ffffff !important;
+}
+
+.bc-host-info {
+  margin-bottom: 12px !important;
+  font-size: 10px !important;
+  color: #718096 !important;
+}
+
+.bc-host-name {
+  color: #fd8312 !important;
+}
+
+.bc-price-section {
+  margin-bottom: 12px !important;
+}
+
+.bc-currency,
+.bc-price-value {
+  font-size: 28px !important;
+  color: #067a0d !important;
+}
+
+.bc-action-button {
+  border-radius: 8px !important;
+  padding: 6px 24px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.5px !important;
+  background: linear-gradient(135deg, #2be937 0%, #067a0d 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 20px rgba(6, 122, 13, 0.3) !important;
+}
+
+.bc-action-button:hover {
+  box-shadow: 0 8px 30px rgba(6, 122, 13, 0.5) !important;
+}
+
+.bc-action-secondary {
+  border: 1px solid #fc8316 !important;
+  border-radius: 8px !important;
+  padding: 6px 16px !important;
+  font-size: 10px !important;
+  background: #fd8312 !important;
+  color: #ffffff !important;
+  margin-top: 6px !important;
+}
+
+.bc-action-stack {
+  gap: 0 !important;
+}
+
+.bc-action-note {
+  font-size: 9px !important;
+  color: #718096 !important;
+  margin-top: 4px !important;
+}
+
+.bc-rating-row,
+.bc-rating-display,
+.bc-highlight {
+  display: none !important;
+}
+
+/* ===== FUNCTIONAL PAGE REDESIGN REMAP ===== */
+
+/* Legacy dark utility surfaces -> design tokens */
+.bg-slate-900\/50,
+.bg-slate-900,
+.bg-gray-900 {
+  background: var(--bg-card) !important;
+}
+
+.bg-slate-800,
+.bg-slate-800\/50,
+.bg-slate-800\/40,
+.bg-gray-800,
+.bg-gray-700 {
+  background: var(--bg-secondary) !important;
+}
+
+.border-slate-800,
+.border-slate-700,
+.border-slate-600,
+.border-gray-700,
+.border-gray-600 {
+  border-color: var(--border) !important;
+}
+
+.text-slate-500,
+.text-slate-400,
+.text-slate-300,
+.text-gray-600,
+.text-gray-500,
+.text-gray-400,
+.text-gray-300 {
+  color: var(--text-secondary) !important;
+}
+
+.text-blue-400,
+.text-blue-500,
+.text-blue-600,
+.text-blue-700 {
+  color: var(--accent-blue) !important;
+}
+
+.text-pink-400,
+.text-pink-500,
+.bg-pink-600,
+.hover\:bg-pink-700:hover {
+  color: var(--accent-green) !important;
+  background: var(--accent-green) !important;
+}
+
+.bg-blue-600,
+.bg-blue-700,
+.hover\:bg-blue-700:hover,
+.hover\:bg-blue-800:hover {
+  background: var(--accent-green) !important;
+}
+
+.focus\:ring-blue-500:focus,
+.focus\:ring-blue-400:focus,
+.focus\:ring-pink-500:focus {
+  --tw-ring-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+.focus\:border-blue-500:focus,
+.focus\:border-blue-400:focus,
+.focus\:border-pink-500:focus {
+  border-color: var(--accent-green) !important;
+}
+
+.rounded-3xl,
+.rounded-2xl,
+.rounded-xl {
+  border-radius: 14px !important;
+}
+
+/* Real app card shell for dashboard/settings/create/auth */
+.bg-slate-900\/50.backdrop-blur-xl,
+.bg-gray-900.rounded-lg,
+.bg-gray-900.rounded-2xl {
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm) !important;
+}

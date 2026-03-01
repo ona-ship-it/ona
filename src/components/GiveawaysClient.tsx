@@ -171,7 +171,7 @@ export default function GiveawaysClient() {
               
               {/* Verified Icon */}
               <div className="bc-verified-icon">
-                <CheckCircle size={20} fill="#00d4d4" stroke="#0f1419" />
+                <CheckCircle size={20} fill="#067a0d" stroke="#0f1419" />
               </div>
               
               {/* Condition Tag */}
@@ -180,16 +180,23 @@ export default function GiveawaysClient() {
             
             {/* Card Body */}
             <div className="bc-card-body">
-              {/* Rating */}
-              <div className="bc-rating-row">
-                <div className="bc-rating-display">
-                  <Star size={12} fill="#ff8800" stroke="none" />
-                  <span className="rating-value">
-                    {getRatingData(giveaway.id).rating}
-                  </span>
-                  <span className="rating-count">
-                    ({getRatingData(giveaway.id).count})
-                  </span>
+              <div
+                className="bc-actions-row"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }}
+              >
+                <div className="bc-identity-row">
+                  <img
+                    src={giveaway.creator_avatar_url || PROFILE_FALLBACK_IMAGE}
+                    alt={giveaway.creator_name || 'Creator'}
+                    className="bc-creator-avatar"
+                  />
+                  <div className="bc-identity-meta">
+                    <span className="bc-handle-text">@{(giveaway.creator_name || 'onagui').toLowerCase().replace(/\s+/g, '')}</span>
+                    <span className="bc-subs-badge">{Math.round(giveaway.onagui_subs || 0)} subs</span>
+                  </div>
                 </div>
                 <LikeSaveButtons
                   postId={giveaway.id}
@@ -199,22 +206,18 @@ export default function GiveawaysClient() {
                 />
               </div>
 
-              <div className="bc-card-subtitle" style={{ marginBottom: 8 }}>
-                {getGiveawayHighlight(giveaway)}
-              </div>
-              
-              {/* Title */}
-              <div className="bc-title-row">
-                <div className="bc-creator-column">
-                  <img
-                    src={giveaway.creator_avatar_url || PROFILE_FALLBACK_IMAGE}
-                    alt={giveaway.creator_name || 'Creator'}
-                    className="bc-creator-avatar"
-                  />
-                  <span className="bc-subs-badge">
-                    {Math.round(giveaway.onagui_subs || 0)} subs
+              {/* Price */}
+              <div className="bc-price-section">
+                <div className="bc-price-display">
+                  <span className="bc-currency">{giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}</span>
+                  <span className="bc-price-value">
+                    {(giveaway.prize_value || 0).toLocaleString()}
                   </span>
                 </div>
+              </div>
+
+              {/* Title */}
+              <div className="bc-title-row">
                 <div className="bc-title-stack">
                   <h3 className="bc-card-title">
                     {giveaway.title || 'Untitled Giveaway'}
@@ -230,359 +233,33 @@ export default function GiveawaysClient() {
                 <span>by</span>
                 <span className="bc-host-name">{giveaway.creator_name || 'ONAGUI'}</span>
               </div>
-              
-              {/* Price */}
-              <div className="bc-price-section">
-                <div className="bc-price-display">
-                  <span className="bc-currency">{giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}</span>
-                  <span className="bc-price-value">
-                    {(giveaway.prize_value || 0).toLocaleString()}
-                  </span>
-                </div>
+
+              <div className="bc-action-stack">
+                <button className="bc-action-button">
+                  <ShoppingCart size={16} />
+                  <span>CLAIM FREE TICKET</span>
+                  <div className="bc-btn-glow"></div>
+                </button>
+
+                <button
+                  className="bc-action-secondary"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    router.push(`/giveaways/${giveaway.id}?entry=paid`);
+                  }}
+                >
+                  BUY TICKET 1 USDC
+                </button>
+
+                <div className="bc-action-note">1 chance per user</div>
               </div>
-
-              <div className="bc-prize-progression">
-                <span>Prize boost</span>
-                <div className="bc-progression-values">
-                  <span>
-                    {giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}
-                    {(giveaway.prize_value || 0).toLocaleString()}
-                  </span>
-                  <span className="bc-progression-arrow">→</span>
-                  <span>
-                    {giveaway.prize_currency === 'USD' ? '$' : giveaway.prize_currency}
-                    {((giveaway.prize_value || 0) + (giveaway.prize_boost || 0)).toLocaleString()}
-                  </span>
-                </div>
-              </div>
-              
-              {/* Button */}
-              <button className="bc-action-button">
-                <ShoppingCart size={16} />
-                <span>CLAIM FREE TICKET</span>
-                <div className="bc-btn-glow"></div>
-              </button>
-
-              <button
-                className="bc-action-secondary"
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  router.push(`/giveaways/${giveaway.id}?entry=paid`);
-                }}
-              >
-                BUY TICKET 1 USDC
-              </button>
-
-              <div className="bc-action-note">1 chance per user</div>
             </div>
           </Link>
         ))}
       </div>
       
-      <style jsx>{`
-        .bc-game-card {
-          background: linear-gradient(135deg, rgba(20, 26, 32, 0.8) 0%, rgba(15, 20, 25, 0.9) 100%);
-          border: 1px solid rgba(0, 212, 212, 0.15);
-          border-radius: 20px;
-          overflow: hidden;
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          position: relative;
-          backdrop-filter: blur(10px);
-          cursor: pointer;
-        }
-        
-        .bc-game-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(135deg, rgba(0, 212, 212, 0.1) 0%, transparent 50%);
-          opacity: 0;
-          transition: opacity 0.3s ease;
-          pointer-events: none;
-        }
-        
-        .bc-game-card:hover::before {
-          opacity: 1;
-        }
-        
-        .bc-game-card:hover {
-          transform: translateY(-8px);
-          border-color: rgba(0, 212, 212, 0.5);
-          box-shadow: 0 20px 60px rgba(0, 212, 212, 0.2), 0 0 40px rgba(0, 212, 212, 0.1);
-        }
-        
-        .bc-card-image-wrapper {
-          position: relative;
-          width: 100%;
-          height: 220px;
-          overflow: hidden;
-        }
-        
-        .bc-card-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.5s ease;
-        }
-        
-        .bc-game-card:hover .bc-card-image {
-          transform: scale(1.1);
-        }
-        
-        .bc-image-overlay {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 60%;
-          background: linear-gradient(to top, rgba(15, 20, 25, 0.95) 0%, transparent 100%);
-        }
-        
-        .bc-trending-badge {
-          position: absolute;
-          top: 16px;
-          left: 16px;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          background: linear-gradient(135deg, #ff4400 0%, #ff8800 100%);
-          color: #fff;
-          padding: 6px 14px;
-          border-radius: 20px;
-          font-family: 'Rajdhani', sans-serif;
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 1px;
-          z-index: 2;
-          box-shadow: 0 4px 15px rgba(255, 68, 0, 0.4);
-          animation: badgePulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes badgePulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-        
-        .bc-verified-icon {
-          position: absolute;
-          top: 16px;
-          right: 16px;
-          width: 36px;
-          height: 36px;
-          background: rgba(15, 20, 25, 0.8);
-          border: 2px solid #00d4d4;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 2;
-          backdrop-filter: blur(10px);
-          box-shadow: 0 0 20px rgba(0, 212, 212, 0.5);
-          animation: verifiedPulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes verifiedPulse {
-          0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 212, 0.5); }
-          50% { box-shadow: 0 0 30px rgba(0, 212, 212, 0.8); }
-        }
-        
-        .bc-condition-tag {
-          position: absolute;
-          bottom: 16px;
-          left: 16px;
-          background: rgba(255, 136, 0, 0.9);
-          color: #0f1419;
-          padding: 6px 14px;
-          border-radius: 8px;
-          font-family: 'Rajdhani', sans-serif;
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 1px;
-          z-index: 2;
-          text-transform: uppercase;
-          box-shadow: 0 4px 15px rgba(255, 136, 0, 0.3);
-        }
-        
-        .bc-card-body {
-          padding: 24px;
-        }
-        
-        .bc-rating-row {
-          display: flex;
-          justify-content: flex-start;
-          margin-bottom: 16px;
-        }
-        
-        .bc-rating-display {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          background: rgba(255, 136, 0, 0.1);
-          border: 1px solid rgba(255, 136, 0, 0.3);
-          padding: 6px 12px;
-          border-radius: 8px;
-          font-size: 13px;
-          font-weight: 600;
-          color: #ff8800;
-        }
-        
-        .rating-value {
-          color: #ff8800;
-        }
-        
-        .rating-count {
-          color: #718096;
-          font-size: 11px;
-        }
-        
-        .bc-card-title {
-          font-family: 'Rajdhani', sans-serif;
-          font-size: 22px;
-          font-weight: 700;
-          color: #ffffff;
-          margin-bottom: 6px;
-          line-height: 1.3;
-          letter-spacing: 0.5px;
-        }
-        
-        .bc-card-subtitle {
-          font-size: 14px;
-          color: #718096;
-          margin-bottom: 12px;
-          font-weight: 500;
-        }
-        
-        .bc-host-info {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          margin-bottom: 20px;
-          font-size: 13px;
-          color: #718096;
-        }
-        
-        .bc-host-name {
-          color: #00d4d4;
-          font-weight: 600;
-        }
-        
-        .bc-price-section {
-          display: flex;
-          justify-content: center;
-          margin-bottom: 20px;
-        }
-        
-        .bc-price-display {
-          display: flex;
-          align-items: baseline;
-          font-family: 'Rajdhani', sans-serif;
-          gap: 2px;
-        }
-        
-        .bc-currency {
-          font-size: 24px;
-          color: #ff8800;
-          font-weight: 600;
-        }
-        
-        .bc-price-value {
-          font-size: 40px;
-          font-weight: 700;
-          color: #ff8800;
-        }
 
-        .bc-commission-row {
-          display: grid;
-          gap: 8px;
-          margin-bottom: 20px;
-          font-size: 12px;
-          color: #94a3b8;
-        }
-
-        .bc-commission-item {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 8px;
-        }
-
-        .bc-commission-item strong {
-          color: #00d4d4;
-          font-weight: 700;
-        }
-        
-        .bc-action-button {
-          position: relative;
-          width: 100%;
-          padding: 12px 24px;
-          border: none;
-          border-radius: 10px;
-          font-family: 'Rajdhani', sans-serif;
-          font-size: 14px;
-          font-weight: 700;
-          letter-spacing: 1.5px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          transition: all 0.3s ease;
-          overflow: hidden;
-          background: linear-gradient(135deg, #00d4d4 0%, #00e6e6 100%);
-          color: #0f1419;
-          box-shadow: 0 4px 20px rgba(0, 212, 212, 0.3);
-        }
-        
-        .bc-btn-glow {
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-          transition: left 0.5s ease;
-        }
-        
-        .bc-action-button:hover .bc-btn-glow {
-          left: 100%;
-        }
-        
-        .bc-action-button:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 30px rgba(0, 212, 212, 0.5);
-        }
-
-        .bc-action-secondary {
-          width: 100%;
-          margin-top: 10px;
-          padding: 10px 20px;
-          border-radius: 10px;
-          border: 1px solid rgba(37, 99, 235, 0.45);
-          background: rgba(37, 99, 235, 0.16);
-          color: #7dd3fc;
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 1.2px;
-          cursor: pointer;
-          transition: all 0.25s ease;
-        }
-
-        .bc-action-secondary:hover {
-          background: rgba(37, 99, 235, 0.28);
-          color: #e0f2fe;
-        }
-
-        .bc-action-note {
-          margin-top: 8px;
-          text-align: center;
-          font-size: 11px;
-          color: #64748b;
-        }
-      `}</style>
     </div>
   );
 }
