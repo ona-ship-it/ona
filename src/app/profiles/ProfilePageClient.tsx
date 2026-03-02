@@ -1109,8 +1109,6 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
         )}
       </div>
     </div>
-      </div>
-    </div>
     <EditProfileModal
       isOpen={showEditModal}
       onClose={() => setShowEditModal(false)}
