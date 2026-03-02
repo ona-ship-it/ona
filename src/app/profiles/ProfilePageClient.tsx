@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import EditProfileModal from '@/components/EditProfileModal';
+import EditProfileModal from '@/components/src/EditProfileModal';
 import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase';
 import CreatorCommissionDisplay, {
