@@ -741,7 +741,6 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
     return label.includes(followingSearch.toLowerCase())
   })
 
-
   return (
     <>
       <Header />
@@ -1103,19 +1102,24 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
                   </a>
                 ))
               )}
-     
-            {followingList.length >= followingCount && followingCount > 0 && (<div className="empty-community" style={{ marginTop: '16px' }}>End of following list</div>)}
+            </div>
+            {followingList.length >= followingCount && followingCount > 0 && (
+              <div className="empty-community" style={{ marginTop: '16px' }}>
+                End of following list
+              </div>
+            )}
           </div>
         )}
       </div>
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        userId={profileData?.id || ''}
+        onSaved={() => window.location.reload()}
+      />
     </div>
-    <EditProfileModal
-      isOpen={showEditModal}
-      onClose={() => setShowEditModal(false)}
-      userId={profileData?.id || ''}
-      onSaved={() => window.location.reload()}
-    />
-  </>
     </>
   );
 };
