@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import EditProfileModal from '@/components/EditProfileModal';
 import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase';
 import CreatorCommissionDisplay, {
@@ -103,6 +104,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
   const searchParams = useSearchParams();
   const requestedProfileId = profileIdOverride || searchParams.get('id');
   const [activeSection, setActiveSection] = useState('live');
+  const [showEditModal, setShowEditModal] = useState(false);
   const [profileId, setProfileId] = useState<string | null>(null);
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<ProfileRecord | null>(null);
@@ -940,6 +942,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
           <button className={`nav-tab ${activeSection === 'fundraise' ? 'active' : ''}`} onClick={() => setActiveSection('fundraise')}>❤️ Supported Causes</button>
           <button className={`nav-tab ${activeSection === 'followers' ? 'active' : ''}`} onClick={() => setActiveSection('followers')}>👥 Followers</button>
           <button className={`nav-tab ${activeSection === 'following' ? 'active' : ''}`} onClick={() => setActiveSection('following')}>➕ Following</button>
+          <button className="follow-btn" onClick={() => setShowEditModal(true)}>Edit Profile</button>
         </div>
 
         {activeSection === 'live' && (
@@ -1100,12 +1103,21 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
                   </a>
                 ))
               )}
-            </div>
+     
             {followingList.length >= followingCount && followingCount > 0 && (<div className="empty-community" style={{ marginTop: '16px' }}>End of following list</div>)}
           </div>
         )}
       </div>
     </div>
+      </div>
+    </div>
+    <EditProfileModal
+      isOpen={showEditModal}
+      onClose={() => setShowEditModal(false)}
+      userId={profileData?.id || ''}
+      onSaved={() => window.location.reload()}
+    />
+  </>
     </>
   );
 };
