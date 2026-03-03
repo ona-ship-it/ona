@@ -2,8 +2,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import EditProfileModal from '@/components/src/EditProfileModal';
 import Header from '@/components/Header';
+import EditProfileModal from '@/components/EditProfileModal';
 import { createClient } from '@/lib/supabase';
 import CreatorCommissionDisplay, {
   CommissionHistoryItem,
@@ -446,7 +446,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
       const nextLivePosts: LivePost[] = [
         ...liveGiveaways.map((giveaway) => ({
           id: giveaway.id,
-          type: 'giveaway' as const,
+          type: 'giveaway',
           title: giveaway.title || 'Giveaway',
           image: giveaway.image_url || profileData?.avatar_url || fallbackImage,
           prize: formatCurrency(giveaway.prize_value, giveaway.prize_currency),
@@ -457,7 +457,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
         })),
         ...liveRaffles.map((raffle) => ({
           id: raffle.id,
-          type: 'raffle' as const,
+          type: 'raffle',
           title: raffle.title || 'Raffle',
           image: raffle.image_urls?.[0] || profileData?.avatar_url || fallbackImage,
           prize: formatCurrency(raffle.prize_value, raffle.prize_currency),
@@ -512,7 +512,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
       const nextHistoryPosts: HistoryPost[] = [
         ...historyGiveaways.map((giveaway) => ({
           id: giveaway.id,
-          type: 'giveaway' as const,
+          type: 'giveaway',
           title: giveaway.title || 'Giveaway',
           image: giveaway.image_url || profileData?.avatar_url || fallbackImage,
           prize: formatCurrency(giveaway.prize_value, giveaway.prize_currency),
@@ -526,7 +526,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
         })),
         ...historyRaffles.map((raffle) => ({
           id: raffle.id,
-          type: 'raffle' as const,
+          type: 'raffle',
           title: raffle.title || 'Raffle',
           image: raffle.image_urls?.[0] || profileData?.avatar_url || fallbackImage,
           prize: formatCurrency(raffle.prize_value, raffle.prize_currency),
@@ -674,7 +674,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
       username: "Creator",
       displayName: "@Creator",
       avatar: "",
-      bio: "",
+      bio: "Welcome to my Onagui profile.",
       verified: false,
       joinDate: "New",
       location: "Onagui",
@@ -696,26 +696,26 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
 
     const joinDate = profileData.created_at
       ? new Date(profileData.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-      : 'New';
+      : fallback.joinDate;
 
     const totalValueLabel = creatorStats.totalValue >= 1000000
       ? `${(creatorStats.totalValue / 1000000).toFixed(1)}M`
       : creatorStats.totalValue.toLocaleString();
 
     return {
-      username: profileData.username || profileData.full_name || 'Creator',
-      displayName: `@${profileData.username || profileData.full_name || 'Creator'}`,
-      avatar: profileData.avatar_url || '',
-      bio: profileData.bio || '',
-      verified: creatorStats.totalGiveaways > 0,
+      username: profileData.username || fallback.username,
+      displayName: `@${profileData.username || fallback.username}`,
+      avatar: profileData.avatar_url || fallback.avatar,
+      bio: profileData.bio || fallback.bio,
+      verified: true,
       joinDate,
-      location: 'Onagui',
+      location: fallback.location,
       stats: {
         totalGiveaways: creatorStats.totalGiveaways,
         totalWinners: creatorStats.totalWinners,
         totalValue: totalValueLabel,
         followers: followersCount,
-        credibilityScore: creatorStats.totalGiveaways > 0 ? Math.min(99, 70 + Math.min(creatorStats.totalGiveaways, 20)) : 0
+        credibilityScore: Math.min(99, 70 + Math.min(creatorStats.totalGiveaways, 20))
       },
       social: {
         twitter: profileData.twitter_url || null,
@@ -726,7 +726,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
   }, [profileData, creatorStats, followersCount]);
 
   const formatSocialLabel = (value: string) =>
-    value.replace(/^https?:\/\//, '').replace(/\/$/, '')
+    value.replace(/^https?:\\/\\//, '').replace(/\\/$/, '')
 
   const formatFollowerCount = (count: number) =>
     count >= 1000 ? `${(count / 1000).toFixed(1)}K` : `${count}`
@@ -740,6 +740,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
     const label = `${person.full_name || ''} ${person.username || ''}`.toLowerCase()
     return label.includes(followingSearch.toLowerCase())
   })
+
 
   return (
     <>
@@ -914,6 +915,9 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
                     {followLoading ? 'Working...' : isFollowing ? 'Following' : 'Follow'}
                   </button>
                 )}
+                {profileData && viewerId === profileData?.id && (
+                  <button className="follow-btn" onClick={() => setShowEditModal(true)}>Edit Profile</button>
+                )}
               </div>
 
               <div className="stats-grid">
@@ -934,14 +938,13 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
         )}
 
         <div className="section-nav">
-          <button className={`nav-tab ${activeSection === 'live' ? 'active' : ''}`} onClick={() => setActiveSection('live')}>🔴 Live Now</button>
-          <button className={`nav-tab ${activeSection === 'history' ? 'active' : ''}`} onClick={() => setActiveSection('history')}>📜 History</button>
-          <button className={`nav-tab ${activeSection === 'popular' ? 'active' : ''}`} onClick={() => setActiveSection('popular')}>🔥 Most Popular</button>
-          <button className={`nav-tab ${activeSection === 'winners' ? 'active' : ''}`} onClick={() => setActiveSection('winners')}>🏆 Winners</button>
-          <button className={`nav-tab ${activeSection === 'fundraise' ? 'active' : ''}`} onClick={() => setActiveSection('fundraise')}>❤️ Supported Causes</button>
-          <button className={`nav-tab ${activeSection === 'followers' ? 'active' : ''}`} onClick={() => setActiveSection('followers')}>👥 Followers</button>
-          <button className={`nav-tab ${activeSection === 'following' ? 'active' : ''}`} onClick={() => setActiveSection('following')}>➕ Following</button>
-          <button className="follow-btn" onClick={() => setShowEditModal(true)}>Edit Profile</button>
+          <button className={`nav-tab ${activeSection === 'live' ? 'active' : ''}`} onClick={() => setActiveSection('live')}>\ud83d\udd34 Live Now</button>
+          <button className={`nav-tab ${activeSection === 'history' ? 'active' : ''}`} onClick={() => setActiveSection('history')}>\ud83d\udcdc History</button>
+          <button className={`nav-tab ${activeSection === 'popular' ? 'active' : ''}`} onClick={() => setActiveSection('popular')}>\ud83d\udd25 Most Popular</button>
+          <button className={`nav-tab ${activeSection === 'winners' ? 'active' : ''}`} onClick={() => setActiveSection('winners')}>\ud83c\udfc6 Winners</button>
+          <button className={`nav-tab ${activeSection === 'fundraise' ? 'active' : ''}`} onClick={() => setActiveSection('fundraise')}>\u2764\ufe0f Supported Causes</button>
+          <button className={`nav-tab ${activeSection === 'followers' ? 'active' : ''}`} onClick={() => setActiveSection('followers')}>\ud83d\udc65 Followers</button>
+          <button className={`nav-tab ${activeSection === 'following' ? 'active' : ''}`} onClick={() => setActiveSection('following')}>\u2795 Following</button>
         </div>
 
         {activeSection === 'live' && (
@@ -1103,23 +1106,17 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
                 ))
               )}
             </div>
-            {followingList.length >= followingCount && followingCount > 0 && (
-              <div className="empty-community" style={{ marginTop: '16px' }}>
-                End of following list
-              </div>
-            )}
+            {followingList.length >= followingCount && followingCount > 0 && (<div className="empty-community" style={{ marginTop: '16px' }}>End of following list</div>)}
           </div>
         )}
       </div>
-
-      {/* Edit Profile Modal */}
-      <EditProfileModal
-        isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
-        userId={profileData?.id || ''}
-        onSaved={() => window.location.reload()}
-      />
     </div>
+    <EditProfileModal
+      isOpen={showEditModal}
+      onClose={() => setShowEditModal(false)}
+      userId={profileData?.id || ''}
+      onSaved={() => window.location.reload()}
+    />
     </>
   );
 };
