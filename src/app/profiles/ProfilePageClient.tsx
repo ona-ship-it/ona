@@ -725,8 +725,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
     };
   }, [profileData, creatorStats, followersCount]);
 
-  const formatSocialLabel = (value: string) =>
-value.replace(/^https?:\/\//, '').replace(/\/$/, '')
+const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '').replace(/[/]$/, '')
   const formatFollowerCount = (count: number) =>
     count >= 1000 ? `${(count / 1000).toFixed(1)}K` : `${count}`
 
