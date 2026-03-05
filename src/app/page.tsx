@@ -36,6 +36,7 @@ type Raffle = {
   id: string
   title: string
   emoji: string
+  image_urls: string[]
   prize_value: number
   tickets_sold: number
   total_tickets: number
@@ -567,12 +568,12 @@ export default function HomePage() {
               >
                 {/* Image */}
                 <div className="bc-card-image-wrapper">
-                  <Image
-                    src={raffleFallbackImage}
-                    alt={raffle.title}
-                    fill
-                    className="bc-card-image"
-                  />
+                 <Image
+                 src={raffle.image_urls?.[0] || raffleFallbackImage}
+                 alt={raffle.title}
+                 fill
+                 className="bc-card-image"
+                 />
 
                   <div className="bc-image-overlay"></div>
 
