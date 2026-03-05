@@ -114,7 +114,7 @@ const handleAddPhoto = () => {
             const supabase = createClient()
             const fileExt = file.name.split('.').pop()
             const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
-            const filePath = `raffle-images/${fileName}`
+            const filePath = fileName
             const { error: uploadError } = await supabase.storage
               .from('raffle-images')
               .upload(filePath, file)
