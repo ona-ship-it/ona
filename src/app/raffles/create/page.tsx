@@ -102,22 +102,36 @@ export default function CreateRafflePage() {
     : 0
 
   // Photo upload simulation (in production, upload to Supabase Storage)
-  const handleAddPhoto = () => {
+const handleAddPhoto = () => {
     if (photos.length < 10) {
       const input = document.createElement('input')
       input.type = 'file'
       input.accept = 'image/*'
-      input.onchange = (e: any) => {
+      input.onchange = async (e: any) => {
         const file = e.target.files?.[0]
         if (file) {
-          const url = URL.createObjectURL(file)
-          setPhotos(prev => [...prev, url])
+          try {
+            const supabase = createClient()
+            const fileExt = file.name.split('.').pop()
+            const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
+            const filePath = `raffle-images/${fileName}`
+            const { error: uploadError } = await supabase.storage
+              .from('raffle-images')
+              .upload(filePath, file)
+            if (uploadError) throw uploadError
+            const { data: { publicUrl } } = supabase.storage
+              .from('raffle-images')
+              .getPublicUrl(filePath)
+            setPhotos(prev => [...prev, publicUrl])
+          } catch (err) {
+            console.error('Upload failed:', err)
+            alert('Failed to upload image. Please try again.')
+          }
         }
       }
       input.click()
     }
   }
-
   const removePhoto = (idx: number) => {
     setPhotos(prev => prev.filter((_, i) => i !== idx))
   }
@@ -142,7 +156,7 @@ export default function CreateRafflePage() {
         .insert({
           title,
           description,
-          images_urls: photos,
+          image_urls: photos,
           category,
           prize_value: prizeNum,
           prize_currency: 'USD',
