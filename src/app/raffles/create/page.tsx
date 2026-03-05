@@ -142,7 +142,7 @@ export default function CreateRafflePage() {
         .insert({
           title,
           description,
-          images: photos,
+          images_urls: photos,
           category,
           prize_value: prizeNum,
           prize_currency: 'USD',
