@@ -17,18 +17,20 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
-          // Standard SSR cookie setting
           request.cookies.set({ name, value, ...options })
           response = NextResponse.next({
-            request: { headers: request.headers },
+            request: {
+              headers: request.headers,
+            },
           })
           response.cookies.set({ name, value, ...options })
         },
         remove(name: string, options: CookieOptions) {
-          // Standard SSR cookie removal
           request.cookies.set({ name, value: '', ...options })
           response = NextResponse.next({
-            request: { headers: request.headers },
+            request: {
+              headers: request.headers,
+            },
           })
           response.cookies.set({ name, value: '', ...options })
         },
@@ -36,8 +38,8 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // This refreshes the session. getUser() is safer than getSession() 
-  // in middleware to prevent session spoofing.
+  // Use getUser() for Next.js 16. It refreshes the session 
+  // and prevents the routing manifest from crashing.
   await supabase.auth.getUser()
 
   return response
@@ -50,7 +52,7 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public files (svg, png, jpg, etc.)
+     * - Public images (svg, png, jpg, etc)
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
