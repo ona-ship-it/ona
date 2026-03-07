@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getGravatarUrl } from '@/utils/gravatar';
@@ -13,10 +13,14 @@ export default function SignUpClient() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showVerificationMessage, setShowVerificationMessage] = useState(false);
 
   const router = useRouter();
-  const supabase = createClientComponentClient();
+
+  // Initialize the Supabase client using the new SSR standard
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const handleOAuthSignIn = async (provider: 'google') => {
     try {
@@ -25,7 +29,9 @@ export default function SignUpClient() {
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
-        options: { redirectTo: `${window.location.origin}/api/auth/callback` },
+        options: { 
+          redirectTo: `${window.location.origin}/api/auth/callback` 
+        },
       });
 
       if (error) throw error;
@@ -67,6 +73,7 @@ export default function SignUpClient() {
         const username = email.split('@')[0];
         const gravatarUrl = getGravatarUrl(email);
 
+        // Standard user record
         await supabase.from('app_users').upsert(
           {
             id: data.user.id,
@@ -77,6 +84,7 @@ export default function SignUpClient() {
           { onConflict: 'id' }
         );
 
+        // Onagui specific profile
         await supabase.from('onagui_profiles').upsert(
           {
             id: data.user.id,
@@ -88,6 +96,7 @@ export default function SignUpClient() {
           { onConflict: 'id' }
         );
 
+        // Avatar/Metadata profile
         await supabase.from('profiles').upsert(
           {
             id: data.user.id,
@@ -97,14 +106,14 @@ export default function SignUpClient() {
           { onConflict: 'id' }
         );
 
-        // Send verification email via Resend
+        // Trigger the Resend email flow
         await triggerVerificationEmail(data.user.email!, data.user.id);
 
-        // Redirect to verification pending page
+        // Redirect to the pending page we verified exists
         router.push('/verify-email?status=pending');
       }
-    } catch {
-      setError('An unexpected error occurred');
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
