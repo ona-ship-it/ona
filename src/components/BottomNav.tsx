@@ -27,10 +27,10 @@ export default function BottomNav() {
       active: pathname === '/giveaways' || pathname.startsWith('/giveaways/'),
     },
     {
-      href: '/create-giveaway',
+      href: '/raffles/create',
       icon: 'plus',
       label: 'Create',
-      active: pathname === '/create-giveaway' || pathname.startsWith('/create-giveaway/'),
+      active: pathname === '/raffles/create' || pathname.startsWith('/raffles/create/'),
       special: true,
     },
     {

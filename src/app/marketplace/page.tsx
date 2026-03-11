@@ -29,8 +29,8 @@ export default function MarketplacePage() {
           Coming Soon
         </p>
         <p
-          className="mb-8 max-w-md text-sm"
-          style={{ color: 'var(--text-secondary)' }}
+          className="mb-8 max-w-md text-sm text-center"
+          style={{ color: 'var(--text-secondary)', margin: '0 auto 32px' }}
         >
           Buy and sell digital goods, collectibles, and raffle prizes.
           Secure peer-to-peer trading with instant settlement.

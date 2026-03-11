@@ -48,7 +48,7 @@ export default function ProfilesPage() {
         </div>
 
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="profiles-grid">
             {[...Array(12)].map((_, i) => (
               <div
                 key={i}
@@ -74,7 +74,7 @@ export default function ProfilesPage() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="profiles-grid">
             {filtered.map((p: any) => (
               <Link
                 key={p.id}

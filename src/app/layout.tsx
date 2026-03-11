@@ -9,6 +9,7 @@ import './globals.css'
 import { WalletProvider } from '@/hooks/useWallet'
 import { ThemeProvider } from '@/components/ThemeContext'
 import BottomNav from '@/components/BottomNav';
+import Header from '@/components/Header';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -71,7 +72,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider>
           <WalletProvider>
-            {children}
+            <Header />
+            <div className="page-body" style={{ paddingBottom: '72px' }}>
+              {children}
+            </div>
           </WalletProvider>
         </ThemeProvider>
         <BottomNav />

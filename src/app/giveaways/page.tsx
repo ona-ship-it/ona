@@ -42,12 +42,11 @@ export default function GiveawaysPage() {
         </div>
 
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="items-grid">
             {[...Array(8)].map((_, i) => (
               <div
                 key={i}
-                className="h-64 animate-pulse rounded-2xl"
-                style={{ background: 'var(--bg-secondary)' }}
+                style={{ height: 256, background: 'var(--bg-secondary)', borderRadius: 16 }}
               />
             ))}
           </div>
@@ -75,29 +74,23 @@ export default function GiveawaysPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="items-grid">
             {items.map((g: any) => (
               <Link
                 key={g.id}
                 href={'/giveaways/' + g.id}
-                className="group rounded-2xl border overflow-hidden transition-transform hover:scale-[1.02]"
-                style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)' }}
+                style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)', borderRadius: 16,
+                  overflow: 'hidden', textDecoration: 'none', display: 'block' }}
               >
                 {g.image_url ? (
-                  <div className="relative h-44 overflow-hidden">
-                    <img src={g.image_url} alt={g.title} className="h-full w-full object-cover" />
-                    <span
-                      className="absolute left-3 top-3 rounded-full px-2 py-0.5 text-xs font-bold"
-                      style={{ background: 'rgba(0,255,136,0.15)', color: 'var(--accent-green)', border: '1px solid rgba(0,255,136,0.3)' }}
-                    >
-                      GIVEAWAY
-                    </span>
+                  <div className="card-img">
+                    <img src={g.image_url} alt={g.title} />
+                    <span className="card-badge">GIVEAWAY</span>
                   </div>
                 ) : (
-                  <div
-                    className="flex h-44 items-center justify-center text-4xl"
-                    style={{ background: 'var(--bg-secondary)' }}
-                  >
+                  <div style={{ height: 176, display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', fontSize: 40, background: 'var(--bg-secondary)' }}>
                     🎁
                   </div>
                 )}

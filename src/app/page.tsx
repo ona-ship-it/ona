@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 import Image from 'next/image'
-import Header from '@/components/Header'
 import Hero from '@/components/Hero'
 import LikeSaveButtons from '@/components/LikeSaveButtons'
 import { TrendingUp, CheckCircle, Star, ShoppingCart } from 'lucide-react'
@@ -402,8 +401,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg-secondary)' }}>
-      <Header />
-      
       {/* Hero Section */}
       <Hero />
 
