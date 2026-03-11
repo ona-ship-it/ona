@@ -57,6 +57,7 @@ export default function BottomNav() {
               key={item.href}
               href={item.href}
               className={`nav-item ${item.active ? 'active' : ''} ${item.special ? 'create-btn' : ''}`}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, textDecoration: 'none' }}
             >
               {item.special ? (
                 <div className="create-icon">
