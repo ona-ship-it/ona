@@ -13,7 +13,6 @@ export default function SignUpClient() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showVerificationMessage, setShowVerificationMessage] = useState(false);
 
   const router = useRouter();
   const supabase = createClientComponentClient();

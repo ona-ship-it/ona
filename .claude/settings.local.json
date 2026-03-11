@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /c/Users/Samira/ona show HEAD~1:package.json)",
+      "Bash(git -C /c/Users/Samira/ona show HEAD~2:package.json)",
+      "Bash(git -C /c/Users/Samira/ona ls-tree -r HEAD~1 --name-only)",
+      "Bash(git -C /c/Users/Samira/ona show HEAD~1:src/app/signup/SignUpClient.tsx)",
+      "Bash(git -C /c/Users/Samira/ona show HEAD~1:src/lib/supabase.ts)",
+      "Bash(git -C /c/Users/Samira/ona show HEAD~1:src/lib/resend.ts)",
+      "Bash(git -C /c/Users/Samira/ona show HEAD~1:src/lib/supabaseServer.ts)",
+      "Bash(git -C /c/Users/Samira/ona show HEAD~1:src/app/signup/page.tsx)",
+      "Bash(unzip -o \"files \\(4\\).zip\" -d /tmp/raffle-files)",
+      "Bash(npm install)",
+      "Bash(npm run build)"
+    ]
+  }
+}

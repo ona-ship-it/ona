@@ -1,39 +1,54 @@
-# Node and Next.js
+# ========================
+# Dependencies
+# ========================
 node_modules/
+.pnp
+.pnp.js
+
+# ========================
+# Next.js build output
+# ========================
 .next/
 out/
-dist/
 build/
-coverage/
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
-*.log
-
-# Environment files
+# ========================
+# Environment variables — NEVER commit these
+# ========================
 .env
 .env.local
-.env.*
+.env.development.local
+.env.test.local
+.env.production.local
 .env.*.local
-.envrc
 
-# IDE and editor
-.vscode/
-.idea/
+# ========================
+# Vercel
+# ========================
+.vercel
 
-# OS-specific
+# ========================
+# TypeScript
+# ========================
+*.tsbuildinfo
+next-env.d.ts
+
+# ========================
+# OS generated files
+# ========================
 .DS_Store
 Thumbs.db
 
-# Vercel
-.vercel/
+# ========================
+# Logs
+# ========================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Trae/Project artifacts
-node_modules_restore/
-temp-restore/
-*.zip
-
-# Supabase (temporary or generated)
-supabase/.temp/
+# ========================
+# Editor
+# ========================
+.idea/
+.vscode/
+*.sw?

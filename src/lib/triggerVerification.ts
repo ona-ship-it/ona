@@ -1,9 +1,9 @@
 /**
  * Call this function right after a successful supabase.auth.signUp()
  * It sends the verification email via Resend.
- * 
+ *
  * Usage in your signup page:
- * 
+ *
  *   const { data, error } = await supabase.auth.signUp({ email, password })
  *   if (data.user && !error) {
  *     await triggerVerificationEmail(data.user.email, data.user.id)
