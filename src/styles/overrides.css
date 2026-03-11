@@ -710,7 +710,7 @@ header .navigation a:hover {
 }
 
 /* ── Page bottom padding for fixed BottomNav ── */
-@media (max-width: 1023px) {
+@media (max-width: 767px) {
   .page-body { padding-bottom: 80px; }
 }
 /* ── Responsive card grids (replaces Tailwind responsive prefixes) ── */

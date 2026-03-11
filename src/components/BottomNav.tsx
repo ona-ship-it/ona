@@ -132,7 +132,7 @@ export default function BottomNav() {
           font-weight: 700;
         }
 
-        @media (min-width: 1024px) {
+        @media (min-width: 768px) {
           .bottom-nav {
             display: none;
           }
