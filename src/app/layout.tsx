@@ -76,19 +76,9 @@ export default function RootLayout({
           <ThemeProvider>
             <WalletProvider>
               <Header />
-              <div className="page-body" style={{ paddingBottom: 'var(--page-body-padding, 72px)' }}>
+              <div className="page-body">
                 {children}
               </div>
-              <style jsx>{`
-                .page-body {
-                  --page-body-padding: 72px;
-                }
-                @media (min-width: 1024px) {
-                  .page-body {
-                    --page-body-padding: 0;
-                  }
-                }
-              `}</style>
             </WalletProvider>
           </ThemeProvider>
           <BottomNav />
