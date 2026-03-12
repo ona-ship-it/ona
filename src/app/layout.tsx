@@ -8,6 +8,7 @@ import '@/styles/raffle-cards.css'
 import './globals.css'
 import { WalletProvider } from '@/hooks/useWallet'
 import { ThemeProvider } from '@/components/ThemeContext'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import BottomNav from '@/components/BottomNav';
 import Header from '@/components/Header';
 
@@ -70,15 +71,17 @@ export default function RootLayout({
         <link rel="manifest" href="/my-favicon/site.webmanifest" />
       </head>
       <body className={inter.className}>
-        <ThemeProvider>
-          <WalletProvider>
-            <Header />
-            <div className="page-body" style={{ paddingBottom: '72px' }}>
-              {children}
-            </div>
-          </WalletProvider>
-        </ThemeProvider>
-        <BottomNav />
+        <ErrorBoundary>
+          <ThemeProvider>
+            <WalletProvider>
+              <Header />
+              <div className="page-body" style={{ paddingBottom: '72px' }}>
+                {children}
+              </div>
+            </WalletProvider>
+          </ThemeProvider>
+          <BottomNav />
+        </ErrorBoundary>
       </body>
     </html>
   )
