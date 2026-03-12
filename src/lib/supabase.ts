@@ -7,10 +7,15 @@ let client: ReturnType<typeof createBrowserClient> | null = null
 export function createClient() {
   if (client) return client
 
-  client = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  // When building on Vercel preview branches we may not have the
+  // Supabase env vars configured. Passing empty strings prevents
+  // the library from throwing a runtime error during build, and
+  // since the pages using this are client-only the real values
+  // will be available in the browser once the user navigates.
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+  client = createBrowserClient(url, key)
 
   return client
 }
