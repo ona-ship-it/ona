@@ -1,8 +1,7 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
+  "buildCommand": "cd src && npm run build",
+  "outputDirectory": "src/.next",
   "framework": "nextjs",
-  "srcDir": "src",
   "functions": {
     "src/app/api/**/*.ts": {
       "runtime": "@vercel/node"
