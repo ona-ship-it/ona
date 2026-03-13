@@ -1,11 +1,4 @@
 {
-  "framework": "nextjs",
-  "builds": [
-    {
-      "src": "src/package.json",
-      "use": "@vercel/next"
-    }
-  ],
   "crons": [
     {
       "path": "/api/cron/draw-winners",
