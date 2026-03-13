@@ -21,7 +21,13 @@ const nextConfig = {
       },
     ],
   },
-  turbopack: {},
+  turbopack: {
+    resolve: {
+      alias: {
+        '@': './src',
+      },
+    },
+  },
   webpack(config) {
     config.resolve.alias['@'] = path.join(__dirname, 'src')
     return config
