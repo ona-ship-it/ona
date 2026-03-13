@@ -1,6 +1,5 @@
 {
-  "buildCommand": "cd src && npm run build",
-  "outputDirectory": "src/.next",
+  "rootDirectory": "src",
   "framework": "nextjs",
   "functions": {
     "src/app/api/**/*.ts": {
