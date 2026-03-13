@@ -1,11 +1,10 @@
 {
-  "rootDirectory": "src",
-  "framework": "nextjs",
-  "functions": {
-    "src/app/api/**/*.ts": {
-      "runtime": "@vercel/node@2.0.0"
+  "builds": [
+    {
+      "src": "src/package.json",
+      "use": "@vercel/next"
     }
-  },
+  ],
   "crons": [
     {
       "path": "/api/cron/draw-winners",
