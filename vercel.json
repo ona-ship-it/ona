@@ -1,4 +1,5 @@
 {
+  "framework": "nextjs",
   "builds": [
     {
       "src": "src/package.json",
