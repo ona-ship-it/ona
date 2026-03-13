@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const path = require('path')
+
 if (process.env.NODE_ENV !== 'development' && !process.env.CRON_SECRET) {
   console.warn('⚠️  CRON_SECRET is missing. Protected cron/API endpoints will reject requests.')
 }
@@ -18,6 +20,17 @@ const nextConfig = {
         pathname: '/storage/v1/object/public/**',
       },
     ],
+  },
+  turbopack: {
+    resolve: {
+      alias: {
+        '@': './src',
+      },
+    },
+  },
+  webpack(config) {
+    config.resolve.alias['@'] = path.join(__dirname, 'src')
+    return config
   },
 };
 

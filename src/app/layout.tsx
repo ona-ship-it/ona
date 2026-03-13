@@ -17,6 +17,7 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Onagui - Web3 Giveaway & Raffle Platform',
   description: 'Create and participate in provably fair giveaways and raffles. Win real prizes with transparent, blockchain-verified draws.',
+  viewport: 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes',
   openGraph: {
     title: 'Onagui - Web3 Giveaway & Raffle Platform',
     description: 'Create and participate in provably fair giveaways and raffles. Win real prizes with transparent, blockchain-verified draws.',
@@ -75,7 +76,7 @@ export default function RootLayout({
           <ThemeProvider>
             <WalletProvider>
               <Header />
-              <div className="page-body" style={{ paddingBottom: '72px' }}>
+              <div className="page-body">
                 {children}
               </div>
             </WalletProvider>

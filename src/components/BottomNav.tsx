@@ -89,6 +89,13 @@ export default function BottomNav() {
           border-top: 1px solid var(--border);
         }
 
+        /* Hide bottom nav on desktop (1024px and above) */
+        @media (min-width: 1024px) {
+          .bottom-nav {
+            display: none;
+          }
+        }
+
         .nav-item {
           min-width: 64px;
           display: flex;
