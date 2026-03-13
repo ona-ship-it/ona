@@ -1,4 +1,13 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "srcDir": "src",
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "runtime": "@vercel/node"
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/draw-winners",
