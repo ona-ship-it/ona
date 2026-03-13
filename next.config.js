@@ -21,13 +21,10 @@ const nextConfig = {
       },
     ],
   },
-  turbopack: {
-    resolve: {
-      alias: {
-        '@': './src',
-      },
-    },
-  },
+  // Turbopack is used for development builds, but it doesn't support webpack-style
+  // resolve alias configuration. We rely on TypeScript path mapping (tsconfig.json)
+  // for the `@/*` import paths.
+  turbopack: {},
   webpack(config) {
     config.resolve.alias['@'] = path.join(__dirname, 'src')
     return config
