@@ -1,0 +1,20 @@
+name: Send Emails Cron Job
+
+on:
+  schedule:
+    # Runs every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  send-emails:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Call send-emails API endpoint
+        run: |
+          curl -X POST https://onagui.com/api/cron/send-emails \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --fail-with-body \
+            || echo "Failed to trigger send-emails cron"

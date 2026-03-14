@@ -44,7 +44,7 @@ export default function RafflesPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
-      <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 16px' }}>
 
         {/* Header row */}
         <div className="mb-6 flex items-center justify-between">
@@ -80,7 +80,7 @@ export default function RafflesPage() {
 
         {/* Grid */}
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
             {[...Array(6)].map((_, i) => (
               <div key={i} className="h-64 animate-pulse rounded-2xl" style={{ background: 'var(--bg-secondary)' }} />
             ))}
@@ -95,7 +95,7 @@ export default function RafflesPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
             {raffles.map((r) => (
               <Link key={r.id} href={`/raffles/${r.id}`} className="group block rounded-2xl border transition-all hover:border-green-500/40" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)' }}>
                 {/* Image */}

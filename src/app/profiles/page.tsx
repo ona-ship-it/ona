@@ -29,8 +29,8 @@ export default function ProfilesPage() {
       className="min-h-screen"
       style={{ background: 'var(--bg-primary)' }}
     >
-      <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 16px' }}>
+        <div style={{ marginBottom: 24, display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between' }}>
           <h1
             className="text-3xl font-extrabold"
             style={{ color: 'var(--text-primary)' }}
@@ -42,8 +42,8 @@ export default function ProfilesPage() {
             placeholder="Search creators..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="rounded-xl border px-4 py-2 text-sm w-full sm:w-64"
-            style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+            className="rounded-xl border px-4 py-2 text-sm"
+            style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', width: 256, maxWidth: '100%' }}
           />
         </div>
 

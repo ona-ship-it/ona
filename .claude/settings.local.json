@@ -11,7 +11,9 @@
       "Bash(git -C /c/Users/Samira/ona show HEAD~1:src/app/signup/page.tsx)",
       "Bash(unzip -o \"files \\(4\\).zip\" -d /tmp/raffle-files)",
       "Bash(npm install)",
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(node ./node_modules/next/dist/bin/next build)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }

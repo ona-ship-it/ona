@@ -8,8 +8,8 @@ import CreatorCommissionDisplay, {
   CommissionHistoryItem,
   CommissionTotals,
 } from '@/components/CreatorCommissionDisplay';
-import {
-  Users, Trophy, Heart, TrendingUp, Clock, Share2,
+import { 
+  Users, Trophy, Heart, TrendingUp, Clock, Share2, 
   ExternalLink, Check, Flame, Star, Gift, Ticket,
   Instagram, Twitter, Music2, Calendar, Eye, MessageCircle,
   Award, DollarSign, Target, Zap
@@ -724,9 +724,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
     };
   }, [profileData, creatorStats, followersCount]);
 
-  const formatSocialLabel = (value: string) =>
-    value.replace(/^https?:\/\//, '').replace(/\/$/, '')
-
+const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '').replace(/[/]$/, '')
   const formatFollowerCount = (count: number) =>
     count >= 1000 ? `${(count / 1000).toFixed(1)}K` : `${count}`
 
@@ -1119,6 +1117,4 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
   );
 };
 
-export default function ProfilePage({ params }: { params: { id: string } }) {
-  return <ONAGUIProfilePage profileIdOverride={params.id} />;
-}
+export default ONAGUIProfilePage;
