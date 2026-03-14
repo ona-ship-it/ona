@@ -797,18 +797,17 @@ export default function HomePage() {
                     className="card group cursor-pointer"
                   >
                     {/* Image */}
-                    <div className="relative h-40 overflow-hidden rounded-t-lg" style={{ background: 'var(--tertiary-bg)' }}>
+                    <div style={{ position: 'relative', height: 160, overflow: 'hidden', borderRadius: '12px 12px 0 0', background: 'var(--tertiary-bg)' }}>
                       <Image
                         src={campaign.cover_image || raffleFallbackImage}
                         alt={campaign.title}
                         fill
-                        className="object-cover"
+                        style={{ objectFit: 'cover' }}
                       />
-                      
+
                       {/* Category Badge */}
-                      <div 
-                        className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold"
-                        style={{ background: 'rgba(11, 14, 17, 0.8)', color: 'var(--accent-green)' }}
+                      <div
+                        style={{ position: 'absolute', top: 8, left: 8, padding: '4px 8px', borderRadius: 6, fontSize: 12, fontWeight: 600, background: 'rgba(11, 14, 17, 0.8)', color: 'var(--accent-green)' }}
                       >
                         {campaign.category || 'Fundraise'}
                       </div>
