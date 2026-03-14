@@ -70,7 +70,7 @@ export default function CreatorProfilePage() {
 
   async function checkIfFollowing(userId: string) {
     const { data } = await supabase
-      .from('follows')
+      .from('profile_followers')
       .select('id')
       .eq('follower_id', userId)
       .eq('following_id', params.id)
@@ -123,13 +123,13 @@ export default function CreatorProfilePage() {
     try {
       if (isFollowing) {
         await supabase
-          .from('follows')
+          .from('profile_followers')
           .delete()
           .eq('follower_id', user.id)
           .eq('following_id', params.id)
         setIsFollowing(false)
       } else {
-        await supabase.from('follows').insert({
+        await supabase.from('profile_followers').insert({
           follower_id: user.id,
           following_id: params.id as string
         })

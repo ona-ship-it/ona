@@ -111,7 +111,7 @@ export default function RaffleDetailClient() {
       // Check follow status now that we have the raffle
       if (currentUser) {
         const { data: followData } = await supabase
-          .from('follows')
+          .from('profile_followers')
           .select('id')
           .eq('follower_id', currentUser.id)
           .eq('following_id', raffleData.creator_id)
@@ -140,11 +140,11 @@ export default function RaffleDetailClient() {
 
     try {
       if (isFollowing) {
-        await supabase.from('follows').delete()
+        await supabase.from('profile_followers').delete()
           .eq('follower_id', user.id).eq('following_id', raffle.creator_id)
         setIsFollowing(false)
       } else {
-        await supabase.from('follows').insert({ follower_id: user.id, following_id: raffle.creator_id })
+        await supabase.from('profile_followers').insert({ follower_id: user.id, following_id: raffle.creator_id })
         setIsFollowing(true)
       }
     } catch (err) {

@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
         status,
         end_date,
         creator_id,
-        creator:profiles(full_name, avatar_url)
+        creator:onagui_profiles(full_name, avatar_url)
       `,
         { count: 'exact' }
       )
