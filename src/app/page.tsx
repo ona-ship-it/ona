@@ -400,29 +400,28 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg-secondary)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)' }}>
       {/* Hero Section */}
       <Hero />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '16px 16px 32px' }}>
         
         {/* ROW 1: POPULAR GIVEAWAYS */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+        <div style={{ marginBottom: 48 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               Popular Giveaways
             </h2>
-            <Link 
-              href="/giveaways" 
-              className="text-sm font-medium hover:opacity-80 transition-opacity"
-              style={{ color: 'var(--accent-blue)' }}
+            <Link
+              href="/giveaways"
+              style={{ fontSize: 14, fontWeight: 500, color: 'var(--accent-blue)' }}
             >
               View More →
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="items-grid">
             {giveaways.map((giveaway) => (
               <Link
                 key={giveaway.id}
@@ -541,21 +540,20 @@ export default function HomePage() {
         </div>
 
         {/* ROW 2: POPULAR RAFFLES */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+        <div style={{ marginBottom: 48 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               Popular Raffles
             </h2>
-            <Link 
-              href="/raffles" 
-              className="text-sm font-medium hover:opacity-80 transition-opacity"
-              style={{ color: 'var(--accent-blue)' }}
+            <Link
+              href="/raffles"
+              style={{ fontSize: 14, fontWeight: 500, color: 'var(--accent-blue)' }}
             >
               View More →
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="items-grid">
             {raffles.map((raffle) => (
               <Link
                 key={raffle.id}
@@ -649,22 +647,21 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ROW 3: MARKETPLACE (MOCK DATA - TODO: REMOVE) */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+        {/* ROW 3: MARKETPLACE */}
+        <div style={{ marginBottom: 48 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               Marketplace
             </h2>
-            <Link 
-              href="/marketplace" 
-              className="text-sm font-medium hover:opacity-80 transition-opacity"
-              style={{ color: 'var(--accent-blue)' }}
+            <Link
+              href="/marketplace"
+              style={{ fontSize: 14, fontWeight: 500, color: 'var(--accent-blue)' }}
             >
               View More →
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="items-grid">
             {marketplaceListings.length === 0 ? (
               <div className="card p-6 text-center" style={{ background: 'var(--secondary-bg)', color: 'var(--text-secondary)' }}>
                 No marketplace listings yet.
@@ -764,22 +761,21 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ROW 4: FUNDRAISE (MOCK DATA - TODO: REMOVE) */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+        {/* ROW 4: FUNDRAISE */}
+        <div style={{ marginBottom: 48 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               Fundraising Campaigns
             </h2>
-            <Link 
-              href="/fundraise" 
-              className="text-sm font-medium hover:opacity-80 transition-opacity"
-              style={{ color: 'var(--accent-blue)' }}
+            <Link
+              href="/fundraise"
+              style={{ fontSize: 14, fontWeight: 500, color: 'var(--accent-blue)' }}
             >
               View More →
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="items-grid">
             {fundraisers.length === 0 ? (
               <div className="card p-6 text-center" style={{ background: 'var(--secondary-bg)', color: 'var(--text-secondary)' }}>
                 No fundraisers yet.
@@ -880,21 +876,20 @@ export default function HomePage() {
         </div>
 
         {/* ROW 5: TOP PROFILES */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+        <div style={{ marginBottom: 48 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               Most Popular Profiles
             </h2>
             <Link
               href="/profiles"
-              className="text-sm font-medium hover:opacity-80 transition-opacity"
-              style={{ color: 'var(--accent-blue)' }}
+              style={{ fontSize: 14, fontWeight: 500, color: 'var(--accent-blue)' }}
             >
               View More →
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="items-grid">
             {topProfiles.map((profile) => (
               <Link
                 key={profile.id}
