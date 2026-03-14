@@ -1,286 +1,167 @@
 "use client";
 
 import React from 'react';
-import { DollarSign, TrendingUp, CheckCircle, Clock } from 'lucide-react';
+import { DollarSign, TrendingUp, Clock, CheckCircle } from 'lucide-react';
 
-export interface CommissionTotals {
+export type CommissionTotals = {
   totalEarned: number;
   paidOut: number;
   pending: number;
-}
+};
 
-export interface CommissionHistoryItem {
+export type CommissionHistoryItem = {
   id: string;
   title: string;
   amount: number;
-  status: 'paid' | 'pending';
-}
+  status: string;
+};
 
-interface CreatorCommissionDisplayProps {
+type Props = {
   totals: CommissionTotals;
   history: CommissionHistoryItem[];
-}
+};
 
-const CreatorCommissionDisplay: React.FC<CreatorCommissionDisplayProps> = ({
-  totals,
-  history,
-}) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  };
+const CreatorCommissionDisplay = ({ totals, history }: Props) => {
+  const formatAmount = (value: number) =>
+    value >= 1000 ? `$${(value / 1000).toFixed(1)}K` : `$${value.toFixed(2)}`;
 
-  const totalEarned = totals.totalEarned;
-  const paidOut = totals.paidOut;
-  const pending = totals.pending;
+  if (totals.totalEarned === 0 && history.length === 0) return null;
 
   return (
     <div style={{
       background: 'linear-gradient(135deg, rgba(20, 26, 32, 0.8) 0%, rgba(15, 20, 25, 0.9) 100%)',
       border: '1px solid rgba(0, 255, 136, 0.2)',
-      borderRadius: '16px',
-      padding: '24px',
-      marginBottom: '24px',
+      borderRadius: '20px',
+      padding: '28px',
+      backdropFilter: 'blur(10px)',
     }}>
-      <div style={{
+      <h3 style={{
+        fontFamily: "'Rajdhani', sans-serif",
+        fontSize: '20px',
+        fontWeight: 700,
+        color: '#fff',
+        marginBottom: '20px',
+        letterSpacing: '1px',
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
-        marginBottom: '20px',
+        gap: '10px',
       }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, #00ff88 0%, #00ffaa 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <DollarSign size={20} color="#0f1419" />
-        </div>
-        <div>
-          <h3 style={{
-            fontFamily: 'Rajdhani, sans-serif',
-            fontSize: '24px',
-            fontWeight: '700',
-            color: '#ffffff',
-            margin: 0,
-          }}>
-            Creator Commissions
-          </h3>
-          <p style={{
-            fontSize: '14px',
-            color: '#a0aec0',
-            margin: '4px 0 0 0',
-          }}>
-            Earnings from your giveaways (10% commission)
-          </p>
-        </div>
-      </div>
+        <DollarSign size={20} color="#00ff88" />
+        CREATOR COMMISSIONS
+      </h3>
 
-      {/* Commission Stats */}
+      {/* Totals row */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gridTemplateColumns: 'repeat(3, 1fr)',
         gap: '16px',
         marginBottom: '24px',
       }}>
         <div style={{
-          background: 'rgba(0, 255, 136, 0.05)',
+          background: 'rgba(0, 255, 136, 0.08)',
           border: '1px solid rgba(0, 255, 136, 0.2)',
-          borderRadius: '12px',
+          borderRadius: '14px',
           padding: '16px',
           textAlign: 'center',
         }}>
-          <div style={{
-            fontFamily: 'Rajdhani, sans-serif',
-            fontSize: '28px',
-            fontWeight: '700',
-            color: '#00ff88',
-            marginBottom: '4px',
-          }}>
-            {formatCurrency(totalEarned)}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '6px' }}>
+            <TrendingUp size={14} color="#00ff88" />
+            <span style={{ fontSize: '11px', color: '#718096', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Total Earned</span>
           </div>
-          <div style={{
-            fontSize: '12px',
-            color: '#a0aec0',
-            textTransform: 'uppercase',
-            letterSpacing: '1px',
-          }}>
-            Total Earned
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '28px', fontWeight: 700, color: '#00ff88' }}>
+            {formatAmount(totals.totalEarned)}
           </div>
         </div>
 
         <div style={{
-          background: 'rgba(0, 255, 170, 0.05)',
-          border: '1px solid rgba(0, 255, 170, 0.2)',
-          borderRadius: '12px',
+          background: 'rgba(0, 255, 136, 0.04)',
+          border: '1px solid rgba(0, 255, 136, 0.12)',
+          borderRadius: '14px',
           padding: '16px',
           textAlign: 'center',
         }}>
-          <div style={{
-            fontFamily: 'Rajdhani, sans-serif',
-            fontSize: '28px',
-            fontWeight: '700',
-            color: '#00ffaa',
-            marginBottom: '4px',
-          }}>
-            {formatCurrency(paidOut)}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '6px' }}>
+            <CheckCircle size={14} color="#4ade80" />
+            <span style={{ fontSize: '11px', color: '#718096', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Paid Out</span>
           </div>
-          <div style={{
-            fontSize: '12px',
-            color: '#a0aec0',
-            textTransform: 'uppercase',
-            letterSpacing: '1px',
-          }}>
-            Paid Out
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '28px', fontWeight: 700, color: '#4ade80' }}>
+            {formatAmount(totals.paidOut)}
           </div>
         </div>
 
         <div style={{
           background: 'rgba(255, 136, 0, 0.05)',
-          border: '1px solid rgba(255, 136, 0, 0.2)',
-          borderRadius: '12px',
+          border: '1px solid rgba(255, 136, 0, 0.15)',
+          borderRadius: '14px',
           padding: '16px',
           textAlign: 'center',
         }}>
-          <div style={{
-            fontFamily: 'Rajdhani, sans-serif',
-            fontSize: '28px',
-            fontWeight: '700',
-            color: '#ff8800',
-            marginBottom: '4px',
-          }}>
-            {formatCurrency(pending)}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '6px' }}>
+            <Clock size={14} color="#ff8800" />
+            <span style={{ fontSize: '11px', color: '#718096', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Pending</span>
           </div>
-          <div style={{
-            fontSize: '12px',
-            color: '#a0aec0',
-            textTransform: 'uppercase',
-            letterSpacing: '1px',
-          }}>
-            Pending
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '28px', fontWeight: 700, color: '#ff8800' }}>
+            {formatAmount(totals.pending)}
           </div>
         </div>
       </div>
 
-      {/* Commission History */}
+      {/* History list */}
       {history.length > 0 && (
         <div>
-          <h4 style={{
-            fontFamily: 'Rajdhani, sans-serif',
-            fontSize: '18px',
-            fontWeight: '600',
-            color: '#ffffff',
-            marginBottom: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}>
-            <TrendingUp size={20} />
-            Recent Commissions
-          </h4>
-
-          <div style={{
-            display: 'grid',
-            gap: '12px',
-          }}>
+          <div style={{ fontSize: '12px', color: '#718096', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600, marginBottom: '12px' }}>
+            Recent Activity
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {history.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  background: 'rgba(15, 20, 25, 0.5)',
-                  border: '1px solid rgba(0, 255, 136, 0.1)',
-                  borderRadius: '8px',
-                  padding: '12px 16px',
-                }}
-              >
-                <div style={{ flex: 1 }}>
+              <div key={item.id} style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 14px',
+                background: 'rgba(15, 20, 25, 0.6)',
+                borderRadius: '10px',
+                border: '1px solid rgba(0, 255, 136, 0.06)',
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
                     fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#ffffff',
-                    marginBottom: '2px',
+                    fontWeight: 600,
+                    color: '#e2e8f0',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                   }}>
                     {item.title}
                   </div>
-                  <div style={{
-                    fontSize: '12px',
-                    color: '#a0aec0',
-                  }}>
-                    Commission earned
-                  </div>
                 </div>
-
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                }}>
-                  <div style={{
-                    fontFamily: 'Rajdhani, sans-serif',
-                    fontSize: '16px',
-                    fontWeight: '700',
-                    color: item.status === 'paid' ? '#00ff88' : '#ff8800',
-                  }}>
-                    +{formatCurrency(item.amount)}
-                  </div>
-
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    fontSize: '12px',
-                    color: item.status === 'paid' ? '#00ff88' : '#ff8800',
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0, marginLeft: '12px' }}>
+                  <span style={{
+                    fontSize: '11px',
+                    fontWeight: 600,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    background: item.status === 'paid' ? 'rgba(0, 255, 136, 0.1)' : 'rgba(255, 136, 0, 0.1)',
+                    color: item.status === 'paid' ? '#00ff88' : '#ff8800',
+                    border: `1px solid ${item.status === 'paid' ? 'rgba(0,255,136,0.2)' : 'rgba(255,136,0,0.2)'}`,
                   }}>
-                    {item.status === 'paid' ? (
-                      <>
-                        <CheckCircle size={14} />
-                        Paid
-                      </>
-                    ) : (
-                      <>
-                        <Clock size={14} />
-                        Pending
-                      </>
-                    )}
-                  </div>
+                    {item.status}
+                  </span>
+                  <span style={{
+                    fontFamily: "'Rajdhani', sans-serif",
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    color: '#00ff88',
+                    minWidth: '60px',
+                    textAlign: 'right',
+                  }}>
+                    {formatAmount(item.amount)}
+                  </span>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      )}
-
-      {history.length === 0 && (
-        <div style={{
-          textAlign: 'center',
-          padding: '40px 20px',
-          color: '#718096',
-        }}>
-          <DollarSign size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
-          <div style={{
-            fontSize: '16px',
-            fontWeight: '600',
-            marginBottom: '8px',
-          }}>
-            No commissions yet
-          </div>
-          <div style={{
-            fontSize: '14px',
-            color: '#a0aec0',
-          }}>
-            Create your first giveaway to start earning commissions
           </div>
         </div>
       )}

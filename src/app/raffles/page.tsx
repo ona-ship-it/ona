@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Header from '@/components/Header'
 import { createClient } from '@/lib/supabase'
 
 type Raffle = {
@@ -45,7 +44,6 @@ export default function RafflesPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
-      <Header />
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
 
         {/* Header row */}

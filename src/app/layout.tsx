@@ -15,18 +15,17 @@ import Header from '@/components/Header';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Onagui - Web3 Giveaway & Raffle Platform',
-  description: 'Create and participate in provably fair giveaways and raffles. Win real prizes with transparent, blockchain-verified draws.',
-  viewport: 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes',
+  title: 'Onagui - Social Fintech Platform',
+  description: 'The social fintech platform where you can win, fundraise, and grow together. Giveaways, raffles, crowdfunding, and community — all in one place.',
   openGraph: {
-    title: 'Onagui - Web3 Giveaway & Raffle Platform',
-    description: 'Create and participate in provably fair giveaways and raffles. Win real prizes with transparent, blockchain-verified draws.',
+    title: 'Onagui - Social Fintech Platform',
+    description: 'The social fintech platform where you can win, fundraise, and grow together. Giveaways, raffles, crowdfunding, and community — all in one place.',
     images: [
       {
         url: 'https://www.onagui.com/og-default.png',
         width: 1200,
         height: 630,
-        alt: 'Onagui - Web3 Giveaway Platform',
+        alt: 'Onagui - Social Fintech Platform',
       },
     ],
     type: 'website',
@@ -35,8 +34,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Onagui - Web3 Giveaway & Raffle Platform',
-    description: 'Create and participate in provably fair giveaways and raffles. Win real prizes.',
+    title: 'Onagui - Social Fintech Platform',
+    description: 'The social fintech platform where you can win, fundraise, and grow together.',
     images: ['https://www.onagui.com/og-default.png'],
     site: '@onaborado',
   },

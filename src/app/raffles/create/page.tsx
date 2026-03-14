@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import Header from '@/components/Header'
 
 /* ── Icons ── */
 const CheckIcon = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -265,7 +264,6 @@ export default function CreateRafflePage() {
 
   return (
     <div style={s.page}>
-      <Header />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <div style={s.inner}>
         <div style={s.container}>

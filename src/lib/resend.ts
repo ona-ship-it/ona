@@ -23,7 +23,7 @@ export async function sendVerificationEmail(to: string, verificationUrl: string)
     <!-- Logo -->
     <div style="text-align:center;margin-bottom:32px;">
       <h1 style="font-size:28px;font-weight:900;color:#00ff88;letter-spacing:2px;margin:0;">ONAGUI</h1>
-      <p style="color:#64748b;font-size:12px;margin:4px 0 0;letter-spacing:1px;">WEB3 GIVEAWAY PLATFORM</p>
+      <p style="color:#64748b;font-size:12px;margin:4px 0 0;letter-spacing:1px;">SOCIAL FINTECH PLATFORM</p>
     </div>
     <!-- Card -->
     <div style="background:#1e293b;border:1px solid rgba(0,255,136,0.15);border-radius:16px;padding:32px 24px;text-align:center;">
@@ -96,7 +96,7 @@ export async function sendWelcomeEmail(to: string, username: string) {
       </div>
       <h2 style="color:#f8fafc;font-size:22px;font-weight:700;margin:0 0 8px;">Welcome, ${username}!</h2>
       <p style="color:#94a3b8;font-size:14px;line-height:1.6;margin:0 0 24px;">
-        Your email is verified and your account is ready. Start exploring giveaways, raffles, and more!
+        Your email is verified and your account is ready. Start exploring giveaways, raffles, fundraising, and more!
       </p>
       <a href="https://www.onagui.com/raffles" style="display:inline-block;padding:14px 40px;background:linear-gradient(135deg,#00ff88,#00cc6a);color:#0a1929;font-size:14px;font-weight:700;text-decoration:none;border-radius:10px;letter-spacing:0.5px;">
         EXPLORE RAFFLES

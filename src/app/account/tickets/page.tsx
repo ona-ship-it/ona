@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import Link from 'next/link'
-import Header from '@/components/Header'
 import Image from 'next/image'
 
 type TicketEntry = {
@@ -82,7 +81,6 @@ export default function MyTicketsPage() {
 
   return (
     <div style={{ background: '#0a1929', minHeight: '100vh', fontFamily: "'Inter', system-ui, sans-serif" }}>
-      <Header />
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 16px' }}>
         <div style={{ marginBottom: 24 }}>
           <h1 style={{ fontSize: 26, fontWeight: 900, color: '#f8fafc', margin: '0 0 4px', fontFamily: "'Rajdhani', sans-serif" }}>My Tickets</h1>

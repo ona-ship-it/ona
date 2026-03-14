@@ -49,13 +49,16 @@ export default function Header() {
 
   return (
     <header
-      className="sticky top-0 z-50 border-b backdrop-blur-xl"
       style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
         background: 'var(--bg-primary)',
-        borderColor: 'var(--border)',
+        borderBottom: '1px solid var(--border)',
+        backdropFilter: 'blur(20px)',
       }}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
+      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', height: 64, alignItems: 'center', justifyContent: 'space-between', padding: '0 16px' }}>
         <Link href="/" className="font-extrabold tracking-tight text-3xl" style={{ color: 'var(--text-primary)' }}>
           ONAGUI
         </Link>

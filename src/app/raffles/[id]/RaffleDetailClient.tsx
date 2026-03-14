@@ -8,7 +8,6 @@ import Link from 'next/link'
 import WalletConnect from '@/components/WalletConnect'
 import WinnerDisplay from '@/components/WinnerDisplay'
 import ShareButtons from '@/components/ShareButtons'
-import Header from '@/components/Header'
 
 type Raffle = {
   id: string
@@ -235,7 +234,6 @@ export default function RaffleDetailClient() {
 
   return (
     <div style={{ background: '#0a1929', minHeight: '100vh', fontFamily: "'Inter', system-ui, sans-serif" }}>
-      <Header />
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 16px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }}>

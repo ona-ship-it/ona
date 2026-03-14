@@ -32,8 +32,8 @@ export default function MarketplacePage() {
           className="mb-8 max-w-md text-sm text-center"
           style={{ color: 'var(--text-secondary)', margin: '0 auto 32px' }}
         >
-          Buy and sell digital goods, collectibles, and raffle prizes.
-          Secure peer-to-peer trading with instant settlement.
+          Buy, sell, and trade digital goods and collectibles.
+          Secure peer-to-peer trading powered by Onagui.
         </p>
         <div className="mb-8 grid w-full max-w-sm gap-3">
           {features.map((item) => (

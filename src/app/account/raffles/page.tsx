@@ -7,7 +7,6 @@ import { createClient } from '@/lib/supabase'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import EditPostModal from '@/components/EditPostModal'
 import Link from 'next/link'
-import Header from '@/components/Header'
 import Image from 'next/image'
 
 type MyRaffle = {
@@ -77,7 +76,6 @@ export default function MyRafflesPage() {
 
   return (
     <div style={{ background: '#0a1929', minHeight: '100vh', fontFamily: "'Inter', system-ui, sans-serif" }}>
-      <Header />
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '32px 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>

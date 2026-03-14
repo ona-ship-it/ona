@@ -84,7 +84,7 @@ export default function FundraisePage() {
             Fundraise with Crypto
           </h1>
           <p style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 28, maxWidth: 560 }}>
-            The #1 platform for crypto crowdfunding. Start a campaign, raise money, change lives.
+            Launch a campaign, rally your community, and raise funds for what matters most.
           </p>
           <div style={{ display: 'flex', gap: 12, marginBottom: 40, flexWrap: 'wrap' }}>
             <Link

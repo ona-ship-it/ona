@@ -111,61 +111,45 @@ export default function LoginPage() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center p-4">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
-      </div>
+  const S = {
+    page: { minHeight: '100vh', background: '#0f1419', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 } as React.CSSProperties,
+    wrap: { position: 'relative' as const, width: '100%', maxWidth: 420 },
+    logo: { display: 'flex', justifyContent: 'center', marginBottom: 32, textDecoration: 'none' },
+    logoText: { fontSize: 32, fontWeight: 800, color: '#ffffff', letterSpacing: 2, fontFamily: "'Rajdhani', 'Space Grotesk', sans-serif" },
+    card: { background: 'rgba(20,26,32,0.9)', backdropFilter: 'blur(20px)', border: '1px solid rgba(6,122,13,0.25)', borderRadius: 20, padding: 32, boxShadow: '0 25px 60px rgba(0,0,0,0.5), 0 0 40px rgba(6,122,13,0.08)' },
+    tabs: { display: 'flex', gap: 4, marginBottom: 28, background: 'rgba(15,20,25,0.6)', padding: 4, borderRadius: 14 },
+    tab: (active: boolean) => ({ flex: 1, padding: '12px 16px', borderRadius: 10, fontWeight: 700, fontSize: 14, border: 'none', cursor: 'pointer', fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.5px', background: active ? 'linear-gradient(135deg, #2be937 0%, #067a0d 100%)' : 'transparent', color: active ? '#fff' : '#718096', boxShadow: active ? '0 4px 16px rgba(6,122,13,0.4)' : 'none', transition: 'all 0.2s' } as React.CSSProperties),
+    google: { width: '100%', marginBottom: 20, padding: '14px 20px', background: '#fff', color: '#111', fontWeight: 600, fontSize: 14, borderRadius: 12, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, transition: 'all 0.2s' } as React.CSSProperties,
+    divider: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, color: '#4a5568', fontSize: 13 },
+    line: { flex: 1, height: 1, background: 'rgba(6,122,13,0.15)' },
+    label: { display: 'block', fontSize: 13, fontWeight: 600, color: '#a0aec0', marginBottom: 8, letterSpacing: '0.3px' },
+    input: { width: '100%', padding: '12px 16px', background: 'rgba(15,20,25,0.8)', border: '1px solid rgba(6,122,13,0.2)', borderRadius: 12, color: '#f1f5f9', fontSize: 14, outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.2s' },
+    submit: { width: '100%', padding: '14px 20px', background: '#fd8312', color: '#fff', fontWeight: 700, fontSize: 15, borderRadius: 12, border: 'none', cursor: 'pointer', marginTop: 8, fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.5px', transition: 'all 0.2s' },
+    footer: { marginTop: 20, textAlign: 'center' as const, fontSize: 13, color: '#718096' },
+    link: { color: '#2be937', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 },
+    alert: (type: 'error' | 'success') => ({ marginBottom: 16, padding: 14, borderRadius: 12, fontSize: 13, background: type === 'error' ? 'rgba(239,68,68,0.1)' : 'rgba(6,122,13,0.1)', border: `1px solid ${type === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(6,122,13,0.3)'}`, color: type === 'error' ? '#f87171' : '#2be937' } as React.CSSProperties),
+    back: { marginTop: 20, textAlign: 'center' as const },
+    backLink: { color: '#718096', textDecoration: 'none', fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 8 },
+  }
 
-      <div className="relative w-full max-w-md">
-        <Link href="/" className="flex justify-center mb-8">
-          <h1 className="text-5xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-            ONAGUI
-          </h1>
+  return (
+    <div style={S.page}>
+      <div style={S.wrap}>
+        <Link href="/" style={S.logo}>
+          <h1 style={S.logoText}>ONAGUI</h1>
         </Link>
 
-        <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl p-8">
-          <div className="flex gap-2 mb-8 bg-slate-800/50 p-1 rounded-2xl">
-            <button
-              onClick={() => setIsLogin(true)}
-              className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all ${
-                isLogin
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/50'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Sign In
-            </button>
-            <button
-              onClick={() => setIsLogin(false)}
-              className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all ${
-                !isLogin
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/50'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Sign Up
-            </button>
+        <div style={S.card}>
+          <div style={S.tabs}>
+            <button onClick={() => setIsLogin(true)} style={S.tab(isLogin)}>Sign In</button>
+            <button onClick={() => setIsLogin(false)} style={S.tab(!isLogin)}>Sign Up</button>
           </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm">
-              {error}
-            </div>
-          )}
-          {message && (
-            <div className="mb-6 p-4 bg-green-500/10 border border-green-500/50 rounded-xl text-green-400 text-sm">
-              {message}
-            </div>
-          )}
+          {error && <div style={S.alert('error')}>{error}</div>}
+          {message && <div style={S.alert('success')}>{message}</div>}
 
-          <button
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-            className="w-full mb-6 py-4 px-6 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:opacity-50"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
+          <button onClick={handleGoogleSignIn} disabled={loading} style={S.google}>
+            <svg width="20" height="20" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -174,129 +158,46 @@ export default function LoginPage() {
             Continue with Google
           </button>
 
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-700"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-slate-900/50 text-slate-400">Or continue with email</span>
-            </div>
-          </div>
+          <div style={S.divider}><span style={S.line} /><span>Or continue with email</span><span style={S.line} /></div>
 
-          <form onSubmit={handleEmailAuth} className="space-y-4">
+          <form onSubmit={handleEmailAuth}>
             {!isLogin && (
               <>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 focus:outline-none transition"
-                    placeholder="John Doe"
-                  />
+                <div style={{ marginBottom: 14 }}>
+                  <label style={S.label}>Full Name</label>
+                  <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required placeholder="John Doe" style={S.input} />
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    required
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 focus:outline-none transition"
-                    placeholder="+1 (555) 123-4567"
-                  />
+                <div style={{ marginBottom: 14 }}>
+                  <label style={S.label}>Phone Number</label>
+                  <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required placeholder="+1 (555) 123-4567" style={S.input} />
                 </div>
               </>
             )}
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 focus:outline-none transition"
-                placeholder="you@example.com"
-              />
+            <div style={{ marginBottom: 14 }}>
+              <label style={S.label}>Email</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@example.com" style={S.input} />
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 focus:outline-none transition"
-                placeholder="••••••••"
-              />
+            <div style={{ marginBottom: 14 }}>
+              <label style={S.label}>Password</label>
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder="••••••••" style={S.input} />
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Processing...
-                </span>
-              ) : isLogin ? (
-                'Sign In'
-              ) : (
-                'Create Account'
-              )}
+            <button type="submit" disabled={loading} style={{ ...S.submit, opacity: loading ? 0.5 : 1 }}>
+              {loading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Account'}
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-slate-400">
+          <div style={S.footer}>
             {isLogin ? (
-              <p>
-                Don't have an account?{' '}
-                <button
-                  onClick={() => setIsLogin(false)}
-                  className="text-blue-400 hover:text-blue-300 font-semibold"
-                >
-                  Sign up
-                </button>
-              </p>
+              <p>Don&apos;t have an account?{' '}<button onClick={() => setIsLogin(false)} style={S.link}>Sign up</button></p>
             ) : (
-              <p>
-                Already have an account?{' '}
-                <button
-                  onClick={() => setIsLogin(true)}
-                  className="text-blue-400 hover:text-blue-300 font-semibold"
-                >
-                  Sign in
-                </button>
-              </p>
+              <p>Already have an account?{' '}<button onClick={() => setIsLogin(true)} style={S.link}>Sign in</button></p>
             )}
           </div>
         </div>
 
-        <div className="mt-6 text-center">
-          <Link
-            href="/"
-            className="text-slate-400 hover:text-white transition-colors inline-flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div style={S.back}>
+          <Link href="/" style={S.backLink}>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Back to Home
