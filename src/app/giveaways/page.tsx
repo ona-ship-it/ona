@@ -1,124 +1,49 @@
-'use client'
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase'
-import Link from 'next/link'
+import React from 'react';
+import Link from 'next/link';
+import GiveawaysClient from '../../components/GiveawaysClient';
 
-export default function GiveawaysPage() {
-  const [items, setItems] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const supabase = createClient()
-    supabase
-      .from('giveaways')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(24)
-      .then(({ data }) => { setItems(data ?? []); setLoading(false) })
-      .catch(() => setLoading(false))
-  }, [])
-
+export default function Page() {
   return (
-    <main
-      className="min-h-screen"
-      style={{ background: 'var(--bg-primary)' }}
-    >
-      <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
-        <div className="mb-6 flex items-center justify-between">
-          <h1
-            className="text-3xl font-extrabold"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            Giveaways
-          </h1>
-          <Link
-            href="/giveaways/create"
-            className="rounded-xl px-4 py-2 text-sm font-semibold text-white"
-            style={{ background: 'var(--accent-green)' }}
-          >
-            + Create Giveaway
-          </Link>
-        </div>
-
-        {loading ? (
-          <div className="items-grid">
-            {[...Array(8)].map((_, i) => (
-              <div
-                key={i}
-                style={{ height: 256, background: 'var(--bg-secondary)', borderRadius: 16 }}
-              />
-            ))}
-          </div>
-        ) : items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="mb-4 text-5xl">🎁</div>
-            <h2
-              className="mb-2 text-xl font-bold"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              No giveaways yet
-            </h2>
-            <p
-              className="mb-6 text-sm"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              Be the first to start one!
-            </p>
+    <div style={{ minHeight: '100vh', background: 'var(--primary-bg)' }}>
+      {/* Hero Section */}
+      <div style={{
+        background: 'var(--secondary-bg)',
+        borderBottom: '1px solid var(--border)'
+      }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+            <div>
+              <h1 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: 16, color: 'var(--text-primary)' }}>
+                Active Giveaways
+              </h1>
+              <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)' }}>
+                Enter giveaways and win amazing prizes
+              </p>
+            </div>
             <Link
-              href="/giveaways/create"
-              className="rounded-xl px-6 py-3 text-sm font-semibold text-white"
-              style={{ background: 'var(--accent-green)' }}
+              href="/create-giveaway"
+              style={{
+                padding: '12px 24px',
+                borderRadius: 8,
+                fontWeight: 600,
+                background: 'var(--accent-green)',
+                color: 'var(--text-primary)',
+                textDecoration: 'none'
+              }}
             >
-              Create Giveaway
+              Create your giveaway
             </Link>
           </div>
-        ) : (
-          <div className="items-grid">
-            {items.map((g: any) => (
-              <Link
-                key={g.id}
-                href={'/giveaways/' + g.id}
-                style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)',
-                  border: '1px solid var(--border)', borderRadius: 16,
-                  overflow: 'hidden', textDecoration: 'none', display: 'block' }}
-              >
-                {g.image_url ? (
-                  <div className="card-img">
-                    <img src={g.image_url} alt={g.title} />
-                    <span className="card-badge">GIVEAWAY</span>
-                  </div>
-                ) : (
-                  <div style={{ height: 176, display: 'flex', alignItems: 'center',
-                    justifyContent: 'center', fontSize: 40, background: 'var(--bg-secondary)' }}>
-                    🎁
-                  </div>
-                )}
-                <div className="p-4">
-                  <p
-                    className="truncate font-semibold"
-                    style={{ color: 'var(--accent-green)' }}
-                  >{g.title}</p>
-                  {g.prize_value && (
-                    <p
-                      className="mt-1 text-xl font-bold"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
-                      {'$'}{g.prize_value}
-                    </p>
-                  )}
-                  {g.description && (
-                    <p
-                      className="mt-1 line-clamp-2 text-xs"
-                      style={{ color: 'var(--text-secondary)' }}
-                    >{g.description}</p>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+        </div>
       </div>
-    </main>
-  )
+
+      {/* Content */}
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 24px' }}>
+        <GiveawaysClient />
+      </div>
+    </div>
+  );
 }

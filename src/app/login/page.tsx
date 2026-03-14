@@ -52,19 +52,20 @@ export default function LoginPage() {
 
         if (authData.user) {
           const gravatarUrl = getGravatarUrl(email);
-          
+          const derivedUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '');
+
           // Create in app_users
           await supabase.from('app_users').upsert({
             id: authData.user.id,
             email: authData.user.email,
-            username,
+            username: derivedUsername,
             created_at: authData.user.created_at,
           }, { onConflict: 'id' });
 
           // Create in onagui_profiles
           await supabase.from('onagui_profiles').upsert({
             id: authData.user.id,
-            username,
+            username: derivedUsername,
             full_name: fullName,
             onagui_type: 'signed_in',
             created_at: authData.user.created_at,

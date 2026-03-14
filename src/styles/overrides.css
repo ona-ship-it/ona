@@ -742,6 +742,15 @@ header .navigation a:hover {
 @media (min-width: 1280px) {
   .profiles-grid { grid-template-columns: repeat(4, 1fr); }
 }
+/* ── Giveaway detail 2-col / 1-col responsive grid ── */
+.giveaway-detail-grid {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 1024px) {
+  .giveaway-detail-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
 /* ── Card image container ── */
 .card-img { position: relative; height: 176px; overflow: hidden; }
 .card-img img { width: 100%; height: 100%; object-fit: cover; }
