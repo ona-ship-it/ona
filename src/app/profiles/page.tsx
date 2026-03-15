@@ -11,18 +11,36 @@ export default function ProfilesPage() {
 
   useEffect(() => {
     const supabase = createClient()
-    supabase
-      .from('onagui_profiles')
-      .select('*, profiles(avatar_url)')
-      .order('created_at', { ascending: false })
-      .limit(48)
-      .then(({ data }) => { setProfiles(data ?? []); setLoading(false) })
-      .catch(() => setLoading(false))
+    async function loadProfiles() {
+      // Try with join first, fall back to plain query if FK doesn't exist
+      let { data, error } = await supabase
+        .from('onagui_profiles')
+        .select('*, profiles(avatar_url)')
+        .order('created_at', { ascending: false })
+        .limit(48)
+
+      if (error || !data) {
+        // Fallback: query without the join
+        const res = await supabase
+          .from('onagui_profiles')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(48)
+        data = res.data
+      }
+
+      setProfiles(data ?? [])
+      setLoading(false)
+    }
+    loadProfiles()
   }, [])
 
-  const filtered = profiles.filter((p) =>
-    !search || (p.username ?? "").toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = profiles.filter((p) => {
+    if (!search) return true
+    const q = search.toLowerCase()
+    return (p.username ?? "").toLowerCase().includes(q)
+      || (p.full_name ?? "").toLowerCase().includes(q)
+  })
 
   return (
     <main
@@ -78,7 +96,7 @@ export default function ProfilesPage() {
             {filtered.map((p: any) => (
               <Link
                 key={p.id}
-                href={'/profile/' + p.username}
+                href={'/profiles/' + p.id}
                 className="flex items-center gap-4 rounded-2xl border p-4 transition-transform hover:scale-[1.02]"
                 style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)' }}
               >
@@ -86,9 +104,9 @@ export default function ProfilesPage() {
                   className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border text-lg font-bold"
                   style={{ borderColor: 'var(--accent-green)', background: 'var(--bg-primary)', color: 'var(--accent-green)' }}
                 >
-                  {p.profiles?.avatar_url ? (
+                  {(p.avatar_url || p.profiles?.avatar_url) ? (
                     <img
-                      src={p.profiles.avatar_url}
+                      src={p.avatar_url || p.profiles?.avatar_url}
                       alt={p.username}
                       className="h-12 w-12 rounded-full object-cover"
                     />
@@ -97,9 +115,17 @@ export default function ProfilesPage() {
                   )}
                 </div>
                 <div className="min-w-0">
+                  {p.full_name && (
+                    <p
+                      className="truncate font-semibold"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      {p.full_name}
+                    </p>
+                  )}
                   <p
-                    className="truncate font-semibold"
-                    style={{ color: 'var(--text-primary)' }}
+                    className={`truncate ${p.full_name ? 'text-xs' : 'font-semibold'}`}
+                    style={{ color: p.full_name ? 'var(--text-secondary)' : 'var(--text-primary)' }}
                   >
                     {'@' + (p.username ?? 'anonymous')}
                   </p>

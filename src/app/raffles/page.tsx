@@ -11,7 +11,7 @@ type Raffle = {
   images: string[] | null
   prize_value: number | null
   ticket_price: number
-  max_tickets: number
+  total_tickets: number
   tickets_sold: number
   status: string
   end_date: string | null
@@ -32,7 +32,7 @@ export default function RafflesPage() {
     setLoading(true)
     const { data } = await supabase
       .from('raffles')
-      .select('id,title,description,images,prize_value,ticket_price,max_tickets,tickets_sold,status,end_date,country_restriction')
+      .select('id,title,description,images,prize_value,ticket_price,total_tickets,tickets_sold,status,end_date,country_restriction')
       .eq('status', filter)
       .order('created_at', { ascending: false })
       .limit(24)
@@ -40,7 +40,7 @@ export default function RafflesPage() {
     setLoading(false)
   }
 
-  const pct = (r: Raffle) => Math.min(100, Math.round((r.tickets_sold / r.max_tickets) * 100))
+  const pct = (r: Raffle) => Math.min(100, Math.round((r.tickets_sold / r.total_tickets) * 100))
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
@@ -132,7 +132,7 @@ export default function RafflesPage() {
                     <div className="h-full rounded-full transition-all" style={{ width: `${pct(r)}%`, background: 'var(--accent-green)' }} />
                   </div>
                   <div className="flex items-center justify-between text-xs" style={{ color: 'var(--text-secondary)' }}>
-                    <span>{r.tickets_sold}/{r.max_tickets} tickets</span>
+                    <span>{r.tickets_sold}/{r.total_tickets} tickets</span>
                     <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>${r.ticket_price} USDC</span>
                   </div>
                 </div>
