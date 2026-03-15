@@ -1,114 +1,84 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabaseServer'
 
-// Initialize Supabase with service role key (server-side only)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Secured by a shared secret — set CRON_SECRET in Vercel env vars
+export async function GET(request: NextRequest) {
+  const secret = request.headers.get('x-cron-secret') ?? request.nextUrl.searchParams.get('secret')
+  if (secret !== process.env.CRON_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
-export async function GET(request: Request) {
+  const supabase = await createClient()
+  const now = new Date().toISOString()
+
   try {
-    // Verify cron secret (security)
-    const authHeader = request.headers.get('authorization')
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Close expired giveaways
-    await supabase.rpc('check_expired_giveaways')
-    
-    // Close sold out raffles
-    await supabase.rpc('check_sold_out_raffles')
-
-    // Get giveaways that need winners drawn
-    const { data: expiredGiveaways } = await supabase
-      .from('giveaways')
-      .select('id, title')
-      .eq('status', 'ended')
-      .is('winner_id', null)
-
-    // Get raffles that need winners drawn
-    const { data: completedRaffles } = await supabase
+    // Find all raffles that have expired and not yet had a winner drawn
+    const { data: expiredRaffles, error: fetchError } = await supabase
       .from('raffles')
-      .select('id, title')
-      .eq('status', 'sold_out')
+      .select('id, title, total_tickets, tickets_sold, creator_id')
+      .eq('status', 'active')
+      .lt('end_date', now)
       .is('winner_id', null)
 
-    const results = {
-      giveawaysDrawn: 0,
-      rafflesDrawn: 0,
-      errors: [] as string[],
+    if (fetchError) throw fetchError
+    if (!expiredRaffles || expiredRaffles.length === 0) {
+      return NextResponse.json({ message: 'No raffles to draw', drawn: 0 })
     }
 
-    // Draw giveaway winners
-    if (expiredGiveaways && expiredGiveaways.length > 0) {
-      for (const giveaway of expiredGiveaways) {
-        try {
-          const { data: winnerId, error } = await supabase.rpc('draw_giveaway_winner', {
-            giveaway_uuid: giveaway.id,
-          })
+    const drawn: string[] = []
 
-          if (error) throw error
-
-          // Create winner notification
-          await supabase.from('winner_notifications').insert({
-            giveaway_id: giveaway.id,
-            winner_id: winnerId,
-            notification_type: 'email',
-            status: 'pending',
-          })
-
-          results.giveawaysDrawn++
-        } catch (error: any) {
-          results.errors.push(`Giveaway ${giveaway.id}: ${error.message}`)
+    for (const raffle of expiredRaffles) {
+      try {
+        if (raffle.tickets_sold === 0) {
+          // No tickets sold — mark as cancelled
+          await supabase.from('raffles').update({ status: 'cancelled' }).eq('id', raffle.id)
+          continue
         }
+
+        // Pick a random ticket number between 1 and tickets_sold
+        const winningTicket = Math.floor(Math.random() * raffle.tickets_sold) + 1
+
+        // Find the ticket holder
+        const { data: ticket } = await supabase
+          .from('raffle_tickets')
+          .select('user_id, ticket_numbers')
+          .eq('raffle_id', raffle.id)
+          .contains('ticket_numbers', [winningTicket])
+          .single()
+
+        if (!ticket) {
+          // Fallback: pick any ticket holder at random
+          const { data: anyTicket } = await supabase
+            .from('raffle_tickets')
+            .select('user_id')
+            .eq('raffle_id', raffle.id)
+            .limit(1)
+            .single()
+          if (!anyTicket) continue
+
+          await supabase.from('raffles').update({
+            status: 'completed',
+            winner_id: anyTicket.user_id,
+            winner_drawn_at: now,
+          }).eq('id', raffle.id)
+        } else {
+          await supabase.from('raffles').update({
+            status: 'completed',
+            winner_id: ticket.user_id,
+            winner_drawn_at: now,
+          }).eq('id', raffle.id)
+        }
+
+        drawn.push(raffle.id)
+        console.log(`Winner drawn for raffle ${raffle.id} (${raffle.title})`)
+      } catch (raffleErr) {
+        console.error(`Failed to draw winner for raffle ${raffle.id}:`, raffleErr)
       }
     }
 
-    // Draw raffle winners
-    if (completedRaffles && completedRaffles.length > 0) {
-      for (const raffle of completedRaffles) {
-        try {
-          const { data: winnerId, error } = await supabase.rpc('draw_raffle_winner', {
-            raffle_uuid: raffle.id,
-          })
-
-          if (error) throw error
-
-          // Create winner notification
-          await supabase.from('winner_notifications').insert({
-            raffle_id: raffle.id,
-            winner_id: winnerId,
-            notification_type: 'email',
-            status: 'pending',
-          })
-
-          results.rafflesDrawn++
-        } catch (error: any) {
-          results.errors.push(`Raffle ${raffle.id}: ${error.message}`)
-        }
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      ...results,
-      timestamp: new Date().toISOString(),
-    })
-  } catch (error: any) {
-    console.error('Cron job error:', error)
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    )
+    return NextResponse.json({ message: 'Draw complete', drawn: drawn.length, raffleIds: drawn })
+  } catch (err: any) {
+    console.error('Draw winners cron error:', err)
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
-
-// Allow POST as well for manual testing
-export async function POST(request: Request) {
-  return GET(request)
-}
-
-export const maxDuration = 60 // Winner drawing might take longer
-export const dynamic = 'force-dynamic'

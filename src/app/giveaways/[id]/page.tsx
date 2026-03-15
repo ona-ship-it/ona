@@ -175,7 +175,7 @@ export default function GiveawayDetailPage() {
         }
       }
 
-      const response = await fetch('/api/entries/create', {
+      const response = await fetch(`/giveaways/${giveaway.id}/api/entries/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ giveawayId: giveaway.id, entryType }),
@@ -218,26 +218,18 @@ export default function GiveawayDetailPage() {
     : null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="text-blue-400 hover:text-blue-300 font-semibold">
-              ← Back to Giveaways
-            </Link>
-            <Link href="/">
-              <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                ONAGUI
-              </h1>
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #020617, #172554, #0f172a)' }}>
+      {/* Back nav */}
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '12px 16px' }}>
+        <Link href="/giveaways" style={{ color: '#60a5fa', fontWeight: 600, textDecoration: 'none' }}>
+          ← Back to Giveaways
+        </Link>
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 16px 48px' }}>
+        <div className="giveaway-detail-grid" style={{ display: 'grid', gap: 32 }}>
           {/* Left - Image & Description */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="giveaway-detail-left" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl overflow-hidden">
               <div className="relative h-96 bg-gradient-to-br from-slate-800 to-slate-900">
                 {giveaway.image_url ? (

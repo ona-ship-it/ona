@@ -272,7 +272,7 @@ export default function ShareLandingPage() {
             {/* How It Works */}
             <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-8">
               <h4 className="text-xl font-bold text-white mb-6 text-center">How It Works</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div style={{ display: "grid", gap: 24, gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
                 <div className="text-center">
                   <div className="text-5xl mb-3">1️⃣</div>
                   <h5 className="font-bold text-white mb-2">Sign Up</h5>

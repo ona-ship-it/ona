@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import Header from '@/components/Header'
 import ProfilePicture from '@/components/ProfilePicture'
 
 export default function SettingsPage() {
@@ -175,10 +174,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--primary-bg)' }}>
-      <Header />
-
-      <div className="max-w-3xl mx-auto px-4 py-8">
+    <div style={{ minHeight: '100vh', background: 'var(--primary-bg)' }}>
+      <div style={{ maxWidth: 768, margin: '0 auto', padding: '32px 16px' }}>
         <h1 className="text-3xl font-bold mb-8" style={{ color: 'var(--text-primary)' }}>
           Profile Settings
         </h1>

@@ -263,7 +263,7 @@ export default function CreateFundraiseClient() {
                 </select>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
                 <div>
                   <label className="block text-gray-700 font-semibold mb-2">
                     Location
@@ -359,7 +359,7 @@ export default function CreateFundraiseClient() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
                 <div>
                   <label className="block text-gray-700 font-semibold mb-2">
                     Beneficiary Name

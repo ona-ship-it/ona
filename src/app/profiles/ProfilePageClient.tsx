@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Header from '@/components/Header';
 import EditProfileModal from '@/components/EditProfileModal';
 import { createClient } from '@/lib/supabase';
 import CreatorCommissionDisplay, {
@@ -742,7 +741,6 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
 
   return (
     <>
-      <Header />
       <div className="profile-container">
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap');

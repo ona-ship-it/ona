@@ -70,7 +70,7 @@ export default function CreatorProfilePage() {
 
   async function checkIfFollowing(userId: string) {
     const { data } = await supabase
-      .from('follows')
+      .from('profile_followers')
       .select('id')
       .eq('follower_id', userId)
       .eq('following_id', params.id)
@@ -123,13 +123,13 @@ export default function CreatorProfilePage() {
     try {
       if (isFollowing) {
         await supabase
-          .from('follows')
+          .from('profile_followers')
           .delete()
           .eq('follower_id', user.id)
           .eq('following_id', params.id)
         setIsFollowing(false)
       } else {
-        await supabase.from('follows').insert({
+        await supabase.from('profile_followers').insert({
           follower_id: user.id,
           following_id: params.id as string
         })
@@ -309,7 +309,7 @@ export default function CreatorProfilePage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <div className="items-grid" style={{ marginBottom: 16 }}>
           <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-6">
             <div className="text-sm text-slate-400 mb-2">Total Raised</div>
             <div className="text-3xl font-black text-green-400">
@@ -350,7 +350,7 @@ export default function CreatorProfilePage() {
               <p className="text-slate-400">No raffles yet</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div style={{ display: "grid", gap: 24, gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
               {raffles.map((raffle) => (
                 <Link
                   key={raffle.id}

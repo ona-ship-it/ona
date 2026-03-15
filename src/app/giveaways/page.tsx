@@ -3,42 +3,45 @@ export const revalidate = 0;
 
 import React from 'react';
 import Link from 'next/link';
-import Header from '@/components/Header';
 import GiveawaysClient from '../../components/GiveawaysClient';
 
 export default function Page() {
   return (
-    <div className="min-h-screen" style={{ background: 'var(--primary-bg)' }}>
-      <Header />
-      
+    <div style={{ minHeight: '100vh', background: 'var(--primary-bg)' }}>
       {/* Hero Section */}
-      <div className="border-b" style={{ 
+      <div style={{
         background: 'var(--secondary-bg)',
-        borderColor: 'var(--border)'
+        borderBottom: '1px solid var(--border)'
       }}>
-        <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="flex items-center justify-between">
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
             <div>
-              <h1 className="text-5xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+              <h1 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: 16, color: 'var(--text-primary)' }}>
                 Active Giveaways
               </h1>
-              <p className="text-xl" style={{ color: 'var(--text-secondary)' }}>
+              <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)' }}>
                 Enter giveaways and win amazing prizes
               </p>
             </div>
             <Link
               href="/create-giveaway"
-              className="px-6 py-3 rounded-lg font-semibold transition-all"
-              style={{ background: 'var(--accent-green)', color: 'var(--text-primary)' }}
+              style={{
+                padding: '12px 24px',
+                borderRadius: 8,
+                fontWeight: 600,
+                background: 'var(--accent-green)',
+                color: 'var(--text-primary)',
+                textDecoration: 'none'
+              }}
             >
               Create your giveaway
             </Link>
           </div>
         </div>
       </div>
-      
+
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 24px' }}>
         <GiveawaysClient />
       </div>
     </div>

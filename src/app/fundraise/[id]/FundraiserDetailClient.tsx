@@ -186,9 +186,9 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
         {/* Hero Section */}
         <div className="bg-white">
           <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="grid lg:grid-cols-3 gap-8">
+            <div className="giveaway-detail-grid" style={{ display: "grid", gap: 32 }}>
               {/* Left Column - Campaign Details */}
-              <div className="lg:col-span-2">
+              <div style={{ gridColumn: "span 1" }}>
                 {/* Cover Image */}
                 <div className="relative h-96 bg-gradient-to-br from-green-400 to-teal-500 rounded-xl overflow-hidden mb-6">
                   {fundraiser.cover_image ? (
@@ -374,7 +374,7 @@ export default function FundraiserDetailClient({ fundraiserId }: { fundraiserId:
               </div>
 
               {/* Right Column - Donation Card */}
-              <div className="lg:col-span-1">
+              <div style={{ gridColumn: "span 1" }}>
                 <div className="sticky top-24">
                   <div className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg">
                     {/* Progress */}

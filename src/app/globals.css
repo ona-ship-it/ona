@@ -1055,3 +1055,17 @@ header button:focus-visible {
     font-size: 1rem !important;
   }
 }
+
+/* ============================================================================
+   PAGE BODY RESPONSIVE PADDING
+   ============================================================================ */
+
+.page-body {
+  padding-bottom: 72px;
+}
+
+@media (min-width: 1024px) {
+  .page-body {
+    padding-bottom: 0;
+  }
+}

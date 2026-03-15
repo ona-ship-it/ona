@@ -393,7 +393,7 @@ export default function NewGiveawayClient() {
                 />
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
                 <div>
                   <label htmlFor="prize_amount" className="block text-purple-300 mb-2">
                     Prize Amount (USDT)*
