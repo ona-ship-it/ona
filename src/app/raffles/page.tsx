@@ -8,7 +8,7 @@ type Raffle = {
   id: string
   title: string
   description: string | null
-  images: string[] | null
+  image_urls: string[] | null
   prize_value: number | null
   ticket_price: number
   total_tickets: number
@@ -32,7 +32,7 @@ export default function RafflesPage() {
     setLoading(true)
     const { data } = await supabase
       .from('raffles')
-      .select('id,title,description,images,prize_value,ticket_price,total_tickets,tickets_sold,status,end_date,country_restriction')
+      .select('id,title,description,image_urls,prize_value,ticket_price,total_tickets,tickets_sold,status,end_date,country_restriction')
       .eq('status', filter)
       .order('created_at', { ascending: false })
       .limit(24)
@@ -100,8 +100,8 @@ export default function RafflesPage() {
               <Link key={r.id} href={`/raffles/${r.id}`} className="group block rounded-2xl border transition-all hover:border-green-500/40" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)' }}>
                 {/* Image */}
                 <div className="relative h-44 overflow-hidden rounded-t-2xl bg-gray-900">
-                  {r.images?.[0] ? (
-                    <img src={r.images[0]} alt={r.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                  {r.image_urls?.[0] ? (
+                    <img src={r.image_urls[0]} alt={r.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
                   ) : (
                     <div className="flex h-full items-center justify-center text-4xl">🏆</div>
                   )}
