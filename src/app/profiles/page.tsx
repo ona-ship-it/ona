@@ -3,37 +3,117 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
+import Image from 'next/image'
+import { TrendingUp, CheckCircle, Users } from 'lucide-react'
+import LikeSaveButtons from '@/components/LikeSaveButtons'
+
+type ProfileData = {
+  id: string
+  username: string | null
+  full_name: string | null
+  avatar_url: string | null
+  created_at: string | null
+  giveawaysHosted: number
+  totalEntries: number
+  followers: number
+  onagui_type?: string
+}
 
 export default function ProfilesPage() {
-  const [profiles, setProfiles] = useState<any[]>([])
+  const [profiles, setProfiles] = useState<ProfileData[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
 
   useEffect(() => {
-    const supabase = createClient()
-    async function loadProfiles() {
-      // Try with join first, fall back to plain query if FK doesn't exist
-      let { data, error } = await supabase
-        .from('onagui_profiles')
-        .select('*, profiles(avatar_url)')
-        .order('created_at', { ascending: false })
-        .limit(48)
+    fetchProfiles()
+  }, [])
 
-      if (error || !data) {
-        // Fallback: query without the join
-        const res = await supabase
-          .from('onagui_profiles')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(48)
-        data = res.data
+  async function fetchProfiles() {
+    const supabase = createClient()
+    setLoading(true)
+    try {
+      // Fetch all profiles
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('onagui_profiles')
+        .select('id, username, full_name, avatar_url, created_at, onagui_type')
+        .order('created_at', { ascending: false })
+        .limit(100)
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError)
+        setProfiles([])
+        setLoading(false)
+        return
       }
 
-      setProfiles(data ?? [])
+      const profileIds = (profilesData || []).map((p) => p.id).filter((id): id is string => !!id)
+
+      if (profileIds.length === 0) {
+        setProfiles([])
+        setLoading(false)
+        return
+      }
+
+      // Get follower counts
+      const { data: followerRows, error: followerError } = await supabase
+        .from('profile_followers')
+        .select('profile_id')
+        .limit(10000)
+
+      if (followerError) {
+        console.error('Error fetching follower data:', followerError)
+      }
+
+      const followerCounts = new Map<string, number>()
+      ;(followerRows || []).forEach((row) => {
+        if (!row.profile_id) return
+        followerCounts.set(row.profile_id, (followerCounts.get(row.profile_id) || 0) + 1)
+      })
+
+      // Get giveaway stats
+      const { data: creatorGiveaways, error: creatorGiveawaysError } = await supabase
+        .from('giveaways')
+        .select('creator_id, tickets_sold')
+        .limit(500)
+
+      if (creatorGiveawaysError) {
+        console.error('Error fetching creator giveaways:', creatorGiveawaysError)
+      }
+
+      const creatorStats = new Map<string, { giveawaysHosted: number; totalEntries: number }>()
+      ;(creatorGiveaways || []).forEach((giveaway) => {
+        if (!giveaway.creator_id) return
+        const current = creatorStats.get(giveaway.creator_id) || { giveawaysHosted: 0, totalEntries: 0 }
+        creatorStats.set(giveaway.creator_id, {
+          giveawaysHosted: current.giveawaysHosted + 1,
+          totalEntries: current.totalEntries + (giveaway.tickets_sold || 0)
+        })
+      })
+
+      // Enhance profiles with stats
+      const enrichedProfiles: ProfileData[] = (profilesData || []).map((profile) => ({
+        ...profile,
+        giveawaysHosted: creatorStats.get(profile.id)?.giveawaysHosted || 0,
+        totalEntries: creatorStats.get(profile.id)?.totalEntries || 0,
+        followers: followerCounts.get(profile.id) || 0
+      }))
+
+      setProfiles(enrichedProfiles)
+    } catch (error) {
+      console.error('Error fetching profiles:', error)
+      setProfiles([])
+    } finally {
       setLoading(false)
     }
-    loadProfiles()
-  }, [])
+  }
+
+  const profileFallbackImage = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=600&auto=format&fit=crop'
+
+  const getProfileHighlight = (profile: ProfileData) => {
+    if (profile.followers >= 1000) return 'Most Followed'
+    if (profile.totalEntries >= 10000) return 'Top Entries'
+    return 'Top Creator'
+  }
 
   const filtered = profiles.filter((p) => {
     if (!search) return true
@@ -43,17 +123,12 @@ export default function ProfilesPage() {
   })
 
   return (
-    <main
-      className="min-h-screen"
-      style={{ background: 'var(--bg-primary)' }}
-    >
+    <main style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 16px' }}>
-        <div style={{ marginBottom: 24, display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between' }}>
-          <h1
-            className="text-3xl font-extrabold"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            Profiles
+        {/* Header with search */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
+          <h1 className="text-3xl font-extrabold" style={{ color: 'var(--text-primary)', margin: 0 }}>
+            Top Creators
           </h1>
           <input
             type="search"
@@ -61,16 +136,23 @@ export default function ProfilesPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="rounded-xl border px-4 py-2 text-sm"
-            style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', width: 256, maxWidth: '100%' }}
+            style={{
+              borderColor: 'var(--border)',
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              width: 256,
+              maxWidth: '100%'
+            }}
           />
         </div>
 
+        {/* Grid */}
         {loading ? (
-          <div className="profiles-grid">
+          <div className="items-grid">
             {[...Array(12)].map((_, i) => (
               <div
                 key={i}
-                className="h-32 animate-pulse rounded-2xl"
+                className="h-96 animate-pulse rounded-2xl"
                 style={{ background: 'var(--bg-secondary)' }}
               />
             ))}
@@ -78,63 +160,89 @@ export default function ProfilesPage() {
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="mb-4 text-5xl">👤</div>
-            <h2
-              className="mb-2 text-xl font-bold"
-              style={{ color: 'var(--text-primary)' }}
-            >
+            <h2 className="mb-2 text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
               {search ? "No profiles found" : "No profiles yet"}
             </h2>
-            <p
-              className="text-sm"
-              style={{ color: 'var(--text-secondary)' }}
-            >
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               {search ? "Try a different search" : "Be the first to sign up!"}
             </p>
           </div>
         ) : (
-          <div className="profiles-grid">
-            {filtered.map((p: any) => (
+          <div className="items-grid">
+            {filtered.map((profile) => (
               <Link
-                key={p.id}
-                href={'/profiles/' + p.id}
-                className="flex items-center gap-4 rounded-2xl border p-4 transition-transform hover:scale-[1.02]"
-                style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)' }}
+                key={profile.id}
+                href={`/profiles/${profile.id}`}
+                className="bc-game-card group"
               >
-                <div
-                  className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border text-lg font-bold"
-                  style={{ borderColor: 'var(--accent-green)', background: 'var(--bg-primary)', color: 'var(--accent-green)' }}
-                >
-                  {(p.avatar_url || p.profiles?.avatar_url) ? (
-                    <img
-                      src={p.avatar_url || p.profiles?.avatar_url}
-                      alt={p.username}
-                      className="h-12 w-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    (p.username ?? "?")[0].toUpperCase()
+                {/* Image */}
+                <div className="bc-card-image-wrapper">
+                  <Image
+                    src={profile.avatar_url || profileFallbackImage}
+                    alt={profile.full_name || profile.username || 'Profile'}
+                    fill
+                    className="bc-card-image"
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                  />
+
+                  <div className="bc-image-overlay"></div>
+
+                  {profile.followers >= 100 && (
+                    <div className="bc-trending-badge">
+                      <TrendingUp size={14} />
+                      <span>TOP CREATOR</span>
+                    </div>
                   )}
+
+                  <div className="bc-verified-icon">
+                    <CheckCircle size={20} fill="#00d4d4" stroke="#0f1419" />
+                  </div>
+
+                  <div className="bc-condition-tag">PROFILE</div>
                 </div>
-                <div className="min-w-0">
-                  {p.full_name && (
-                    <p
-                      className="truncate font-semibold"
-                      style={{ color: 'var(--text-primary)' }}
+
+                {/* Content */}
+                <div className="bc-card-body">
+                  <div className="bc-rating-row">
+                    <div className="bc-rating-display">
+                      <Users size={12} color="#ff8800" />
+                      <span className="rating-value">{profile.followers}</span>
+                      <span className="rating-count">followers</span>
+                    </div>
+                    <div
+                      style={{ marginLeft: 'auto' }}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
                     >
-                      {p.full_name}
-                    </p>
-                  )}
-                  <p
-                    className={`truncate ${p.full_name ? 'text-xs' : 'font-semibold'}`}
-                    style={{ color: p.full_name ? 'var(--text-secondary)' : 'var(--text-primary)' }}
-                  >
-                    {'@' + (p.username ?? 'anonymous')}
-                  </p>
-                  <p
-                    className="mt-0.5 truncate text-xs capitalize"
-                    style={{ color: 'var(--accent-green)' }}
-                  >
-                    {p.onagui_type ?? 'member'}
-                  </p>
+                      <LikeSaveButtons postId={profile.id} postType="profile" showCount={false} size="sm" />
+                    </div>
+                  </div>
+
+                  <div className="bc-highlight">{getProfileHighlight(profile)}</div>
+
+                  <h3 className="bc-card-title">{profile.full_name || profile.username || 'Onagui Creator'}</h3>
+
+                  <p className="bc-card-subtitle">@{profile.username || 'onagui'}</p>
+
+                  <div className="bc-host-info">
+                    <span>Giveaways hosted</span>
+                    <span className="bc-host-name">{profile.giveawaysHosted}</span>
+                  </div>
+
+                  <div className="bc-metric-row">
+                    <div>
+                      <div className="bc-metric-label">Followers</div>
+                      <div className="bc-metric-value">{profile.followers.toLocaleString()}</div>
+                    </div>
+                    <div>
+                      <div className="bc-metric-label">Total entries</div>
+                      <div className="bc-metric-value">{profile.totalEntries.toLocaleString()}</div>
+                    </div>
+                  </div>
+
+                  <button className="bc-action-button">
+                    <span>VIEW PROFILE</span>
+                    <div className="bc-btn-glow"></div>
+                  </button>
                 </div>
               </Link>
             ))}
