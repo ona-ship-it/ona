@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 import Image from 'next/image'
-import { TrendingUp, CheckCircle, Users } from 'lucide-react'
-import LikeSaveButtons from '@/components/LikeSaveButtons'
+import { TrendingUp, CheckCircle } from 'lucide-react'
 
 type ProfileData = {
   id: string
@@ -98,7 +97,14 @@ export default function ProfilesPage() {
         followers: followerCounts.get(profile.id) || 0
       }))
 
-      setProfiles(enrichedProfiles)
+      const rankedProfiles = [...enrichedProfiles]
+        .sort((a, b) => {
+          const scoreA = a.followers * 3 + a.totalEntries + a.giveawaysHosted * 100
+          const scoreB = b.followers * 3 + b.totalEntries + b.giveawaysHosted * 100
+          return scoreB - scoreA
+        })
+
+      setProfiles(rankedProfiles)
     } catch (error) {
       console.error('Error fetching profiles:', error)
       setProfiles([])
@@ -128,7 +134,7 @@ export default function ProfilesPage() {
         {/* Header with search */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
           <h1 className="text-3xl font-extrabold" style={{ color: 'var(--text-primary)', margin: 0 }}>
-            Top Creators
+            Most Popular Profiles
           </h1>
           <input
             type="search"
@@ -187,12 +193,10 @@ export default function ProfilesPage() {
 
                   <div className="bc-image-overlay"></div>
 
-                  {profile.followers >= 100 && (
-                    <div className="bc-trending-badge">
-                      <TrendingUp size={14} />
-                      <span>TOP CREATOR</span>
-                    </div>
-                  )}
+                  <div className="bc-trending-badge">
+                    <TrendingUp size={14} />
+                    <span>TOP CREATOR</span>
+                  </div>
 
                   <div className="bc-verified-icon">
                     <CheckCircle size={20} fill="#00d4d4" stroke="#0f1419" />
@@ -203,20 +207,6 @@ export default function ProfilesPage() {
 
                 {/* Content */}
                 <div className="bc-card-body">
-                  <div className="bc-rating-row">
-                    <div className="bc-rating-display">
-                      <Users size={12} color="#ff8800" />
-                      <span className="rating-value">{profile.followers}</span>
-                      <span className="rating-count">followers</span>
-                    </div>
-                    <div
-                      style={{ marginLeft: 'auto' }}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
-                    >
-                      <LikeSaveButtons postId={profile.id} postType="profile" showCount={false} size="sm" />
-                    </div>
-                  </div>
-
                   <div className="bc-highlight">{getProfileHighlight(profile)}</div>
 
                   <h3 className="bc-card-title">{profile.full_name || profile.username || 'Onagui Creator'}</h3>
