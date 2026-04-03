@@ -264,7 +264,7 @@ export default function AdminFundraise() {
         <p className="text-slate-400 mb-8">Review campaigns, verify legitimacy, manage compliance, and approve payouts</p>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', marginBottom: 32 }}>
           <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 text-center">
             <div className="text-2xl font-black text-white">{stats.total}</div>
             <div className="text-xs text-slate-400">Total</div>

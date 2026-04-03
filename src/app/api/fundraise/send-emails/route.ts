@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabaseServer';
+import { createClient as createServerSupabase } from '@/lib/supabaseServer';
 import { sendFundraiserEmail, FundraiserEmailType, FundraiserEmailData } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';

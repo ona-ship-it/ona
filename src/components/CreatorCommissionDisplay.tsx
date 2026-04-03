@@ -1,132 +1,172 @@
-'use client'
+"use client";
 
-import React from 'react'
-
-export type CommissionHistoryItem = {
-  id: string
-  title: string
-  amount: number
-  status: 'paid' | 'pending'
-}
+import React from 'react';
+import { DollarSign, TrendingUp, Clock, CheckCircle } from 'lucide-react';
 
 export type CommissionTotals = {
-  totalEarned: number
-  paidOut: number
-  pending: number
-}
+  totalEarned: number;
+  paidOut: number;
+  pending: number;
+};
 
-type CreatorCommissionDisplayProps = {
-  totals: CommissionTotals
-  history: CommissionHistoryItem[]
-}
+export type CommissionHistoryItem = {
+  id: string;
+  title: string;
+  amount: number;
+  status: string;
+};
 
-const formatUSDC = (amount: number) =>
-  `${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`
+type Props = {
+  totals: CommissionTotals;
+  history: CommissionHistoryItem[];
+};
 
-export default function CreatorCommissionDisplay({ totals, history }: CreatorCommissionDisplayProps) {
+const CreatorCommissionDisplay = ({ totals, history }: Props) => {
+  const formatAmount = (value: number) =>
+    value >= 1000 ? `$${(value / 1000).toFixed(1)}K` : `$${value.toFixed(2)}`;
+
+  if (totals.totalEarned === 0 && history.length === 0) return null;
+
   return (
-    <section className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-8">
-      <header className="space-y-2">
-        <h2 className="text-2xl md:text-3xl font-black text-white">ONAGUI Subs</h2>
-        <p className="text-slate-400">
-          Commission from paid tickets. Transparent split: 50% ONAGUI, 40% winners, 10% creator.
-        </p>
-      </header>
+    <div style={{
+      background: 'linear-gradient(135deg, rgba(20, 26, 32, 0.8) 0%, rgba(15, 20, 25, 0.9) 100%)',
+      border: '1px solid rgba(0, 255, 136, 0.2)',
+      borderRadius: '20px',
+      padding: '28px',
+      backdropFilter: 'blur(10px)',
+    }}>
+      <h3 style={{
+        fontFamily: "'Rajdhani', sans-serif",
+        fontSize: '20px',
+        fontWeight: 700,
+        color: '#fff',
+        marginBottom: '20px',
+        letterSpacing: '1px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+      }}>
+        <DollarSign size={20} color="#00ff88" />
+        CREATOR COMMISSIONS
+      </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-slate-800/70 rounded-2xl p-5 border border-slate-700">
-          <div className="text-xs uppercase tracking-widest text-slate-400 mb-2">Total Earned</div>
-          <div className="text-2xl font-black text-white">{formatUSDC(totals.totalEarned)}</div>
+      {/* Totals row */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '16px',
+        marginBottom: '24px',
+      }}>
+        <div style={{
+          background: 'rgba(0, 255, 136, 0.08)',
+          border: '1px solid rgba(0, 255, 136, 0.2)',
+          borderRadius: '14px',
+          padding: '16px',
+          textAlign: 'center',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '6px' }}>
+            <TrendingUp size={14} color="#00ff88" />
+            <span style={{ fontSize: '11px', color: '#718096', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Total Earned</span>
+          </div>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '28px', fontWeight: 700, color: '#00ff88' }}>
+            {formatAmount(totals.totalEarned)}
+          </div>
         </div>
-        <div className="bg-slate-800/70 rounded-2xl p-5 border border-slate-700">
-          <div className="text-xs uppercase tracking-widest text-slate-400 mb-2">Paid Out</div>
-          <div className="text-2xl font-black text-emerald-400">{formatUSDC(totals.paidOut)}</div>
+
+        <div style={{
+          background: 'rgba(0, 255, 136, 0.04)',
+          border: '1px solid rgba(0, 255, 136, 0.12)',
+          borderRadius: '14px',
+          padding: '16px',
+          textAlign: 'center',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '6px' }}>
+            <CheckCircle size={14} color="#4ade80" />
+            <span style={{ fontSize: '11px', color: '#718096', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Paid Out</span>
+          </div>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '28px', fontWeight: 700, color: '#4ade80' }}>
+            {formatAmount(totals.paidOut)}
+          </div>
         </div>
-        <div className="bg-slate-800/70 rounded-2xl p-5 border border-slate-700">
-          <div className="text-xs uppercase tracking-widest text-slate-400 mb-2">Pending</div>
-          <div className="text-2xl font-black text-amber-400">{formatUSDC(totals.pending)}</div>
+
+        <div style={{
+          background: 'rgba(255, 136, 0, 0.05)',
+          border: '1px solid rgba(255, 136, 0, 0.15)',
+          borderRadius: '14px',
+          padding: '16px',
+          textAlign: 'center',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '6px' }}>
+            <Clock size={14} color="#ff8800" />
+            <span style={{ fontSize: '11px', color: '#718096', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Pending</span>
+          </div>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '28px', fontWeight: 700, color: '#ff8800' }}>
+            {formatAmount(totals.pending)}
+          </div>
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex items-center justify-between text-sm text-slate-400">
-          <span>Revenue Split</span>
-          <span>50 / 40 / 10</span>
-        </div>
-        <div className="h-3 w-full rounded-full overflow-hidden bg-slate-800">
-          <div className="h-full flex">
-            <div className="w-1/2 bg-cyan-500" />
-            <div className="w-2/5 bg-violet-500" />
-            <div className="w-1/10 bg-emerald-500" />
+      {/* History list */}
+      {history.length > 0 && (
+        <div>
+          <div style={{ fontSize: '12px', color: '#718096', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600, marginBottom: '12px' }}>
+            Recent Activity
           </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-400">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-cyan-500" />
-            <span>50% ONAGUI platform</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-violet-500" />
-            <span>40% winners pool</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span>10% creator commission</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-white">Commission History</h3>
-          <span className="text-xs text-slate-500">Latest payouts</span>
-        </div>
-        {history.length === 0 ? (
-          <div className="text-slate-400 text-sm">No commissions yet.</div>
-        ) : (
-          <div className="space-y-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {history.map((item) => (
-              <div
-                key={item.id}
-                className="flex flex-wrap items-center justify-between gap-3 bg-slate-800/60 border border-slate-700 rounded-2xl p-4"
-              >
-                <div>
-                  <div className="text-white font-semibold">{item.title}</div>
-                  <div className="text-xs text-slate-400">{formatUSDC(item.amount)}</div>
+              <div key={item.id} style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 14px',
+                background: 'rgba(15, 20, 25, 0.6)',
+                borderRadius: '10px',
+                border: '1px solid rgba(0, 255, 136, 0.06)',
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: '#e2e8f0',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}>
+                    {item.title}
+                  </div>
                 </div>
-                <span
-                  className={`text-xs font-semibold px-3 py-1 rounded-full border ${
-                    item.status === 'paid'
-                      ? 'text-emerald-300 border-emerald-500/50 bg-emerald-500/10'
-                      : 'text-amber-300 border-amber-500/50 bg-amber-500/10'
-                  }`}
-                >
-                  {item.status === 'paid' ? 'Paid' : 'Pending'}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0, marginLeft: '12px' }}>
+                  <span style={{
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    background: item.status === 'paid' ? 'rgba(0, 255, 136, 0.1)' : 'rgba(255, 136, 0, 0.1)',
+                    color: item.status === 'paid' ? '#00ff88' : '#ff8800',
+                    border: `1px solid ${item.status === 'paid' ? 'rgba(0,255,136,0.2)' : 'rgba(255,136,0,0.2)'}`,
+                  }}>
+                    {item.status}
+                  </span>
+                  <span style={{
+                    fontFamily: "'Rajdhani', sans-serif",
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    color: '#00ff88',
+                    minWidth: '60px',
+                    textAlign: 'right',
+                  }}>
+                    {formatAmount(item.amount)}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-300">
-        <div className="bg-slate-800/50 rounded-2xl p-5 border border-slate-700">
-          <h4 className="text-white font-semibold mb-2">How it works</h4>
-          <p>
-            Paid tickets increase the prize pool while supporting the creator. After the initial
-            winner is paid, the remaining pool is split 50% ONAGUI, 40% winners, 10% creator.
-          </p>
-        </div>
-        <div className="bg-slate-800/50 rounded-2xl p-5 border border-slate-700">
-          <h4 className="text-white font-semibold mb-2">Features</h4>
-          <ul className="space-y-2">
-            <li>Escrow-secured initial prize</li>
-            <li>Auto-calculation on ticket purchases</li>
-            <li>Flexible winner distribution</li>
-            <li>Transparent breakdown for users</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-  )
-}
+export default CreatorCommissionDisplay;

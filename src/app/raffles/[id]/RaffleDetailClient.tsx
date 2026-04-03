@@ -7,47 +7,43 @@ import Image from 'next/image'
 import Link from 'next/link'
 import WalletConnect from '@/components/WalletConnect'
 import WinnerDisplay from '@/components/WinnerDisplay'
-import { payWithUSDC, isOnPolygon, getCurrentWallet } from '@/lib/wallet'
+import ShareButtons from '@/components/ShareButtons'
 
 type Raffle = {
   id: string
   title: string
   description: string
-  emoji: string
   image_urls: string[]
-  prize_description: string
+  prize_description?: string
   prize_value: number
   prize_currency: string
   total_tickets: number
   tickets_sold: number
   base_ticket_price: number
-  tier_2_threshold: number
-  tier_2_discount: number
-  tier_3_threshold: number
-  tier_3_discount: number
-  tier_4_threshold: number
-  tier_4_discount: number
-  early_bird_percentage: number
-  early_bird_discount: number
-  early_bird_expired: boolean
-  is_powered_by_onagui: boolean
-  country: string | null
-  tags: string[]
+  tier_2_threshold?: number
+  tier_2_discount?: number
+  tier_3_threshold?: number
+  tier_3_discount?: number
+  tier_4_threshold?: number
+  tier_4_discount?: number
+  early_bird_percentage?: number
+  early_bird_discount?: number
+  early_bird_expired?: boolean
+  is_powered_by_onagui?: boolean
+  country_restriction: string | null
+  location_name: string | null
+  tags?: string[]
   status: string
   creator_id: string
   winner_id: string | null
   winner_drawn_at: string | null
-  view_count: number
   created_at: string
 }
 
-type Creator = {
-  display_name: string
+type CreatorProfile = {
+  id: string
+  username: string
   avatar_url: string | null
-  verification_level: string
-  follower_count: number
-  total_raffles_completed: number
-  average_rating: number
 }
 
 type Activity = {
@@ -60,229 +56,145 @@ export default function RaffleDetailClient() {
   const params = useParams()
   const router = useRouter()
   const supabase = createClient()
-  
+
   const [loading, setLoading] = useState(true)
   const [raffle, setRaffle] = useState<Raffle | null>(null)
-  const [creator, setCreator] = useState<Creator | null>(null)
+  const [creator, setCreator] = useState<CreatorProfile | null>(null)
   const [activities, setActivities] = useState<Activity[]>([])
   const [quantity, setQuantity] = useState(1)
   const [isFollowing, setIsFollowing] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [buying, setBuying] = useState(false)
+  const [buyError, setBuyError] = useState('')
+  const [buySuccess, setBuySuccess] = useState('')
   const [selectedImage, setSelectedImage] = useState(0)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
 
   useEffect(() => {
-    checkAuth()
-    fetchRaffle()
-    incrementView()
+    initPage()
   }, [params.id])
 
-  async function checkAuth() {
+  async function initPage() {
     const { data: { session } } = await supabase.auth.getSession()
-    if (session?.user) {
-      setUser(session.user)
-      checkIfFollowing(session.user.id)
-    }
+    const currentUser = session?.user ?? null
+    setUser(currentUser)
+
+    await fetchRaffle(currentUser)
+    incrementView(currentUser?.id ?? null)
   }
 
-  async function checkIfFollowing(userId: string) {
-    if (!raffle) return
-    
-    const { data } = await supabase
-      .from('follows')
-      .select('id')
-      .eq('follower_id', userId)
-      .eq('following_id', raffle.creator_id)
-      .single()
-    
-    setIsFollowing(!!data)
-  }
-
-  async function incrementView() {
-    try {
-      await supabase.from('raffle_views').insert({
-        raffle_id: params.id as string,
-        user_id: user?.id || null,
-        viewed_at: new Date().toISOString()
-      })
-    } catch (error) {
-      // Ignore errors for views
-    }
-  }
-
-  async function fetchRaffle() {
+  async function fetchRaffle(currentUser: any) {
     try {
       const { data: raffleData, error } = await supabase
         .from('raffles')
         .select('*')
         .eq('id', params.id)
+        .neq('status', 'deleted')
         .single()
 
-      if (error) throw error
-      if (!raffleData) {
+      if (error || !raffleData) {
         router.push('/raffles')
         return
       }
 
       setRaffle(raffleData)
 
-      // Fetch creator
-      const { data: creatorProfile } = await supabase
-        .from('creator_profiles')
-        .select('*')
-        .eq('user_id', raffleData.creator_id)
+      // Fetch creator from onagui_profiles (correct table)
+      const { data: creatorData } = await supabase
+        .from('onagui_profiles')
+        .select('id, username, avatar_url')
+        .eq('id', raffleData.creator_id)
         .single()
 
-      if (creatorProfile) {
-        setCreator(creatorProfile)
+      if (creatorData) setCreator(creatorData)
+
+      // Check follow status now that we have the raffle
+      if (currentUser) {
+        const { data: followData } = await supabase
+          .from('profile_followers')
+          .select('id')
+          .eq('follower_id', currentUser.id)
+          .eq('following_id', raffleData.creator_id)
+          .maybeSingle()
+        setIsFollowing(!!followData)
       }
-
-      // Fetch recent activity
-      const { data: activityData } = await supabase
-        .from('activity_feed')
-        .select('id, message, created_at')
-        .eq('raffle_id', params.id)
-        .eq('is_public', true)
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-      setActivities(activityData || [])
-
-      if (user) {
-        checkIfFollowing(user.id)
-      }
-    } catch (error) {
-      console.error('Error fetching raffle:', error)
+    } catch (err) {
+      console.error('Error fetching raffle:', err)
       router.push('/raffles')
     } finally {
       setLoading(false)
     }
   }
 
-  async function handleFollow() {
-    if (!user) {
-      router.push('/login')
-      return
+  async function incrementView(userId: string | null) {
+    try {
+      await supabase.rpc('increment_raffle_view', { raffle_id: params.id as string })
+    } catch {
+      // Non-critical — ignore if function doesn't exist
     }
+  }
 
+  async function handleFollow() {
+    if (!user) { router.push('/login'); return }
     if (!raffle) return
 
     try {
       if (isFollowing) {
-        await supabase
-          .from('follows')
-          .delete()
-          .eq('follower_id', user.id)
-          .eq('following_id', raffle.creator_id)
+        await supabase.from('profile_followers').delete()
+          .eq('follower_id', user.id).eq('following_id', raffle.creator_id)
         setIsFollowing(false)
       } else {
-        await supabase.from('follows').insert({
-          follower_id: user.id,
-          following_id: raffle.creator_id
-        })
+        await supabase.from('profile_followers').insert({ follower_id: user.id, following_id: raffle.creator_id })
         setIsFollowing(true)
       }
-    } catch (error) {
-      console.error('Error following:', error)
+    } catch (err) {
+      console.error('Follow error:', err)
     }
+  }
+
+  function getTicketPrice(): number {
+    if (!raffle) return 1
+    return raffle.base_ticket_price ?? 1
   }
 
   function calculatePrice(qty: number): number {
-    if (!raffle) return 0
-
-    let basePrice = raffle.base_ticket_price
-    let discount = 0
-
-    // Tiered discount
-    if (qty >= raffle.tier_4_threshold) {
-      discount = raffle.tier_4_discount
-    } else if (qty >= raffle.tier_3_threshold) {
-      discount = raffle.tier_3_discount
-    } else if (qty >= raffle.tier_2_threshold) {
-      discount = raffle.tier_2_discount
-    }
-
-    // Early bird bonus
-    if (!raffle.early_bird_expired) {
-      discount += raffle.early_bird_discount
-    }
-
-    const pricePerTicket = basePrice * (1 - discount / 100)
-    return pricePerTicket * qty
+    return getTicketPrice() * qty
   }
 
-  function getSavings(qty: number): number {
-    if (!raffle) return 0
-    const originalPrice = raffle.base_ticket_price * qty
-    const finalPrice = calculatePrice(qty)
-    return originalPrice - finalPrice
+  function getOdds(): string {
+    if (!raffle) return '0'
+    const remaining = raffle.total_tickets - raffle.tickets_sold
+    if (remaining <= 0) return '0'
+    return ((quantity / remaining) * 100).toFixed(4)
   }
 
   async function handleBuyTickets() {
-    if (!user) {
-      router.push('/login')
-      return
-    }
-
+    if (!user) { router.push('/login'); return }
     if (!raffle || quantity < 1) return
-
-    // Check wallet connection
-    const wallet = await getCurrentWallet()
-    if (!wallet) {
-      alert('Please connect your wallet first')
-      return
-    }
-
-    const onPolygon = await isOnPolygon()
-    if (!onPolygon) {
-      alert('Please switch to Polygon network')
-      return
-    }
+    if (!walletAddress) { setBuyError('Please connect your wallet first'); return }
 
     setBuying(true)
+    setBuyError('')
+    setBuySuccess('')
 
     try {
-      const totalPrice = calculatePrice(quantity)
-      
-      // Process USDC payment
-      const paymentResult = await payWithUSDC(totalPrice)
-      
-      if (!paymentResult.success) {
-        throw new Error(paymentResult.error || 'Payment failed')
+      const response = await fetch(`/api/raffles/${raffle.id}/buy`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity, walletAddress }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        setBuyError(result.error || 'Failed to purchase tickets')
+        return
       }
 
-      // Generate ticket numbers
-      const ticketNumbers: number[] = []
-      for (let i = 0; i < quantity; i++) {
-        ticketNumbers.push(raffle.tickets_sold + i + 1)
-      }
-
-      // Save tickets to database
-      const { error: ticketError } = await supabase
-        .from('raffle_tickets')
-        .insert({
-          raffle_id: raffle.id,
-          user_id: user.id,
-          ticket_numbers: ticketNumbers,
-          quantity: quantity,
-          original_price: raffle.base_ticket_price * quantity,
-          discount_applied: getSavings(quantity) / (raffle.base_ticket_price * quantity) * 100,
-          final_price: totalPrice,
-          transaction_hash: paymentResult.txHash,
-          payment_currency: 'USDC',
-          blockchain: 'Polygon',
-        })
-
-      if (ticketError) throw ticketError
-
-      alert(`Success! You purchased ${quantity} ticket${quantity > 1 ? 's' : ''}!\n\nYour ticket numbers: ${ticketNumbers.join(', ')}`)
-      
-      // Refresh raffle
-      await fetchRaffle()
-    } catch (error: any) {
-      console.error('Error buying tickets:', error)
-      alert(`Failed to purchase tickets: ${error.message || 'Unknown error'}`)
+      setBuySuccess(`Success! You got ticket${quantity > 1 ? 's' : ''} #${result.ticketNumbers.join(', ')}`)
+      await fetchRaffle(user)
+    } catch (err: any) {
+      setBuyError(err.message || 'Unexpected error')
     } finally {
       setBuying(false)
     }
@@ -293,331 +205,293 @@ export default function RaffleDetailClient() {
     return Math.min((raffle.tickets_sold / raffle.total_tickets) * 100, 100)
   }
 
-  const getOdds = () => {
-    if (!raffle) return '0'
-    return ((quantity / (raffle.total_tickets - raffle.tickets_sold)) * 100).toFixed(4)
-  }
-
+  // ── Loading state (matches Onagui dark theme)
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+      <div style={{ background: '#0a1929', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 48, height: 48, border: '3px solid rgba(0,255,136,0.2)', borderTopColor: '#00ff88', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     )
   }
 
   if (!raffle) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">❌</div>
-          <h3 className="text-2xl font-bold text-white mb-2">Raffle Not Found</h3>
-          <Link href="/raffles" className="text-blue-400 hover:underline">
-            Back to Raffles
-          </Link>
+      <div style={{ background: '#0a1929', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 64, marginBottom: 16 }}>🏆</div>
+          <h3 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Raffle Not Found</h3>
+          <Link href="/raffles" style={{ color: '#00ff88', textDecoration: 'none' }}>Back to Raffles</Link>
         </div>
       </div>
     )
   }
 
+  const card: React.CSSProperties = {
+    background: 'rgba(30,41,59,0.8)', border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 20, padding: 24, marginBottom: 16,
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/raffles" className="text-blue-400 hover:text-blue-300 font-semibold">
-              ← Back to Raffles
-            </Link>
-            <Link href="/">
-              <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                ONAGUI
-              </h1>
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div style={{ background: '#0a1929', minHeight: '100vh', fontFamily: "'Inter', system-ui, sans-serif" }}>
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Images & Description */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Powered by Onagui Badge */}
-            {raffle.is_powered_by_onagui && (
-              <div className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl flex items-center gap-3">
-                <span className="text-3xl">⚡</span>
-                <div>
-                  <div className="text-white font-bold">Powered by Onagui</div>
-                  <div className="text-yellow-100 text-sm">Verified & secured by the platform</div>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }}>
+          {/* Two-column on large screens via inline media is approximated; actual responsive needs Tailwind or CSS */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,2fr) minmax(0,1fr)', gap: 24, alignItems: 'start' }}>
+
+            {/* ── Left column ── */}
+            <div>
+              {/* Powered by badge */}
+              {raffle.is_powered_by_onagui && (
+                <div style={{ padding: '12px 20px', background: 'linear-gradient(135deg,#f59e0b,#ea580c)', borderRadius: 14, display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                  <span style={{ fontSize: 28 }}>⚡</span>
+                  <div>
+                    <div style={{ color: '#fff', fontWeight: 700 }}>Powered by Onagui</div>
+                    <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 13 }}>Verified & secured by the platform</div>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Image Gallery */}
-            <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl overflow-hidden">
-              <div className="relative h-96 bg-gradient-to-br from-slate-800 to-slate-900">
-                {raffle.image_urls && raffle.image_urls.length > 0 ? (
-                  <Image
-                    src={raffle.image_urls[selectedImage]}
-                    alt={raffle.title}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-9xl">
-                    {raffle.emoji}
+              {/* Image gallery */}
+              <div style={{ ...card, padding: 0, overflow: 'hidden', marginBottom: 16 }}>
+                <div style={{ position: 'relative', height: 380, background: '#0f1419' }}>
+                  {raffle.image_urls && raffle.image_urls.length > 0 ? (
+                    <Image src={raffle.image_urls[selectedImage]} alt={raffle.title} fill style={{ objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                      <span style={{ fontSize: 80, opacity: 0.3 }}>🏆</span>
+                    </div>
+                  )}
+                  {/* Country/location badge */}
+                  {(raffle.country_restriction || raffle.location_name) && (
+                    <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(0,0,0,0.7)', borderRadius: 8, padding: '4px 10px', fontSize: 11, color: '#94a3b8' }}>
+                      {raffle.country_restriction && <span>🌍 {raffle.country_restriction}</span>}
+                      {raffle.location_name && <span> · 📍 {raffle.location_name}</span>}
+                    </div>
+                  )}
+                </div>
+                {raffle.image_urls && raffle.image_urls.length > 1 && (
+                  <div style={{ padding: 12, display: 'flex', gap: 8, overflowX: 'auto' }}>
+                    {raffle.image_urls.map((url, idx) => (
+                      <button key={idx} onClick={() => setSelectedImage(idx)} style={{
+                        position: 'relative', width: 72, height: 72, flexShrink: 0, borderRadius: 8,
+                        overflow: 'hidden', border: `2px solid ${selectedImage === idx ? '#00ff88' : 'rgba(255,255,255,0.1)'}`,
+                        cursor: 'pointer', background: 'none', padding: 0,
+                      }}>
+                        <Image src={url} alt={`${raffle.title} ${idx + 1}`} fill style={{ objectFit: 'cover' }} />
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
-              
-              {/* Thumbnail Gallery */}
-              {raffle.image_urls && raffle.image_urls.length > 1 && (
-                <div className="p-4 flex gap-3 overflow-x-auto">
-                  {raffle.image_urls.map((url, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setSelectedImage(idx)}
-                      className={`relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
-                        selectedImage === idx ? 'border-blue-500' : 'border-slate-700'
-                      }`}
-                    >
-                      <Image src={url} alt={`${raffle.title} ${idx + 1}`} fill className="object-cover" />
+
+              {/* Title & description */}
+              <div style={card}>
+                <h1 style={{ fontSize: 28, fontWeight: 900, color: '#f8fafc', margin: '0 0 12px', fontFamily: "'Rajdhani', sans-serif" }}>{raffle.title}</h1>
+                <p style={{ color: '#94a3b8', fontSize: 15, lineHeight: 1.7, margin: '0 0 16px' }}>{raffle.description}</p>
+                {raffle.prize_description && (
+                  <>
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 16, marginBottom: 16 }}>
+                      <h3 style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Prize Details</h3>
+                      <p style={{ color: '#64748b', fontSize: 14 }}>{raffle.prize_description}</p>
+                    </div>
+                  </>
+                )}
+                {raffle.tags && raffle.tags.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {raffle.tags.map(tag => (
+                      <span key={tag} style={{ padding: '4px 12px', background: 'rgba(255,255,255,0.05)', borderRadius: 20, fontSize: 12, color: '#94a3b8' }}>#{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Winner */}
+              {raffle.winner_id && raffle.winner_drawn_at && (
+                <WinnerDisplay raffleId={raffle.id} winnerId={raffle.winner_id} winnerDrawnAt={raffle.winner_drawn_at} />
+              )}
+
+              {/* Activity feed */}
+              {activities.length > 0 && (
+                <div style={card}>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 16 }}>📊 Live Activity</h3>
+                  <div style={{ maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {activities.map(a => (
+                      <div key={a.id} style={{ display: 'flex', gap: 12, padding: '10px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: 10 }}>
+                        <span>🎟️</span>
+                        <div>
+                          <p style={{ color: '#94a3b8', fontSize: 13, margin: 0 }}>{a.message}</p>
+                          <p style={{ color: '#4a5568', fontSize: 11, margin: '4px 0 0' }}>{new Date(a.created_at).toLocaleString()}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ── Right column ── */}
+            <div>
+              {/* Creator */}
+              {creator && (
+                <div style={card}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg,#00ff88,#00cc6a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#0a1929', fontSize: 18, overflow: 'hidden', flexShrink: 0 }}>
+                      {creator.avatar_url
+                        ? <Image src={creator.avatar_url} alt={creator.username} width={48} height={48} style={{ borderRadius: '50%' }} />
+                        : creator.username.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, color: '#fff' }}>{creator.username}</div>
+                      <div style={{ fontSize: 12, color: '#64748b' }}>Raffle Creator</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleFollow}
+                    style={{
+                      width: '100%', padding: '10px 0', borderRadius: 10, fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                      background: isFollowing ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg,#00ff88,#00cc6a)',
+                      border: isFollowing ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                      color: isFollowing ? '#94a3b8' : '#0a1929',
+                    }}
+                  >
+                    {isFollowing ? 'Following ✓' : 'Follow'}
+                  </button>
+                </div>
+              )}
+
+              {/* Prize value */}
+              <div style={{ ...card, background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.2)' }}>
+                <div style={{ fontSize: 11, color: '#00ff88', marginBottom: 4, fontWeight: 600, letterSpacing: 1 }}>PRIZE VALUE</div>
+                <div style={{ fontSize: 36, fontWeight: 900, color: '#fff' }}>${raffle.prize_value.toLocaleString()}</div>
+                <div style={{ fontSize: 13, color: '#00ff88', fontWeight: 600 }}>{raffle.prize_currency}</div>
+              </div>
+
+              {/* Progress */}
+              <div style={card}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ color: '#94a3b8', fontSize: 13 }}>Tickets Sold</span>
+                  <span style={{ color: '#00ff88', fontWeight: 700 }}>{getProgressPercentage().toFixed(0)}%</span>
+                </div>
+                <div style={{ height: 8, background: '#0f1419', borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
+                  <div style={{ height: '100%', background: 'linear-gradient(90deg,#00ff88,#00cc6a)', borderRadius: 4, width: `${getProgressPercentage()}%`, transition: 'width 0.5s' }} />
+                </div>
+                <div style={{ textAlign: 'center', fontWeight: 700, color: '#fff', fontSize: 14 }}>
+                  {raffle.tickets_sold.toLocaleString()} / {raffle.total_tickets.toLocaleString()}
+                </div>
+              </div>
+
+              {/* Buy tickets */}
+              <div style={card}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 16 }}>Buy Tickets</h3>
+
+                {/* Country restriction notice */}
+                {raffle.country_restriction && (
+                  <div style={{ padding: '8px 12px', background: 'rgba(253,131,18,0.1)', border: '1px solid rgba(253,131,18,0.3)', borderRadius: 8, marginBottom: 12, fontSize: 12, color: '#fd8312' }}>
+                    🌍 Only open to participants from <strong>{raffle.country_restriction}</strong>
+                  </div>
+                )}
+
+                <div style={{ marginBottom: 12 }}>
+                  <label style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 6 }}>Quantity</label>
+                  <input
+                    type="number" min={1} max={raffle.total_tickets - raffle.tickets_sold}
+                    value={quantity}
+                    onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                    style={{ width: '100%', padding: '10px 14px', background: '#0f1419', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: '#fff', fontSize: 18, fontWeight: 700, textAlign: 'center', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                {/* Quick select */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6, marginBottom: 12 }}>
+                  {[1, 10, 50, 100].map(n => (
+                    <button key={n} onClick={() => setQuantity(n)} style={{ padding: '8px 0', background: quantity === n ? '#00ff88' : 'rgba(255,255,255,0.05)', border: 'none', borderRadius: 8, color: quantity === n ? '#0a1929' : '#94a3b8', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+                      {n}
                     </button>
                   ))}
                 </div>
-              )}
-            </div>
 
-            {/* Title & Description */}
-            <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-8">
-              <h1 className="text-4xl font-black text-white mb-4">{raffle.title}</h1>
-              <p className="text-slate-300 text-lg mb-6">{raffle.description}</p>
-              
-              <div className="border-t border-slate-800 pt-6">
-                <h3 className="text-xl font-bold text-white mb-3">Prize Details</h3>
-                <p className="text-slate-400">{raffle.prize_description}</p>
-              </div>
-
-              {/* Tags */}
-              {raffle.tags && raffle.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-6">
-                  {raffle.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-4 py-2 bg-slate-800 rounded-full text-sm text-slate-300"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
+                {/* Pricing summary */}
+                <div style={{ padding: 14, background: 'rgba(0,0,0,0.3)', borderRadius: 10, marginBottom: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <span style={{ color: '#64748b', fontSize: 13 }}>Price per ticket</span>
+                    <span style={{ color: '#94a3b8', fontSize: 13 }}>{getTicketPrice()} USDC</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <span style={{ color: '#fff', fontWeight: 700 }}>Total</span>
+                    <span style={{ color: '#00ff88', fontWeight: 700, fontSize: 18 }}>{calculatePrice(quantity).toFixed(2)} USDC</span>
+                  </div>
                 </div>
-              )}
-            </div>
 
-            {/* Winner Display */}
-            {raffle.winner_id && raffle.winner_drawn_at && (
-              <WinnerDisplay
-                raffleId={raffle.id}
-                winnerId={raffle.winner_id}
-                winnerDrawnAt={raffle.winner_drawn_at}
-              />
-            )}
+                {/* Odds */}
+                <div style={{ padding: 12, background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.1)', borderRadius: 10, marginBottom: 12, textAlign: 'center' }}>
+                  <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Your Winning Odds</div>
+                  <div style={{ fontSize: 24, fontWeight: 900, color: '#fff' }}>{getOdds()}%</div>
+                  <div style={{ fontSize: 11, color: '#64748b' }}>
+                    {quantity} ticket{quantity !== 1 ? 's' : ''} of {(raffle.total_tickets - raffle.tickets_sold).toLocaleString()} remaining
+                  </div>
+                </div>
 
-            {/* Activity Feed */}
-            <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-8">
-              <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                📊 Live Activity
-              </h3>
-              <div className="space-y-3 max-h-64 overflow-y-auto">
-                {activities.length === 0 ? (
-                  <p className="text-slate-500 text-sm">No activity yet</p>
-                ) : (
-                  activities.map((activity) => (
-                    <div key={activity.id} className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-xl">
-                      <div className="text-2xl">🎟️</div>
-                      <div className="flex-1">
-                        <p className="text-slate-300 text-sm">{activity.message}</p>
-                        <p className="text-slate-500 text-xs mt-1">
-                          {new Date(activity.created_at).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))
+                {/* Wallet connect */}
+                <div style={{ marginBottom: 12 }}>
+                  <WalletConnect onConnect={setWalletAddress} />
+                </div>
+
+                {/* Error / success */}
+                {buyError && (
+                  <div style={{ padding: '10px 12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, fontSize: 12, color: '#ef4444', marginBottom: 10 }}>
+                    {buyError}
+                  </div>
                 )}
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Purchase & Stats */}
-          <div className="space-y-6">
-            {/* Creator Card */}
-            {creator && (
-              <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-6">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-2xl">
-                    {creator.avatar_url ? (
-                      <Image src={creator.avatar_url} alt={creator.display_name} width={64} height={64} className="rounded-full" />
-                    ) : (
-                      creator.display_name.charAt(0).toUpperCase()
-                    )}
+                {buySuccess && (
+                  <div style={{ padding: '10px 12px', background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.3)', borderRadius: 8, fontSize: 12, color: '#00ff88', marginBottom: 10 }}>
+                    {buySuccess}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-white">{creator.display_name}</span>
-                      {creator.verification_level !== 'none' && (
-                        <span className="text-blue-400">✓</span>
-                      )}
-                    </div>
-                    <div className="text-sm text-slate-400">
-                      {creator.follower_count} followers
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="p-3 bg-slate-800/50 rounded-xl">
-                    <div className="text-xs text-slate-500 mb-1">Raffles</div>
-                    <div className="text-xl font-bold text-white">{creator.total_raffles_completed}</div>
-                  </div>
-                  <div className="p-3 bg-slate-800/50 rounded-xl">
-                    <div className="text-xs text-slate-500 mb-1">Rating</div>
-                    <div className="text-xl font-bold text-yellow-400">⭐ {creator.average_rating.toFixed(1)}</div>
-                  </div>
-                </div>
+                )}
 
                 <button
-                  onClick={handleFollow}
-                  disabled={!user}
-                  className={`w-full py-3 rounded-xl font-bold transition-all ${
-                    isFollowing
-                      ? 'bg-slate-700 text-white hover:bg-slate-600'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
+                  onClick={handleBuyTickets}
+                  disabled={buying || raffle.status !== 'active' || !walletAddress}
+                  style={{
+                    width: '100%', padding: '14px 0', borderRadius: 12, fontWeight: 700, fontSize: 15, cursor: buying || raffle.status !== 'active' || !walletAddress ? 'not-allowed' : 'pointer',
+                    background: buying || raffle.status !== 'active' ? 'rgba(255,255,255,0.08)' : 'linear-gradient(135deg,#00ff88,#00cc6a)',
+                    border: 'none', color: buying || raffle.status !== 'active' ? '#64748b' : '#0a1929',
+                  }}
                 >
-                  {isFollowing ? 'Following' : 'Follow'}
+                  {buying ? 'Processing...' : raffle.status !== 'active' ? 'Raffle Ended' : '🎟️ Buy Tickets'}
                 </button>
-              </div>
-            )}
 
-            {/* Prize Value */}
-            <div className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-2 border-green-500/50 rounded-3xl p-6">
-              <div className="text-sm text-green-400 mb-2">Prize Value</div>
-              <div className="text-4xl font-black text-white mb-1">
-                ${raffle.prize_value.toLocaleString()}
-              </div>
-              <div className="text-green-400 font-semibold">{raffle.prize_currency}</div>
-            </div>
-
-            {/* Progress */}
-            <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-slate-400 text-sm">Tickets Sold</span>
-                <span className="text-blue-400 font-bold">
-                  {getProgressPercentage().toFixed(0)}%
-                </span>
-              </div>
-              <div className="h-4 bg-slate-800 rounded-full overflow-hidden mb-2">
-                <div
-                  className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-500"
-                  style={{ width: `${getProgressPercentage()}%` }}
-                />
-              </div>
-              <div className="text-center text-white font-bold text-lg">
-                {raffle.tickets_sold.toLocaleString()} / {raffle.total_tickets.toLocaleString()}
-              </div>
-            </div>
-
-            {/* Buy Tickets */}
-            <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Buy Tickets</h3>
-
-              {/* Quantity Selector */}
-              <div className="mb-4">
-                <label className="text-sm text-slate-400 mb-2 block">Quantity</label>
-                <input
-                  type="number"
-                  min="1"
-                  max={raffle.total_tickets - raffle.tickets_sold}
-                  value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-center text-2xl font-bold focus:outline-none focus:border-blue-500"
-                />
-              </div>
-
-              {/* Quick Select */}
-              <div className="grid grid-cols-4 gap-2 mb-4">
-                {[1, 10, 50, 100].map((num) => (
-                  <button
-                    key={num}
-                    onClick={() => setQuantity(num)}
-                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-semibold transition-all"
-                  >
-                    {num}
-                  </button>
-                ))}
-              </div>
-
-              {/* Pricing */}
-              <div className="mb-4 p-4 bg-slate-800/50 rounded-xl space-y-2">
-                <div className="flex justify-between text-slate-400 text-sm">
-                  <span>Base Price</span>
-                  <span>${(raffle.base_ticket_price * quantity).toFixed(2)}</span>
-                </div>
-                {getSavings(quantity) > 0 && (
-                  <div className="flex justify-between text-green-400 text-sm font-semibold">
-                    <span>💰 You Save</span>
-                    <span>-${getSavings(quantity).toFixed(2)}</span>
-                  </div>
+                {!user && (
+                  <p style={{ textAlign: 'center', fontSize: 13, color: '#64748b', marginTop: 10 }}>
+                    <Link href="/login" style={{ color: '#00ff88' }}>Sign in</Link> to buy tickets
+                  </p>
                 )}
-                <div className="flex justify-between text-white text-lg font-bold pt-2 border-t border-slate-700">
-                  <span>Total</span>
-                  <span>${calculatePrice(quantity).toFixed(2)} USDC</span>
+              </div>
+
+              {/* Early bird */}
+              {raffle.early_bird_expired === false && raffle.early_bird_discount && (
+                <div style={{ ...card, background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.2)' }}>
+                  <div style={{ fontWeight: 700, color: '#00ff88', marginBottom: 4 }}>🐦 Early Bird Active!</div>
+                  <p style={{ color: '#94a3b8', fontSize: 13, margin: 0 }}>
+                    First {raffle.early_bird_percentage}% of tickets get {raffle.early_bird_discount}% off!
+                  </p>
                 </div>
-              </div>
-
-              {/* Your Odds */}
-              <div className="mb-4 p-4 bg-blue-900/20 border border-blue-500/50 rounded-xl">
-                <div className="text-sm text-blue-400 mb-1">Your Winning Odds</div>
-                <div className="text-2xl font-black text-white">{getOdds()}%</div>
-                <div className="text-xs text-slate-400 mt-1">
-                  {quantity} ticket{quantity !== 1 ? 's' : ''} out of {(raffle.total_tickets - raffle.tickets_sold).toLocaleString()} remaining
-                </div>
-              </div>
-
-              {/* Wallet Connect */}
-              <div className="mb-4">
-                <WalletConnect onConnect={setWalletAddress} />
-              </div>
-
-              {/* Buy Button */}
-              <button
-                onClick={handleBuyTickets}
-                disabled={buying || raffle.status !== 'active' || !walletAddress}
-                className="w-full py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:from-slate-700 disabled:to-slate-700 text-white font-bold rounded-xl text-lg transition-all disabled:cursor-not-allowed"
-              >
-                {buying ? 'Processing...' : raffle.status !== 'active' ? 'Raffle Ended' : 'Buy Tickets 🎟️'}
-              </button>
-
-              {!user && (
-                <p className="text-center text-sm text-slate-400 mt-3">
-                  <Link href="/login" className="text-blue-400 hover:underline">Sign in</Link> to buy tickets
-                </p>
               )}
-            </div>
 
-            {/* Discount Info */}
-            {!raffle.early_bird_expired && (
-              <div className="p-4 bg-green-500/10 border border-green-500/50 rounded-xl">
-                <div className="flex items-center gap-2 text-green-400 font-bold mb-1">
-                  🐦 Early Bird Active!
-                </div>
-                <p className="text-sm text-slate-300">
-                  First {raffle.early_bird_percentage}% of tickets get extra {raffle.early_bird_discount}% off!
-                </p>
+              {/* Share */}
+              <div style={card}>
+                <ShareButtons
+                  url={`https://www.onagui.com/raffles/${raffle.id}`}
+                  title={`Win ${raffle.title} worth $${raffle.prize_value.toLocaleString()} on Onagui!`}
+                  description={raffle.description}
+                />
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }

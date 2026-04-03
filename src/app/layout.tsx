@@ -8,22 +8,24 @@ import '@/styles/raffle-cards.css'
 import './globals.css'
 import { WalletProvider } from '@/hooks/useWallet'
 import { ThemeProvider } from '@/components/ThemeContext'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import BottomNav from '@/components/BottomNav';
+import Header from '@/components/Header';
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Onagui - Web3 Giveaway & Raffle Platform',
-  description: 'Create and participate in provably fair giveaways and raffles. Win real prizes with transparent, blockchain-verified draws.',
+  title: 'Onagui - Social Fintech Platform',
+  description: 'The social fintech platform where you can win, fundraise, and grow together. Giveaways, raffles, crowdfunding, and community — all in one place.',
   openGraph: {
-    title: 'Onagui - Web3 Giveaway & Raffle Platform',
-    description: 'Create and participate in provably fair giveaways and raffles. Win real prizes with transparent, blockchain-verified draws.',
+    title: 'Onagui - Social Fintech Platform',
+    description: 'The social fintech platform where you can win, fundraise, and grow together. Giveaways, raffles, crowdfunding, and community — all in one place.',
     images: [
       {
         url: 'https://www.onagui.com/og-default.png',
         width: 1200,
         height: 630,
-        alt: 'Onagui - Web3 Giveaway Platform',
+        alt: 'Onagui - Social Fintech Platform',
       },
     ],
     type: 'website',
@@ -32,8 +34,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Onagui - Web3 Giveaway & Raffle Platform',
-    description: 'Create and participate in provably fair giveaways and raffles. Win real prizes.',
+    title: 'Onagui - Social Fintech Platform',
+    description: 'The social fintech platform where you can win, fundraise, and grow together.',
     images: ['https://www.onagui.com/og-default.png'],
     site: '@onaborado',
   },
@@ -46,7 +48,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Anti-flash script */}
         <script
@@ -69,12 +71,17 @@ export default function RootLayout({
         <link rel="manifest" href="/my-favicon/site.webmanifest" />
       </head>
       <body className={inter.className}>
-        <ThemeProvider>
-          <WalletProvider>
-            {children}
-          </WalletProvider>
-        </ThemeProvider>
-        <BottomNav />
+        <ErrorBoundary>
+          <ThemeProvider>
+            <WalletProvider>
+              <Header />
+              <div className="page-body">
+                {children}
+              </div>
+            </WalletProvider>
+          </ThemeProvider>
+          <BottomNav />
+        </ErrorBoundary>
       </body>
     </html>
   )

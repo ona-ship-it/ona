@@ -122,7 +122,7 @@ export default function KYCForm({ fundraiserId, fundraiserTitle, escrowBalance, 
         <div className="border-b pb-6">
           <h3 className="text-xl font-semibold mb-4">Personal Information</h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Full Legal Name *</label>
               <input
@@ -175,7 +175,7 @@ export default function KYCForm({ fundraiserId, fundraiserTitle, escrowBalance, 
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div style={{ display: "grid", gap: 24, gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
                 <input

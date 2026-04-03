@@ -211,7 +211,7 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Revenue Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="items-grid" style={{ marginBottom: 32 }}>
           <div className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-2 border-green-500/50 rounded-3xl p-8">
             <div className="text-4xl mb-3">💰</div>
             <div className="text-sm text-green-400 mb-2">Total Revenue</div>
@@ -302,7 +302,7 @@ export default function AdminAnalyticsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="items-grid" style={{ marginBottom: 32 }}>
             {Object.entries(participation.eventsByType).length === 0 ? (
               <div className="col-span-full text-center py-6 text-slate-400">No events recorded yet.</div>
             ) : (

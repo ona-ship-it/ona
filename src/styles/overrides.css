@@ -697,3 +697,68 @@ header .navigation a:hover {
   border: 1px solid var(--border) !important;
   box-shadow: var(--shadow-sm) !important;
 }
+
+/* ── Header responsive (replaces broken Tailwind hidden/md:) ── */
+.hdr-nav { display: none; align-items: center; gap: 24px; }
+.hdr-actions { display: none; align-items: center; gap: 8px; }
+.hdr-burger { display: flex; align-items: center; }
+@media (min-width: 768px) {
+  .hdr-nav { display: flex; }
+  .hdr-actions { display: flex; }
+  .hdr-burger { display: none !important; }
+  .hdr-mobile-menu { display: none !important; }
+}
+
+/* ── Page bottom padding for fixed BottomNav ── */
+@media (max-width: 767px) {
+  .page-body { padding-bottom: 80px; }
+}
+/* ── Responsive card grids (replaces Tailwind responsive prefixes) ── */
+.items-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .items-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+  .items-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1280px) {
+  .items-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.profiles-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .profiles-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 768px) {
+  .profiles-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1280px) {
+  .profiles-grid { grid-template-columns: repeat(4, 1fr); }
+}
+/* ── Giveaway detail 2-col / 1-col responsive grid ── */
+.giveaway-detail-grid {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 1024px) {
+  .giveaway-detail-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+/* ── Card image container ── */
+.card-img { position: relative; height: 176px; overflow: hidden; }
+.card-img img { width: 100%; height: 100%; object-fit: cover; }
+.card-badge {
+  position: absolute; left: 12px; top: 12px;
+  border-radius: 9999px; padding: 2px 8px;
+  font-size: 11px; font-weight: 700;
+  background: rgba(0,255,136,0.15);
+  color: var(--accent-green);
+  border: 1px solid rgba(0,255,136,0.3);
+}

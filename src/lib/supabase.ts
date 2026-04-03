@@ -1,17 +1,59 @@
 import { createBrowserClient } from '@supabase/ssr'
 
-// Singleton pattern — reuse the same client instance
-// This prevents session loss from creating multiple clients
-let client: ReturnType<typeof createBrowserClient> | null = null
+// Singleton pattern — reuse the same client instance.
+// This prevents session loss from creating multiple clients.
+let client: any = null
+
+function createNoopClient() {
+  const noop = async () => ({ data: null, error: null })
+  const noopUnsubscribe = () => undefined
+
+  return {
+    auth: {
+      getSession: async () => ({ data: { session: null } }),
+      onAuthStateChange: () => ({
+        data: {
+          subscription: {
+            unsubscribe: noopUnsubscribe,
+          },
+        },
+      }),
+    },
+    from: () => ({
+      select: noop,
+      insert: noop,
+      update: noop,
+      delete: noop,
+      upsert: noop,
+      maybeSingle: noop,
+      single: noop,
+      order: () => ({ range: noop, limit: noop, execute: noop }),
+      range: () => ({ execute: noop }),
+      execute: noop,
+    }),
+    rpc: noop,
+  }
+}
 
 export function createClient() {
   if (client) return client
 
-  client = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  // Avoid creating a Supabase client during server-side build / prerender
+  // where environment variables may be missing and window is unavailable.
+  if (typeof window === 'undefined') {
+    client = createNoopClient()
+    return client
+  }
 
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!url || !key) {
+    client = createNoopClient()
+    return client
+  }
+
+  client = createBrowserClient(url, key)
   return client
 }
 

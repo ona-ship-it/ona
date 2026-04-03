@@ -147,7 +147,7 @@ export default function MyFundraisersClient() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', marginBottom: 32 }}>
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">

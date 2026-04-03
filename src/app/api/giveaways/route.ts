@@ -5,10 +5,17 @@ import type { Database } from '@/types/supabase';
 
 export async function GET(request: NextRequest) {
   try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return NextResponse.json({ giveaways: [] });
+    }
+
     const cookieStore = await cookies();
     const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      supabaseUrl,
+      supabaseAnonKey,
       {
         cookies: {
           get(name: string) {
@@ -32,10 +39,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching giveaways:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch giveaways' },
-        { status: 500 }
-      );
+      return NextResponse.json({ giveaways: [] });
     }
 
     const creatorIds = (giveaways || [])
@@ -93,9 +97,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ giveaways: enrichedGiveaways });
   } catch (error) {
     console.error('API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ giveaways: [] });
   }
 }

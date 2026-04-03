@@ -350,7 +350,7 @@ export default function AdminVerification() {
         <h2 className="text-4xl font-black text-white mb-2">Verification & Compliance</h2>
         <p className="text-slate-400 mb-8">Verify winners, creators, fundraise campaigns, and KYC documents for legal compliance</p>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', marginBottom: 32 }}>
           <div className="bg-gradient-to-br from-orange-900/30 to-yellow-900/30 border-2 border-orange-500/50 rounded-2xl p-4 text-center">
             <div className="text-2xl font-black text-orange-400">{stats.pendingWinners}</div>
             <div className="text-xs text-orange-300">Pending Winners</div>

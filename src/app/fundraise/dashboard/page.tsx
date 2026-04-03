@@ -253,7 +253,7 @@ export default function FundraiserDashboard() {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  <div className="items-grid" style={{ marginBottom: 16 }}>
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <div className="text-sm text-gray-600 mb-1">Raised</div>
                       <div className="text-2xl font-bold text-gray-900">

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServerSupabase } from '@/lib/supabaseServer'
+import { createClient as createServerSupabase } from '@/lib/supabaseServer'
 
 /**
  * Social Media Verification API
