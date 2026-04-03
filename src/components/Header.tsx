@@ -55,7 +55,6 @@ export default function Header() {
         zIndex: 50,
         background: 'var(--bg-primary)',
         borderBottom: '1px solid var(--border)',
-        backdropFilter: 'blur(20px)',
       }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', height: 64, alignItems: 'center', justifyContent: 'space-between', padding: '0 16px' }}>
