@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { getGravatarUrl } from '@/utils/gravatar'
-import Image from 'next/image'
+
 
 type ProfilePictureProps = {
   size?: 'sm' | 'md' | 'lg'
@@ -114,15 +114,13 @@ export default function ProfilePicture({ size = 'sm', showUpload = false }: Prof
     <div className="relative group">
       {avatarUrl ? (
         <div 
-          className={`${sizeClasses[size]} rounded-full overflow-hidden cursor-pointer transition-opacity hover:opacity-80 relative`}
+          className={`${sizeClasses[size]} rounded-full overflow-hidden cursor-pointer transition-opacity hover:opacity-80`}
           style={{ border: '2px solid var(--accent-blue)' }}
         >
-          <Image 
-            src={avatarUrl} 
-            alt="Profile" 
-            fill
-            className="object-cover"
-            unoptimized // For external URLs like Gravatar
+          <img
+            src={avatarUrl}
+            alt="Profile"
+            className="w-full h-full object-cover"
           />
         </div>
       ) : (
