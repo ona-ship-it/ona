@@ -672,7 +672,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
     const fallback = {
       username: "Creator",
       displayName: "@Creator",
-      avatar: "",
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=600&auto=format&fit=crop",
       bio: "Welcome to my Onagui profile.",
       verified: false,
       joinDate: "New",
@@ -865,7 +865,11 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
           <div className="hero-content">
             <div className="avatar-section">
               <div className="avatar-wrapper">
-                <img src={profile.avatar} alt={profile.username} className="avatar-img" />
+                <img
+                  src={profile.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=600&auto=format&fit=crop"}
+                  alt={profile.username}
+                  className="avatar-img"
+                />
                 {profile.verified && (
                   <div className="verified-badge-large">
                     <Zap size={20} fill="#0f1419" stroke="#0f1419" />
