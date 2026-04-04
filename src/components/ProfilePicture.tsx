@@ -17,10 +17,10 @@ export default function ProfilePicture({ size = 'sm', showUpload = false }: Prof
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
 
-  const sizeClasses = {
-    sm: 'w-9 h-9 text-sm',
-    md: 'w-16 h-16 text-xl',
-    lg: 'w-24 h-24 text-3xl'
+  const sizeConfig = {
+    sm: { dimension: 36, fontSize: 14 },
+    md: { dimension: 64, fontSize: 20 },
+    lg: { dimension: 96, fontSize: 30 },
   }
 
   useEffect(() => {
@@ -110,23 +110,55 @@ export default function ProfilePicture({ size = 'sm', showUpload = false }: Prof
 
   if (!user) return null
 
+  const { dimension, fontSize } = sizeConfig[size]
+  const isHeaderAvatar = size === 'sm' && !showUpload
+  const shouldShowImage = !!avatarUrl && !isHeaderAvatar
+
   return (
     <div className="relative group">
-      {avatarUrl ? (
+      {shouldShowImage ? (
         <div 
-          className={`${sizeClasses[size]} rounded-full overflow-hidden cursor-pointer transition-opacity hover:opacity-80`}
-          style={{ border: '2px solid var(--accent-blue)' }}
+          style={{
+            width: dimension,
+            height: dimension,
+            minWidth: dimension,
+            minHeight: dimension,
+            borderRadius: '9999px',
+            overflow: 'hidden',
+            cursor: 'pointer',
+            transition: 'opacity 0.2s ease',
+            border: '2px solid var(--accent-blue)',
+          }}
         >
           <img
             src={avatarUrl}
             alt="Profile"
-            className="w-full h-full object-cover"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
+            }}
           />
         </div>
       ) : (
         <div 
-          className={`${sizeClasses[size]} rounded-full flex items-center justify-center font-semibold cursor-pointer transition-opacity hover:opacity-80`}
-          style={{ background: 'var(--accent-blue)', color: 'var(--text-primary)' }}
+          style={{
+            width: dimension,
+            height: dimension,
+            minWidth: dimension,
+            minHeight: dimension,
+            borderRadius: '9999px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 600,
+            fontSize,
+            cursor: 'pointer',
+            transition: 'opacity 0.2s ease',
+            background: 'var(--accent-blue)',
+            color: 'var(--text-primary)',
+          }}
         >
           {getInitials()}
         </div>
