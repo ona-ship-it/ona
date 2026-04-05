@@ -64,11 +64,11 @@ export default function RootLayout({
         />
         
         {/* Onagui Brand Favicon - Added Here */}
-        <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96" />
-        <link rel="icon" type="image/svg+xml" href="/my-favicon/favicon.svg" />
-        <link rel="shortcut icon" href="/my-favicon/favicon.ico" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/my-favicon/apple-touch-icon.png" />
-        <link rel="manifest" href="/my-favicon/site.webmanifest" />
+        <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png?v=20260405" sizes="96x96" />
+        <link rel="icon" type="image/svg+xml" href="/my-favicon/favicon.svg?v=20260405" />
+        <link rel="shortcut icon" href="/my-favicon/favicon.ico?v=20260405" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/my-favicon/apple-touch-icon.png?v=20260405" />
+        <link rel="manifest" href="/my-favicon/site.webmanifest?v=20260405" />
       </head>
       <body className={inter.className}>
         <ErrorBoundary>
