@@ -53,6 +53,19 @@ type Activity = {
   created_at: string
 }
 
+type BuyAttempt = {
+  quantity: number
+  walletAddress: string
+  idempotencyKey: string
+}
+
+function createIdempotencyKey(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 export default function RaffleDetailClient() {
   const params = useParams()
   const router = useRouter()
@@ -70,6 +83,7 @@ export default function RaffleDetailClient() {
   const [buySuccess, setBuySuccess] = useState('')
   const [selectedImage, setSelectedImage] = useState(0)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
+  const [lastBuyAttempt, setLastBuyAttempt] = useState<BuyAttempt | null>(null)
 
   useEffect(() => {
     initPage()
@@ -169,10 +183,21 @@ export default function RaffleDetailClient() {
     return ((quantity / remaining) * 100).toFixed(4)
   }
 
-  async function handleBuyTickets() {
+  async function handleBuyTickets(retryAttempt?: BuyAttempt) {
     if (!user) { router.push('/login'); return }
     if (!raffle || quantity < 1) return
-    if (!walletAddress) { setBuyError('Please connect your wallet first'); return }
+
+    const attemptQuantity = retryAttempt?.quantity ?? quantity
+    const attemptWalletAddress = retryAttempt?.walletAddress ?? walletAddress
+
+    if (!attemptWalletAddress) { setBuyError('Please connect your wallet first'); return }
+
+    const idempotencyKey = retryAttempt?.idempotencyKey ?? createIdempotencyKey()
+    setLastBuyAttempt({
+      quantity: attemptQuantity,
+      walletAddress: attemptWalletAddress,
+      idempotencyKey,
+    })
 
     setBuying(true)
     setBuyError('')
@@ -181,8 +206,11 @@ export default function RaffleDetailClient() {
     try {
       const response = await fetch(`/api/raffles/${raffle.id}/buy`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity, walletAddress }),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Idempotency-Key': idempotencyKey,
+        },
+        body: JSON.stringify({ quantity: attemptQuantity, walletAddress: attemptWalletAddress }),
       })
 
       const result = await response.json()
@@ -192,7 +220,8 @@ export default function RaffleDetailClient() {
         return
       }
 
-      setBuySuccess(`Success! You got ticket${quantity > 1 ? 's' : ''} #${result.ticketNumbers.join(', ')}`)
+      setBuySuccess(`Success! You got ticket${attemptQuantity > 1 ? 's' : ''} #${result.ticketNumbers.join(', ')}`)
+      setLastBuyAttempt(null)
       await fetchRaffle(user)
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unexpected error'
@@ -444,6 +473,25 @@ export default function RaffleDetailClient() {
                 {buyError && (
                   <div style={{ padding: '10px 12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, fontSize: 12, color: '#ef4444', marginBottom: 10 }}>
                     {buyError}
+                    {lastBuyAttempt && !buying && (
+                      <div style={{ marginTop: 8 }}>
+                        <button
+                          onClick={() => handleBuyTickets(lastBuyAttempt)}
+                          style={{
+                            padding: '6px 10px',
+                            borderRadius: 8,
+                            border: '1px solid rgba(239,68,68,0.3)',
+                            background: 'rgba(239,68,68,0.15)',
+                            color: '#fecaca',
+                            cursor: 'pointer',
+                            fontSize: 12,
+                            fontWeight: 700,
+                          }}
+                        >
+                          Retry Last Purchase
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
                 {buySuccess && (

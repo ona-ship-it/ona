@@ -11,6 +11,20 @@ import ShareGiveaway from '@/components/ShareGiveaway'
 import WinnerDisplay from '@/components/WinnerDisplay'
 import { payWithUSDC, isOnPolygon } from '@/lib/wallet'
 
+type FailedEntryAttempt = {
+  entryType: 'free' | 'paid'
+  idempotencyKey: string
+  paymentConfirmed: boolean
+  paymentTxHash: string | null
+}
+
+function createIdempotencyKey(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 type Giveaway = {
   id: string
   title: string
@@ -56,6 +70,9 @@ export default function GiveawayDetailPage() {
   const [freeTicketsClaimed, setFreeTicketsClaimed] = useState(0)
   const [preferredEntryType, setPreferredEntryType] = useState<'free' | 'paid'>('free')
   const [quantity] = useState(1)
+  const [entryError, setEntryError] = useState<string | null>(null)
+  const [entrySuccess, setEntrySuccess] = useState<string | null>(null)
+  const [failedEntryAttempt, setFailedEntryAttempt] = useState<FailedEntryAttempt | null>(null)
 
   useEffect(() => {
     checkAuth()
@@ -145,7 +162,7 @@ export default function GiveawayDetailPage() {
     }
   }
 
-  async function handleEnter(entryType: 'free' | 'paid') {
+  async function handleEnter(entryType: 'free' | 'paid', retryAttempt?: FailedEntryAttempt) {
     if (!user) {
       router.push('/login')
       return
@@ -153,33 +170,51 @@ export default function GiveawayDetailPage() {
 
     if (!giveaway) return
 
+    setEntryError(null)
+    setEntrySuccess(null)
+
     if (entryType === 'paid') {
       if (!walletAddress) {
-        alert('Please connect your wallet first')
+        setEntryError('Please connect your wallet first')
         return
       }
 
       const onPolygon = await isOnPolygon()
       if (!onPolygon) {
-        alert('Please switch to Polygon network')
+        setEntryError('Please switch to Polygon network')
         return
       }
     }
 
     setEntering(true)
+    const idempotencyKey = retryAttempt?.idempotencyKey || createIdempotencyKey()
+    let paymentConfirmed = retryAttempt?.paymentConfirmed || false
+    let paymentTxHash = retryAttempt?.paymentTxHash || null
+
+    setFailedEntryAttempt({
+      entryType,
+      idempotencyKey,
+      paymentConfirmed,
+      paymentTxHash,
+    })
 
     try {
-      if (entryType === 'paid') {
+      if (entryType === 'paid' && !paymentConfirmed) {
         const paymentResult = await payWithUSDC(1)
         if (!paymentResult.success) {
           throw new Error(paymentResult.error || 'Payment failed')
         }
+        paymentConfirmed = true
+        paymentTxHash = paymentResult.txHash || null
       }
 
       const response = await fetch(`/giveaways/${giveaway.id}/api/entries/create`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ giveawayId: giveaway.id, entryType }),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Idempotency-Key': idempotencyKey,
+        },
+        body: JSON.stringify({ giveawayId: giveaway.id, entryType, paymentTxHash }),
       })
 
       const result = await response.json()
@@ -187,14 +222,21 @@ export default function GiveawayDetailPage() {
         throw new Error(result.error || 'Entry failed')
       }
 
-      alert(result.message || 'Entry successful!')
+      setEntrySuccess(result.message || 'Entry successful!')
+      setFailedEntryAttempt(null)
       
       // Refresh giveaway data
       await fetchGiveaway()
     } catch (error: unknown) {
       console.error('Entry error:', error)
       const message = error instanceof Error ? error.message : 'Unknown error'
-      alert(`Failed to enter: ${message}`)
+      setEntryError(`Failed to enter: ${message}`)
+      setFailedEntryAttempt({
+        entryType,
+        idempotencyKey,
+        paymentConfirmed,
+        paymentTxHash,
+      })
     } finally {
       setEntering(false)
     }
@@ -372,6 +414,26 @@ export default function GiveawayDetailPage() {
                 >
                   {entering ? 'Processing...' : preferredEntryType === 'paid' ? 'Buy Ticket 1 USDC (Selected)' : 'Buy Ticket 1 USDC'}
                 </button>
+
+                {entryError && (
+                  <div className="mt-3 rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-300">
+                    <div>{entryError}</div>
+                    {failedEntryAttempt && !entering && (
+                      <button
+                        onClick={() => handleEnter(failedEntryAttempt.entryType, failedEntryAttempt)}
+                        className="mt-2 rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-semibold text-red-100 hover:bg-red-500/30"
+                      >
+                        Retry Last Attempt
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {entrySuccess && (
+                  <div className="mt-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-200">
+                    {entrySuccess}
+                  </div>
+                )}
               </div>
 
               {!user && (
