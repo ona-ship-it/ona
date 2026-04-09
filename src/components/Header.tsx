@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import type { Session } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
 import ProfilePicture from '@/components/ProfilePicture'
+import NotificationBell from '@/components/NotificationBell'
 
 const NAV_ITEMS = [
   { href: '/', label: 'Home' },
@@ -103,6 +104,16 @@ export default function Header() {
                 <ProfilePicture size="sm" />
               </Link>
             </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <Link href="/raffles/create" className="rounded-xl px-4 py-2 text-sm font-semibold text-white" style={{ background: 'var(--accent-green)' }}>
+                          + Create
+                        </Link>
+                        <NotificationBell />
+                        <Link href="/profile" className="block">
+                          <ProfilePicture size="sm" />
+                        </Link>
+                      </div>
           )}
         </div>
 

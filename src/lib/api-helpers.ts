@@ -80,6 +80,36 @@ export function validateFieldTypes(
 }
 
 /**
+ * Standardized permission / authorization error shape returned by API routes.
+ *
+ * code        — machine-readable reason (matches PermissionReason in PermissionGate)
+ * message     — human-readable description
+ * nextAction  — optional hint for the client (e.g. "verify_email", "contact_support")
+ */
+export interface PermissionError {
+  code: 'must_login' | 'must_verify_email' | 'account_suspended' | 'insufficient_role'
+  message: string
+  nextAction?: string
+}
+
+/**
+ * Returns a 401 or 403 NextResponse with a standard PermissionError body.
+ *
+ * httpStatus defaults to 403 for role/suspension errors and 401 for auth errors.
+ */
+export function permissionErrorResponse(
+  error: PermissionError,
+  httpStatus?: number,
+): NextResponse {
+  const defaultStatus =
+    error.code === 'must_login' || error.code === 'must_verify_email' ? 401 : 403
+  return NextResponse.json(
+    { permission_error: error, status: 'error', timestamp: new Date().toISOString() },
+    { status: httpStatus ?? defaultStatus },
+  )
+}
+
+/**
  * Success response helper
  */
 export function successResponse<T>(data: T, status: number = 200): NextResponse<ApiResponse<T>> {
