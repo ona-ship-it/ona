@@ -53,9 +53,10 @@ export default function GiveawaysClient() {
       }
 
       setGiveaways(data.giveaways || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching giveaways:', err);
-      setError(err.message || 'Failed to load giveaways');
+      const message = err instanceof Error ? err.message : 'Failed to load giveaways';
+      setError(message);
     } finally {
       setLoading(false);
     }

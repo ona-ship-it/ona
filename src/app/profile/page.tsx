@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import ProfilePageClient from './ProfilePageClient';
+import ProfilePageClient from '@/app/profiles/ProfilePageClient';
 
 export const metadata = { title: 'Profile | Onagui' };
 

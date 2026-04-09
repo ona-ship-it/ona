@@ -109,7 +109,7 @@ export default function KYCAdminPage() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
 
-    const updateData: any = {
+    const updateData: Record<string, string | null> = {
       status: newStatus,
       reviewed_by: session.user.id,
       reviewed_at: new Date().toISOString(),

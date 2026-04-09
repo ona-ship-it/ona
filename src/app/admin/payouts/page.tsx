@@ -100,7 +100,7 @@ export default function PayoutRequestsPage() {
   async function updateStatus(
     requestId: string,
     newStatus: 'approved' | 'processing' | 'completed' | 'failed' | 'cancelled',
-    transactionHash?: string,
+    transactionHash?: string | null,
     failureReason?: string
   ) {
     setProcessing(true);
@@ -108,14 +108,14 @@ export default function PayoutRequestsPage() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
 
-    const updateData: any = {
+    const updateData: Record<string, string | null> = {
       status: newStatus,
       processed_by: session.user.id,
       processed_at: new Date().toISOString(),
       admin_notes: adminNotes || null,
     };
 
-    if (transactionHash) {
+    if (transactionHash !== undefined) {
       updateData.transaction_hash = transactionHash;
     }
 
@@ -182,8 +182,8 @@ export default function PayoutRequestsPage() {
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: crypto.chainId }],
         });
-      } catch (switchError: any) {
-        if (switchError.code === 4902) {
+      } catch (switchError: unknown) {
+        if (typeof switchError === 'object' && switchError !== null && 'code' in switchError && (switchError as { code?: number }).code === 4902) {
           alert('Please add this network to MetaMask first');
           setProcessing(false);
           return;

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
 import { getGravatarUrl } from '@/utils/gravatar'
 
@@ -10,10 +11,15 @@ type ProfilePictureProps = {
   showUpload?: boolean
 }
 
+type Profile = {
+  avatar_url: string | null
+  full_name: string | null
+}
+
 export default function ProfilePicture({ size = 'sm', showUpload = false }: ProfilePictureProps) {
   const supabase = createClient()
-  const [user, setUser] = useState<any>(null)
-  const [profile, setProfile] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
 
@@ -41,7 +47,7 @@ export default function ProfilePicture({ size = 'sm', showUpload = false }: Prof
         .eq('id', user.id)
         .single()
 
-      setProfile(profileData)
+      setProfile((profileData as Profile | null) || null)
 
       // Get avatar URL
       if (profileData?.avatar_url) {
@@ -90,9 +96,10 @@ export default function ProfilePicture({ size = 'sm', showUpload = false }: Prof
 
       setAvatarUrl(data.publicUrl)
       alert('Avatar updated successfully!')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error uploading avatar:', error)
-      alert('Error uploading avatar: ' + error.message)
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      alert('Error uploading avatar: ' + message)
     } finally {
       setUploading(false)
     }

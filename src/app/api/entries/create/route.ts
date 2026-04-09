@@ -156,8 +156,9 @@ export async function POST(request: Request) {
       ticket,
       message: normalizedEntryType === 'free' ? 'Free ticket claimed!' : 'Paid ticket purchased!'
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error'
     console.error('Entry error:', error)
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }

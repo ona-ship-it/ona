@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 import { createClient } from '@/utils/supabase/server';
-import { createAdminSupabaseClient } from '@/utils/supabase/server-admin';
+import { isAdmin as hasAdminAccess } from '@/lib/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
@@ -18,17 +18,7 @@ export default async function AccountPage() {
     return redirect('/signin');
   }
 
-  // Check for Admin Role using user metadata
-  let isAdmin = false;
-  try {
-    const adminSupabase = await createAdminSupabaseClient();
-    const { data: fullUser } = await adminSupabase.auth.admin.getUserById(user.id);
-    
-    isAdmin = fullUser?.user?.user_metadata?.is_admin === true;
-  } catch (error) {
-    console.error('Error checking admin status:', error);
-    isAdmin = false;
-  }
+  const isAdmin = hasAdminAccess(user.email);
 
   // Fetch Profile Info (if needed)
   const { data: profile }: { data: { email: string; user_id: string } | null } = await supabase

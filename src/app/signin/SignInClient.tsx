@@ -23,8 +23,11 @@ export default function SignInClient() {
       if (error) throw error;
       router.push('/');
       router.refresh();
-    } catch (authError: any) {
-      setError(authError.message || 'An error occurred during sign in');
+    } catch (authError: unknown) {
+      const errorMessage = authError instanceof Error
+        ? authError.message
+        : 'An error occurred during sign in';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -29,6 +29,16 @@ type TicketEntry = {
   } | null
 }
 
+type TicketRow = {
+  id: string
+  raffle_id: string
+  ticket_numbers: number[]
+  quantity: number
+  final_price: number
+  purchased_at: string
+  raffle: TicketEntry['raffle']
+}
+
 const statusColor: Record<string, string> = {
   active: '#00ff88',
   completed: '#3b82f6',
@@ -64,7 +74,7 @@ export default function MyTicketsPage() {
       .eq('user_id', user.id)
       .order('purchased_at', { ascending: false })
 
-    if (!error && data) setTickets(data as any)
+    if (!error && data) setTickets(data as TicketRow[])
     setLoading(false)
   }
 

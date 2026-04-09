@@ -190,7 +190,7 @@ export default function GoogleSignIn() {
           
           {/* Privacy notice */}
           <div className="mt-4 text-xs text-gray-400 text-center">
-            To continue, google.com will share your name, email address and profile picture with this site. See this site's <a href="/privacy" className="text-[#5AFF7F] hover:underline">privacy policy</a> and <a href="/terms" className="text-[#5AFF7F] hover:underline">Terms of Service</a>.
+            To continue, google.com will share your name, email address and profile picture with this site. See this site&apos;s <a href="/privacy" className="text-[#5AFF7F] hover:underline">privacy policy</a> and <a href="/terms" className="text-[#5AFF7F] hover:underline">Terms of Service</a>.
           </div>
         </div>
       </div>

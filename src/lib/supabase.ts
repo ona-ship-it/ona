@@ -2,7 +2,7 @@ import { createBrowserClient } from '@supabase/ssr'
 
 // Singleton pattern — reuse the same client instance.
 // This prevents session loss from creating multiple clients.
-let client: any = null
+let client: ReturnType<typeof createNoopClient> | ReturnType<typeof createBrowserClient> | null = null
 
 function createNoopClient() {
   const noop = async () => ({ data: null, error: null })

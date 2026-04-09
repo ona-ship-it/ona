@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { IconWallet, IconCheck, IconClock, IconAlertCircle, IconFileDescription } from '@tabler/icons-react';
+import { IconWallet, IconCheck, IconClock, IconAlertCircle, IconFileDescription, IconX } from '@tabler/icons-react';
 import KYCForm from '@/components/KYCForm';
 
 interface Fundraiser {
@@ -217,7 +217,7 @@ export default function FundraiserDashboard() {
 
         {fundraisers.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-12 text-center">
-            <p className="text-gray-500 mb-4">You haven't created any fundraisers yet</p>
+            <p className="text-gray-500 mb-4">You haven&apos;t created any fundraisers yet</p>
             <button
               onClick={() => router.push('/fundraise/create')}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"

@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import type { Database } from '@/lib/supabase'
+import { isAdmin } from '@/lib/admin'
+import type { Database } from '@/types/supabase'
+
+type CookieOptions = Record<string, unknown>
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,26 +17,22 @@ export async function GET(request: NextRequest) {
           get(name: string) {
             return cookieStore.get(name)?.value
           },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options })
+          set(name: string, value: string, options: CookieOptions) {
+            cookieStore.set({ name, value, ...(options as Record<string, unknown>) })
           },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: '', ...options })
+          remove(name: string, options: CookieOptions) {
+            cookieStore.set({ name, value: '', ...(options as Record<string, unknown>) })
           },
         },
       }
     )
 
-    // Check if user is admin
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: userMetadata } = await supabase.auth.getUser()
-    const isAdmin = userMetadata?.user?.user_metadata?.is_admin === true
-
-    if (!isAdmin) {
+    if (!isAdmin(user.email)) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
@@ -87,37 +86,40 @@ export async function POST(request: NextRequest) {
           get(name: string) {
             return cookieStore.get(name)?.value
           },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options })
+          set(name: string, value: string, options: CookieOptions) {
+            cookieStore.set({ name, value, ...(options as Record<string, unknown>) })
           },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: '', ...options })
+          remove(name: string, options: CookieOptions) {
+            cookieStore.set({ name, value: '', ...(options as Record<string, unknown>) })
           },
         },
       }
     )
 
-    // Check if user is admin
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: userMetadata } = await supabase.auth.getUser()
-    const isAdmin = userMetadata?.user?.user_metadata?.is_admin === true
-
-    if (!isAdmin) {
+    if (!isAdmin(user.email)) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
     if (action === 'promote') {
-      // Mark as promoted and increment counter
-      const { error } = await supabase
+      const supabaseAny = supabase as any
+
+      const { error: incrementError } = await supabaseAny.rpc('increment_promotion_count', {
+        giveaway_id: giveawayId,
+      })
+
+      if (incrementError) {
+        console.error('Failed to increment promotion count:', incrementError)
+      }
+
+      const { error } = await supabaseAny
         .from('giveaways')
         .update({
-          is_featured: true,
           promoted_at: new Date().toISOString(),
-          promotions_count: supabase.rpc('increment_promotion_count', { giveaway_id: giveawayId }),
         })
         .eq('id', giveawayId)
 

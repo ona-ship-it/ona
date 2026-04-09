@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import EditProfileModal from '@/components/EditProfileModal';
+import EditPostModal from '@/components/EditPostModal';
 import { createClient } from '@/lib/supabase';
 import CreatorCommissionDisplay, {
   CommissionHistoryItem,
@@ -65,6 +66,7 @@ type HistoryPost = {
 
 type PopularPost = {
   id: string
+  type: 'giveaway' | 'raffle'
   title: string
   image: string
   prize: string
@@ -95,6 +97,24 @@ type FundraiseEntry = {
   date: string
 }
 
+type FollowerJoinRow = {
+  follower: CommunityProfile | null
+}
+
+type FollowingJoinRow = {
+  profile: CommunityProfile | null
+}
+
+type FundraiserRecord = {
+  id: string
+  title: string | null
+  cover_image: string | null
+  raised_amount: number | null
+  goal_amount: number | null
+  total_donors: number | null
+  created_at: string | null
+}
+
 type ProfilePageClientProps = {
   profileIdOverride?: string | null
 }
@@ -104,6 +124,8 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
   const requestedProfileId = profileIdOverride || searchParams.get('id');
   const [activeSection, setActiveSection] = useState('live');
   const [showEditModal, setShowEditModal] = useState(false);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editingPostType, setEditingPostType] = useState<'raffle' | 'giveaway'>('giveaway');
   const [profileId, setProfileId] = useState<string | null>(null);
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<ProfileRecord | null>(null);
@@ -314,12 +336,12 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
           .eq('follower_id', profileId),
       ]);
 
-      const nextFollowers = (followerRows || [])
-        .map((row: any) => row.follower)
-        .filter(Boolean);
-      const nextFollowing = (followingRows || [])
-        .map((row: any) => row.profile)
-        .filter(Boolean);
+      const nextFollowers = ((followerRows || []) as FollowerJoinRow[])
+        .map((row) => row.follower)
+        .filter((person): person is CommunityProfile => Boolean(person));
+      const nextFollowing = ((followingRows || []) as FollowingJoinRow[])
+        .map((row) => row.profile)
+        .filter((person): person is CommunityProfile => Boolean(person));
 
       setFollowersList((prev) => {
         const merged = followerPage === 1 ? nextFollowers : [...prev, ...nextFollowers];
@@ -542,6 +564,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
       const nextPopularPosts: PopularPost[] = giveawayRows
         .map((giveaway) => ({
           id: giveaway.id,
+          type: 'giveaway',
           title: giveaway.title || 'Giveaway',
           image: giveaway.image_url || profileData?.avatar_url || fallbackImage,
           prize: formatCurrency(giveaway.prize_value, giveaway.prize_currency),
@@ -591,7 +614,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
         new Set((donations || []).map((donation) => donation.fundraiser_id).filter(Boolean))
       );
 
-      let fundraisers: any[] = [];
+      let fundraisers: FundraiserRecord[] = [];
       if (fundraiserIds.length > 0) {
         const { data: fundraiserRows } = await supabase
           .from('fundraisers')
@@ -966,6 +989,17 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
                     {post.entries !== undefined && post.entries > 0 && (<div className="info-item"><Users size={14} /><span>{post.entries.toLocaleString()} entries</span></div>)}
                     {post.tickets !== undefined && post.tickets > 0 && (<div className="info-item"><Ticket size={14} /><span>{post.soldTickets}/{post.tickets}</span></div>)}
                   </div>
+                  {profileData && viewerId === profileData.id && (
+                    <button
+                      onClick={() => {
+                        setEditingPostId(post.id)
+                        setEditingPostType(post.type)
+                      }}
+                      style={{ marginTop: '10px', width: '100%', padding: '8px', borderRadius: '8px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)', color: '#00ff88', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.5px' }}
+                    >
+                      Edit Post
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -988,6 +1022,17 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
                     <div className="info-item"><Calendar size={14} /><span>{post.endDate}</span></div>
                   </div>
                   <div className="winner-info"><span className="winner-name">Winner: {post.winner}</span><Check size={16} color="#00ff88" /></div>
+                  {profileData && viewerId === profileData.id && (
+                    <button
+                      onClick={() => {
+                        setEditingPostId(post.id)
+                        setEditingPostType(post.type)
+                      }}
+                      style={{ marginTop: '10px', width: '100%', padding: '8px', borderRadius: '8px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)', color: '#00ff88', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.5px' }}
+                    >
+                      Edit Post
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -1013,6 +1058,17 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
                     {post.entries !== undefined && post.entries > 0 && (<div className="info-item"><Users size={14} /><span>{post.entries.toLocaleString()} entries</span></div>)}
                     {post.tickets !== undefined && post.tickets > 0 && (<div className="info-item"><Ticket size={14} /><span>{post.tickets.toLocaleString()} tickets</span></div>)}
                   </div>
+                  {profileData && viewerId === profileData.id && (
+                    <button
+                      onClick={() => {
+                        setEditingPostId(post.id)
+                        setEditingPostType(post.type)
+                      }}
+                      style={{ marginTop: '10px', width: '100%', padding: '8px', borderRadius: '8px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)', color: '#00ff88', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.5px' }}
+                    >
+                      Edit Post
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -1117,6 +1173,15 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
       userId={profileData?.id || ''}
       onSaved={() => window.location.reload()}
     />
+    {editingPostId && (
+      <EditPostModal
+        isOpen={!!editingPostId}
+        onClose={() => setEditingPostId(null)}
+        postId={editingPostId}
+        postType={editingPostType}
+        onSaved={() => window.location.reload()}
+      />
+    )}
     </>
   );
 };

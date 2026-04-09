@@ -11,7 +11,7 @@ export interface ValidationError {
 /**
  * API response wrapper
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T
   error?: string
   errors?: ValidationError[]
@@ -38,7 +38,7 @@ export async function validateJsonBody(request: NextRequest) {
  * Validate required fields
  */
 export function validateRequiredFields(
-  data: any,
+  data: Record<string, unknown>,
   requiredFields: string[]
 ): ValidationError[] {
   const errors: ValidationError[] = []
@@ -59,7 +59,7 @@ export function validateRequiredFields(
  * Validate field types
  */
 export function validateFieldTypes(
-  data: any,
+  data: Record<string, unknown>,
   fieldTypes: Record<string, 'string' | 'number' | 'boolean' | 'object'>
 ): ValidationError[] {
   const errors: ValidationError[] = []

@@ -100,7 +100,7 @@ export default function AdminMarketplace() {
       const { data, error } = await query
       if (error) throw error
 
-      const mapped = (data || []).map((item: any) => ({
+      const mapped = (data || []).map((item: { profiles?: { email?: string; full_name?: string } | null }) => ({
         ...item,
         seller_email: item.profiles?.email || 'Unknown',
         seller_name: item.profiles?.full_name || 'Unknown',

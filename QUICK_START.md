@@ -113,6 +113,9 @@ npm run test:e2e        # Run Playwright E2E tests (if configured)
 npm run build           # Build for production
 ```
 
+Build now includes a local env check (`npm run env:check`) automatically via `prebuild`.
+It tells you which variables are missing locally vs required in production.
+
 ---
 
 ## 📚 Documentation Guide
@@ -193,6 +196,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
 RESEND_API_KEY=your_key
 CRON_SECRET=your_secret
 ```
+
+Also add `CRON_SECRET` to GitHub repository secrets because cron schedules are triggered by GitHub Actions workflows.
 
 ### 3. Watch CI/CD
 - Each push to `main` → automatic production deploy

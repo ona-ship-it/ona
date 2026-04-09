@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { useSupabaseClient } from '@/lib/supabaseClient';
+import { isAdmin as hasAdminAccess } from '@/lib/admin';
 
 interface AuthState {
-  user: any;
+  user: User | null;
   isAdmin: boolean;
 }
 
 export function useAuth(): AuthState {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const supabase = useSupabaseClient();
 
@@ -23,14 +25,8 @@ export function useAuth(): AuthState {
         setUser(user || null);
 
         if (user) {
-          const { data: adminData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', user.id)
-            .eq('role', 'admin')
-            .single();
           if (!mounted) return;
-          setIsAdmin(!!adminData);
+          setIsAdmin(hasAdminAccess(user.email));
         } else {
           setIsAdmin(false);
         }

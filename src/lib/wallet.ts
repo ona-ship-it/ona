@@ -3,6 +3,28 @@
 
 import { ethers } from 'ethers'
 
+type EthereumRequestArgs = {
+  method: string
+  params?: unknown[]
+}
+
+type EthereumProvider = {
+  request: (args: EthereumRequestArgs) => Promise<unknown>
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message
+  return 'Unknown error'
+}
+
+function getErrorCode(error: unknown): number | undefined {
+  if (typeof error === 'object' && error !== null && 'code' in error) {
+    const value = (error as { code?: unknown }).code
+    if (typeof value === 'number') return value
+  }
+  return undefined
+}
+
 // USDC Contract Address (Polygon Mainnet)
 const USDC_ADDRESS = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'
 
@@ -24,7 +46,7 @@ export async function connectWallet(): Promise<string | null> {
   }
 
   try {
-    const provider = new ethers.BrowserProvider(window.ethereum)
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
     const accounts = await provider.send('eth_requestAccounts', [])
     return accounts[0]
   } catch (error) {
@@ -37,7 +59,7 @@ export async function getCurrentWallet(): Promise<string | null> {
   if (typeof window === 'undefined' || !window.ethereum) return null
 
   try {
-    const provider = new ethers.BrowserProvider(window.ethereum)
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
     const accounts = await provider.send('eth_accounts', [])
     return accounts.length > 0 ? accounts[0] : null
   } catch (error) {
@@ -50,9 +72,9 @@ export async function isOnPolygon(): Promise<boolean> {
   if (typeof window === 'undefined' || !window.ethereum) return false
 
   try {
-    const provider = new ethers.BrowserProvider(window.ethereum)
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
     const network = await provider.getNetwork()
-    return network.chainId === BigInt(137) // Polygon Mainnet chain ID
+    return network.chainId === 137 // Polygon Mainnet chain ID
   } catch (error) {
     console.error('Error checking network:', error)
     return false
@@ -63,13 +85,13 @@ export async function getUSDCBalance(walletAddress: string): Promise<number> {
   if (typeof window === 'undefined' || !window.ethereum) return 0
 
   try {
-    const provider = new ethers.BrowserProvider(window.ethereum)
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
     const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, provider)
-    
+
     const balance = await usdcContract.balanceOf(walletAddress)
     const decimals = await usdcContract.decimals()
-    
-    return Number(ethers.formatUnits(balance, decimals))
+
+    return Number(ethers.utils.formatUnits(balance, decimals))
   } catch (error) {
     console.error('Error getting USDC balance:', error)
     return 0
@@ -85,12 +107,12 @@ export async function payWithUSDC(
   }
 
   try {
-    const provider = new ethers.BrowserProvider(window.ethereum)
-    const signer = await provider.getSigner()
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const signer = provider.getSigner()
     const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer)
 
     // USDC has 6 decimals
-    const amountInWei = ethers.parseUnits(amount.toString(), 6)
+    const amountInWei = ethers.utils.parseUnits(amount.toString(), 6)
 
     // Send USDC
     const tx = await usdcContract.transfer(recipient, amountInWei)
@@ -102,11 +124,11 @@ export async function payWithUSDC(
       success: true,
       txHash: tx.hash,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Payment error:', error)
     return {
       success: false,
-      error: error.message || 'Payment failed',
+      error: getErrorMessage(error) || 'Payment failed',
     }
   }
 }
@@ -120,9 +142,9 @@ export async function switchToPolygon(): Promise<boolean> {
       params: [{ chainId: '0x89' }], // Polygon Mainnet
     })
     return true
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Chain not added, try to add it
-    if (error.code === 4902) {
+    if (getErrorCode(error) === 4902) {
       try {
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
@@ -153,6 +175,6 @@ export async function switchToPolygon(): Promise<boolean> {
 // Type declaration for window.ethereum
 declare global {
   interface Window {
-    ethereum?: any
+    ethereum?: EthereumProvider
   }
 }

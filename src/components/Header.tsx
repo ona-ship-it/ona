@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import type { Session } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
 import ProfilePicture from '@/components/ProfilePicture'
 
@@ -25,7 +26,7 @@ export default function Header() {
     checkAuth()
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+    } = supabase.auth.onAuthStateChange((_event, session: Session | null) => {
       setIsLoggedIn(!!session)
     })
 

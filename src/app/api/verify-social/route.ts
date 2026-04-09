@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     }
 
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
-    const { count: recentAttempts, error: rateLimitError } = await (supabase as any)
+    const { count: recentAttempts, error: rateLimitError } = await supabase
       .from('social_verifications')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { data: existingPending, error: pendingError } = await (supabase as any)
+    const { data: existingPending, error: pendingError } = await supabase
       .from('social_verifications')
       .select('id')
       .eq('user_id', user.id)
@@ -121,7 +121,7 @@ export async function POST(request: Request) {
     }
 
     const now = new Date().toISOString()
-    const { data: inserted, error: insertError } = await (supabase as any)
+    const { data: inserted, error: insertError } = await supabase
       .from('social_verifications')
       .insert({
         user_id: user.id,
@@ -146,11 +146,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       verified: false,
       pending: true,
-      verificationId: (inserted as any)?.id,
+      verificationId: inserted?.id,
       message: 'Verification submitted! An admin will review and approve it shortly. Please keep the code in your bio until approval.'
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Verification error:', error)
     return NextResponse.json(
       { verified: false, error: 'Verification failed' },

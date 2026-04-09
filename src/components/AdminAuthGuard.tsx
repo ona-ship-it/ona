@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { isAdmin as hasAdminAccess } from '@/lib/admin';
 
 interface AdminAuthGuardProps {
   children: React.ReactNode;
@@ -30,9 +31,8 @@ export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
 
         setIsAuthenticated(true);
 
-        // Check if user has admin metadata
         const { data: { user } } = await supabase.auth.getUser();
-        const isAdminUser = user?.user_metadata?.is_admin === true;
+        const isAdminUser = hasAdminAccess(user?.email);
 
         if (!isAdminUser) {
           // Redirect to home if not admin
@@ -79,7 +79,7 @@ export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600">You don't have permission to access this page.</p>
+          <p className="text-gray-600">You don&apos;t have permission to access this page.</p>
         </div>
       </div>
     );

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -63,7 +64,7 @@ export default function RaffleDetailClient() {
   const [activities, setActivities] = useState<Activity[]>([])
   const [quantity, setQuantity] = useState(1)
   const [isFollowing, setIsFollowing] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [buying, setBuying] = useState(false)
   const [buyError, setBuyError] = useState('')
   const [buySuccess, setBuySuccess] = useState('')
@@ -83,7 +84,7 @@ export default function RaffleDetailClient() {
     incrementView(currentUser?.id ?? null)
   }
 
-  async function fetchRaffle(currentUser: any) {
+  async function fetchRaffle(currentUser: User | null) {
     try {
       const { data: raffleData, error } = await supabase
         .from('raffles')
@@ -193,8 +194,9 @@ export default function RaffleDetailClient() {
 
       setBuySuccess(`Success! You got ticket${quantity > 1 ? 's' : ''} #${result.ticketNumbers.join(', ')}`)
       await fetchRaffle(user)
-    } catch (err: any) {
-      setBuyError(err.message || 'Unexpected error')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unexpected error'
+      setBuyError(message)
     } finally {
       setBuying(false)
     }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase';
 import { IconPlus, IconEdit, IconEye, IconTrash, IconTrendingUp, IconUsers } from '@tabler/icons-react';
 import FundraiseHeader from '@/components/FundraiseHeader';
@@ -24,7 +25,7 @@ export default function MyFundraisersClient() {
   const router = useRouter();
   const [fundraisers, setFundraisers] = useState<Fundraiser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     checkUser();

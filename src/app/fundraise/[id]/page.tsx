@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -43,7 +44,7 @@ export default function FundraiseDetailPage() {
   const [loading, setLoading] = useState(true)
   const [fundraiser, setFundraiser] = useState<Fundraiser | null>(null)
   const [creator, setCreator] = useState<Creator | null>(null)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [donating, setDonating] = useState(false)
   const [donationAmount, setDonationAmount] = useState('5')
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
@@ -142,9 +143,10 @@ export default function FundraiseDetailPage() {
 
       setSuccessMsg(`Thank you for donating $${amount} USDC!`)
       await fetchFundraiser()
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Donation error:', err)
-      alert(`Donation failed: ${err.message || 'Unknown error'}`)
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      alert(`Donation failed: ${message}`)
     } finally {
       setDonating(false)
     }

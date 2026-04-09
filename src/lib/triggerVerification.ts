@@ -18,7 +18,7 @@ export async function triggerVerificationEmail(email: string, userId: string) {
       body: JSON.stringify({ email, userId }),
     });
 
-    const data = await response.json();
+    const data: { error?: string } = await response.json();
 
     if (!response.ok) {
       console.error('Verification email error:', data.error);
@@ -26,8 +26,9 @@ export async function triggerVerificationEmail(email: string, userId: string) {
     }
 
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Verification request failed';
     console.error('Trigger verification failed:', err);
-    return { success: false, error: err.message };
+    return { success: false, error: errorMessage };
   }
 }

@@ -31,10 +31,10 @@ interface TicketPurchaseResponse {
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const raffleId = params.id
+    const { id: raffleId } = await context.params
 
     // Parse request body
     let body: CryptoPaymentRequest
@@ -169,7 +169,7 @@ export async function POST(
     }
 
     // Create activity log
-    await supabase.from('activity_logs').insert({
+    const { error: activityError } = await supabase.from('activity_logs').insert({
       user_id: user?.id || body.walletAddress,
       action: 'ticket_purchased',
       resource_type: 'raffle',
@@ -179,7 +179,11 @@ export async function POST(
         paymentMethod: body.paymentMethod,
         transactionHash: body.transactionHash,
       },
-    }).catch((err) => console.error('Failed to log activity:', err))
+    })
+
+    if (activityError) {
+      console.error('Failed to log activity:', activityError)
+    }
 
     // Return success response
     const response: TicketPurchaseResponse = {
@@ -196,10 +200,11 @@ export async function POST(
     }
 
     return NextResponse.json(response, { status: 200 })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorDetails = error instanceof Error ? error.message : 'Unknown error'
     console.error('Crypto payment error:', error)
     return NextResponse.json(
-      { error: 'Internal server error', details: error?.message },
+      { error: 'Internal server error', details: errorDetails },
       { status: 500 }
     )
   }
@@ -238,9 +243,9 @@ function validateCryptoPaymentInput(body: CryptoPaymentRequest): string[] {
  */
 async function verifyTransaction(
   transactionHash: string,
-  paymentMethod: PaymentMethod,
-  walletAddress: string,
-  expectedAmount: number
+  _paymentMethod: PaymentMethod,
+  _walletAddress: string,
+  _expectedAmount: number
 ): Promise<boolean> {
   try {
     // Mock verification - in production, implement proper blockchain verification

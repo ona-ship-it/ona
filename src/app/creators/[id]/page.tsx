@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -24,7 +25,7 @@ type Creator = {
   total_reviews: number
   successful_completion_rate: number
   average_delivery_days: number
-  badges: any
+  badges: unknown
   website: string | null
   twitter: string | null
   instagram: string | null
@@ -51,7 +52,7 @@ export default function CreatorProfilePage() {
   const [loading, setLoading] = useState(true)
   const [creator, setCreator] = useState<Creator | null>(null)
   const [raffles, setRaffles] = useState<Raffle[]>([])
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [isFollowing, setIsFollowing] = useState(false)
   const [followLoading, setFollowLoading] = useState(false)
 

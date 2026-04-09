@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     await sendWelcomeEmail(verification.email, profile?.username || 'Creator')
 
     return NextResponse.redirect(new URL('/verify-email?status=success', baseUrl))
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Verify email error:', error)
     return NextResponse.redirect(new URL('/verify-email?error=server_error', baseUrl))
   }

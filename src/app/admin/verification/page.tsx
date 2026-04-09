@@ -30,6 +30,50 @@ type VerificationItem = {
   country?: string
 }
 
+type WinnerGiveawayRow = {
+  id: string
+  winner_id: string | null
+  winner_verified: boolean | null
+  created_at: string
+  title?: string | null
+  entry_price?: number | null
+  winner?: { email?: string | null; full_name?: string | null } | null
+}
+
+type CreatorProfileRow = {
+  id: string
+  email?: string | null
+  full_name?: string | null
+  verified?: boolean | null
+  created_at: string
+}
+
+type FundraiserRow = {
+  id: string
+  creator_id: string
+  compliance_status?: string | null
+  created_at: string
+  title?: string | null
+  goal_amount?: number | null
+  raised_amount?: number | null
+  compliance_notes?: string | null
+  profiles?: { email?: string | null; full_name?: string | null } | null
+}
+
+type KycSubmissionRow = {
+  id: string
+  user_id: string
+  status: string
+  created_at: string
+  reviewed_at?: string | null
+  admin_notes?: string | null
+  document_type?: string | null
+  country?: string | null
+  document_urls?: string[] | null
+  full_name?: string | null
+  profiles?: { email?: string | null; full_name?: string | null } | null
+}
+
 export default function AdminVerification() {
   const router = useRouter()
   const supabase = createClient()
@@ -112,7 +156,7 @@ export default function AdminVerification() {
 
   async function fetchItems() {
     try {
-      let data: any[] = []
+      let data: VerificationItem[] = []
 
       if (activeTab === 'winners') {
         let query = supabase
@@ -128,7 +172,7 @@ export default function AdminVerification() {
         const { data: giveaways, error } = await query
         if (error) throw error
 
-        data = (giveaways || []).map((g: any) => ({
+        data = (giveaways || []).map((g: WinnerGiveawayRow) => ({
           id: g.id,
           user_id: g.winner_id,
           email: g.winner?.email || 'Unknown',
@@ -149,7 +193,7 @@ export default function AdminVerification() {
 
         if (error) throw error
 
-        data = (profiles || []).map((p: any) => ({
+        data = (profiles || []).map((p: CreatorProfileRow) => ({
           id: p.id,
           user_id: p.id,
           email: p.email || 'Unknown',
@@ -173,7 +217,7 @@ export default function AdminVerification() {
         const { data: fundraisers, error } = await query
         if (error) throw error
 
-        data = (fundraisers || []).map((f: any) => ({
+        data = (fundraisers || []).map((f: FundraiserRow) => ({
           id: f.id,
           user_id: f.creator_id,
           email: f.profiles?.email || 'Unknown',
@@ -199,7 +243,7 @@ export default function AdminVerification() {
         const { data: submissions, error } = await query
         if (error) throw error
 
-        data = (submissions || []).map((s: any) => ({
+        data = (submissions || []).map((s: KycSubmissionRow) => ({
           id: s.id,
           user_id: s.user_id,
           email: s.profiles?.email || 'Unknown',

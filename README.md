@@ -87,6 +87,17 @@ SENTRY_AUTH_TOKEN=your_sentry_auth_token
 NEXT_PUBLIC_ANALYTICS_ID=your_analytics_id
 ```
 
+### Local Env Check During Build
+
+`npm run build` now runs a prebuild env checker that prints:
+
+- vars missing in your local shell/.env files
+- which vars are truly required in production
+- which vars are only recommended
+
+Local builds will warn (not fail) when required production vars are only missing locally.
+CI/runtime builds fail if required production vars are missing.
+
 ### Supabase Setup
 
 1. Create a Supabase project at https://supabase.com
@@ -147,8 +158,10 @@ public/                    # Static assets
 - `POST /api/raffles/:id/buy` - Purchase raffle ticket
 
 ### System
-- `GET /api/cron/draw-winners` - Automated daily winner drawing
-  - Secured with `CRON_SECRET` header
+- `POST /api/cron/draw-winners` - Automated winner drawing
+  - Secured with `Authorization: Bearer <CRON_SECRET>`
+- `POST /api/cron/send-emails` - Process pending winner notifications
+  - Secured with `Authorization: Bearer <CRON_SECRET>`
 
 See [API Documentation](./docs/API.md) for detailed endpoint specifications.
 
@@ -195,25 +208,16 @@ Vercel is the recommended platform for Next.js apps.
 
 ### Scheduled Jobs (Cron)
 
-The platform includes daily winner drawing at midnight UTC:
+Cron scheduling is handled by GitHub Actions workflows:
 
-```json
-// vercel.json
-{
-  "crons": [
-    {
-      "path": "/api/cron/draw-winners",
-      "schedule": "0 0 * * *"
-    }
-  ]
-}
-```
+- `.github/workflows/draw-winners-cron.yml` runs hourly
+- `.github/workflows/send-emails-cron.yml` runs every 15 minutes
 
-For local testing with Vercel CLI:
-```bash
-vercel env pull          # Pull environment variables
-vercel dev               # Run with cron emulation
-```
+Both call production endpoints with:
+
+`Authorization: Bearer ${{ secrets.CRON_SECRET }}`
+
+Vercel hosts the API routes; GitHub Actions is the scheduler of record.
 
 ## 💳 Crypto Payment Integration
 

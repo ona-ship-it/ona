@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 // Force dynamic rendering so Next.js never tries to statically prerender
 // this page (which would require Supabase at build time).
 export const dynamic = 'force-dynamic'
@@ -10,7 +12,7 @@ export default function NotFound() {
         <p style={{ color: '#94a3b8', fontSize: '1.125rem', margin: '0 0 32px' }}>
           This page doesn&apos;t exist.
         </p>
-        <a
+        <Link
           href="/"
           style={{
             display: 'inline-block',
@@ -25,7 +27,7 @@ export default function NotFound() {
           }}
         >
           GO HOME
-        </a>
+        </Link>
       </div>
     </main>
   )

@@ -103,7 +103,7 @@ function VerifyEmailContent() {
           {content.showResend && (
             <div style={{ marginTop: 24 }}>
               <p style={{ color: '#64748b', fontSize: 12, marginBottom: 12 }}>
-                Didn't receive it?
+                Didn&apos;t receive it?
               </p>
               <Link
                 href="/resend-verification"

@@ -57,12 +57,26 @@ interface PaymentResult {
   error?: string
 }
 
+type EthereumRequestArgs = {
+  method: string
+  params?: unknown[]
+}
+
+type EthereumProvider = {
+  request: (args: EthereumRequestArgs) => Promise<unknown>
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message
+  return 'Unknown error'
+}
+
 export class USDCPaymentProcessor {
-  private ethereum: any
+  private ethereum: EthereumProvider | null = null
 
   constructor() {
     if (typeof window !== 'undefined') {
-      this.ethereum = (window as any).ethereum
+      this.ethereum = window.ethereum
     }
   }
 
@@ -70,6 +84,8 @@ export class USDCPaymentProcessor {
    * Get USDC balance for an address
    */
   async getBalance(userAddress: string, network: Network): Promise<number> {
+    if (!this.ethereum) return 0
+
     try {
       const contractAddress = USDC_ADDRESSES[network]
       
@@ -86,7 +102,7 @@ export class USDCPaymentProcessor {
 
       const balance = await data
       // USDC has 6 decimals
-      return parseInt(balance, 16) / 1e6
+      return parseInt(String(balance), 16) / 1e6
     } catch (error) {
       console.error('Error getting USDC balance:', error)
       return 0
@@ -100,6 +116,8 @@ export class USDCPaymentProcessor {
     userAddress: string,
     network: Network
   ): Promise<number> {
+    if (!this.ethereum) return 0
+
     try {
       const contractAddress = USDC_ADDRESSES[network]
 
@@ -114,7 +132,7 @@ export class USDCPaymentProcessor {
         ],
       })
 
-      return parseInt(data, 16) / 1e6
+      return parseInt(String(data), 16) / 1e6
     } catch (error) {
       console.error('Error checking allowance:', error)
       return 0
@@ -129,11 +147,15 @@ export class USDCPaymentProcessor {
     amount: number,
     network: Network
   ): Promise<PaymentResult> {
+    if (!this.ethereum) {
+      return { success: false, error: 'No Ethereum wallet provider available' }
+    }
+
     try {
       const contractAddress = USDC_ADDRESSES[network]
       const amountInSmallestUnit = Math.floor(amount * 1e6)
 
-      const txHash = await this.ethereum.request({
+      const txHash = String(await this.ethereum.request({
         method: 'eth_sendTransaction',
         params: [
           {
@@ -142,7 +164,7 @@ export class USDCPaymentProcessor {
             data: this.encodeApprove(PLATFORM_WALLET, amountInSmallestUnit),
           },
         ],
-      })
+      }))
 
       // Wait for transaction confirmation
       await this.waitForTransaction(txHash)
@@ -151,11 +173,11 @@ export class USDCPaymentProcessor {
         success: true,
         transactionHash: txHash,
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Approval error:', error)
       return {
         success: false,
-        error: error.message || 'Failed to approve USDC',
+        error: getErrorMessage(error) || 'Failed to approve USDC',
       }
     }
   }
@@ -168,11 +190,15 @@ export class USDCPaymentProcessor {
     amount: number,
     network: Network
   ): Promise<PaymentResult> {
+    if (!this.ethereum) {
+      return { success: false, error: 'No Ethereum wallet provider available' }
+    }
+
     try {
       const contractAddress = USDC_ADDRESSES[network]
       const amountInSmallestUnit = Math.floor(amount * 1e6)
 
-      const txHash = await this.ethereum.request({
+      const txHash = String(await this.ethereum.request({
         method: 'eth_sendTransaction',
         params: [
           {
@@ -181,7 +207,7 @@ export class USDCPaymentProcessor {
             data: this.encodeTransfer(PLATFORM_WALLET, amountInSmallestUnit),
           },
         ],
-      })
+      }))
 
       // Wait for transaction confirmation
       await this.waitForTransaction(txHash)
@@ -190,11 +216,11 @@ export class USDCPaymentProcessor {
         success: true,
         transactionHash: txHash,
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Transfer error:', error)
       return {
         success: false,
-        error: error.message || 'Failed to transfer USDC',
+        error: getErrorMessage(error) || 'Failed to transfer USDC',
       }
     }
   }
@@ -245,11 +271,11 @@ export class USDCPaymentProcessor {
       }
 
       return transferResult
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Payment processing error:', error)
       return {
         success: false,
-        error: error.message || 'Payment processing failed',
+        error: getErrorMessage(error) || 'Payment processing failed',
       }
     }
   }
@@ -258,6 +284,10 @@ export class USDCPaymentProcessor {
    * Wait for transaction to be mined
    */
   private async waitForTransaction(txHash: string): Promise<void> {
+    if (!this.ethereum) {
+      throw new Error('No Ethereum wallet provider available')
+    }
+
     let attempts = 0
     const maxAttempts = 60 // 60 attempts = ~1 minute
 
@@ -275,7 +305,7 @@ export class USDCPaymentProcessor {
         if (receipt && receipt.status === '0x0') {
           throw new Error('Transaction failed')
         }
-      } catch (error) {
+      } catch {
         // Transaction not yet mined, continue waiting
       }
 
@@ -316,3 +346,9 @@ export class USDCPaymentProcessor {
 }
 
 export const paymentProcessor = new USDCPaymentProcessor()
+
+declare global {
+  interface Window {
+    ethereum?: EthereumProvider
+  }
+}

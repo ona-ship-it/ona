@@ -5,8 +5,8 @@ interface SearchQuery {
   search?: string
   filter?: 'active' | 'completed' | 'cancelled' | 'all'
   sort?: 'newest' | 'popular' | 'ending-soon'
-  limit?: number
-  offset?: number
+  limit: number
+  offset: number
   isFree?: boolean
   minPrice?: number
   maxPrice?: number
@@ -37,6 +37,29 @@ interface SearchResponse {
   limit: number
   offset: number
   hasMore: boolean
+}
+
+type CreatorJoin = {
+  full_name?: string | null
+  avatar_url?: string | null
+}
+
+type GiveawayRow = {
+  id: string
+  title: string
+  description?: string | null
+  emoji?: string | null
+  image_url?: string | null
+  prize_value: number
+  prize_currency: string
+  is_free: boolean
+  ticket_price?: number | null
+  tickets_sold?: number | null
+  total_tickets: number
+  status: string
+  end_date: string
+  creator_id?: string | null
+  creator?: CreatorJoin | null
 }
 
 /**
@@ -147,7 +170,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Format response
-    const giveaways = (data || []).map((giveaway: any) => ({
+    const giveaways = (data || []).map((giveaway: GiveawayRow) => ({
       id: giveaway.id,
       title: giveaway.title,
       description: giveaway.description,
@@ -175,7 +198,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(response, { status: 200 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Giveaway search error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

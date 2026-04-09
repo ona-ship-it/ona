@@ -5,8 +5,8 @@ interface SearchQuery {
   search?: string
   filter?: 'active' | 'completed' | 'cancelled' | 'all'
   sort?: 'newest' | 'popular' | 'ending-soon'
-  limit?: number
-  offset?: number
+  limit: number
+  offset: number
   categoryId?: string
   minPrice?: number
   maxPrice?: number
@@ -37,6 +37,27 @@ interface SearchResponse {
   hasMore: boolean
 }
 
+type CreatorJoin = {
+  full_name?: string | null
+  avatar_url?: string | null
+}
+
+type RaffleRow = {
+  id: string
+  title: string
+  description?: string | null
+  image_urls?: string[] | null
+  prize_value: number
+  prize_currency: string
+  base_ticket_price: number
+  total_tickets: number
+  tickets_sold?: number | null
+  status: string
+  end_date: string
+  creator_id?: string | null
+  creator?: CreatorJoin | null
+}
+
 /**
  * GET /api/search/raffles
  * Search and filter raffles with full-text search capability
@@ -60,6 +81,9 @@ export async function GET(request: NextRequest) {
     // Validate query
     if (query.limit < 1) query.limit = 20
     if (query.offset < 0) query.offset = 0
+
+    const limit = query.limit ?? 20
+    const offset = query.offset ?? 0
 
     // Get Supabase client
     const supabase = await createClient()
@@ -130,7 +154,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Apply pagination
-    raffleQuery = raffleQuery.range(query.offset, query.offset + query.limit - 1)
+    raffleQuery = raffleQuery.range(offset, offset + limit - 1)
 
     // Execute query
     const { data, error, count } = await raffleQuery
@@ -144,7 +168,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Format response
-    const raffles = (data || []).map((raffle: any) => ({
+    const raffles = (data || []).map((raffle: RaffleRow) => ({
       id: raffle.id,
       title: raffle.title,
       description: raffle.description,
@@ -164,13 +188,13 @@ export async function GET(request: NextRequest) {
     const response: SearchResponse = {
       raffles,
       total: count || 0,
-      limit: query.limit,
-      offset: query.offset,
-      hasMore: (query.offset + query.limit) < (count || 0),
+      limit,
+      offset,
+      hasMore: (offset + limit) < (count || 0),
     }
 
     return NextResponse.json(response, { status: 200 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Search endpoint error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

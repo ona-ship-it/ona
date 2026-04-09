@@ -1,7 +1,7 @@
-// Admin Configuration - Multiple Admins
+// Admin Configuration - Email allowlist only
 export const ADMIN_EMAILS = [
-  'theoonagui@icloud.com',
   'samiraeddaoudi88@gmail.com',
+  'richtheocrypto@gmail.com',
 ]
 
 function normalizeEmail(email: string): string {

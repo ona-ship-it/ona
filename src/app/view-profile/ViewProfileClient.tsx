@@ -63,7 +63,7 @@ export default function ViewProfileClient() {
           setAvatarUrl(found);
           setLoading(false);
         }
-      } catch (e: any) {
+      } catch (_e: unknown) {
         if (!cancelled) {
           setError("Network error loading profile");
           setLoading(false);

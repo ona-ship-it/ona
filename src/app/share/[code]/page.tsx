@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useParams, useRouter } from 'next/navigation'
+import type { User } from '@supabase/supabase-js'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -29,7 +30,7 @@ export default function ShareLandingPage() {
   
   const [loading, setLoading] = useState(true)
   const [giveaway, setGiveaway] = useState<Giveaway | null>(null)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [claiming, setClaiming] = useState(false)
   const [claimed, setClaimed] = useState(false)
 
@@ -172,9 +173,10 @@ export default function ShareLandingPage() {
       setTimeout(() => {
         router.push(`/giveaways/${giveaway.id}`)
       }, 2000)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error claiming ticket:', error)
-      alert('Failed to claim ticket: ' + error.message)
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      alert('Failed to claim ticket: ' + message)
     } finally {
       setClaiming(false)
     }
@@ -208,7 +210,7 @@ export default function ShareLandingPage() {
             <div className="text-8xl mb-6">🎉</div>
             <h2 className="text-4xl font-black text-white mb-4">Free Ticket Claimed!</h2>
             <p className="text-green-400 text-xl mb-6">
-              You've successfully claimed your free ticket!
+              You&apos;ve successfully claimed your free ticket!
             </p>
             <p className="text-slate-400">Redirecting you to the giveaway...</p>
           </div>
@@ -217,7 +219,7 @@ export default function ShareLandingPage() {
             {/* Hero Banner */}
             <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-3xl p-8 mb-8 text-center">
               <div className="text-6xl mb-4">🎁</div>
-              <h2 className="text-3xl font-black text-white mb-2">You've Been Invited!</h2>
+              <h2 className="text-3xl font-black text-white mb-2">You&apos;ve Been Invited!</h2>
               <p className="text-blue-100 text-lg">
                 Claim your FREE ticket to enter this giveaway
               </p>

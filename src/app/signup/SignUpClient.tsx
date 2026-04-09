@@ -28,8 +28,11 @@ export default function SignUpClient() {
       });
 
       if (error) throw error;
-    } catch (oauthError: any) {
-      setError(oauthError.message || `Failed to sign in with ${provider}`);
+    } catch (oauthError: unknown) {
+      const errorMessage = oauthError instanceof Error
+        ? oauthError.message
+        : `Failed to sign in with ${provider}`;
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -96,8 +99,13 @@ export default function SignUpClient() {
           { onConflict: 'id' }
         );
 
-        // Send verification email via Resend
-        await triggerVerificationEmail(data.user.email!, data.user.id);
+        // Send verification email via Resend and handle failures explicitly.
+        const verificationResult = await triggerVerificationEmail(data.user.email!, data.user.id);
+
+        if (!verificationResult.success) {
+          router.push(`/resend-verification?email=${encodeURIComponent(data.user.email!)}&source=signup`);
+          return;
+        }
 
         // Redirect to verification pending page
         router.push('/verify-email?status=pending');

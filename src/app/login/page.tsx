@@ -86,8 +86,9 @@ export default function LoginPage() {
           setMessage('Account created! Please check your email to verify.')
         }
       }
-    } catch (err: any) {
-      setError(err.message || 'An error occurred')
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -106,8 +107,9 @@ export default function LoginPage() {
       })
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message || 'An error occurred')
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred'
+      setError(errorMessage)
       setLoading(false)
     }
   }

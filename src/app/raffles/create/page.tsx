@@ -193,8 +193,9 @@ export default function CreateRafflePage() {
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = 'image/*'
-    input.onchange = async (e: any) => {
-      const file = e.target.files?.[0]
+    input.onchange = async (e: Event) => {
+      const target = e.target as HTMLInputElement | null
+      const file = target?.files?.[0]
       if (!file) return
       try {
         setUploading(true)
@@ -253,8 +254,9 @@ export default function CreateRafflePage() {
 
       if (insertError) throw insertError
       router.push(`/raffles/${data.id}`)
-    } catch (err: any) {
-      setError(err.message || 'Failed to create raffle')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to create raffle'
+      setError(message)
     } finally {
       setLoading(false)
     }

@@ -1,13 +1,22 @@
 'use client'
-import { useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 
-export default function ResendVerificationPage() {
+function ResendVerificationContent() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const queryEmail = searchParams.get('email')
+    if (queryEmail) {
+      setEmail(queryEmail)
+    }
+  }, [searchParams])
 
   const handleResend = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,9 +49,15 @@ export default function ResendVerificationPage() {
         return
       }
 
+      if (!response.ok) {
+        setStatus('error')
+        setMessage(data.error || 'Failed to send verification email. Please try again.')
+        return
+      }
+
       setStatus('success')
       setMessage('Verification email sent! Check your inbox and spam folder.')
-    } catch (err: any) {
+    } catch {
       setStatus('error')
       setMessage('Something went wrong. Please try again.')
     } finally {
@@ -61,7 +76,7 @@ export default function ResendVerificationPage() {
         <div style={{ background: '#1e293b', border: '1px solid rgba(0,255,136,0.15)', borderRadius: 20, padding: 32 }}>
           <h2 style={{ fontSize: 22, fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>Resend Verification</h2>
           <p style={{ color: '#94a3b8', fontSize: 14, margin: '0 0 24px' }}>
-            Enter your email address and we'll send a new verification link.
+            Enter your email address and we&apos;ll send a new verification link.
           </p>
 
           {status === 'success' && (
@@ -100,5 +115,13 @@ export default function ResendVerificationPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ResendVerificationPage() {
+  return (
+    <Suspense fallback={<div style={{ background: '#0a1929', minHeight: '100vh' }} />}>
+      <ResendVerificationContent />
+    </Suspense>
   )
 }

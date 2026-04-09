@@ -10,6 +10,15 @@ interface User {
   balance?: number;
 }
 
+type WalletRow = {
+  user_id: string;
+  balance: number | null;
+};
+
+type AddFundsRpcResult = {
+  error: { message?: string } | null;
+};
+
 export function AdminWalletManager() {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState('');
@@ -26,25 +35,27 @@ export function AdminWalletManager() {
       const { data: usersData, error: usersError } = await (supabase
         .from('users')
         .select('id, email')
-        .limit(50) as any);
+        .limit(50));
 
       if (usersError) throw usersError;
 
       // Fetch wallet balances for these users
-      const userIds = (usersData as any)?.map((u: any) => u.id) || [];
+      const typedUsers: User[] = (usersData as User[] | null) || [];
+      const userIds = typedUsers.map((u) => u.id);
       const { data: walletsData } = await supabase
         .from('wallets')
         .select('user_id, balance')
         .in('user_id', userIds);
 
       // Combine user data with wallet balances
-      const usersWithBalances = (usersData as any)?.map((user: any) => ({
+      const typedWallets: WalletRow[] = (walletsData as WalletRow[] | null) || [];
+      const usersWithBalances = typedUsers.map((user) => ({
         ...user,
-        balance: (walletsData as any)?.find((w: any) => w.user_id === user.id)?.balance || 0
-      })) || [];
+        balance: typedWallets.find((w) => w.user_id === user.id)?.balance || 0
+      }));
 
       setUsers(usersWithBalances);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching users:', error);
       setMessage({ type: 'error', text: 'Failed to load users' });
     } finally {
@@ -63,10 +74,10 @@ export function AdminWalletManager() {
     setMessage(null);
 
     try {
-      const response = await ((supabase as any).rpc('add_funds_to_wallet', {
+      const response = await (supabase.rpc('add_funds_to_wallet', {
         user_uuid: selectedUser,
         amount: parseFloat(amount)
-      }));
+      }) as AddFundsRpcResult);
       const { error } = response;
 
       if (error) throw error;
@@ -76,9 +87,10 @@ export function AdminWalletManager() {
       
       // Refresh user list to show updated balance
       await fetchUsers();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding funds:', error);
-      setMessage({ type: 'error', text: error.message || 'Failed to add funds' });
+      const message = error instanceof Error ? error.message : 'Failed to add funds';
+      setMessage({ type: 'error', text: message });
     } finally {
       setLoading(false);
     }

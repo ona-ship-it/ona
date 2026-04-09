@@ -6,10 +6,40 @@ export interface BitcoinWalletProvider {
   sendBitcoin: (address: string, amount: number) => Promise<string>;
 }
 
+type UnisatProvider = {
+  requestAccounts: () => Promise<string[]>;
+  getPublicKey: () => Promise<string>;
+  sendBitcoin: (address: string, amountSats: number) => Promise<string>;
+};
+
+type XverseAddress = {
+  purpose: string;
+  address: string;
+  publicKey: string;
+};
+
+type XverseGetAddressResponse = {
+  addresses: XverseAddress[];
+};
+
+type XverseGetAddressOptions = {
+  payload: {
+    purposes: string[];
+    message: string;
+    network: { type: 'Mainnet' | 'Testnet' };
+  };
+  onFinish: (response: XverseGetAddressResponse) => void;
+  onCancel: () => void;
+};
+
+type SatsConnectModule = {
+  getAddress: (options: XverseGetAddressOptions) => void;
+};
+
 export async function connectUnisatWallet(): Promise<BitcoinWalletProvider | null> {
   if (typeof window === 'undefined') return null;
   
-  const { unisat } = window as any;
+  const { unisat } = window as Window & { unisat?: UnisatProvider };
   
   if (!unisat) {
     alert('Please install Unisat Wallet for Bitcoin donations!');
@@ -39,8 +69,7 @@ export async function connectXverseWallet(): Promise<BitcoinWalletProvider | nul
   if (typeof window === 'undefined') return null;
 
   try {
-    // @ts-ignore
-    const { getAddress, signTransaction } = await import('sats-connect');
+    const { getAddress } = (await import('sats-connect')) as unknown as SatsConnectModule;
     
     return new Promise((resolve, reject) => {
       getAddress({
@@ -51,8 +80,8 @@ export async function connectXverseWallet(): Promise<BitcoinWalletProvider | nul
             type: 'Mainnet'
           }
         },
-        onFinish: (response: any) => {
-          const paymentAddress = response.addresses.find((addr: any) => addr.purpose === 'payment');
+        onFinish: (response: XverseGetAddressResponse) => {
+          const paymentAddress = response.addresses.find((addr) => addr.purpose === 'payment');
           
           if (paymentAddress) {
             resolve({

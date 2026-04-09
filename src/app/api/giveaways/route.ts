@@ -3,7 +3,9 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import type { Database } from '@/types/supabase';
 
-export async function GET(request: NextRequest) {
+type CookieOptions = Record<string, unknown>;
+
+export async function GET(_request: NextRequest) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -21,11 +23,11 @@ export async function GET(request: NextRequest) {
           get(name: string) {
             return cookieStore.get(name)?.value;
           },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options });
+          set(name: string, value: string, options: CookieOptions) {
+            cookieStore.set({ name, value, ...(options as Record<string, unknown>) });
           },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: '', ...options });
+          remove(name: string, options: CookieOptions) {
+            cookieStore.set({ name, value: '', ...(options as Record<string, unknown>) });
           },
         },
       }

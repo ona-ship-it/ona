@@ -305,7 +305,7 @@ export default function AdminDashboard() {
             <div className="flex-1">
               <h4 className="text-lg font-bold text-white mb-2">Admin Access</h4>
               <p className="text-slate-400 text-sm">
-                You're logged in as <span className="text-blue-400 font-semibold">{userEmail}</span>. 
+                You&apos;re logged in as <span className="text-blue-400 font-semibold">{userEmail}</span>. 
                 You have full access to all platform management features including marketplace, fundraise, compliance verification, and direct post control.
               </p>
             </div>

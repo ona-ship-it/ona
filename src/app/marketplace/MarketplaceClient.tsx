@@ -15,7 +15,7 @@ export default function MarketplaceClient() {
         </div>
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-semibold mb-2">Trending</h3>
-          <p className="text-gray-600">See what's popular right now.</p>
+          <p className="text-gray-600">See what&apos;s popular right now.</p>
         </div>
       </div>
     </div>

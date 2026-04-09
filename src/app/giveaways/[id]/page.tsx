@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
@@ -49,7 +50,7 @@ export default function GiveawayDetailPage() {
   
   const [loading, setLoading] = useState(true)
   const [giveaway, setGiveaway] = useState<Giveaway | null>(null)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [entering, setEntering] = useState(false)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
   const [freeTicketsClaimed, setFreeTicketsClaimed] = useState(0)
@@ -190,9 +191,10 @@ export default function GiveawayDetailPage() {
       
       // Refresh giveaway data
       await fetchGiveaway()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Entry error:', error)
-      alert(`Failed to enter: ${error.message || 'Unknown error'}`)
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      alert(`Failed to enter: ${message}`)
     } finally {
       setEntering(false)
     }

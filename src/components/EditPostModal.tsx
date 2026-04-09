@@ -28,6 +28,8 @@ const EditPostModal = ({ isOpen, onClose, postId, postType, onSaved }: EditPostM
   const [uploading, setUploading] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [hasEntries, setHasEntries] = useState(false);
+  const [deleteBlockedReason, setDeleteBlockedReason] = useState('');
 
   const [post, setPost] = useState<PostData>({
     title: '',
@@ -76,6 +78,33 @@ const EditPostModal = ({ isOpen, onClose, postId, postType, onSaved }: EditPostM
       setPrizeValue(data.prize_value || 0);
       setTotalTickets(data.total_tickets || 0);
       setTicketsSold(data.tickets_sold || 0);
+
+      const soldCount = Number(data.tickets_sold || 0);
+      let participationCount = 0;
+
+      if (postType === 'giveaway') {
+        const { count } = await supabase
+          .from('tickets')
+          .select('*', { count: 'exact', head: true })
+          .eq('giveaway_id', postId);
+        participationCount = count || 0;
+      } else {
+        const { count } = await supabase
+          .from('raffle_tickets')
+          .select('*', { count: 'exact', head: true })
+          .eq('raffle_id', postId);
+        participationCount = count || 0;
+      }
+
+      const hasAnyEntries = soldCount > 0 || participationCount > 0;
+      setHasEntries(hasAnyEntries);
+      setDeleteBlockedReason(
+        hasAnyEntries
+          ? postType === 'giveaway'
+            ? 'This giveaway already has entries, so it cannot be deleted or have prize data changed.'
+            : 'This raffle already has ticket purchases, so it cannot be deleted or have prize data changed.'
+          : ''
+      );
       setLoading(false);
     };
 
@@ -91,7 +120,7 @@ const EditPostModal = ({ isOpen, onClose, postId, postType, onSaved }: EditPostM
       const supabase = createClient();
       const table = postType === 'raffle' ? 'raffles' : 'giveaways';
 
-      const updateData: Record<string, any> = {
+      const updateData: Record<string, unknown> = {
         title: post.title || null,
         description: post.description || null,
         updated_at: new Date().toISOString(),
@@ -115,14 +144,20 @@ const EditPostModal = ({ isOpen, onClose, postId, postType, onSaved }: EditPostM
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
       onSaved?.();
-    } catch (err: any) {
-      setError(err.message || 'Failed to save');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save';
+      setError(message);
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async () => {
+    if (hasEntries) {
+      setError(deleteBlockedReason || 'This post already has participants and cannot be deleted.');
+      return;
+    }
+
     if (!confirmDelete) {
       setConfirmDelete(true);
       return;
@@ -142,8 +177,9 @@ const EditPostModal = ({ isOpen, onClose, postId, postType, onSaved }: EditPostM
 
       onClose();
       onSaved?.();
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to delete';
+      setError(message);
     } finally {
       setDeleting(false);
     }
@@ -155,8 +191,9 @@ const EditPostModal = ({ isOpen, onClose, postId, postType, onSaved }: EditPostM
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = async (e: any) => {
-      const file = e.target.files?.[0];
+    input.onchange = async (e: Event) => {
+      const target = e.target as HTMLInputElement | null;
+      const file = target?.files?.[0];
       if (!file) return;
 
       try {
@@ -334,7 +371,7 @@ const EditPostModal = ({ isOpen, onClose, postId, postType, onSaved }: EditPostM
               {/* Non-editable fields */}
               <div style={{ background: 'rgba(15, 20, 25, 0.6)', borderRadius: '12px', border: '1px solid rgba(0,255,136,0.08)', padding: '16px' }}>
                 <div style={{ fontSize: '11px', fontWeight: 700, color: '#4a5568', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
-                  Cannot be modified
+                  Locked fields
                 </div>
                 {[
                   ['Prize Value', `$${prizeValue.toLocaleString()}`],
@@ -347,25 +384,39 @@ const EditPostModal = ({ isOpen, onClose, postId, postType, onSaved }: EditPostM
                     <span style={{ fontSize: '13px', fontWeight: 600, color: '#e2e8f0' }}>{v}</span>
                   </div>
                 ))}
+                <div style={{ marginTop: '10px', fontSize: '12px', color: '#94a3b8' }}>
+                  You can edit photos and description after publishing. Prize-related values stay locked.
+                </div>
+                {hasEntries && (
+                  <div style={{ marginTop: '8px', fontSize: '12px', color: '#fca5a5' }}>
+                    {deleteBlockedReason}
+                  </div>
+                )}
               </div>
 
               {/* Delete Post */}
               <div style={{ borderTop: '1px solid rgba(255,59,48,0.2)', paddingTop: '20px' }}>
                 <button
                   onClick={handleDelete}
-                  disabled={deleting}
+                  disabled={deleting || hasEntries}
                   style={{
                     width: '100%', padding: '14px', borderRadius: '12px',
-                    background: confirmDelete ? '#ef4444' : 'rgba(255, 59, 48, 0.08)',
-                    border: confirmDelete ? 'none' : '1px solid rgba(255, 59, 48, 0.2)',
-                    color: confirmDelete ? '#fff' : '#ff3b30',
+                    background: hasEntries ? 'rgba(148, 163, 184, 0.12)' : (confirmDelete ? '#ef4444' : 'rgba(255, 59, 48, 0.08)'),
+                    border: hasEntries ? '1px solid rgba(148, 163, 184, 0.25)' : (confirmDelete ? 'none' : '1px solid rgba(255, 59, 48, 0.2)'),
+                    color: hasEntries ? '#94a3b8' : (confirmDelete ? '#fff' : '#ff3b30'),
                     fontFamily: "'Rajdhani', sans-serif", fontWeight: 700,
                     fontSize: '14px', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                   }}
                 >
                   <Trash2 size={16} />
-                  {deleting ? 'Deleting...' : confirmDelete ? 'Confirm Delete (cannot be undone)' : 'Delete Post'}
+                  {hasEntries
+                    ? 'Delete Blocked (participants already joined)'
+                    : deleting
+                      ? 'Deleting...'
+                      : confirmDelete
+                        ? 'Confirm Delete (cannot be undone)'
+                        : 'Delete Post'}
                 </button>
                 {confirmDelete && !deleting && (
                   <button

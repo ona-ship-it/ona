@@ -121,7 +121,7 @@ export default function AdminFundraise() {
       const creatorIds = Array.from(
         new Set(
           (data || [])
-            .map((item: any) => item.user_id || item.creator_id)
+            .map((item: { user_id?: string | null; creator_id?: string | null }) => item.user_id || item.creator_id)
             .filter(Boolean)
         )
       )
@@ -138,12 +138,12 @@ export default function AdminFundraise() {
           console.error('Error fetching fundraiser creator profiles:', profilesError)
         } else {
           profileById = new Map(
-            (profilesData || []).map((profile: any) => [profile.id, profile])
+            (profilesData || []).map((profile: { id: string; email?: string; full_name?: string }) => [profile.id, profile])
           )
         }
       }
 
-      const mapped = (data || []).map((item: any) => ({
+      const mapped = (data || []).map((item: { creator_id?: string | null; user_id?: string | null; description?: string | null; story?: string | null; donor_count?: number | null; total_donors?: number | null; end_date?: string | null; ends_at?: string | null }) => ({
         ...item,
         creator_id: item.creator_id || item.user_id,
         creator_email: profileById.get(item.user_id || item.creator_id)?.email || 'Unknown',

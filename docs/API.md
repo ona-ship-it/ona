@@ -17,8 +17,11 @@ All authenticated endpoints require a valid Supabase session. The session is aut
 
 ### API Key (Internal/Cron)
 Protected cron endpoints accept:
+- Header: `Authorization: Bearer YOUR_CRON_SECRET`
+
+Legacy compatibility (still accepted, do not use for new callers):
 - Header: `x-cron-secret`
-- Query Parameter: `?secret=YOUR_CRON_SECRET`
+- Query parameter: `?secret=YOUR_CRON_SECRET`
 
 ## Response Format
 
@@ -293,13 +296,13 @@ POST /raffles/:id/buy
 Automatically draws winners for expired raffles. **Restricted: Requires CRON_SECRET.**
 
 ```
-GET /cron/draw-winners?secret=YOUR_CRON_SECRET
+GET /cron/draw-winners
+POST /cron/draw-winners
 ```
 
-Or with header:
+With header:
 ```
-GET /cron/draw-winners
-Header: x-cron-secret: YOUR_CRON_SECRET
+Authorization: Bearer YOUR_CRON_SECRET
 ```
 
 **Response**

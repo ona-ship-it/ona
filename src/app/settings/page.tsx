@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
+import type { User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import ProfilePicture from '@/components/ProfilePicture'
 
@@ -11,7 +12,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saveNotice, setSaveNotice] = useState<string | null>(null)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [formData, setFormData] = useState({
     full_name: '',
     username: '',
@@ -103,7 +104,7 @@ export default function SettingsPage() {
       if (error && error.message?.includes('schema cache')) {
         // Retry without columns missing from schema cache
         usedFallback = true
-        const retryPayload: any = {
+        const retryPayload: Record<string, string | null> = {
           ...updatePayload,
         }
 
@@ -157,9 +158,10 @@ export default function SettingsPage() {
         setSaveNotice('Some fields were saved with compatibility mode while database schema cache refreshes.')
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error:', error)
-      alert('Failed to update profile: ' + error.message)
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      alert('Failed to update profile: ' + message)
     } finally {
       setSaving(false)
     }

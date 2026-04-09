@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabaseServer'
+import { authorizeCronRequest } from '@/lib/cronAuth'
 
-// Secured by a shared secret — set CRON_SECRET in Vercel env vars
 export async function GET(request: NextRequest) {
-  const secret = request.headers.get('x-cron-secret') ?? request.nextUrl.searchParams.get('secret')
-  if (secret !== process.env.CRON_SECRET) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const authError = authorizeCronRequest(request)
+  if (authError) return authError
 
   const supabase = await createClient()
   const now = new Date().toISOString()
@@ -77,8 +75,13 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ message: 'Draw complete', drawn: drawn.length, raffleIds: drawn })
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown cron error'
     console.error('Draw winners cron error:', err)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
+}
+
+export async function POST(request: NextRequest) {
+  return GET(request)
 }

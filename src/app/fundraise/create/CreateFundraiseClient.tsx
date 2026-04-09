@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase';
 import { IconHeart, IconUpload, IconX } from '@tabler/icons-react';
 import FundraiseHeader from '@/components/FundraiseHeader';
@@ -21,7 +22,7 @@ const CATEGORIES = [
 export default function CreateFundraiseClient() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
@@ -156,9 +157,10 @@ export default function CreateFundraiseClient() {
       if (error) throw error;
 
       router.push(`/fundraise/${data.id}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating fundraiser:', error);
-      alert(error.message || 'Failed to create fundraiser');
+      const message = error instanceof Error ? error.message : 'Failed to create fundraiser';
+      alert(message);
     } finally {
       setLoading(false);
     }
@@ -185,7 +187,7 @@ export default function CreateFundraiseClient() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">Start Your Fundraiser</h1>
-          <p className="text-gray-300">Raise money with crypto. It's fast, secure, and transparent.</p>
+          <p className="text-gray-300">Raise money with crypto. It&apos;s fast, secure, and transparent.</p>
         </div>
 
         {/* Progress Steps */}

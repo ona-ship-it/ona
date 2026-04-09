@@ -11,9 +11,35 @@ env:
   NPM_CACHE: ~/.npm
 
 jobs:
+  env-gate:
+    name: Environment Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate required environment variables
+        run: npm run env:check
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
   lint:
     name: Lint & Format Check
     runs-on: ubuntu-latest
+    needs: [env-gate]
     
     steps:
       - name: Checkout code
@@ -30,15 +56,14 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
-        continue-on-error: true
 
       - name: Check TypeScript
         run: npx tsc --noEmit
-        continue-on-error: true
 
   type-check:
     name: Type Checking
     runs-on: ubuntu-latest
+    needs: [env-gate]
     
     steps:
       - name: Checkout code
@@ -59,6 +84,7 @@ jobs:
   test-unit:
     name: Unit Tests
     runs-on: ubuntu-latest
+    needs: [env-gate]
     
     steps:
       - name: Checkout code
@@ -75,11 +101,11 @@ jobs:
 
       - name: Run unit tests
         run: npm run test:unit
-        continue-on-error: true
 
   test-e2e:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
+    needs: [env-gate]
     
     steps:
       - name: Checkout code
@@ -99,10 +125,11 @@ jobs:
 
       - name: Run E2E tests
         run: npm run test:e2e
-        continue-on-error: true
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v3
@@ -115,6 +142,7 @@ jobs:
   build:
     name: Build Check
     runs-on: ubuntu-latest
+    needs: [env-gate]
     
     steps:
       - name: Checkout code
@@ -134,6 +162,8 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
 
       - name: Check build size
         run: du -sh .next/
@@ -147,8 +177,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run npm audit
-        run: npm audit --audit-level=moderate
-        continue-on-error: true
+        run: npm audit --audit-level=high
 
       - name: Dependency check
         run: npm audit fix --dry-run
@@ -211,14 +240,15 @@ jobs:
     name: Notify Build Status
     runs-on: ubuntu-latest
     if: always()
-    needs: [lint, type-check, build]
+    needs: [env-gate, lint, type-check, build]
     
     steps:
       - name: Build status
         run: |
           if [ "${{ needs.lint.result }}" == "failure" ] || \
              [ "${{ needs.type-check.result }}" == "failure" ] || \
-             [ "${{ needs.build.result }}" == "failure" ]; then
+             [ "${{ needs.build.result }}" == "failure" ] || \
+             [ "${{ needs.env-gate.result }}" == "failure" ]; then
             echo "❌ Build failed"
             exit 1
           else

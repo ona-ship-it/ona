@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabaseServer'
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { quantity, walletAddress } = await request.json()
-    const raffleId = params.id
+    const { id: raffleId } = await context.params
 
     if (!quantity || quantity < 1) {
       return NextResponse.json({ error: 'Invalid quantity' }, { status: 400 })
@@ -100,8 +100,9 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       totalPrice,
       currency: 'USDC',
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Internal server error'
     console.error('Buy tickets error:', err)
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }

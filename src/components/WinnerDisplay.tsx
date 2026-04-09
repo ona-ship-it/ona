@@ -11,9 +11,14 @@ type WinnerDisplayProps = {
   winnerDrawnAt: string
 }
 
+type WinnerProfile = {
+  full_name: string | null
+  avatar_url: string | null
+}
+
 export default function WinnerDisplay({ giveawayId, raffleId, winnerId, winnerDrawnAt }: WinnerDisplayProps) {
   const supabase = createClient()
-  const [winner, setWinner] = useState<any>(null)
+  const [winner, setWinner] = useState<WinnerProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

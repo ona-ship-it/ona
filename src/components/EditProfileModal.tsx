@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
+import { useTheme } from '@/components/ThemeContext';
 import {
   X, Camera, User, Mail, Phone, FileText, Globe,
   Twitter, Instagram, Music2, Youtube, Eye, EyeOff,
@@ -37,9 +39,27 @@ type PrivacySettings = {
   show_email: boolean;
 };
 
+type SocialFieldKey = keyof Pick<
+  ProfileData,
+  'twitter_url' | 'instagram_url' | 'tiktok_url' | 'youtube_url' | 'website_url' | 'facebook_url'
+>;
+
+type PrivacyKey = keyof PrivacySettings;
+
 type ActiveView = 'menu' | 'profile' | 'social' | 'privacy' | 'notifications' | 'security';
 
+type MenuItem = {
+  icon: React.ReactNode;
+  label: string;
+  view: ActiveView | null;
+  chevron?: boolean;
+  right?: React.ReactNode;
+  action?: 'toggle-theme' | 'open-contact' | 'open-verify-email' | 'open-privacy' | 'open-terms';
+};
+
 const EditProfileModal = ({ isOpen, onClose, userId, onSaved }: EditProfileModalProps) => {
+  const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
   const [activeView, setActiveView] = useState<ActiveView>('menu');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -65,6 +85,11 @@ const EditProfileModal = ({ isOpen, onClose, userId, onSaved }: EditProfileModal
     show_name: true,
     show_phone: false,
     show_email: false,
+  });
+  const [notificationPrefs, setNotificationPrefs] = useState({
+    winnerAlerts: true,
+    marketing: false,
+    systemUpdates: true,
   });
 
   useEffect(() => {
@@ -116,6 +141,19 @@ const EditProfileModal = ({ isOpen, onClose, userId, onSaved }: EditProfileModal
     load();
   }, [isOpen, userId]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const raw = localStorage.getItem('onagui-notification-prefs');
+    if (!raw) return;
+
+    try {
+      const parsed = JSON.parse(raw) as Partial<typeof notificationPrefs>;
+      setNotificationPrefs((prev) => ({ ...prev, ...parsed }));
+    } catch {
+      // Ignore invalid local storage payload.
+    }
+  }, [isOpen]);
+
   const handleSave = async () => {
     setSaving(true);
     setError('');
@@ -153,8 +191,9 @@ const EditProfileModal = ({ isOpen, onClose, userId, onSaved }: EditProfileModal
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
       onSaved?.();
-    } catch (err: any) {
-      setError(err.message || 'Failed to save');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save';
+      setError(message);
     } finally {
       setSaving(false);
     }
@@ -184,9 +223,85 @@ const EditProfileModal = ({ isOpen, onClose, userId, onSaved }: EditProfileModal
     setProfile(prev => ({ ...prev, avatar_url: publicUrl }));
   };
 
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    onClose();
+    router.push('/login');
+  };
+
+  const handleNotificationToggle = (key: keyof typeof notificationPrefs) => {
+    setNotificationPrefs((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      localStorage.setItem('onagui-notification-prefs', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const handleSendPasswordReset = async () => {
+    if (!profile.email) {
+      setError('No email found for this account.');
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+
+    try {
+      const supabase = createClient();
+      const redirectTo = `${window.location.origin}/login`;
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(profile.email, { redirectTo });
+
+      if (resetError) throw resetError;
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to send password reset email';
+      setError(message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleMenuItemClick = (item: MenuItem) => {
+    if (item.view) {
+      setActiveView(item.view);
+      return;
+    }
+
+    if (item.action === 'toggle-theme') {
+      toggleTheme();
+      return;
+    }
+
+    if (item.action === 'open-contact') {
+      onClose();
+      router.push('/contact');
+      return;
+    }
+
+    if (item.action === 'open-verify-email') {
+      onClose();
+      router.push('/verify-email');
+      return;
+    }
+
+    if (item.action === 'open-privacy') {
+      onClose();
+      router.push('/privacy');
+      return;
+    }
+
+    if (item.action === 'open-terms') {
+      onClose();
+      router.push('/terms');
+    }
+  };
+
   if (!isOpen) return null;
 
-  const menuItems = [
+  const menuItems: Array<{ section: string; items: MenuItem[] }> = [
     {
       section: 'ACCOUNT',
       items: [
@@ -200,25 +315,25 @@ const EditProfileModal = ({ isOpen, onClose, userId, onSaved }: EditProfileModal
       section: 'SECURITY',
       items: [
         { icon: <Shield size={20} />, label: 'Security', view: 'security' as ActiveView, chevron: true },
-        { icon: <Mail size={20} />, label: 'Email Verification', view: null, right: <span style={{ color: '#00ff88', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600 }}><Check size={14} /> Verified</span> },
+        { icon: <Mail size={20} />, label: 'Email Verification', view: null, action: 'open-verify-email', right: <span style={{ color: '#00ff88', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600 }}><Check size={14} /> Verified</span> },
         { icon: <Smartphone size={20} />, label: '2FA', view: 'security' as ActiveView, chevron: true },
       ]
     },
     {
       section: 'PREFERENCES',
       items: [
-        { icon: <Moon size={20} />, label: 'Dark Mode', view: null, right: <div style={{ width: '44px', height: '24px', borderRadius: '12px', background: '#00ff88', position: 'relative' as const, cursor: 'pointer' }}><div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#fff', position: 'absolute' as const, top: '2px', right: '2px', transition: 'all 0.2s' }} /></div> },
-        { icon: <Globe size={20} />, label: 'Language', view: null, right: <span style={{ color: '#718096', fontSize: '14px' }}>English</span> },
-        { icon: <FileText size={20} />, label: 'Currency', view: null, right: <span style={{ color: '#718096', fontSize: '14px' }}>USD</span> },
+        { icon: <Moon size={20} />, label: 'Dark Mode', view: null, action: 'toggle-theme', right: <div style={{ width: '44px', height: '24px', borderRadius: '12px', background: theme === 'dark' ? '#00ff88' : 'rgba(74, 85, 104, 0.5)', position: 'relative' as const, cursor: 'pointer' }}><div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#fff', position: 'absolute' as const, top: '2px', left: theme === 'dark' ? '22px' : '2px', transition: 'all 0.2s' }} /></div> },
+        { icon: <Globe size={20} />, label: 'Language', view: null, action: 'open-contact', right: <span style={{ color: '#718096', fontSize: '14px' }}>English</span> },
+        { icon: <FileText size={20} />, label: 'Currency', view: null, action: 'open-contact', right: <span style={{ color: '#718096', fontSize: '14px' }}>USD</span> },
       ]
     },
     {
       section: 'SUPPORT',
       items: [
-        { icon: <HelpCircle size={20} />, label: 'Help Center', view: null, chevron: true },
-        { icon: <MessageSquare size={20} />, label: 'Contact Support', view: null, chevron: true },
-        { icon: <FileCheck size={20} />, label: 'Terms of Service', view: null, chevron: true },
-        { icon: <Lock size={20} />, label: 'Privacy Policy', view: null, chevron: true },
+        { icon: <HelpCircle size={20} />, label: 'Help Center', view: null, action: 'open-contact', chevron: true },
+        { icon: <MessageSquare size={20} />, label: 'Contact Support', view: null, action: 'open-contact', chevron: true },
+        { icon: <FileCheck size={20} />, label: 'Terms of Service', view: null, action: 'open-terms', chevron: true },
+        { icon: <Lock size={20} />, label: 'Privacy Policy', view: null, action: 'open-privacy', chevron: true },
       ]
     },
   ];
@@ -253,14 +368,14 @@ const EditProfileModal = ({ isOpen, onClose, userId, onSaved }: EditProfileModal
             {section.items.map((item, idx) => (
               <div
                 key={item.label}
-                onClick={() => item.view ? setActiveView(item.view) : undefined}
+                onClick={() => handleMenuItemClick(item)}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px',
-                  cursor: item.view ? 'pointer' : 'default',
+                  cursor: item.view || item.action ? 'pointer' : 'default',
                   borderBottom: idx < section.items.length - 1 ? '1px solid rgba(0,255,136,0.06)' : 'none',
                   transition: 'background 0.2s',
                 }}
-                onMouseEnter={(e) => { if (item.view) e.currentTarget.style.background = 'rgba(0,255,136,0.05)'; }}
+                onMouseEnter={(e) => { if (item.view || item.action) e.currentTarget.style.background = 'rgba(0,255,136,0.05)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
               >
                 <span style={{ color: '#718096' }}>{item.icon}</span>
@@ -275,7 +390,9 @@ const EditProfileModal = ({ isOpen, onClose, userId, onSaved }: EditProfileModal
 
       {/* Log Out */}
       <div style={{ padding: '20px 12px' }}>
-        <button style={{
+        <button
+          onClick={handleSignOut}
+          style={{
           width: '100%', padding: '14px', borderRadius: '12px',
           background: 'rgba(255, 59, 48, 0.08)', border: '1px solid rgba(255, 59, 48, 0.2)',
           color: '#ff3b30', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700,
@@ -424,7 +541,7 @@ const EditProfileModal = ({ isOpen, onClose, userId, onSaved }: EditProfileModal
     </div>
   );
 
-  const socialFields = [
+  const socialFields: Array<{ key: SocialFieldKey; label: string; icon: React.ReactNode; placeholder: string; color: string }> = [
     { key: 'twitter_url', label: 'Twitter / X', icon: <Twitter size={18} />, placeholder: 'https://x.com/yourhandle', color: '#1DA1F2' },
     { key: 'instagram_url', label: 'Instagram', icon: <Instagram size={18} />, placeholder: 'https://instagram.com/yourhandle', color: '#E4405F' },
     { key: 'tiktok_url', label: 'TikTok', icon: <Music2 size={18} />, placeholder: 'https://tiktok.com/@yourhandle', color: '#00f2ea' },
@@ -448,7 +565,7 @@ const EditProfileModal = ({ isOpen, onClose, userId, onSaved }: EditProfileModal
             </label>
             <input
               style={inputStyle}
-              value={(profile as any)[field.key] || ''}
+              value={profile[field.key] || ''}
               onChange={(e) => setProfile(prev => ({ ...prev, [field.key]: e.target.value }))}
               placeholder={field.placeholder}
               onFocus={(e) => e.target.style.borderColor = field.color}
@@ -472,7 +589,7 @@ const EditProfileModal = ({ isOpen, onClose, userId, onSaved }: EditProfileModal
             { key: 'show_name', label: 'Show Display Name', desc: 'Your name will appear on your profile' },
             { key: 'show_phone', label: 'Show Phone Number', desc: 'Other users can see your phone' },
             { key: 'show_email', label: 'Show Email Address', desc: 'Your email will be visible publicly' },
-          ].map((item, idx) => (
+          ].map((item: { key: PrivacyKey; label: string; desc: string }, idx) => (
             <div key={item.key} style={{
               display: 'flex', alignItems: 'center', padding: '16px',
               borderBottom: idx < 2 ? '1px solid rgba(0,255,136,0.06)' : 'none',
@@ -482,17 +599,17 @@ const EditProfileModal = ({ isOpen, onClose, userId, onSaved }: EditProfileModal
                 <div style={{ fontSize: '12px', color: '#4a5568' }}>{item.desc}</div>
               </div>
               <div
-                onClick={() => setPrivacy(prev => ({ ...prev, [item.key]: !(prev as any)[item.key] }))}
+                onClick={() => setPrivacy(prev => ({ ...prev, [item.key]: !prev[item.key] }))}
                 style={{
                   width: '44px', height: '24px', borderRadius: '12px',
-                  background: (privacy as any)[item.key] ? '#00ff88' : 'rgba(74, 85, 104, 0.5)',
+                  background: privacy[item.key] ? '#00ff88' : 'rgba(74, 85, 104, 0.5)',
                   position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0,
                 }}
               >
                 <div style={{
                   width: '20px', height: '20px', borderRadius: '50%', background: '#fff',
                   position: 'absolute', top: '2px',
-                  left: (privacy as any)[item.key] ? '22px' : '2px',
+                  left: privacy[item.key] ? '22px' : '2px',
                   transition: 'left 0.2s',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
                 }} />
@@ -504,13 +621,85 @@ const EditProfileModal = ({ isOpen, onClose, userId, onSaved }: EditProfileModal
     </div>
   );
 
-  const renderPlaceholder = (title: string) => (
+  const renderNotifications = () => (
     <div>
-      {renderBackHeader(title)}
-      <div style={{ padding: '60px 20px', textAlign: 'center' }}>
-        <Settings size={48} color="#4a5568" style={{ marginBottom: '16px' }} />
-        <div style={{ fontSize: '16px', color: '#718096', fontWeight: 500 }}>Coming Soon</div>
-        <div style={{ fontSize: '13px', color: '#4a5568', marginTop: '8px' }}>This feature is under development.</div>
+      {renderBackHeader('Notifications')}
+      <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {[
+          { key: 'winnerAlerts', label: 'Winner Alerts', desc: 'Get notified when results are published' },
+          { key: 'marketing', label: 'Product Updates', desc: 'Receive feature and campaign updates' },
+          { key: 'systemUpdates', label: 'Security Updates', desc: 'Important account and security notices' },
+        ].map((item) => (
+          <div key={item.key} style={{
+            display: 'flex', alignItems: 'center', padding: '16px',
+            background: 'rgba(20, 26, 32, 0.6)', borderRadius: '12px', border: '1px solid rgba(0,255,136,0.08)',
+          }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '15px', fontWeight: 500, color: '#e2e8f0', marginBottom: '2px' }}>{item.label}</div>
+              <div style={{ fontSize: '12px', color: '#4a5568' }}>{item.desc}</div>
+            </div>
+            <div
+              onClick={() => handleNotificationToggle(item.key as keyof typeof notificationPrefs)}
+              style={{
+                width: '44px', height: '24px', borderRadius: '12px',
+                background: notificationPrefs[item.key as keyof typeof notificationPrefs] ? '#00ff88' : 'rgba(74, 85, 104, 0.5)',
+                position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0,
+              }}
+            >
+              <div style={{
+                width: '20px', height: '20px', borderRadius: '50%', background: '#fff',
+                position: 'absolute', top: '2px',
+                left: notificationPrefs[item.key as keyof typeof notificationPrefs] ? '22px' : '2px',
+                transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+              }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderSecurity = () => (
+    <div>
+      {renderBackHeader('Security')}
+      <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <button
+          onClick={handleSendPasswordReset}
+          disabled={saving}
+          style={{
+            width: '100%', padding: '14px', borderRadius: '12px',
+            background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.25)',
+            color: '#00ff88', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700,
+            fontSize: '14px', letterSpacing: '0.6px', cursor: saving ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {saving ? 'Sending Reset Link...' : 'Send Password Reset Email'}
+        </button>
+        <button
+          onClick={() => {
+            onClose();
+            router.push('/verify-email');
+          }}
+          style={{
+            width: '100%', padding: '14px', borderRadius: '12px',
+            background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)',
+            color: '#60a5fa', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700,
+            fontSize: '14px', letterSpacing: '0.6px', cursor: 'pointer',
+          }}
+        >
+          Open Email Verification
+        </button>
+        <button
+          onClick={handleSignOut}
+          style={{
+            width: '100%', padding: '14px', borderRadius: '12px',
+            background: 'rgba(255, 59, 48, 0.08)', border: '1px solid rgba(255, 59, 48, 0.2)',
+            color: '#ff3b30', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700,
+            fontSize: '14px', letterSpacing: '0.6px', cursor: 'pointer',
+          }}
+        >
+          Log Out of This Device
+        </button>
       </div>
     </div>
   );
@@ -581,8 +770,8 @@ const EditProfileModal = ({ isOpen, onClose, userId, onSaved }: EditProfileModal
               {activeView === 'profile' && renderProfileEdit()}
               {activeView === 'social' && renderSocialLinks()}
               {activeView === 'privacy' && renderPrivacy()}
-              {activeView === 'notifications' && renderPlaceholder('Notifications')}
-              {activeView === 'security' && renderPlaceholder('Security')}
+              {activeView === 'notifications' && renderNotifications()}
+              {activeView === 'security' && renderSecurity()}
             </>
           )}
         </div>

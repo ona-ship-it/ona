@@ -63,7 +63,7 @@ const verifyEvmTransaction = async (payload: DonationPayload): Promise<Verificat
         if (normalizeAddress(parsed.args.to) === platformWallet) {
           received = received.add(parsed.args.value)
         }
-      } catch (error) {
+      } catch {
         continue
       }
     }
@@ -152,7 +152,7 @@ export async function POST(request: Request) {
     }
 
     const status = verification.verified ? 'confirmed' : 'pending'
-    const supabase = await createAdminSupabaseClient() as any
+    const supabase = await createAdminSupabaseClient()
 
     const { data: existingDonation, error: lookupError } = await supabase
       .from('donations')
@@ -209,7 +209,7 @@ export async function POST(request: Request) {
       status,
       reason: verification.reason,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Donation verification error:', error)
     return NextResponse.json({ error: 'Failed to verify donation' }, { status: 500 })
   }

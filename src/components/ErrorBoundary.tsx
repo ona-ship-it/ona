@@ -1,6 +1,15 @@
 'use client'
 
 import React, { ReactNode, useEffect } from 'react'
+import Link from 'next/link'
+
+type SentryLike = {
+  captureException: (error: Error, context: {
+    tags: Record<string, string>
+    extra: { errorInfo: string | null }
+    level: string
+  }) => void
+}
 
 interface Props {
   children: ReactNode
@@ -146,12 +155,12 @@ function ErrorFallback({ error, resetError, errorId }: ErrorFallbackProps) {
             >
               Try Again
             </button>
-            <a
+            <Link
               href="/"
               className="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold rounded-lg text-center transition-colors"
             >
               Go Home
-            </a>
+            </Link>
           </div>
 
           {/* Support Link */}
@@ -180,9 +189,9 @@ function logErrorToSentry(
 ) {
   try {
     // Check if Sentry is configured
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      const Sentry = (window as any).Sentry
-      Sentry.captureException(error, {
+    const sentry = typeof window !== 'undefined' ? (window as Window & { Sentry?: SentryLike }).Sentry : undefined
+    if (sentry) {
+      sentry.captureException(error, {
         tags: {
           errorBoundary: 'true',
           errorId,
@@ -193,8 +202,8 @@ function logErrorToSentry(
         level: 'error',
       })
     }
-  } catch (sentry) {
-    console.error('Failed to log to Sentry:', sentry)
+  } catch (sentryError: unknown) {
+    console.error('Failed to log to Sentry:', sentryError)
   }
 
   // Also send to custom error logging endpoint

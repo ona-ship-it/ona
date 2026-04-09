@@ -100,9 +100,10 @@ export default function KYCForm({ fundraiserId, fundraiserTitle, escrowBalance, 
 
       alert('KYC submitted successfully! We will review your documents within 2-3 business days.');
       onComplete();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error submitting KYC:', error);
-      alert('Failed to submit KYC: ' + error.message);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      alert('Failed to submit KYC: ' + message);
     } finally {
       setLoading(false);
     }

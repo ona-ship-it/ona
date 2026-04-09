@@ -166,14 +166,12 @@ export default function MyRafflesPage() {
                     <Link href={`/raffles/${raffle.id}`} style={{ fontSize: 12, color: '#00ff88', textDecoration: 'none', fontWeight: 600, padding: '5px 12px', border: '1px solid rgba(0,255,136,0.3)', borderRadius: 7 }}>
                       View
                     </Link>
-                    {raffle.status === 'active' && (
-                      <button
-                        onClick={() => setEditId(raffle.id)}
-                        style={{ fontSize: 12, color: '#94a3b8', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 7, padding: '5px 12px', cursor: 'pointer', fontWeight: 600 }}
-                      >
-                        Edit
-                      </button>
-                    )}
+                    <button
+                      onClick={() => setEditId(raffle.id)}
+                      style={{ fontSize: 12, color: '#94a3b8', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 7, padding: '5px 12px', cursor: 'pointer', fontWeight: 600 }}
+                    >
+                      Edit
+                    </button>
                   </div>
                 </div>
               </div>

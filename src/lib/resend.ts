@@ -65,9 +65,10 @@ export async function sendVerificationEmail(to: string, verificationUrl: string)
       return { success: false, error: error.message };
     }
     return { success: true, id: data?.id };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Failed to send email';
     console.error('Email send failed:', err);
-    return { success: false, error: err.message || 'Failed to send email' };
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -116,8 +117,9 @@ export async function sendWelcomeEmail(to: string, username: string) {
       return { success: false, error: error.message };
     }
     return { success: true, id: data?.id };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Failed to send email';
     console.error('Welcome email failed:', err);
-    return { success: false, error: err.message || 'Failed to send email' };
+    return { success: false, error: errorMessage };
   }
 }
