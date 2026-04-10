@@ -1,20 +1,11 @@
-"use client"; 
-  
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"; 
+"use client";
+
 import { useEffect, useState } from "react";
 import { User } from '@supabase/supabase-js';
-import { handleAuthError } from '@/utils/authUtils';
-import type { Database } from '@/types/supabase';
+import { createClient } from '@/lib/supabase';
   
-export default function GoogleSignIn() { 
-  const supabase = createClientComponentClient<Database>({
-    cookieOptions: {
-      path: '/',
-      domain: process.env.NODE_ENV === 'production' ? '.onagui.com' : undefined,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    }
-  });
+export default function GoogleSignIn() {
+  const supabase = createClient();
   const [visible, setVisible] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -65,47 +56,29 @@ export default function GoogleSignIn() {
     };
     
     checkAuth();
-    
-    // Hide after 5 seconds if visible
-    if (visible) {
-      const timer = setTimeout(() => {
-        setVisible(false);
-      }, 5000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [visible, supabase.auth]);
+  }, [visible, supabase]);
   
-  const handleSignIn = async () => { 
+  const handleSignIn = async () => {
     try {
       setLoading(true);
-      
-      // Get the redirectTo parameter from URL if it exists
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirectPath = urlParams.get('redirectTo') || '/';
-      const callbackUrl = `${window.location.origin}/api/auth/callback?redirectTo=${encodeURIComponent(redirectPath)}`;
-      
-      const { error } = await supabase.auth.signInWithOAuth({ 
-        provider: "google", 
-        options: { 
+      const callbackUrl = `${window.location.origin}/api/auth/callback?next=${encodeURIComponent('/')}`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
           redirectTo: callbackUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
-          }
-        }, 
-      }); 
-      
-      if (error) { 
-        throw error;
-      } 
+          },
+        },
+      });
+      if (error) throw error;
     } catch (err) {
-      console.error("Google sign-in error:", err);
+      console.error('Google sign-in error:', err);
       setError(err instanceof Error ? err.message : 'Sign-in failed');
-    } finally {
       setLoading(false);
     }
-  };
+  ;
 
   // Don't render if user is already authenticated or component should be hidden
   if (isAuthenticated || !visible) {

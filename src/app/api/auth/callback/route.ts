@@ -6,7 +6,8 @@ import type { NextRequest } from 'next/server'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/profile'
+  // Accept both ?next= (canonical) and ?redirectTo= (legacy)
+  const nextParam = searchParams.get('next') ?? searchParams.get('redirectTo') ?? null
 
   if (code) {
     const cookieStore = await cookies()
@@ -37,6 +38,15 @@ export async function GET(request: NextRequest) {
         const derivedUsername = (user.email || '').split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '')
         const fullName = user.user_metadata?.full_name || user.user_metadata?.name || derivedUsername
 
+        // Detect new vs returning user BEFORE upserting (so we can check existence)
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', user.id)
+          .maybeSingle()
+
+        const isNewUser = !existingProfile
+
         await supabase.from('app_users').upsert({
           id: user.id,
           email: user.email,
@@ -60,9 +70,14 @@ export async function GET(request: NextRequest) {
           full_name: fullName,
           avatar_url: user.user_metadata?.avatar_url || null,
         }, { onConflict: 'id' })
+
+        // New users → landing page ('/'), returning users → /profile (or requested path)
+        const redirectPath = isNewUser ? '/' : (nextParam ?? '/profile')
+        return NextResponse.redirect(`${origin}${redirectPath}`)
       }
 
-      return NextResponse.redirect(`${origin}${next}`)
+      // Fallback if user object is missing
+      return NextResponse.redirect(`${origin}${nextParam ?? '/profile'}`)
     }
   }
 
