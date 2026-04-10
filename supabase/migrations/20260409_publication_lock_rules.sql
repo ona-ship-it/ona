@@ -136,3 +136,4 @@ drop trigger if exists trg_enforce_raffle_lock_after_sales_d on public.raffles;
 create trigger trg_enforce_raffle_lock_after_sales_d
 before delete on public.raffles
 for each row execute function public.enforce_raffle_lock_after_sales();
+ 
