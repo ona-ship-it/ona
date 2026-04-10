@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Hero from '@/components/Hero'
 import LikeSaveButtons from '@/components/LikeSaveButtons'
+import ProfileFollowButton from '@/components/ProfileFollowButton'
 import { TrendingUp, CheckCircle, Star, ShoppingCart } from 'lucide-react'
 
 type Giveaway = {
@@ -893,7 +894,7 @@ export default function HomePage() {
             {topProfiles.map((profile) => (
               <Link
                 key={profile.id}
-                href="/profiles"
+                href={`/profiles/${profile.id}`}
                 className="bc-game-card group"
                 onClick={() => trackEvent('card_click', 'profile', profile.id)}
               >
@@ -943,10 +944,24 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  <button className="bc-action-button">
-                    <span>VIEW PROFILE</span>
-                    <div className="bc-btn-glow"></div>
-                  </button>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr auto',
+                      gap: 10,
+                      marginTop: 12,
+                    }}
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                    }}
+                  >
+                    <button className="bc-action-button" style={{ marginTop: 0 }}>
+                      <span>VIEW PROFILE</span>
+                      <div className="bc-btn-glow"></div>
+                    </button>
+                    <ProfileFollowButton targetProfileId={profile.id} size="sm" />
+                  </div>
                 </div>
               </Link>
             ))}

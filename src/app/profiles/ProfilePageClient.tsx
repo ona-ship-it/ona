@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import EditProfileModal from '@/components/EditProfileModal';
 import EditPostModal from '@/components/EditPostModal';
+import ProfileFollowButton from '@/components/ProfileFollowButton';
 import { createClient } from '@/lib/supabase';
 import CreatorCommissionDisplay, {
   CommissionHistoryItem,
@@ -909,8 +910,10 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
         .progress-bar-inner { height: 100%; background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%); border-radius: 10px; box-shadow: 0 0 15px rgba(59,130,246,0.55); transition: width 0.5s ease; }
         .contribution-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 136, 0, 0.1); border: 1px solid rgba(255, 136, 0, 0.3); padding: 8px 16px; border-radius: 20px; font-family: 'Rajdhani', sans-serif; font-weight: 700; color: #ff8800; }
         .community-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-        .community-card { background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(59,130,246,0.16); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 14px; transition: all 0.3s ease; text-decoration: none; }
+        .community-card { background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(59,130,246,0.16); border-radius: 16px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; transition: all 0.3s ease; }
         .community-card:hover { border-color: rgba(59,130,246,0.42); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(59,130,246,0.16); }
+        .community-card-main { display: flex; align-items: center; gap: 14px; text-decoration: none; color: inherit; min-width: 0; flex: 1; }
+        .community-follow-slot { display: flex; align-items: center; justify-content: flex-end; }
         .community-search { display: flex; gap: 12px; margin-bottom: 20px; }
         .community-search input { flex: 1; background: rgba(15, 20, 25, 0.9); border: 1px solid rgba(59,130,246,0.24); border-radius: 10px; padding: 10px 14px; color: #ffffff; font-size: 14px; }
         .community-search input::placeholder { color: #718096; }
@@ -1246,10 +1249,15 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
                 <div className="empty-community">{followersLoading ? 'Loading followers...' : 'No followers found.'}</div>
               ) : (
                 filteredFollowers.map((person) => (
-                  <a key={person.id} href={`/profiles/${person.id}`} className="community-card">
-                    <img src={person.avatar_url || profile.avatar} alt={person.full_name || person.username || 'Profile'} className="community-avatar" />
-                    <div><div className="community-name">{person.full_name || person.username || 'Onagui Member'}</div><div className="community-handle">@{person.username || 'onagui'}</div></div>
-                  </a>
+                  <div key={person.id} className="community-card">
+                    <a href={`/profiles/${person.id}`} className="community-card-main">
+                      <img src={person.avatar_url || profile.avatar} alt={person.full_name || person.username || 'Profile'} className="community-avatar" />
+                      <div><div className="community-name">{person.full_name || person.username || 'Onagui Member'}</div><div className="community-handle">@{person.username || 'onagui'}</div></div>
+                    </a>
+                    <div className="community-follow-slot">
+                      <ProfileFollowButton targetProfileId={person.id} viewerIdOverride={viewerId} size="sm" />
+                    </div>
+                  </div>
                 ))
               )}
             </div>
@@ -1271,10 +1279,15 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
                 <div className="empty-community">{followingLoading ? 'Loading following...' : 'No following found.'}</div>
               ) : (
                 filteredFollowing.map((person) => (
-                  <a key={person.id} href={`/profiles/${person.id}`} className="community-card">
-                    <img src={person.avatar_url || profile.avatar} alt={person.full_name || person.username || 'Profile'} className="community-avatar" />
-                    <div><div className="community-name">{person.full_name || person.username || 'Onagui Member'}</div><div className="community-handle">@{person.username || 'onagui'}</div></div>
-                  </a>
+                  <div key={person.id} className="community-card">
+                    <a href={`/profiles/${person.id}`} className="community-card-main">
+                      <img src={person.avatar_url || profile.avatar} alt={person.full_name || person.username || 'Profile'} className="community-avatar" />
+                      <div><div className="community-name">{person.full_name || person.username || 'Onagui Member'}</div><div className="community-handle">@{person.username || 'onagui'}</div></div>
+                    </a>
+                    <div className="community-follow-slot">
+                      <ProfileFollowButton targetProfileId={person.id} viewerIdOverride={viewerId} size="sm" />
+                    </div>
+                  </div>
                 ))
               )}
             </div>

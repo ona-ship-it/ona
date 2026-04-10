@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 import Image from 'next/image'
 import { TrendingUp, CheckCircle } from 'lucide-react'
+import ProfileFollowButton from '@/components/ProfileFollowButton'
 
 type ProfileData = {
   id: string
@@ -229,10 +230,24 @@ export default function ProfilesPage() {
                     </div>
                   </div>
 
-                  <button className="bc-action-button">
-                    <span>VIEW PROFILE</span>
-                    <div className="bc-btn-glow"></div>
-                  </button>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr auto',
+                      gap: 10,
+                      marginTop: 12,
+                    }}
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                    }}
+                  >
+                    <button className="bc-action-button" style={{ marginTop: 0 }}>
+                      <span>VIEW PROFILE</span>
+                      <div className="bc-btn-glow"></div>
+                    </button>
+                    <ProfileFollowButton targetProfileId={profile.id} size="sm" />
+                  </div>
                 </div>
               </Link>
             ))}
