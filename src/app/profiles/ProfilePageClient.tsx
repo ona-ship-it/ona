@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import EditProfileModal from '@/components/EditProfileModal';
 import EditPostModal from '@/components/EditPostModal';
@@ -13,7 +13,7 @@ import {
   Users, Trophy, Heart, TrendingUp, Clock, Share2, 
   ExternalLink, Check, Flame, Star, Gift, Ticket,
   Instagram, Twitter, Music2, Calendar, Eye, MessageCircle,
-  Award, DollarSign, Target, Zap
+  Award, DollarSign, Target, Zap, Search, Plus, Pencil
 } from 'lucide-react';
 
 type ProfileRecord = {
@@ -143,11 +143,13 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
   const [followingList, setFollowingList] = useState<CommunityProfile[]>([]);
   const [followerSearch, setFollowerSearch] = useState('');
   const [followingSearch, setFollowingSearch] = useState('');
+  const [contentSearch, setContentSearch] = useState('');
   const [followerPage, setFollowerPage] = useState(1);
   const [followingPage, setFollowingPage] = useState(1);
   const pageSize = 12;
   const [followersLoading, setFollowersLoading] = useState(false);
   const [followingLoading, setFollowingLoading] = useState(false);
+  const [contentLoading, setContentLoading] = useState(false);
   const [creatorStats, setCreatorStats] = useState({
     totalGiveaways: 0,
     totalWinners: 0,
@@ -159,6 +161,7 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
   const [popularPosts, setPopularPosts] = useState<PopularPost[]>([]);
   const [recentWinners, setRecentWinners] = useState<WinnerEntry[]>([]);
   const [supportedFundraises, setSupportedFundraises] = useState<FundraiseEntry[]>([]);
+  const contentSearchInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -411,7 +414,9 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
     };
 
     const loadProfileContent = async () => {
-      const now = new Date();
+      setContentLoading(true);
+      try {
+        const now = new Date();
 
       const [{ data: giveaways }, { data: raffles }] = await Promise.all([
         supabase
@@ -652,11 +657,16 @@ const ONAGUIProfilePage = ({ profileIdOverride = null }: ProfilePageClientProps)
         };
       });
 
-      setLivePosts(nextLivePosts);
-      setHistoryPosts(nextHistoryPosts);
-      setPopularPosts(nextPopularPosts);
-      setRecentWinners(nextWinners);
-      setSupportedFundraises(nextFundraises);
+        setLivePosts(nextLivePosts);
+        setHistoryPosts(nextHistoryPosts);
+        setPopularPosts(nextPopularPosts);
+        setRecentWinners(nextWinners);
+        setSupportedFundraises(nextFundraises);
+      } catch (error) {
+        console.error('Failed to load profile content', error);
+      } finally {
+        setContentLoading(false);
+      }
     };
 
     loadProfileContent();
@@ -751,6 +761,14 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
   const formatFollowerCount = (count: number) =>
     count >= 1000 ? `${(count / 1000).toFixed(1)}K` : `${count}`
 
+  const isOwnProfile = !!profileData && !!viewerId && viewerId === profileData.id
+  const normalizedContentSearch = contentSearch.trim().toLowerCase()
+
+  const postMatchesSearch = (title: string, prize: string) => {
+    if (!normalizedContentSearch) return true
+    return `${title} ${prize}`.toLowerCase().includes(normalizedContentSearch)
+  }
+
   const filteredFollowers = followersList.filter((person) => {
     const label = `${person.full_name || ''} ${person.username || ''}`.toLowerCase()
     return label.includes(followerSearch.toLowerCase())
@@ -761,6 +779,37 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
     return label.includes(followingSearch.toLowerCase())
   })
 
+  const filteredLivePosts = livePosts.filter((post) => postMatchesSearch(post.title, post.prize))
+  const filteredHistoryPosts = historyPosts.filter((post) => postMatchesSearch(post.title, post.prize))
+  const filteredPopularPosts = popularPosts.filter((post) => postMatchesSearch(post.title, post.prize))
+  const filteredWinners = recentWinners.filter((winner) => {
+    if (!normalizedContentSearch) return true
+    return `${winner.username} ${winner.prize}`.toLowerCase().includes(normalizedContentSearch)
+  })
+  const filteredFundraises = supportedFundraises.filter((fundraise) => {
+    if (!normalizedContentSearch) return true
+    return fundraise.title.toLowerCase().includes(normalizedContentSearch)
+  })
+
+  const openPostEditor = (postId: string, postType: 'raffle' | 'giveaway') => {
+    setEditingPostId(postId)
+    setEditingPostType(postType)
+  }
+
+  const getPostHref = (postType: 'raffle' | 'giveaway', postId: string) =>
+    postType === 'raffle' ? `/raffles/${postId}` : `/giveaways/${postId}`
+
+  const handleContentSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Escape') {
+      setContentSearch('')
+      return
+    }
+
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      setContentSearch((prev) => prev.trim())
+    }
+  }
 
   return (
     <>
@@ -772,11 +821,11 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
 
         .profile-container {
           min-height: 100vh;
-          background: #0f1419;
+          background: var(--primary-bg);
           background-image: 
-            radial-gradient(circle at 20% 20%, rgba(0, 255, 136, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 20% 20%, rgba(59,130,246,0.06) 0%, transparent 50%),
             radial-gradient(circle at 80% 80%, rgba(255, 136, 0, 0.05) 0%, transparent 50%),
-            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 136, 0.03) 2px, rgba(0, 255, 136, 0.03) 4px);
+            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(59,130,246,0.04) 2px, rgba(59,130,246,0.04) 4px);
           font-family: 'Barlow', sans-serif;
           color: #fff;
           padding: 32px 24px;
@@ -785,49 +834,49 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
         .profile-wrapper { max-width: 1400px; margin: 0 auto; }
 
         .profile-hero {
-          background: linear-gradient(135deg, rgba(20, 26, 32, 0.8) 0%, rgba(15, 20, 25, 0.9) 100%);
-          border: 1px solid rgba(0, 255, 136, 0.2);
+          background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.92) 100%);
+          border: 1px solid rgba(59,130,246,0.24);
           border-radius: 24px; padding: 48px; margin-bottom: 32px;
           position: relative; overflow: hidden; backdrop-filter: blur(10px);
         }
-        .profile-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, transparent 50%); pointer-events: none; }
+        .profile-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(59,130,246,0.06) 0%, transparent 50%); pointer-events: none; }
         .hero-content { display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: start; position: relative; z-index: 1; }
         .avatar-section { position: relative; }
-        .avatar-wrapper { width: 160px; height: 160px; border-radius: 50%; border: 4px solid #00ff88; padding: 6px; background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 170, 0.2)); box-shadow: 0 0 40px rgba(0, 255, 136, 0.4); animation: avatarGlow 3s ease-in-out infinite; }
-        @keyframes avatarGlow { 0%, 100% { box-shadow: 0 0 40px rgba(0, 255, 136, 0.4); } 50% { box-shadow: 0 0 60px rgba(0, 255, 136, 0.6); } }
+        .avatar-wrapper { width: 160px; height: 160px; border-radius: 50%; border: 4px solid #3b82f6; padding: 6px; background: linear-gradient(135deg, rgba(59,130,246,0.24), rgba(37,99,235,0.22)); box-shadow: 0 0 40px rgba(59,130,246,0.42); animation: avatarGlow 3s ease-in-out infinite; }
+        @keyframes avatarGlow { 0%, 100% { box-shadow: 0 0 40px rgba(59,130,246,0.42); } 50% { box-shadow: 0 0 60px rgba(59,130,246,0.55); } }
         .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .verified-badge-large { position: absolute; bottom: 8px; right: 8px; width: 40px; height: 40px; background: #00ff88; border: 3px solid #0f1419; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0, 255, 136, 0.6); }
+        .verified-badge-large { position: absolute; bottom: 8px; right: 8px; width: 40px; height: 40px; background: #3b82f6; border: 3px solid #0f1419; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(59,130,246,0.55); }
         .profile-info { flex: 1; }
         .username-row { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
         .display-name { font-family: 'Rajdhani', sans-serif; font-size: 36px; font-weight: 700; color: #ffffff; letter-spacing: 1px; }
-        .credibility-badge { display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 170, 0.2)); border: 2px solid #00ff88; padding: 8px 16px; border-radius: 20px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 16px; color: #00ff88; box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
+        .credibility-badge { display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, rgba(59,130,246,0.24), rgba(37,99,235,0.22)); border: 2px solid #3b82f6; padding: 8px 16px; border-radius: 20px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 16px; color: #3b82f6; box-shadow: 0 0 20px rgba(59,130,246,0.34); }
         .bio-text { font-size: 16px; color: #a0aec0; line-height: 1.6; margin-bottom: 20px; }
         .profile-meta { display: flex; gap: 24px; margin-bottom: 24px; font-size: 14px; color: #718096; }
         .meta-item { display: flex; align-items: center; gap: 6px; }
         .social-links { display: flex; gap: 12px; margin-bottom: 24px; }
-        .social-btn { display: flex; align-items: center; gap: 8px; background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.3); padding: 10px 20px; border-radius: 10px; color: #00ff88; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.3s ease; }
-        .social-btn:hover { background: rgba(0, 255, 136, 0.2); border-color: #00ff88; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3); }
+        .social-btn { display: flex; align-items: center; gap: 8px; background: rgba(59,130,246,0.10); border: 1px solid rgba(59,130,246,0.34); padding: 10px 20px; border-radius: 10px; color: #3b82f6; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.3s ease; }
+        .social-btn:hover { background: rgba(59,130,246,0.24); border-color: #3b82f6; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(59,130,246,0.34); }
         .social-btn.twitter { color: #1DA1F2; border-color: rgba(29, 161, 242, 0.3); }
         .social-btn.instagram { color: #E4405F; border-color: rgba(228, 64, 95, 0.3); }
         .social-btn.tiktok { color: #00f2ea; border-color: rgba(0, 242, 234, 0.3); }
-        .follow-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #00ff88 0%, #00ffaa 100%); color: #0f1419; border: none; padding: 12px 24px; border-radius: 10px; font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; }
-        .follow-btn.is-following { background: rgba(0, 255, 136, 0.1); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.4); }
+        .follow-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #ffffff; border: none; padding: 12px 24px; border-radius: 10px; font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; }
+        .follow-btn.is-following { background: rgba(59,130,246,0.10); color: #3b82f6; border: 1px solid rgba(59,130,246,0.42); }
         .follow-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 24px; }
-        .stat-card { background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 12px; padding: 20px; text-align: center; }
-        .stat-value { font-family: 'Rajdhani', sans-serif; font-size: 32px; font-weight: 700; color: #00ff88; margin-bottom: 4px; }
+        .stat-card { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.24); border-radius: 12px; padding: 20px; text-align: center; }
+        .stat-value { font-family: 'Rajdhani', sans-serif; font-size: 32px; font-weight: 700; color: #3b82f6; margin-bottom: 4px; }
         .stat-label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 1px; }
-        .section-nav { display: flex; gap: 12px; margin-bottom: 32px; border-bottom: 2px solid rgba(0, 255, 136, 0.1); padding-bottom: 0; overflow-x: auto; }
+        .section-nav { display: flex; gap: 12px; margin-bottom: 32px; border-bottom: 2px solid rgba(59,130,246,0.10); padding-bottom: 0; overflow-x: auto; }
         .nav-tab { background: transparent; border: none; color: #718096; padding: 16px 24px; font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; border-bottom: 3px solid transparent; white-space: nowrap; }
-        .nav-tab:hover { color: #00ff88; }
-        .nav-tab.active { color: #00ff88; border-bottom-color: #00ff88; box-shadow: 0 2px 15px rgba(0, 255, 136, 0.3); }
+        .nav-tab:hover { color: #3b82f6; }
+        .nav-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; box-shadow: 0 2px 15px rgba(59,130,246,0.34); }
         .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; margin-bottom: 32px; }
-        .content-card { background: linear-gradient(135deg, rgba(20, 26, 32, 0.8) 0%, rgba(15, 20, 25, 0.9) 100%); border: 1px solid rgba(0, 255, 136, 0.15); border-radius: 16px; overflow: hidden; transition: all 0.3s ease; cursor: pointer; position: relative; }
-        .content-card:hover { transform: translateY(-4px); border-color: rgba(0, 255, 136, 0.4); box-shadow: 0 12px 40px rgba(0, 255, 136, 0.2); }
+        .content-card { background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(59,130,246,0.16); border-radius: 16px; overflow: hidden; transition: all 0.3s ease; cursor: pointer; position: relative; }
+        .content-card:hover { transform: translateY(-4px); border-color: rgba(59,130,246,0.42); box-shadow: 0 12px 40px rgba(59,130,246,0.24); }
         .card-image { position: relative; width: 100%; height: 200px; overflow: hidden; }
         .card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
         .content-card:hover .card-image img { transform: scale(1.05); }
-        .status-badge { position: absolute; top: 12px; left: 12px; display: flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #00ff88 0%, #00ffaa 100%); color: #0f1419; padding: 6px 12px; border-radius: 20px; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4); animation: badgePulse 2s ease-in-out infinite; }
+        .status-badge { position: absolute; top: 12px; left: 12px; display: flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #ffffff; padding: 6px 12px; border-radius: 20px; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(59,130,246,0.42); animation: badgePulse 2s ease-in-out infinite; }
         .status-badge.completed { background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: #fff; }
         @keyframes badgePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -839,39 +888,51 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
         .prize-display { display: flex; align-items: center; gap: 8px; color: #ff8800; font-family: 'Rajdhani', sans-serif; font-size: 24px; font-weight: 700; }
         .card-info { display: flex; gap: 16px; font-size: 13px; color: #718096; }
         .info-item { display: flex; align-items: center; gap: 6px; }
-        .winner-info { background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 10px; padding: 12px; display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
-        .winner-name { color: #00ff88; font-weight: 600; }
+        .winner-info { background: rgba(59,130,246,0.10); border: 1px solid rgba(59,130,246,0.34); border-radius: 10px; padding: 12px; display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+        .winner-name { color: #3b82f6; font-weight: 600; }
         .winners-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .winner-card { background: linear-gradient(135deg, rgba(20, 26, 32, 0.8) 0%, rgba(15, 20, 25, 0.9) 100%); border: 1px solid rgba(0, 255, 136, 0.15); border-radius: 16px; padding: 20px; display: flex; gap: 16px; align-items: center; transition: all 0.3s ease; }
-        .winner-card:hover { border-color: rgba(0, 255, 136, 0.4); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 255, 136, 0.15); }
-        .winner-avatar { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #00ff88; object-fit: cover; }
+        .winner-card { background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(59,130,246,0.16); border-radius: 16px; padding: 20px; display: flex; gap: 16px; align-items: center; transition: all 0.3s ease; }
+        .winner-card:hover { border-color: rgba(59,130,246,0.42); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(59,130,246,0.16); }
+        .winner-avatar { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #3b82f6; object-fit: cover; }
         .winner-details { flex: 1; }
-        .winner-username { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; color: #00ff88; margin-bottom: 4px; }
+        .winner-username { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; color: #3b82f6; margin-bottom: 4px; }
         .winner-prize { font-size: 14px; color: #a0aec0; margin-bottom: 4px; }
         .winner-value { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; color: #ff8800; }
         .winner-date { font-size: 12px; color: #718096; }
-        .fundraise-card { background: linear-gradient(135deg, rgba(20, 26, 32, 0.8) 0%, rgba(15, 20, 25, 0.9) 100%); border: 1px solid rgba(0, 255, 136, 0.15); border-radius: 16px; overflow: hidden; transition: all 0.3s ease; }
-        .fundraise-card:hover { transform: translateY(-4px); border-color: rgba(0, 255, 136, 0.4); box-shadow: 0 12px 40px rgba(0, 255, 136, 0.2); }
+        .fundraise-card { background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(59,130,246,0.16); border-radius: 16px; overflow: hidden; transition: all 0.3s ease; }
+        .fundraise-card:hover { transform: translateY(-4px); border-color: rgba(59,130,246,0.42); box-shadow: 0 12px 40px rgba(59,130,246,0.24); }
         .fundraise-progress { padding: 20px; }
         .progress-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
-        .raised-amount { font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700; color: #00ff88; }
+        .raised-amount { font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700; color: #3b82f6; }
         .goal-amount { font-size: 14px; color: #718096; }
-        .progress-bar-container { width: 100%; height: 8px; background: rgba(0, 255, 136, 0.1); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
-        .progress-bar-inner { height: 100%; background: linear-gradient(90deg, #00ff88 0%, #00ffaa 100%); border-radius: 10px; box-shadow: 0 0 15px rgba(0, 255, 136, 0.6); transition: width 0.5s ease; }
+        .progress-bar-container { width: 100%; height: 8px; background: rgba(59,130,246,0.10); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+        .progress-bar-inner { height: 100%; background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%); border-radius: 10px; box-shadow: 0 0 15px rgba(59,130,246,0.55); transition: width 0.5s ease; }
         .contribution-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 136, 0, 0.1); border: 1px solid rgba(255, 136, 0, 0.3); padding: 8px 16px; border-radius: 20px; font-family: 'Rajdhani', sans-serif; font-weight: 700; color: #ff8800; }
         .community-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-        .community-card { background: linear-gradient(135deg, rgba(20, 26, 32, 0.8) 0%, rgba(15, 20, 25, 0.9) 100%); border: 1px solid rgba(0, 255, 136, 0.15); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 14px; transition: all 0.3s ease; text-decoration: none; }
-        .community-card:hover { border-color: rgba(0, 255, 136, 0.4); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 255, 136, 0.15); }
+        .community-card { background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(59,130,246,0.16); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 14px; transition: all 0.3s ease; text-decoration: none; }
+        .community-card:hover { border-color: rgba(59,130,246,0.42); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(59,130,246,0.16); }
         .community-search { display: flex; gap: 12px; margin-bottom: 20px; }
-        .community-search input { flex: 1; background: rgba(15, 20, 25, 0.9); border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 10px; padding: 10px 14px; color: #ffffff; font-size: 14px; }
+        .community-search input { flex: 1; background: rgba(15, 20, 25, 0.9); border: 1px solid rgba(59,130,246,0.24); border-radius: 10px; padding: 10px 14px; color: #ffffff; font-size: 14px; }
         .community-search input::placeholder { color: #718096; }
-        .load-more-btn { background: rgba(0, 255, 136, 0.12); border: 1px solid rgba(0, 255, 136, 0.4); color: #00ff88; padding: 10px 18px; border-radius: 10px; font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; }
-        .load-more-btn:hover { background: rgba(0, 255, 136, 0.2); }
-        .mini-spinner { width: 14px; height: 14px; border-radius: 999px; border: 2px solid rgba(0, 255, 136, 0.35); border-top-color: #00ff88; animation: spin 0.8s linear infinite; }
-        .community-avatar { width: 48px; height: 48px; border-radius: 50%; border: 2px solid #00ff88; object-fit: cover; }
+        .owner-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .owner-action-btn { display: inline-flex; align-items: center; gap: 8px; background: rgba(59,130,246,0.10); border: 1px solid rgba(59,130,246,0.38); color: #3b82f6; border-radius: 10px; padding: 10px 14px; font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; }
+        .section-tools { display: flex; gap: 12px; align-items: center; margin: 0 0 20px; }
+        .content-search { display: flex; gap: 8px; align-items: center; flex: 1; max-width: 520px; }
+        .content-search input { flex: 1; background: rgba(15, 20, 25, 0.9); border: 1px solid rgba(59,130,246,0.24); border-radius: 10px; padding: 10px 14px; color: #ffffff; font-size: 14px; }
+        .content-search-icon-btn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid rgba(59,130,246,0.38); background: rgba(59,130,246,0.10); color: #3b82f6; display: inline-flex; align-items: center; justify-content: center; }
+        .content-search-clear-btn { border: none; background: transparent; color: #718096; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .card-actions { display: flex; gap: 8px; margin-top: 10px; }
+        .card-action-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px; padding: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #e2e8f0; font-size: 12px; font-weight: 600; text-decoration: none; cursor: pointer; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; }
+        .card-action-btn.primary { background: rgba(59,130,246,0.10); border-color: rgba(59,130,246,0.24); color: #3b82f6; }
+        .load-more-btn { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.42); color: #3b82f6; padding: 10px 18px; border-radius: 10px; font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; }
+        .load-more-btn:hover { background: rgba(59,130,246,0.24); }
+        .mini-spinner { width: 14px; height: 14px; border-radius: 999px; border: 2px solid rgba(59,130,246,0.38); border-top-color: #3b82f6; animation: spin 0.8s linear infinite; }
+        .community-avatar { width: 48px; height: 48px; border-radius: 50%; border: 2px solid #3b82f6; object-fit: cover; }
         .community-name { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 2px; }
         .community-handle { font-size: 12px; color: #718096; }
         .empty-community { color: #718096; font-size: 14px; }
+        .content-skeleton { height: 320px; border-radius: 16px; background: linear-gradient(90deg, rgba(30,41,59,0.55), rgba(51,65,85,0.65), rgba(30,41,59,0.55)); background-size: 200% 100%; animation: pulseSlide 1.2s linear infinite; border: 1px solid rgba(59,130,246,0.16); }
+        @keyframes pulseSlide { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         @media (max-width: 768px) {
           .profile-hero { padding: 24px; }
           .hero-content { grid-template-columns: 1fr; text-align: center; }
@@ -960,6 +1021,23 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
           </div>
         )}
 
+        {isOwnProfile && (
+          <div className="owner-actions">
+            <button className="owner-action-btn" onClick={() => setShowEditModal(true)}>
+              <Pencil size={14} /> Edit Profile
+            </button>
+            <a className="owner-action-btn" href="/create-giveaway">
+              <Plus size={14} /> New Giveaway
+            </a>
+            <a className="owner-action-btn" href="/raffles/create">
+              <Plus size={14} /> New Raffle
+            </a>
+            <a className="owner-action-btn" href="/dashboard">
+              <Eye size={14} /> Open Dashboard
+            </a>
+          </div>
+        )}
+
         <div className="section-nav">
           <button className={`nav-tab ${activeSection === 'live' ? 'active' : ''}`} onClick={() => setActiveSection('live')}>\ud83d\udd34 Live Now</button>
           <button className={`nav-tab ${activeSection === 'history' ? 'active' : ''}`} onClick={() => setActiveSection('history')}>\ud83d\udcdc History</button>
@@ -970,9 +1048,41 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
           <button className={`nav-tab ${activeSection === 'following' ? 'active' : ''}`} onClick={() => setActiveSection('following')}>\u2795 Following</button>
         </div>
 
+        {(activeSection === 'live' || activeSection === 'history' || activeSection === 'popular' || activeSection === 'winners' || activeSection === 'fundraise') && (
+          <div className="section-tools">
+            <div className="content-search">
+              <input
+                ref={contentSearchInputRef}
+                type="text"
+                placeholder="Search posts, prizes, or winners"
+                value={contentSearch}
+                onChange={(event) => setContentSearch(event.target.value)}
+                onKeyDown={handleContentSearchKeyDown}
+              />
+              <button
+                className="content-search-icon-btn"
+                aria-label="Search content"
+                type="button"
+                onClick={() => {
+                  setContentSearch((prev) => prev.trim())
+                  contentSearchInputRef.current?.focus()
+                }}
+              >
+                <Search size={16} />
+              </button>
+              {contentSearch.trim() && (
+                <button className="content-search-clear-btn" type="button" onClick={() => setContentSearch('')}>
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {activeSection === 'live' && (
           <div className="content-grid">
-            {livePosts.map(post => (
+            {contentLoading && Array.from({ length: 3 }).map((_, idx) => <div key={`live-skeleton-${idx}`} className="content-skeleton" />)}
+            {filteredLivePosts.map(post => (
               <div key={post.id} className="content-card">
                 <div className="card-image">
                   <img src={post.image} alt={post.title} />
@@ -989,26 +1099,27 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
                     {post.entries !== undefined && post.entries > 0 && (<div className="info-item"><Users size={14} /><span>{post.entries.toLocaleString()} entries</span></div>)}
                     {post.tickets !== undefined && post.tickets > 0 && (<div className="info-item"><Ticket size={14} /><span>{post.soldTickets}/{post.tickets}</span></div>)}
                   </div>
-                  {profileData && viewerId === profileData.id && (
-                    <button
-                      onClick={() => {
-                        setEditingPostId(post.id)
-                        setEditingPostType(post.type)
-                      }}
-                      style={{ marginTop: '10px', width: '100%', padding: '8px', borderRadius: '8px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)', color: '#00ff88', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.5px' }}
-                    >
-                      Edit Post
-                    </button>
-                  )}
+                  <div className="card-actions">
+                    <a className="card-action-btn" href={getPostHref(post.type, post.id)}>
+                      <ExternalLink size={14} /> View
+                    </a>
+                    {isOwnProfile && (
+                      <button className="card-action-btn primary" onClick={() => openPostEditor(post.id, post.type)}>
+                        <Pencil size={14} /> Edit
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
+            {filteredLivePosts.length === 0 && <div className="empty-community">No live posts match this search.</div>}
           </div>
         )}
 
         {activeSection === 'history' && (
           <div className="content-grid">
-            {historyPosts.map(post => (
+            {contentLoading && Array.from({ length: 3 }).map((_, idx) => <div key={`history-skeleton-${idx}`} className="content-skeleton" />)}
+            {filteredHistoryPosts.map(post => (
               <div key={post.id} className="content-card">
                 <div className="card-image">
                   <img src={post.image} alt={post.title} />
@@ -1021,27 +1132,28 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
                     {post.entries !== undefined && post.entries > 0 && (<div className="info-item"><Users size={14} /><span>{post.entries.toLocaleString()} entries</span></div>)}
                     <div className="info-item"><Calendar size={14} /><span>{post.endDate}</span></div>
                   </div>
-                  <div className="winner-info"><span className="winner-name">Winner: {post.winner}</span><Check size={16} color="#00ff88" /></div>
-                  {profileData && viewerId === profileData.id && (
-                    <button
-                      onClick={() => {
-                        setEditingPostId(post.id)
-                        setEditingPostType(post.type)
-                      }}
-                      style={{ marginTop: '10px', width: '100%', padding: '8px', borderRadius: '8px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)', color: '#00ff88', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.5px' }}
-                    >
-                      Edit Post
-                    </button>
-                  )}
+                  <div className="winner-info"><span className="winner-name">Winner: {post.winner}</span><Check size={16} color="#3b82f6" /></div>
+                  <div className="card-actions">
+                    <a className="card-action-btn" href={getPostHref(post.type, post.id)}>
+                      <ExternalLink size={14} /> View
+                    </a>
+                    {isOwnProfile && (
+                      <button className="card-action-btn primary" onClick={() => openPostEditor(post.id, post.type)}>
+                        <Pencil size={14} /> Edit
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
+            {filteredHistoryPosts.length === 0 && <div className="empty-community">No history posts match this search.</div>}
           </div>
         )}
 
         {activeSection === 'popular' && (
           <div className="content-grid">
-            {popularPosts.map(post => (
+            {contentLoading && Array.from({ length: 3 }).map((_, idx) => <div key={`popular-skeleton-${idx}`} className="content-skeleton" />)}
+            {filteredPopularPosts.map(post => (
               <div key={post.id} className="content-card">
                 <div className="card-image">
                   <img src={post.image} alt={post.title} />
@@ -1058,42 +1170,45 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
                     {post.entries !== undefined && post.entries > 0 && (<div className="info-item"><Users size={14} /><span>{post.entries.toLocaleString()} entries</span></div>)}
                     {post.tickets !== undefined && post.tickets > 0 && (<div className="info-item"><Ticket size={14} /><span>{post.tickets.toLocaleString()} tickets</span></div>)}
                   </div>
-                  {profileData && viewerId === profileData.id && (
-                    <button
-                      onClick={() => {
-                        setEditingPostId(post.id)
-                        setEditingPostType(post.type)
-                      }}
-                      style={{ marginTop: '10px', width: '100%', padding: '8px', borderRadius: '8px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)', color: '#00ff88', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.5px' }}
-                    >
-                      Edit Post
-                    </button>
-                  )}
+                  <div className="card-actions">
+                    <a className="card-action-btn" href={getPostHref(post.type, post.id)}>
+                      <ExternalLink size={14} /> View
+                    </a>
+                    {isOwnProfile && (
+                      <button className="card-action-btn primary" onClick={() => openPostEditor(post.id, post.type)}>
+                        <Pencil size={14} /> Edit
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
+            {filteredPopularPosts.length === 0 && <div className="empty-community">No popular posts match this search.</div>}
           </div>
         )}
 
         {activeSection === 'winners' && (
           <div className="winners-grid">
-            {recentWinners.map(winner => (
+            {contentLoading && Array.from({ length: 3 }).map((_, idx) => <div key={`winners-skeleton-${idx}`} className="content-skeleton" />)}
+            {filteredWinners.map(winner => (
               <div key={winner.id} className="winner-card">
                 <img src={winner.avatar} alt={winner.username} className="winner-avatar" />
                 <div className="winner-details">
-                  <div className="winner-username">@{winner.username}{winner.verified && <Zap size={14} fill="#00ff88" stroke="#00ff88" style={{ marginLeft: '6px' }} />}</div>
+                  <div className="winner-username">@{winner.username}{winner.verified && <Zap size={14} fill="#3b82f6" stroke="#3b82f6" style={{ marginLeft: '6px' }} />}</div>
                   <div className="winner-prize">{winner.prize}</div>
                   <div className="winner-value">{winner.value}</div>
                   <div className="winner-date">{winner.date}</div>
                 </div>
               </div>
             ))}
+            {filteredWinners.length === 0 && <div className="empty-community">No winners match this search.</div>}
           </div>
         )}
 
         {activeSection === 'fundraise' && (
           <div className="content-grid">
-            {supportedFundraises.map(fundraise => {
+            {contentLoading && Array.from({ length: 3 }).map((_, idx) => <div key={`fundraise-skeleton-${idx}`} className="content-skeleton" />)}
+            {filteredFundraises.map(fundraise => {
               const progress = fundraise.goal > 0 ? Math.min((fundraise.raised / fundraise.goal) * 100, 100) : 0;
               return (
                 <div key={fundraise.id} className="fundraise-card">
@@ -1113,6 +1228,7 @@ const formatSocialLabel = (value: string) => value.replace(/^https?:[/][/]/, '')
                 </div>
               );
             })}
+            {filteredFundraises.length === 0 && <div className="empty-community">No supported causes match this search.</div>}
           </div>
         )}
 

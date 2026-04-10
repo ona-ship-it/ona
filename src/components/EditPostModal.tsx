@@ -201,12 +201,13 @@ const EditPostModal = ({ isOpen, onClose, postId, postType, onSaved }: EditPostM
         const supabase = createClient();
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+        const bucketName = postType === 'raffle' ? 'raffle-images' : 'giveaway-images';
         const { error: uploadError } = await supabase.storage
-          .from('raffle-images')
+          .from(bucketName)
           .upload(fileName, file);
         if (uploadError) throw uploadError;
         const { data: { publicUrl } } = supabase.storage
-          .from('raffle-images')
+          .from(bucketName)
           .getPublicUrl(fileName);
         setPost(prev => ({ ...prev, image_urls: [...prev.image_urls, publicUrl] }));
       } catch (err) {
