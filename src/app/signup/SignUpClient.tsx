@@ -5,6 +5,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getGravatarUrl } from '@/utils/gravatar';
+import { triggerVerificationEmail } from '@/lib/triggerVerification';
 
 export default function SignUpClient() {
   const [email, setEmail] = useState('');
@@ -12,7 +13,6 @@ export default function SignUpClient() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showVerificationMessage, setShowVerificationMessage] = useState(false);
 
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -28,8 +28,11 @@ export default function SignUpClient() {
       });
 
       if (error) throw error;
-    } catch (oauthError: any) {
-      setError(oauthError.message || `Failed to sign in with ${provider}`);
+    } catch (oauthError: unknown) {
+      const errorMessage = oauthError instanceof Error
+        ? oauthError.message
+        : `Failed to sign in with ${provider}`;
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -96,7 +99,16 @@ export default function SignUpClient() {
           { onConflict: 'id' }
         );
 
-        setShowVerificationMessage(true);
+        // Send verification email via Resend and handle failures explicitly.
+        const verificationResult = await triggerVerificationEmail(data.user.email!, data.user.id);
+
+        if (!verificationResult.success) {
+          router.push(`/resend-verification?email=${encodeURIComponent(data.user.email!)}&source=signup`);
+          return;
+        }
+
+        // Redirect to verification pending page
+        router.push('/verify-email?status=pending');
       }
     } catch {
       setError('An unexpected error occurred');
@@ -112,15 +124,6 @@ export default function SignUpClient() {
           <h2 className="mb-4 text-center text-3xl font-extrabold" style={{ color: 'var(--text-primary)' }}>
             Create Account
           </h2>
-
-          {showVerificationMessage && (
-            <div className="mb-4 rounded-xl border p-4" style={{ borderColor: 'rgba(59,130,246,0.35)', background: 'rgba(59,130,246,0.08)' }}>
-              <h3 className="mb-2 text-base font-bold" style={{ color: 'var(--text-primary)' }}>Verify Your Email</h3>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                We sent a verification link to your email. Check your inbox to activate your account.
-              </p>
-            </div>
-          )}
 
           {error && (
             <div className="mb-4 rounded-lg border px-3 py-2 text-sm" style={{ borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444', background: 'rgba(239,68,68,0.08)' }}>

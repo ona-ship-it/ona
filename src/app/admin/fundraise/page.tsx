@@ -121,7 +121,7 @@ export default function AdminFundraise() {
       const creatorIds = Array.from(
         new Set(
           (data || [])
-            .map((item: any) => item.user_id || item.creator_id)
+            .map((item: { user_id?: string | null; creator_id?: string | null }) => item.user_id || item.creator_id)
             .filter(Boolean)
         )
       )
@@ -138,12 +138,12 @@ export default function AdminFundraise() {
           console.error('Error fetching fundraiser creator profiles:', profilesError)
         } else {
           profileById = new Map(
-            (profilesData || []).map((profile: any) => [profile.id, profile])
+            (profilesData || []).map((profile: { id: string; email?: string; full_name?: string }) => [profile.id, profile])
           )
         }
       }
 
-      const mapped = (data || []).map((item: any) => ({
+      const mapped = (data || []).map((item: { creator_id?: string | null; user_id?: string | null; description?: string | null; story?: string | null; donor_count?: number | null; total_donors?: number | null; end_date?: string | null; ends_at?: string | null }) => ({
         ...item,
         creator_id: item.creator_id || item.user_id,
         creator_email: profileById.get(item.user_id || item.creator_id)?.email || 'Unknown',
@@ -264,7 +264,7 @@ export default function AdminFundraise() {
         <p className="text-slate-400 mb-8">Review campaigns, verify legitimacy, manage compliance, and approve payouts</p>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', marginBottom: 32 }}>
           <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 text-center">
             <div className="text-2xl font-black text-white">{stats.total}</div>
             <div className="text-xs text-slate-400">Total</div>

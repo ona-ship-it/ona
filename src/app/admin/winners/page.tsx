@@ -218,8 +218,8 @@ function WinnersContent() {
           <p className="text-slate-400">Select winners for ended giveaways</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
+        <div className="giveaway-detail-grid" style={{ display: 'grid', gap: 32 }}>
+          <div style={{ gridColumn: "span 1" }}>
             <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
               <h3 className="text-xl font-bold text-white mb-4">Pending Draws</h3>
               
@@ -256,7 +256,7 @@ function WinnersContent() {
             </div>
           </div>
 
-          <div className="lg:col-span-2">
+          <div style={{ gridColumn: "span 1" }}>
             {!selectedGiveaway ? (
               <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-12 text-center">
                 <div className="text-6xl mb-4">🎯</div>

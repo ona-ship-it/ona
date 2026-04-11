@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import type { User } from '@supabase/supabase-js'
 import Link from 'next/link'
 import Image from 'next/image'
 import VerificationBadge from '@/components/VerificationBadge'
-import Header from '@/components/Header'
 import ProfilePicture from '@/components/ProfilePicture'
 
 type Entry = {
@@ -40,19 +40,35 @@ type UserStats = {
   totalWins: number
 }
 
+type Profile = {
+  full_name: string | null
+}
+
+type CreatedRaffle = {
+  id: string
+  emoji: string
+  title: string
+  prize_value: number
+  tickets_sold: number
+  total_tickets: number
+  status: string
+}
+
+type WinItem = Entry | RaffleTicket
+
 export default function UserDashboard() {
   const router = useRouter()
   const supabase = createClient()
   
   const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
-  const [profile, setProfile] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [activeTab, setActiveTab] = useState<'entries' | 'raffles' | 'wins' | 'created'>('entries')
   
   const [giveawayEntries, setGiveawayEntries] = useState<Entry[]>([])
   const [raffleTickets, setRaffleTickets] = useState<RaffleTicket[]>([])
-  const [wins, setWins] = useState<(Entry | RaffleTicket)[]>([])
-  const [createdRaffles, setCreatedRaffles] = useState<any[]>([])
+  const [wins, setWins] = useState<WinItem[]>([])
+  const [createdRaffles, setCreatedRaffles] = useState<CreatedRaffle[]>([])
   const [stats, setStats] = useState<UserStats>({
     totalEntries: 0,
     totalRaffleTickets: 0,
@@ -228,10 +244,8 @@ export default function UserDashboard() {
   ]
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--primary-bg)' }}>
-      <Header />
-
-      <div className="max-w-7xl mx-auto px-4 py-12">
+    <div style={{ minHeight: '100vh', background: 'var(--primary-bg)' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 16px' }}>
         {/* Profile Header */}
         <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-8 mb-8">
           <div className="flex items-center gap-6">
@@ -272,7 +286,7 @@ export default function UserDashboard() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="items-grid" style={{ marginBottom: 32 }}>
           <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
             <div className="text-3xl font-black text-white mb-1">{stats.totalEntries}</div>
             <div className="text-sm text-slate-400">Giveaway Entries</div>
@@ -429,7 +443,7 @@ export default function UserDashboard() {
                   <p className="text-slate-400">Keep entering - your luck will turn!</p>
                 </div>
               ) : (
-                allWins.map((win: any) => (
+                allWins.map((win: WinItem) => (
                   <div
                     key={win.id}
                     className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-2 border-green-500/50 rounded-3xl p-6"

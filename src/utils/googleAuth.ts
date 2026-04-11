@@ -1,40 +1,29 @@
 "use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import type { Database } from '@/types/supabase';
+import { createClient } from '@/lib/supabase';
 
 /**
- * Initiates Google OAuth sign-in process
- * This function handles the same sign-in flow as the GoogleSignIn component
+ * Initiates Google OAuth sign-in process.
+ * After Google auth the callback route handles session setup and redirects
+ * new users to '/' and returning users to '/profile'.
  */
-export const signInWithGoogle = async () => {
-  const supabase = createClientComponentClient<Database>({
-    cookieOptions: {
-      path: '/',
-      domain: process.env.NODE_ENV === 'production' ? '.onagui.com' : undefined,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    }
-  });
-  
+export const signInWithGoogle = async (nextPath = '/') => {
+  const supabase = createClient();
+
   try {
-    // Get the redirectTo parameter from URL if it exists
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirectPath = urlParams.get('redirectTo') || '/';
-    const base = process.env.NODE_ENV !== 'production' ? 'http://localhost:3000' : window.location.origin;
-    const callbackUrl = `${base}/api/auth/callback?redirectTo=${encodeURIComponent(redirectPath)}`;
-    
-    const { error } = await supabase.auth.signInWithOAuth({ 
-      provider: "google", 
-      options: { 
+    const callbackUrl = `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(nextPath)}`;
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
         redirectTo: callbackUrl,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
-        }
-      }, 
+        },
+      },
     });
-    
+
     if (error) {
       throw error;
     }

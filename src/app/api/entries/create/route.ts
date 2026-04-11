@@ -1,6 +1,8 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { createAdminSupabaseClient } from '@/utils/supabase/server-admin'
+import { getIdempotencyKey, persistIdempotencyResult, reserveIdempotencyKey } from '@/lib/idempotency'
 
 export async function POST(request: Request) {
   try {
@@ -39,6 +41,45 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const idempotencyKey = getIdempotencyKey(request)
+    const idempotencyEndpoint = `entries:${giveawayId}:create`
+    let adminClient: Awaited<ReturnType<typeof createAdminSupabaseClient>> | null = null
+
+    const respond = async (body: Record<string, unknown>, status: number) => {
+      if (idempotencyKey && adminClient) {
+        await persistIdempotencyResult({
+          adminClient,
+          userId: user.id,
+          endpoint: idempotencyEndpoint,
+          key: idempotencyKey,
+          statusCode: status,
+          body,
+        })
+      }
+      return NextResponse.json(body, { status })
+    }
+
+    if (idempotencyKey) {
+      adminClient = await createAdminSupabaseClient()
+      const reservation = await reserveIdempotencyKey({
+        adminClient,
+        userId: user.id,
+        endpoint: idempotencyEndpoint,
+        key: idempotencyKey,
+      })
+
+      if (reservation.type === 'replay') {
+        return NextResponse.json(reservation.body, { status: reservation.statusCode })
+      }
+
+      if (reservation.type === 'in_progress') {
+        return NextResponse.json(
+          { error: 'This entry is already being processed. Please wait a moment and retry.' },
+          { status: 409 }
+        )
+      }
+    }
+
     // Fetch giveaway details
     const { data: giveaway, error: giveawayError } = await supabase
       .from('giveaways')
@@ -47,24 +88,24 @@ export async function POST(request: Request) {
       .single()
 
     if (giveawayError || !giveaway) {
-      return NextResponse.json({ error: 'Giveaway not found' }, { status: 404 })
+      return respond({ error: 'Giveaway not found' }, 404)
     }
 
     // Validate giveaway is active
     if (giveaway.status !== 'active') {
-      return NextResponse.json({ error: 'Giveaway is not active' }, { status: 400 })
+      return respond({ error: 'Giveaway is not active' }, 400)
     }
 
     // Check if not ended
     if (new Date(giveaway.end_date) < new Date()) {
-      return NextResponse.json({ error: 'Giveaway has ended' }, { status: 400 })
+      return respond({ error: 'Giveaway has ended' }, 400)
     }
 
     const hasTicketLimit = Number(giveaway.total_tickets) > 0
 
     // Check if not sold out (0 means unlimited)
     if (hasTicketLimit && giveaway.tickets_sold >= giveaway.total_tickets) {
-      return NextResponse.json({ error: 'Giveaway is sold out' }, { status: 400 })
+      return respond({ error: 'Giveaway is sold out' }, 400)
     }
 
     const normalizedEntryType = entryType === 'paid' ? 'paid' : 'free'
@@ -80,11 +121,11 @@ export async function POST(request: Request) {
           .eq('is_free', true)
 
         if (freeTicketCountError) {
-          return NextResponse.json({ error: 'Failed to validate free ticket limit' }, { status: 500 })
+          return respond({ error: 'Failed to validate free ticket limit' }, 500)
         }
 
         if ((claimedFreeTickets || 0) >= freeTicketLimit) {
-          return NextResponse.json({ error: 'Free tickets are fully claimed for this giveaway' }, { status: 400 })
+          return respond({ error: 'Free tickets are fully claimed for this giveaway' }, 400)
         }
       }
 
@@ -97,11 +138,11 @@ export async function POST(request: Request) {
         .maybeSingle()
 
       if (existingFreeTicketError) {
-        return NextResponse.json({ error: 'Failed to validate free entry' }, { status: 500 })
+        return respond({ error: 'Failed to validate free entry' }, 500)
       }
 
       if (existingFreeTicket) {
-        return NextResponse.json({ error: 'Free entry already claimed' }, { status: 400 })
+        return respond({ error: 'Free entry already claimed' }, 400)
       }
     }
 
@@ -124,7 +165,7 @@ export async function POST(request: Request) {
 
     if (ticketError) {
       console.error('Ticket creation error:', ticketError)
-      return NextResponse.json({ error: 'Failed to create entry' }, { status: 500 })
+      return respond({ error: 'Failed to create entry' }, 500)
     }
 
     // Create transaction record
@@ -151,13 +192,14 @@ export async function POST(request: Request) {
       },
     ])
 
-    return NextResponse.json({ 
+    return respond({ 
       success: true, 
       ticket,
       message: normalizedEntryType === 'free' ? 'Free ticket claimed!' : 'Paid ticket purchased!'
-    })
-  } catch (error: any) {
+    }, 200)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error'
     console.error('Entry error:', error)
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }

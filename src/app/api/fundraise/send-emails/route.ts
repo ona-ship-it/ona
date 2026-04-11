@@ -1,23 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabaseServer';
+import { createClient as createServerSupabase } from '@/lib/supabaseServer';
 import { sendFundraiserEmail, FundraiserEmailType, FundraiserEmailData } from '@/lib/email';
+import { authorizeCronRequest } from '@/lib/cronAuth';
 
 export const dynamic = 'force-dynamic';
 
 function authorizeCron(request: NextRequest): NextResponse | null {
-  const cronSecret = process.env.CRON_SECRET
-
-  if (!cronSecret) {
-    console.error('CRON_SECRET is not configured')
-    return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
-  }
-
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  return null
+  return authorizeCronRequest(request)
 }
 
 // This endpoint processes pending email notifications
@@ -49,7 +38,7 @@ export async function POST(request: NextRequest) {
     const results = {
       sent: 0,
       failed: 0,
-      errors: [] as any[],
+      errors: [] as Array<{ id: string; error: unknown }>,
     };
 
     // Process each email
@@ -146,7 +135,7 @@ export async function GET(request: NextRequest) {
           bounced: 0,
         };
         
-        result.data?.forEach((email: any) => {
+        result.data?.forEach((email: { status: keyof typeof counts }) => {
           counts[email.status as keyof typeof counts]++;
         });
         

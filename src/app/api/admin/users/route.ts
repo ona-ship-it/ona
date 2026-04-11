@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { isAdmin } from '@/lib/admin';
 import type { Database } from '@/types/supabase';
+
+type CookieOptions = Record<string, unknown>;
+
+type RoleJoinRecord = {
+  user_id: string | null;
+  admin_roles?: { name?: string | null } | null;
+};
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,11 +22,11 @@ export async function GET(request: NextRequest) {
           get(name: string) {
             return cookieStore.get(name)?.value;
           },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options });
+          set(name: string, value: string, options: CookieOptions) {
+            cookieStore.set({ name, value, ...(options as Record<string, unknown>) });
           },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: '', ...options });
+          remove(name: string, options: CookieOptions) {
+            cookieStore.set({ name, value: '', ...(options as Record<string, unknown>) });
           },
         },
       }
@@ -40,15 +48,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if user is admin by querying their profile
-    const { data: profile, error: profileError } = await supabase
-      .from('onagui_profiles')
-      .select('onagui_type')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError || !profile || (profile as any).onagui_type !== 'admin') {
-      console.log('Admin access denied for user:', user.email, 'Profile:', profile);
+    if (!isAdmin(user.email)) {
+      console.log('Admin access denied for user:', user.email);
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
     }
 
@@ -79,11 +80,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: rolesError.message }, { status: 500 });
     }
 
-    const users = (profiles ?? []).map((profile: any) => {
-      const roles = (userRoles ?? [])
-        .filter((role: any) => role.user_id === profile.id)
-        .map((role: any) => role.admin_roles?.name)
-        .filter((name: any) => !!name);
+    const users = (profiles ?? []).map((profile) => {
+      const roles = ((userRoles ?? []) as RoleJoinRecord[])
+        .filter((role) => role.user_id === profile.id)
+        .map((role) => role.admin_roles?.name)
+        .filter((name): name is string => Boolean(name));
       return { ...profile, roles: roles || [] };
     });
 

@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase';
 import { IconHeart, IconSearch, IconPlus, IconTrendingUp } from '@tabler/icons-react';
 import LikeSaveButtons from '@/components/LikeSaveButtons';
-import Header from '@/components/Header';
-
 interface Fundraiser {
   id: string;
   title: string;
@@ -118,9 +116,7 @@ export default function FundraiseClient() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--primary-bg)' }}>
-      <Header />
-      
+    <div style={{ minHeight: '100vh', background: 'var(--primary-bg)' }}>
       {/* Hero Section */}
       <div className="border-b" style={{ 
         background: 'var(--secondary-bg)',
@@ -159,7 +155,7 @@ export default function FundraiseClient() {
         borderColor: 'var(--border)'
       }}>
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <div style={{ display: "grid", gap: 32, gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", textAlign: "center" }}>
             <div>
               <div className="text-4xl font-bold mb-2" style={{ color: 'var(--accent-green)' }}>
                 ${stats.totalRaised.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -296,7 +292,7 @@ export default function FundraiseClient() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div style={{ display: "grid", gap: 24, gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
             {filteredFundraisers.map((fundraiser) => {
               const percentage = calculatePercentage(fundraiser.raised_amount, fundraiser.goal_amount);
               

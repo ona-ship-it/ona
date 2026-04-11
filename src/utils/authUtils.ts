@@ -85,12 +85,22 @@ export async function refreshSession() {
   }
 }
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === 'string') return message;
+  }
+  return '';
+}
+
 /**
  * Handle authentication errors gracefully
  */
-export async function handleAuthError(error: any) {
-  if (error?.message?.includes('Invalid Refresh Token') || 
-      error?.message?.includes('Refresh Token Not Found')) {
+export async function handleAuthError(error: unknown) {
+  const message = getErrorMessage(error);
+  if (message.includes('Invalid Refresh Token') || 
+      message.includes('Refresh Token Not Found')) {
     console.log('🔄 Detected invalid refresh token, clearing auth state...');
     await clearAuthTokens();
     

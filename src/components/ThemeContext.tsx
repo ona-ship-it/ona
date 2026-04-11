@@ -8,6 +8,8 @@ type Theme = 'light' | 'dark';
 interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
+  isWhite: boolean;
+  isDarker: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -44,9 +46,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
+  const isWhite = theme === 'light';
+  const isDarker = theme === 'dark';
+
   // Always provide the context, even before mounting
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, isWhite, isDarker }}>
       {children}
     </ThemeContext.Provider>
   );

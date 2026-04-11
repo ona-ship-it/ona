@@ -13,7 +13,7 @@ export default function AdminPosts() {
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<PostType>('giveaway')
-  const [posts, setPosts] = useState<any[]>([])
+  const [posts, setPosts] = useState<Array<Record<string, unknown>>>([])
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [search, setSearch] = useState('')
@@ -80,7 +80,7 @@ export default function AdminPosts() {
       if (!session?.user) throw new Error('Not authenticated')
 
       const table = tableMap[activeTab]
-      let insertData: any = {
+      let insertData: Record<string, unknown> = {
         title: newPost.title,
         description: newPost.description,
         status: newPost.status,

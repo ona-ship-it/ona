@@ -9,6 +9,20 @@ interface WalletBalance {
   balance_tickets: number;
 }
 
+type EnsureWalletRpcResult = {
+  error: { message?: string } | null;
+};
+
+type WalletRow = {
+  balance_fiat: number | null;
+  balance_tickets: number | null;
+};
+
+type DbError = {
+  code?: string;
+  message?: string;
+};
+
 interface WalletBalanceProps {
   userId: string;
   onBalanceUpdate?: (fiatBalance: number, ticketBalance: number) => void;
@@ -30,20 +44,20 @@ export function WalletBalance({ userId, onBalanceUpdate, className = '', showTic
     
     try {
       // First, ensure user has a wallet using the new function
-      const { error: ensureError } = await ((supabase as any).rpc('ensure_user_wallet', {
+      const { error: ensureError } = await (supabase.rpc('ensure_user_wallet', {
         user_uuid: userId
-      }));
+      }) as EnsureWalletRpcResult);
 
       if (ensureError) {
         console.warn('Could not ensure wallet exists:', ensureError);
       }
 
       // Fetch wallet balance
-      const { data, error } = await ((supabase as any)
+      const { data, error } = await (supabase
         .from('wallets')
         .select('balance_fiat, balance_tickets')
         .eq('user_id', userId)
-        .single());
+        .single()) as { data: WalletRow | null; error: DbError | null };
 
       if (error) {
         if (error.code === 'PGRST116') {
@@ -62,9 +76,10 @@ export function WalletBalance({ userId, onBalanceUpdate, className = '', showTic
         setWalletBalance(balance);
         onBalanceUpdate?.(balance.balance_fiat, balance.balance_tickets);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching wallet balance:', err);
-      setError(err.message || 'Failed to load wallet balance');
+      const message = err instanceof Error ? err.message : 'Failed to load wallet balance';
+      setError(message);
       const defaultBalance = { balance_fiat: 0, balance_tickets: 0 };
       setWalletBalance(defaultBalance);
       onBalanceUpdate?.(0, 0);

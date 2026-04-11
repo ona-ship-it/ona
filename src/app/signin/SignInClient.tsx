@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase';
 import Link from 'next/link';
 
 export default function SignInClient() {
@@ -11,7 +11,7 @@ export default function SignInClient() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,20 +23,24 @@ export default function SignInClient() {
       if (error) throw error;
       router.push('/');
       router.refresh();
-    } catch (authError: any) {
-      setError(authError.message || 'An error occurred during sign in');
+    } catch (authError: unknown) {
+      const errorMessage = authError instanceof Error
+        ? authError.message
+        : 'An error occurred during sign in';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    const callbackUrl = `${window.location.origin}/api/auth/callback?next=${encodeURIComponent('/')}`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/api/auth/callback` },
+      options: { redirectTo: callbackUrl },
     });
 
-    if (error) setError('Error signing in with Google. Check console for details.');
+    if (error) setError('Error signing in with Google. Please try again.');
   };
 
   return (

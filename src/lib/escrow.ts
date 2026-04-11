@@ -13,6 +13,10 @@ const ESCROW_ABI = [
 const ESCROW_ADDRESS = process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS!
 const USDC_ADDRESS = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Unknown error'
+}
+
 // Get contract instance
 export function getEscrowContract(signer?: ethers.Signer) {
   if (typeof window === 'undefined' || !window.ethereum) {
@@ -68,11 +72,11 @@ export async function createRaffleEscrow(
       success: true,
       txHash: receipt.transactionHash,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Escrow create error:', error)
     return {
       success: false,
-      error: error.message,
+      error: getErrorMessage(error),
     }
   }
 }
@@ -107,11 +111,11 @@ export async function purchaseTicketsEscrow(
       success: true,
       txHash: receipt.transactionHash,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Ticket purchase error:', error)
     return {
       success: false,
-      error: error.message,
+      error: getErrorMessage(error),
     }
   }
 }
@@ -155,11 +159,11 @@ export async function claimRaffleRefund(raffleId: string) {
       success: true,
       txHash: receipt.transactionHash,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Refund claim error:', error)
     return {
       success: false,
-      error: error.message,
+      error: getErrorMessage(error),
     }
   }
 }

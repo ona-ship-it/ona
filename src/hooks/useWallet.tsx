@@ -31,6 +31,44 @@ const NETWORKS = {
 type WalletType = 'metamask' | 'phantom' | null
 type Network = 'ethereum' | 'polygon' | 'solana' | 'base'
 
+type RpcRequest = {
+  method: string
+  params?: unknown[]
+}
+
+type EthereumProvider = {
+  request: (args: RpcRequest) => Promise<unknown>
+  on: (event: string, handler: (...args: unknown[]) => void) => void
+  removeListener: (event: string, handler: (...args: unknown[]) => void) => void
+}
+
+type PhantomConnectionResponse = {
+  publicKey: { toString: () => string }
+}
+
+type PhantomProvider = {
+  isPhantom?: boolean
+  connect: () => Promise<PhantomConnectionResponse>
+  disconnect: () => void
+  on: (event: string, handler: (...args: unknown[]) => void) => void
+}
+
+type SolanaConnection = {
+  getBalance: (publicKey: unknown) => Promise<number>
+}
+
+type SolanaWeb3Provider = {
+  Connection: new (url: string) => SolanaConnection
+}
+
+function isCode4902Error(error: unknown): error is { code: number } {
+  return typeof error === 'object' && error !== null && 'code' in error && (error as { code: unknown }).code === 4902
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback
+}
+
 interface WalletContextType {
   // Connection state
   isConnected: boolean
@@ -79,10 +117,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     setError(null)
 
     try {
-      const ethereum = (window as any).ethereum
+      const ethereum = (window as Window & { ethereum?: EthereumProvider }).ethereum
+      if (!ethereum) throw new Error('MetaMask provider not found')
 
       // Request account access
-      const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
+      const accounts = (await ethereum.request({ method: 'eth_requestAccounts' }) as string[])
       const account = accounts[0]
 
       // Switch to target network
@@ -91,10 +130,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Get balance
-      const balanceWei = await ethereum.request({
+      const balanceWei = (await ethereum.request({
         method: 'eth_getBalance',
         params: [account, 'latest'],
-      })
+      }) as string)
       const balanceEth = (parseInt(balanceWei, 16) / 1e18).toFixed(4)
 
       setAddress(account)
@@ -107,9 +146,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       ethereum.on('accountsChanged', handleAccountsChanged)
       ethereum.on('chainChanged', handleChainChanged)
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('MetaMask connection error:', err)
-      setError(err.message || 'Failed to connect MetaMask')
+      setError(getErrorMessage(err, 'Failed to connect MetaMask'))
     } finally {
       setConnecting(false)
     }
@@ -127,7 +166,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     setError(null)
 
     try {
-      const phantom = (window as any).solana
+      const phantom = (window as Window & { solana?: PhantomProvider }).solana
+      if (!phantom) throw new Error('Phantom provider not found')
 
       if (!phantom.isPhantom) {
         throw new Error('Phantom wallet not found')
@@ -137,7 +177,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       const publicKey = response.publicKey.toString()
 
       // Get SOL balance
-      const connection = new (window as any).solanaWeb3.Connection(
+      const solanaWeb3 = (window as Window & { solanaWeb3?: SolanaWeb3Provider }).solanaWeb3
+      if (!solanaWeb3) throw new Error('Solana Web3 provider not available')
+      const connection = new solanaWeb3.Connection(
         'https://api.mainnet-beta.solana.com'
       )
       const balanceLamports = await connection.getBalance(response.publicKey)
@@ -154,9 +196,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         disconnect()
       })
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Phantom connection error:', err)
-      setError(err.message || 'Failed to connect Phantom')
+      setError(getErrorMessage(err, 'Failed to connect Phantom'))
     } finally {
       setConnecting(false)
     }
@@ -167,7 +209,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     if (walletType !== 'metamask') return
 
     try {
-      const ethereum = (window as any).ethereum
+      const ethereum = (window as Window & { ethereum?: EthereumProvider }).ethereum
+      if (!ethereum) throw new Error('MetaMask provider not found')
       const networkConfig = NETWORKS[targetNetwork as keyof typeof NETWORKS]
 
       if (!networkConfig) {
@@ -180,9 +223,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: networkConfig.chainId }],
         })
-      } catch (switchError: any) {
+      } catch (switchError: unknown) {
         // If network doesn't exist, add it
-        if (switchError.code === 4902) {
+        if (isCode4902Error(switchError)) {
           await ethereum.request({
             method: 'wallet_addEthereumChain',
             params: [networkConfig],
@@ -195,19 +238,19 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       setNetwork(targetNetwork)
 
       // Update balance
-      const accounts = await ethereum.request({ method: 'eth_accounts' })
+      const accounts = (await ethereum.request({ method: 'eth_accounts' }) as string[])
       if (accounts[0]) {
-        const balanceWei = await ethereum.request({
+        const balanceWei = (await ethereum.request({
           method: 'eth_getBalance',
           params: [accounts[0], 'latest'],
-        })
+        }) as string)
         const balanceEth = (parseInt(balanceWei, 16) / 1e18).toFixed(4)
         setBalance(balanceEth)
       }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Network switch error:', err)
-      setError(err.message || 'Failed to switch network')
+      setError(getErrorMessage(err, 'Failed to switch network'))
     }
   }
 
@@ -216,15 +259,16 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     const networkConfig = NETWORKS[targetNetwork as keyof typeof NETWORKS]
     if (!networkConfig) return
 
-    const ethereum = (window as any).ethereum
+    const ethereum = (window as Window & { ethereum?: EthereumProvider }).ethereum
+    if (!ethereum) return
 
     try {
       await ethereum.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: networkConfig.chainId }],
       })
-    } catch (switchError: any) {
-      if (switchError.code === 4902) {
+    } catch (switchError: unknown) {
+      if (isCode4902Error(switchError)) {
         await ethereum.request({
           method: 'wallet_addEthereumChain',
           params: [networkConfig],
@@ -236,7 +280,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   // Disconnect wallet
   const disconnect = () => {
     if (walletType === 'phantom') {
-      const phantom = (window as any).solana
+      const phantom = (window as Window & { solana?: PhantomProvider }).solana
       if (phantom) {
         phantom.disconnect()
       }
@@ -271,7 +315,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     return () => {
       if (hasMetaMask) {
-        const ethereum = (window as any).ethereum
+        const ethereum = (window as Window & { ethereum?: EthereumProvider }).ethereum
         ethereum?.removeListener('accountsChanged', handleAccountsChanged)
         ethereum?.removeListener('chainChanged', handleChainChanged)
       }

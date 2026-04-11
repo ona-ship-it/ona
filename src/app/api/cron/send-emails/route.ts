@@ -1,24 +1,51 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import { 
-  sendWinnerEmail, 
-  sendEntryConfirmationEmail,
-  sendRaffleTicketConfirmationEmail,
-  sendRaffleApprovalEmail,
-  sendEndingSoonEmail 
-} from '@/lib/email'
+import { sendWinnerEmail } from '@/lib/email'
+import { authorizeCronRequest } from '@/lib/cronAuth'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabaseAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return null
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey)
+}
+
+async function sendWinnerEmailWithRetry(payload: Parameters<typeof sendWinnerEmail>[0], maxAttempts = 2) {
+  let lastError: unknown = null
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const result = await sendWinnerEmail(payload)
+    if (result.success) {
+      return result
+    }
+
+    lastError = result.error
+    if (attempt < maxAttempts) {
+      await new Promise((resolve) => setTimeout(resolve, attempt * 250))
+    }
+  }
+
+  return {
+    success: false,
+    error: lastError ?? 'Failed to send winner email after retries',
+  }
+}
 
 export async function GET(request: Request) {
   try {
-    // Verify cron secret
-    const authHeader = request.headers.get('authorization')
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const authError = authorizeCronRequest(request)
+    if (authError) return authError
+
+    const supabase = getSupabaseAdminClient()
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Missing Supabase server environment configuration' },
+        { status: 500 }
+      )
     }
 
     const results = {
@@ -50,14 +77,14 @@ export async function GET(request: Request) {
 
           // Send winner email
           const result = notification.giveaway_id
-            ? await sendWinnerEmail({
+            ? await sendWinnerEmailWithRetry({
                 to: profile.email,
                 winnerName: profile.full_name || 'Winner',
                 prizeName: notification.giveaways.title,
                 prizeValue: notification.giveaways.prize_value,
                 giveawayId: notification.giveaway_id,
               })
-            : await sendWinnerEmail({
+            : await sendWinnerEmailWithRetry({
                 to: profile.email,
                 winnerName: profile.full_name || 'Winner',
                 prizeName: notification.raffles.title,
@@ -78,15 +105,16 @@ export async function GET(request: Request) {
           if (result.success) {
             results.winnerEmails++
           }
-        } catch (error: any) {
-          results.errors.push(`Notification ${notification.id}: ${error.message}`)
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown notification error'
+          results.errors.push(`Notification ${notification.id}: ${errorMessage}`)
           
           // Mark as failed
           await supabase
             .from('winner_notifications')
             .update({
               status: 'failed',
-              error_message: error.message,
+              error_message: errorMessage,
             })
             .eq('id', notification.id)
         }
@@ -98,10 +126,11 @@ export async function GET(request: Request) {
       ...results,
       timestamp: new Date().toISOString(),
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown email cron error'
     console.error('Email cron error:', error)
     return NextResponse.json(
-      { error: error.message },
+      { error: errorMessage },
       { status: 500 }
     )
   }

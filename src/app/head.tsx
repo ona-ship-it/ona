@@ -1,11 +1,11 @@
 export default function Head() {
   return (
     <>
-      {/* Use PNG icons from public to avoid app-level favicon conflicts */}
-      <link rel="icon" type="image/png" sizes="32x32" href="/onagui_icon_clean_32x32.png" />
-      <link rel="icon" type="image/png" sizes="16x16" href="/onagui_icon_clean_16x16.png" />
-      <link rel="apple-touch-icon" sizes="180x180" href="/onagui_icon_clean_180x180.png" />
-      <link rel="manifest" href="/site.webmanifest" />
+      <link rel="icon" type="image/png" sizes="96x96" href="/my-favicon/favicon-96x96.png?v=20260405" />
+      <link rel="icon" type="image/svg+xml" href="/my-favicon/favicon.svg?v=20260405" />
+      <link rel="shortcut icon" href="/my-favicon/favicon.ico?v=20260405" />
+      <link rel="apple-touch-icon" sizes="180x180" href="/my-favicon/apple-touch-icon.png?v=20260405" />
+      <link rel="manifest" href="/my-favicon/site.webmanifest?v=20260405" />
       <meta name="theme-color" content="#ffffff" />
     </>
   );

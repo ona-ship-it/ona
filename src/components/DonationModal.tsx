@@ -8,6 +8,10 @@ import { SUPPORTED_CRYPTOS, type CryptoNetwork } from '@/lib/cryptoConfig';
 import { connectPhantomWallet, sendSolanaTransaction, getSolanaExplorerUrl } from '@/lib/solanaWallet';
 import { connectUnisatWallet, btcToSatoshis, getBitcoinExplorerUrl } from '@/lib/bitcoinWallet';
 
+const ERC20_ABI = [
+  'function transfer(address to, uint256 amount) returns (bool)'
+];
+
 interface DonationModalProps {
   fundraiser: {
     id: string;
@@ -15,6 +19,18 @@ interface DonationModalProps {
   };
   onClose: () => void;
   onSuccess: () => void;
+}
+
+type EthereumProvider = {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+};
+
+function isCode4902Error(error: unknown): error is { code: number } {
+  return typeof error === 'object' && error !== null && 'code' in error && (error as { code: unknown }).code === 4902;
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback;
 }
 
 // Calculate platform fee: 2.9% + $0.30 (like GoFundMe)
@@ -27,6 +43,7 @@ function calculateNetAmount(amount: number): number {
 }
 
 export default function DonationModal({ fundraiser, onClose, onSuccess }: DonationModalProps) {
+  const ethereum = typeof window !== 'undefined' ? (window as Window & { ethereum?: EthereumProvider }).ethereum : undefined;
   const [amount, setAmount] = useState('');
   const [donorName, setDonorName] = useState('');
   const [message, setMessage] = useState('');
@@ -85,9 +102,9 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
   };
 
   async function checkWalletConnection() {
-    if (typeof window.ethereum !== 'undefined') {
+    if (ethereum) {
       try {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        const accounts = await ethereum.request({ method: 'eth_accounts' }) as string[];
         if (accounts.length > 0) {
           setWalletConnected(true);
           setWalletAddress(accounts[0]);
@@ -99,7 +116,7 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
   }
 
   async function connectWallet() {
-    if (typeof window.ethereum === 'undefined') {
+    if (!ethereum) {
       alert('Please install MetaMask to donate with crypto!');
       window.open('https://metamask.io/download/', '_blank');
       return;
@@ -107,18 +124,18 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
 
     try {
       setLoading(true);
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' }) as string[];
       
       // Switch to Polygon network
       try {
-        await window.ethereum.request({
+        await ethereum.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: '0x89' }], // 137 in hex
         });
-      } catch (switchError: any) {
+      } catch (switchError: unknown) {
         // If chain doesn't exist, add it
-        if (switchError.code === 4902) {
-          await window.ethereum.request({
+        if (isCode4902Error(switchError)) {
+          await ethereum.request({
             method: 'wallet_addEthereumChain',
             params: [{
               chainId: '0x89',
@@ -137,9 +154,9 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
 
       setWalletConnected(true);
       setWalletAddress(accounts[0]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error connecting wallet:', error);
-      alert('Failed to connect wallet: ' + error.message);
+      alert('Failed to connect wallet: ' + getErrorMessage(error, 'Unknown error'));
     } finally {
       setLoading(false);
     }
@@ -165,14 +182,14 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
       if (selectedCrypto.chainId) {
         // Switch to correct network
         try {
-          await window.ethereum.request({
+          await ethereum?.request({
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: selectedCrypto.chainId }],
           });
-        } catch (switchError: any) {
+        } catch (switchError: unknown) {
           // If chain doesn't exist, add it
-          if (switchError.code === 4902 && selectedCrypto.rpcUrl) {
-            await window.ethereum.request({
+          if (isCode4902Error(switchError) && selectedCrypto.rpcUrl) {
+            await ethereum?.request({
               method: 'wallet_addEthereumChain',
               params: [{
                 chainId: selectedCrypto.chainId,
@@ -189,7 +206,10 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
           }
         }
 
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        if (!ethereum) {
+          throw new Error('Wallet provider unavailable');
+        }
+        const provider = new ethers.providers.Web3Provider(ethereum as unknown as ethers.providers.ExternalProvider);
         const signer = provider.getSigner();
 
         let tx;
@@ -258,9 +278,9 @@ export default function DonationModal({ fundraiser, onClose, onSuccess }: Donati
       setTimeout(() => {
         onSuccess();
       }, 3000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error processing donation:', error);
-      alert('Donation failed: ' + (error.message || 'Unknown error'));
+      alert('Donation failed: ' + getErrorMessage(error, 'Unknown error'));
       setStep('details');
     } finally {
       setLoading(false);

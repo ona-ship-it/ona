@@ -25,7 +25,7 @@ export function calculateRevenueDistribution(
   const creatorCommission = totalTicketRevenue * 0.1
 
   // Calculate prize per additional winner (if any)
-  let winnersCount = giveaway.additional_winners_count || 0
+  const winnersCount = giveaway.additional_winners_count || 0
   let prizePerWinner = 0
 
   if (winnersCount > 0 && giveaway.additional_winners_distribution === 'multiple') {

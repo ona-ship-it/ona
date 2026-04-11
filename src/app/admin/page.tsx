@@ -116,7 +116,7 @@ export default function AdminDashboard() {
         {/* STATS: Giveaways */}
         <div className="mb-12">
           <h3 className="text-2xl font-bold text-white mb-6">Giveaways</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))" }}>
             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6"><div className="text-4xl mb-3">🎁</div><div className="text-3xl font-black text-white mb-1">{stats.totalGiveaways}</div><div className="text-sm text-slate-400">Total</div></div>
             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6"><div className="text-4xl mb-3">🔥</div><div className="text-3xl font-black text-green-400 mb-1">{stats.activeGiveaways}</div><div className="text-sm text-slate-400">Active</div></div>
             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6"><div className="text-4xl mb-3">🎫</div><div className="text-3xl font-black text-blue-400 mb-1">{stats.totalEntries}</div><div className="text-sm text-slate-400">Entries</div></div>
@@ -128,7 +128,7 @@ export default function AdminDashboard() {
         {/* STATS: Raffles */}
         <div className="mb-12">
           <h3 className="text-2xl font-bold text-white mb-6">Raffles</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))" }}>
             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6"><div className="text-4xl mb-3">🎟️</div><div className="text-3xl font-black text-white mb-1">{stats.totalRaffles}</div><div className="text-sm text-slate-400">Total</div></div>
             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6"><div className="text-4xl mb-3">✅</div><div className="text-3xl font-black text-green-400 mb-1">{stats.activeRaffles}</div><div className="text-sm text-slate-400">Active</div></div>
             <div className="bg-gradient-to-br from-orange-900/30 to-yellow-900/30 border-2 border-orange-500/50 rounded-3xl p-6"><div className="text-4xl mb-3">⏳</div><div className="text-3xl font-black text-orange-400 mb-1">{stats.pendingRaffles}</div><div className="text-sm text-orange-400 font-semibold">Pending</div></div>
@@ -155,7 +155,7 @@ export default function AdminDashboard() {
         {/* STATS: Fundraisers */}
         <div className="mb-12">
           <h3 className="text-2xl font-bold text-white mb-6">Fundraisers</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))" }}>
             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6"><div className="text-4xl mb-3">💝</div><div className="text-3xl font-black text-white mb-1">{stats.totalFundraisers}</div><div className="text-sm text-slate-400">Total</div></div>
             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6"><div className="text-4xl mb-3">🔥</div><div className="text-3xl font-black text-green-400 mb-1">{stats.activeFundraisers}</div><div className="text-sm text-slate-400">Active</div></div>
             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6"><div className="text-4xl mb-3">💵</div><div className="text-3xl font-black text-blue-400 mb-1">${stats.fundraiserRevenue.toFixed(0)}</div><div className="text-sm text-slate-400">Total Raised</div></div>
@@ -168,7 +168,7 @@ export default function AdminDashboard() {
         {/* STATS: Marketplace */}
         <div className="mb-12">
           <h3 className="text-2xl font-bold text-white mb-6">Marketplace</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div style={{ display: "grid", gap: 24, gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6"><div className="text-4xl mb-3">🏪</div><div className="text-3xl font-black text-white mb-1">{stats.totalListings}</div><div className="text-sm text-slate-400">Total Listings</div></div>
             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6"><div className="text-4xl mb-3">✅</div><div className="text-3xl font-black text-green-400 mb-1">{stats.activeListings}</div><div className="text-sm text-slate-400">Active Listings</div></div>
             <div className="bg-gradient-to-br from-orange-900/30 to-yellow-900/30 border-2 border-orange-500/50 rounded-3xl p-6"><div className="text-4xl mb-3">⏳</div><div className="text-3xl font-black text-orange-400 mb-1">{stats.pendingListings}</div><div className="text-sm text-orange-400 font-semibold">Pending Review</div></div>
@@ -180,7 +180,7 @@ export default function AdminDashboard() {
           <h3 className="text-2xl font-bold text-white mb-6">Management Tools</h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', marginBottom: 48 }}>
           {/* Giveaways */}
           <Link href="/admin/giveaways" className="group">
             <div className="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 border-2 border-blue-500/50 hover:border-blue-500 rounded-3xl p-8 transition-all hover:scale-105">
@@ -305,7 +305,7 @@ export default function AdminDashboard() {
             <div className="flex-1">
               <h4 className="text-lg font-bold text-white mb-2">Admin Access</h4>
               <p className="text-slate-400 text-sm">
-                You're logged in as <span className="text-blue-400 font-semibold">{userEmail}</span>. 
+                You&apos;re logged in as <span className="text-blue-400 font-semibold">{userEmail}</span>. 
                 You have full access to all platform management features including marketplace, fundraise, compliance verification, and direct post control.
               </p>
             </div>

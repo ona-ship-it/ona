@@ -799,7 +799,7 @@ export async function sendFundraiserEmail(
   to: string,
   type: FundraiserEmailType,
   data: FundraiserEmailData
-): Promise<{ success: boolean; error?: any }> {
+): Promise<{ success: boolean; error?: string }> {
   try {
     if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'dummy_key') {
       console.warn('RESEND_API_KEY not configured - skipping email');

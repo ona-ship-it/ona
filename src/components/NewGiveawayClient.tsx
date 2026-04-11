@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import type { User } from '@supabase/supabase-js';
 import Navigation from './Navigation';
 import PageTitle from './PageTitle';
 import { WalletBalance } from '@/components/WalletBalance';
@@ -32,7 +33,7 @@ export default function NewGiveawayClient() {
   const [ticketBalance, setTicketBalance] = useState<number | null>(null);
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   const supabase = useSupabaseClient();
 
@@ -151,7 +152,7 @@ export default function NewGiveawayClient() {
       const initialStatus = getInitialStatus();
       
       // Insert new giveaway
-      const { data, error } = await ((supabase as any)
+      const { error } = await supabase
         .from('giveaways')
         .insert({
           creator_id: user.id,
@@ -167,7 +168,7 @@ export default function NewGiveawayClient() {
           escrow_amount: isAdmin ? 0 : formData.prize_amount // Admin bypass escrow
         })
         .select()
-        .single());
+        .single();
         
       if (error) throw error;
       
@@ -179,9 +180,10 @@ export default function NewGiveawayClient() {
         router.push('/giveaways');
       }, 2000);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error creating giveaway:', err);
-      setError(err.message || 'Failed to create giveaway');
+      const message = err instanceof Error ? err.message : 'Failed to create giveaway';
+      setError(message);
       alert('Error creating giveaway. Check console for details.');
     } finally {
       setLoading(false);
@@ -232,7 +234,7 @@ export default function NewGiveawayClient() {
       const mediaUrl = formData.photo_url || formData.media_url || null;
       
       // Insert new giveaway with active status (admin bypass)
-      const { data, error } = await ((supabase as any)
+      const { error } = await supabase
         .from('giveaways')
         .insert({
           creator_id: user.id,
@@ -248,7 +250,7 @@ export default function NewGiveawayClient() {
           escrow_amount: 0 // Admin bypass escrow
         })
         .select()
-        .single());
+        .single();
         
       if (error) throw error;
       
@@ -259,9 +261,10 @@ export default function NewGiveawayClient() {
         router.push('/giveaways');
       }, 2000);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error creating and activating giveaway:', err);
-      setError(err.message || 'Failed to create and activate giveaway');
+      const message = err instanceof Error ? err.message : 'Failed to create and activate giveaway';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -393,7 +396,7 @@ export default function NewGiveawayClient() {
                 />
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
                 <div>
                   <label htmlFor="prize_amount" className="block text-purple-300 mb-2">
                     Prize Amount (USDT)*

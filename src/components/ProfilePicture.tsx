@@ -1,26 +1,32 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
 import { getGravatarUrl } from '@/utils/gravatar'
-import Image from 'next/image'
+
 
 type ProfilePictureProps = {
   size?: 'sm' | 'md' | 'lg'
   showUpload?: boolean
 }
 
+type Profile = {
+  avatar_url: string | null
+  full_name: string | null
+}
+
 export default function ProfilePicture({ size = 'sm', showUpload = false }: ProfilePictureProps) {
   const supabase = createClient()
-  const [user, setUser] = useState<any>(null)
-  const [profile, setProfile] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
 
-  const sizeClasses = {
-    sm: 'w-9 h-9 text-sm',
-    md: 'w-16 h-16 text-xl',
-    lg: 'w-24 h-24 text-3xl'
+  const sizeConfig = {
+    sm: { dimension: 36, fontSize: 14 },
+    md: { dimension: 64, fontSize: 20 },
+    lg: { dimension: 96, fontSize: 30 },
   }
 
   useEffect(() => {
@@ -41,7 +47,7 @@ export default function ProfilePicture({ size = 'sm', showUpload = false }: Prof
         .eq('id', user.id)
         .single()
 
-      setProfile(profileData)
+      setProfile((profileData as Profile | null) || null)
 
       // Get avatar URL
       if (profileData?.avatar_url) {
@@ -90,9 +96,10 @@ export default function ProfilePicture({ size = 'sm', showUpload = false }: Prof
 
       setAvatarUrl(data.publicUrl)
       alert('Avatar updated successfully!')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error uploading avatar:', error)
-      alert('Error uploading avatar: ' + error.message)
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      alert('Error uploading avatar: ' + message)
     } finally {
       setUploading(false)
     }
@@ -110,25 +117,55 @@ export default function ProfilePicture({ size = 'sm', showUpload = false }: Prof
 
   if (!user) return null
 
+  const { dimension, fontSize } = sizeConfig[size]
+  const isHeaderAvatar = size === 'sm' && !showUpload
+  const shouldShowImage = !!avatarUrl && !isHeaderAvatar
+
   return (
     <div className="relative group">
-      {avatarUrl ? (
+      {shouldShowImage ? (
         <div 
-          className={`${sizeClasses[size]} rounded-full overflow-hidden cursor-pointer transition-opacity hover:opacity-80 relative`}
-          style={{ border: '2px solid var(--accent-blue)' }}
+          style={{
+            width: dimension,
+            height: dimension,
+            minWidth: dimension,
+            minHeight: dimension,
+            borderRadius: '9999px',
+            overflow: 'hidden',
+            cursor: 'pointer',
+            transition: 'opacity 0.2s ease',
+            border: '2px solid var(--accent-blue)',
+          }}
         >
-          <Image 
-            src={avatarUrl} 
-            alt="Profile" 
-            fill
-            className="object-cover"
-            unoptimized // For external URLs like Gravatar
+          <img
+            src={avatarUrl}
+            alt="Profile"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
+            }}
           />
         </div>
       ) : (
         <div 
-          className={`${sizeClasses[size]} rounded-full flex items-center justify-center font-semibold cursor-pointer transition-opacity hover:opacity-80`}
-          style={{ background: 'var(--accent-blue)', color: 'var(--text-primary)' }}
+          style={{
+            width: dimension,
+            height: dimension,
+            minWidth: dimension,
+            minHeight: dimension,
+            borderRadius: '9999px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 600,
+            fontSize,
+            cursor: 'pointer',
+            transition: 'opacity 0.2s ease',
+            background: 'var(--accent-blue)',
+            color: 'var(--text-primary)',
+          }}
         >
           {getInitials()}
         </div>

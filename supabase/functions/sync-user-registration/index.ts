@@ -14,7 +14,7 @@ interface SyncUserRequest {
   userId: string;
   email: string;
   username?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 serve(async (req) => {
@@ -36,7 +36,7 @@ serve(async (req) => {
     })
 
     if (req.method === 'POST') {
-      const { userId, email, username, metadata }: SyncUserRequest = await req.json()
+      const { userId, email, username }: SyncUserRequest = await req.json()
 
       if (!userId || !email) {
         return new Response(
@@ -127,13 +127,14 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     console.error('Error in sync-user-registration:', error)
     
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error',
-        details: error.message 
+        details: errorMessage 
       }),
       { 
         status: 500, 

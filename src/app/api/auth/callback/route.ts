@@ -1,73 +1,86 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import type { Database } from '@/types/supabase';
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get('code');
-  const redirectTo = requestUrl.searchParams.get('redirectTo') || '/';
-
-  const origin = requestUrl.origin;
-  const redirectUrl = new URL(redirectTo, origin);
+  const { searchParams, origin } = new URL(request.url)
+  const code = searchParams.get('code')
+  // Accept both ?next= (canonical) and ?redirectTo= (legacy)
+  const nextParam = searchParams.get('next') ?? searchParams.get('redirectTo') ?? null
 
   if (code) {
-    const cookieStore = await cookies();
-    const supabase = createServerClient<Database>(
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
           get(name: string) {
-            return cookieStore.get(name)?.value;
+            return cookieStore.get(name)?.value
           },
           set(name: string, value: string, options: CookieOptions) {
-            cookieStore.set({ name, value, ...options });
+            cookieStore.set({ name, value, ...options })
           },
           remove(name: string, options: CookieOptions) {
-            cookieStore.set({ name, value: '', ...options });
+            cookieStore.set({ name, value: '', ...options })
           },
         },
       }
-    );
-    
-    const { data: sessionData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+    )
 
-    if (exchangeError) {
-      console.error('OAuth callback error:', exchangeError);
-      return NextResponse.redirect(new URL('/signup?error=auth_failed', origin));
-    }
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
 
-    // Best-effort: ensure records exist in both tables for the newly signed-in user
-    if (sessionData?.user) {
-      const user = sessionData.user;
-      const username = user.email ? user.email.split('@')[0] : null;
-      const fullName = (user.user_metadata as any)?.full_name ?? (user.user_metadata as any)?.name ?? null;
-      const avatarUrl = (user.user_metadata as any)?.avatar_url ?? (user.user_metadata as any)?.picture ?? null;
+    if (!error) {
+      // Ensure user profile records exist after OAuth sign-in
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const derivedUsername = (user.email || '').split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '')
+        const fullName = user.user_metadata?.full_name || user.user_metadata?.name || derivedUsername
 
-      // Upsert into app_users
-      await supabase
-        .from('app_users')
-        .upsert({
+        // Detect new vs returning user BEFORE upserting (so we can check existence)
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', user.id)
+          .maybeSingle()
+
+        const isNewUser = !existingProfile
+
+        await supabase.from('app_users').upsert({
           id: user.id,
           email: user.email,
-          username,
+          username: derivedUsername,
           created_at: user.created_at,
-        }, { onConflict: 'id' });
+        }, { onConflict: 'id' })
 
-      // Upsert into onagui_profiles
-      await supabase
-        .from('onagui_profiles')
-        .upsert({
+        await supabase.from('onagui_profiles').upsert({
           id: user.id,
-          username,
+          username: derivedUsername,
           full_name: fullName,
-          avatar_url: avatarUrl,
+          avatar_url: user.user_metadata?.avatar_url || null,
           onagui_type: 'signed_in',
+          created_at: user.created_at,
           updated_at: new Date().toISOString(),
-        }, { onConflict: 'id' });
+        }, { onConflict: 'id' })
+
+        await supabase.from('profiles').upsert({
+          id: user.id,
+          email: user.email,
+          full_name: fullName,
+          avatar_url: user.user_metadata?.avatar_url || null,
+        }, { onConflict: 'id' })
+
+        // New users → landing page ('/'), returning users → /profile (or requested path)
+        const redirectPath = isNewUser ? '/' : (nextParam ?? '/profile')
+        return NextResponse.redirect(`${origin}${redirectPath}`)
+      }
+
+      // Fallback if user object is missing
+      return NextResponse.redirect(`${origin}${nextParam ?? '/profile'}`)
     }
   }
 
-  return NextResponse.redirect(redirectUrl);
+  // If code exchange fails, redirect to login with error
+  return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
 }

@@ -3,8 +3,10 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import type { Session } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
 import ProfilePicture from '@/components/ProfilePicture'
+import NotificationBell from '@/components/NotificationBell'
 
 const NAV_ITEMS = [
   { href: '/', label: 'Home' },
@@ -25,7 +27,7 @@ export default function Header() {
     checkAuth()
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+    } = supabase.auth.onAuthStateChange((_event, session: Session | null) => {
       setIsLoggedIn(!!session)
     })
 
@@ -49,18 +51,20 @@ export default function Header() {
 
   return (
     <header
-      className="sticky top-0 z-50 border-b backdrop-blur-xl"
       style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
         background: 'var(--bg-primary)',
-        borderColor: 'var(--border)',
+        borderBottom: '1px solid var(--border)',
       }}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
+      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', height: 64, alignItems: 'center', justifyContent: 'space-between', padding: '0 16px' }}>
         <Link href="/" className="font-extrabold tracking-tight text-3xl" style={{ color: 'var(--text-primary)' }}>
           ONAGUI
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hdr-nav">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
@@ -73,7 +77,7 @@ export default function Header() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hdr-actions">
           {!isLoggedIn ? (
             <>
               <Link
@@ -84,7 +88,7 @@ export default function Header() {
                 Sign In
               </Link>
               <Link
-                href="/create-giveaway"
+                href="/raffles/create"
                 className="rounded-xl px-4 py-2 text-sm font-semibold text-white"
                 style={{ background: 'var(--accent-green)' }}
               >
@@ -93,9 +97,10 @@ export default function Header() {
             </>
           ) : (
             <div className="flex items-center gap-3">
-              <Link href="/create-giveaway" className="rounded-xl px-4 py-2 text-sm font-semibold text-white" style={{ background: 'var(--accent-green)' }}>
+              <Link href="/raffles/create" className="rounded-xl px-4 py-2 text-sm font-semibold text-white" style={{ background: 'var(--accent-green)' }}>
                 + Create
               </Link>
+              <NotificationBell />
               <Link href="/profile" className="block">
                 <ProfilePicture size="sm" />
               </Link>
@@ -105,7 +110,7 @@ export default function Header() {
 
         <button
           onClick={() => setShowMobileMenu((prev) => !prev)}
-          className="md:hidden"
+          className="hdr-burger"
           aria-label="Toggle menu"
           style={{ color: 'var(--text-secondary)' }}
         >
@@ -118,7 +123,7 @@ export default function Header() {
       </div>
 
       {showMobileMenu && (
-        <div className="border-t md:hidden" style={{ borderColor: 'var(--border)', background: 'var(--bg-primary)' }}>
+        <div className="hdr-mobile-menu border-t" style={{ borderColor: 'var(--border)', background: 'var(--bg-primary)' }}>
           <div className="space-y-1 px-4 py-3">
             {NAV_ITEMS.map((item) => (
               <Link
@@ -145,7 +150,7 @@ export default function Header() {
                     Sign In
                   </Link>
                   <Link
-                    href="/create-giveaway"
+                    href="/raffles/create"
                     className="flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold text-white"
                     style={{ background: 'var(--accent-green)' }}
                   >
@@ -162,7 +167,7 @@ export default function Header() {
                     Profile
                   </Link>
                   <Link
-                    href="/create-giveaway"
+                    href="/raffles/create"
                     className="flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold text-white"
                     style={{ background: 'var(--accent-green)' }}
                   >

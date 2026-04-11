@@ -44,7 +44,7 @@ export default function FeaturedSection({ title, linkTo, items }: FeaturedSectio
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="items-grid">
         {items.map((item, index) => (
           <div key={index} className={`${isDarker ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg border-l-4 border-${item.color}-500 overflow-hidden hover:shadow-xl transition-all duration-300`}>
             {/* Photo space */}

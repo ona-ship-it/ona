@@ -63,7 +63,7 @@ export default function ViewProfileClient() {
           setAvatarUrl(found);
           setLoading(false);
         }
-      } catch (e: any) {
+      } catch (_e: unknown) {
         if (!cancelled) {
           setError("Network error loading profile");
           setLoading(false);
@@ -109,9 +109,9 @@ export default function ViewProfileClient() {
 
       {!loading && !error && (
         <>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div style={{ display: "grid", gap: 24, gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))" }}>
           {/* Profile summary */}
-          <div className="md:col-span-1 bg-gray-800 rounded-lg border border-gray-700 p-6">
+          <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
             <div className="flex items-center gap-4 mb-4">
               {avatarUrl && !avatarFailed ? (
                 <img
@@ -141,7 +141,7 @@ export default function ViewProfileClient() {
           </div>
 
           {/* Edit form */}
-          <div className="md:col-span-2 bg-gray-800 rounded-lg border border-gray-700 p-6">
+          <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
             <h3 className="text-lg font-semibold mb-4">Edit Profile</h3>
             <div className="space-y-4">
               <div>
@@ -180,8 +180,8 @@ export default function ViewProfileClient() {
         </div>
 
         {/* Badges & Achievements */}
-        <div className="mt-6 grid md:grid-cols-3 gap-6">
-          <div className="md:col-span-1 bg-gray-800 rounded-lg border border-gray-700 p-6">
+        <div style={{ marginTop: 24, display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
+          <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Badges</h3>
             <div className="rounded-lg border border-gray-700 p-4 mb-4">
               <div className="flex flex-wrap gap-2">
@@ -198,7 +198,7 @@ export default function ViewProfileClient() {
             </div>
           </div>
 
-          <div className="md:col-span-2 bg-gray-800 rounded-lg border border-gray-700 p-6">
+          <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Achievements</h3>
             <div className="rounded-lg border border-gray-700 p-4">
               <div className="flex flex-wrap gap-2">

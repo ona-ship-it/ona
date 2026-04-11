@@ -1,133 +1,125 @@
 'use client'
-
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase'
-import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
 import { Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 
 function VerifyEmailContent() {
-  const router = useRouter()
   const searchParams = useSearchParams()
-  const supabase = createClient()
-  
-  const [status, setStatus] = useState<'verifying' | 'success' | 'error' | 'already-verified'>('verifying')
-  const [message, setMessage] = useState('')
+  const status = searchParams.get('status')
+  const error = searchParams.get('error')
 
-  useEffect(() => {
-    handleEmailVerification()
-  }, [])
-
-  async function handleEmailVerification() {
-    try {
-      // Get the token from URL
-      const token = searchParams.get('token')
-      const type = searchParams.get('type')
-
-      if (type === 'email') {
-        // Supabase handles this automatically
-        const { data: { session }, error } = await supabase.auth.getSession()
-
-        if (error) throw error
-
-        if (session?.user) {
-          // Check if already verified
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('is_verified')
-            .eq('id', session.user.id)
-            .single()
-
-          if (profile?.is_verified) {
-            setStatus('already-verified')
-            setMessage('Your email is already verified!')
-            setTimeout(() => router.push('/dashboard'), 2000)
-            return
-          }
-
-          // Mark as verified
-          const { error: updateError } = await supabase
-            .from('profiles')
-            .update({
-              is_verified: true,
-              verification_method: 'email',
-              verified_at: new Date().toISOString(),
-            })
-            .eq('id', session.user.id)
-
-          if (updateError) throw updateError
-
-          setStatus('success')
-          setMessage('Email verified successfully! Redirecting to dashboard...')
-          
-          setTimeout(() => {
-            const returnUrl = searchParams.get('return')
-            router.push(returnUrl || '/dashboard')
-          }, 2000)
-        } else {
-          throw new Error('No session found')
-        }
+  const getContent = () => {
+    if (status === 'success') {
+      return {
+        icon: '✅',
+        title: 'Email Verified!',
+        message: 'Your email has been verified successfully. Welcome to Onagui!',
+        color: '#00ff88',
+        cta: { label: 'Go to Raffles', href: '/raffles' },
+        showResend: false,
       }
-    } catch (error: any) {
-      console.error('Verification error:', error)
-      setStatus('error')
-      setMessage(error.message || 'Failed to verify email')
+    }
+    if (status === 'already_verified') {
+      return {
+        icon: '✅',
+        title: 'Already Verified',
+        message: "Your email was already verified. You're all set!",
+        color: '#00ff88',
+        cta: { label: 'Go to Raffles', href: '/raffles' },
+        showResend: false,
+      }
+    }
+    if (status === 'pending') {
+      return {
+        icon: '📧',
+        title: 'Check Your Email',
+        message: "We sent a verification link to your email address. Click the link to verify your account. Check your spam folder if you don't see it.",
+        color: '#3b82f6',
+        cta: { label: 'Go Home', href: '/' },
+        showResend: true,
+      }
+    }
+    if (error === 'expired') {
+      return {
+        icon: '⏰',
+        title: 'Link Expired',
+        message: 'This verification link has expired. Request a new one below.',
+        color: '#ef4444',
+        cta: { label: 'Sign In', href: '/login' },
+        showResend: true,
+      }
+    }
+    if (error === 'invalid_token' || error === 'missing_token') {
+      return {
+        icon: '❌',
+        title: 'Invalid Link',
+        message: 'This verification link is invalid or has already been used.',
+        color: '#ef4444',
+        cta: { label: 'Go Home', href: '/' },
+        showResend: false,
+      }
+    }
+    return {
+      icon: '⚠️',
+      title: 'Something Went Wrong',
+      message: "We couldn't verify your email. Please try again or contact support.",
+      color: '#f59e0b',
+      cta: { label: 'Go Home', href: '/' },
+      showResend: false,
     }
   }
 
+  const content = getContent()
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        {status === 'verifying' && (
-          <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-12 text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-6"></div>
-            <h2 className="text-2xl font-bold text-white mb-2">Verifying Email...</h2>
-            <p className="text-slate-400">Please wait while we verify your email address.</p>
-          </div>
-        )}
+    <div style={{ background: '#0a1929', minHeight: '100vh' }}>
+      <div style={{ maxWidth: '480px', margin: '0 auto', padding: '80px 20px', textAlign: 'center' }}>
+        <div style={{ marginBottom: 24, textAlign: 'center' }}>
+          <h1 style={{ fontSize: 28, fontWeight: 900, color: '#00ff88', letterSpacing: 2, margin: 0 }}>ONAGUI</h1>
+        </div>
+        <div style={{
+          background: '#1e293b', border: '1px solid rgba(0,255,136,0.15)',
+          borderRadius: '20px', padding: '48px 32px',
+        }}>
+          <div style={{ fontSize: '56px', marginBottom: '20px' }}>{content.icon}</div>
+          <h2 style={{ fontWeight: 700, fontSize: '28px', color: content.color, margin: '0 0 12px' }}>
+            {content.title}
+          </h2>
+          <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.6, margin: '0 0 32px' }}>
+            {content.message}
+          </p>
+          <Link
+            href={content.cta.href}
+            style={{
+              display: 'inline-block', padding: '14px 40px',
+              background: 'linear-gradient(135deg, #00ff88, #00cc6a)',
+              color: '#0a1929', fontSize: '14px', fontWeight: 700,
+              textDecoration: 'none', borderRadius: '10px', letterSpacing: '0.5px',
+            }}
+          >
+            {content.cta.label}
+          </Link>
 
-        {status === 'success' && (
-          <div className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-2 border-green-500/50 rounded-3xl p-12 text-center">
-            <div className="text-6xl mb-6">✅</div>
-            <h2 className="text-3xl font-black text-white mb-4">Email Verified!</h2>
-            <p className="text-green-400 mb-6">{message}</p>
-            <div className="space-y-2 text-sm text-slate-300">
-              <p>✅ You can now claim free tickets</p>
-              <p>✅ Enter giveaways and raffles</p>
-              <p>✅ Create your own raffles</p>
-            </div>
-          </div>
-        )}
-
-        {status === 'already-verified' && (
-          <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-blue-500/50 rounded-3xl p-12 text-center">
-            <div className="text-6xl mb-6">✓</div>
-            <h2 className="text-3xl font-black text-white mb-4">Already Verified</h2>
-            <p className="text-blue-400 mb-6">{message}</p>
-            <Link href="/dashboard" className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl">
-              Go to Dashboard
-            </Link>
-          </div>
-        )}
-
-        {status === 'error' && (
-          <div className="bg-gradient-to-br from-red-900/30 to-orange-900/30 border-2 border-red-500/50 rounded-3xl p-12 text-center">
-            <div className="text-6xl mb-6">❌</div>
-            <h2 className="text-3xl font-black text-white mb-4">Verification Failed</h2>
-            <p className="text-red-400 mb-6">{message}</p>
-            <div className="space-y-3">
-              <Link href="/login" className="block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl">
-                Back to Login
-              </Link>
-              <button 
-                onClick={() => router.push('/resend-verification')}
-                className="block w-full px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl"
+          {content.showResend && (
+            <div style={{ marginTop: 24 }}>
+              <p style={{ color: '#64748b', fontSize: 12, marginBottom: 12 }}>
+                Didn&apos;t receive it?
+              </p>
+              <Link
+                href="/resend-verification"
+                style={{
+                  display: 'inline-block', padding: '10px 28px',
+                  border: '1px solid rgba(0,255,136,0.3)',
+                  color: '#00ff88', fontSize: '13px', fontWeight: 600,
+                  textDecoration: 'none', borderRadius: '10px',
+                  background: 'rgba(0,255,136,0.05)',
+                }}
               >
                 Resend Verification Email
-              </button>
+              </Link>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   )
@@ -136,8 +128,8 @@ function VerifyEmailContent() {
 export default function VerifyEmailPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+      <div style={{ background: '#0a1929', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 32, height: 32, border: '3px solid rgba(0,255,136,0.2)', borderTopColor: '#00ff88', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       </div>
     }>
       <VerifyEmailContent />

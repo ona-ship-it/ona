@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -24,7 +25,7 @@ type Creator = {
   total_reviews: number
   successful_completion_rate: number
   average_delivery_days: number
-  badges: any
+  badges: unknown
   website: string | null
   twitter: string | null
   instagram: string | null
@@ -51,7 +52,7 @@ export default function CreatorProfilePage() {
   const [loading, setLoading] = useState(true)
   const [creator, setCreator] = useState<Creator | null>(null)
   const [raffles, setRaffles] = useState<Raffle[]>([])
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [isFollowing, setIsFollowing] = useState(false)
   const [followLoading, setFollowLoading] = useState(false)
 
@@ -70,7 +71,7 @@ export default function CreatorProfilePage() {
 
   async function checkIfFollowing(userId: string) {
     const { data } = await supabase
-      .from('follows')
+      .from('profile_followers')
       .select('id')
       .eq('follower_id', userId)
       .eq('following_id', params.id)
@@ -123,13 +124,13 @@ export default function CreatorProfilePage() {
     try {
       if (isFollowing) {
         await supabase
-          .from('follows')
+          .from('profile_followers')
           .delete()
           .eq('follower_id', user.id)
           .eq('following_id', params.id)
         setIsFollowing(false)
       } else {
-        await supabase.from('follows').insert({
+        await supabase.from('profile_followers').insert({
           follower_id: user.id,
           following_id: params.id as string
         })
@@ -309,7 +310,7 @@ export default function CreatorProfilePage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <div className="items-grid" style={{ marginBottom: 16 }}>
           <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-6">
             <div className="text-sm text-slate-400 mb-2">Total Raised</div>
             <div className="text-3xl font-black text-green-400">
@@ -350,7 +351,7 @@ export default function CreatorProfilePage() {
               <p className="text-slate-400">No raffles yet</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div style={{ display: "grid", gap: 24, gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
               {raffles.map((raffle) => (
                 <Link
                   key={raffle.id}

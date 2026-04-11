@@ -2,13 +2,27 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { isAdmin } from '@/lib/admin'
+import type { Database } from '@/types/supabase'
+
+type CookieOptions = Record<string, unknown>
+
+type ParticipationEvent = {
+  id: string
+  event_type: string | null
+  entity_type: string | null
+  entity_id: string | null
+  user_id: string | null
+  session_id: string | null
+  metadata: Record<string, unknown> | null
+  created_at: string | null
+}
 
 export async function GET(request: NextRequest) {
   try {
     const rangeParam = request.nextUrl.searchParams.get('range')
     const rangeDays = rangeParam === '30' ? 30 : 7
     const cookieStore = await cookies()
-    const supabase = createServerClient<any>(
+    const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -16,11 +30,11 @@ export async function GET(request: NextRequest) {
           get(name: string) {
             return cookieStore.get(name)?.value
           },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options })
+          set(name: string, value: string, options: CookieOptions) {
+            cookieStore.set({ name, value, ...(options as Record<string, unknown>) })
           },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: '', ...options })
+          remove(name: string, options: CookieOptions) {
+            cookieStore.set({ name, value: '', ...(options as Record<string, unknown>) })
           },
         },
       }
@@ -43,7 +57,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { createClient } = await import('@supabase/supabase-js')
-    const service = createClient<any>(url, key)
+    const service = createClient<Database>(url, key)
 
     const { data: events, error: eventsError } = await service
       .from('participation_events')
@@ -58,7 +72,7 @@ export async function GET(request: NextRequest) {
     const now = Date.now()
     const rangeStart = now - rangeDays * 24 * 60 * 60 * 1000
 
-    const recentEvents = (events || []).map((event: any) => ({
+    const recentEvents = (events || []).map((event: ParticipationEvent) => ({
       ...event,
       created_at: event.created_at || null,
     }))

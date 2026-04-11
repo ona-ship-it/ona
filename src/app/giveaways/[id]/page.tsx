@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
@@ -9,6 +10,20 @@ import WalletConnect from '@/components/WalletConnect'
 import ShareGiveaway from '@/components/ShareGiveaway'
 import WinnerDisplay from '@/components/WinnerDisplay'
 import { payWithUSDC, isOnPolygon } from '@/lib/wallet'
+
+type FailedEntryAttempt = {
+  entryType: 'free' | 'paid'
+  idempotencyKey: string
+  paymentConfirmed: boolean
+  paymentTxHash: string | null
+}
+
+function createIdempotencyKey(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
 
 type Giveaway = {
   id: string
@@ -49,12 +64,15 @@ export default function GiveawayDetailPage() {
   
   const [loading, setLoading] = useState(true)
   const [giveaway, setGiveaway] = useState<Giveaway | null>(null)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [entering, setEntering] = useState(false)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
   const [freeTicketsClaimed, setFreeTicketsClaimed] = useState(0)
   const [preferredEntryType, setPreferredEntryType] = useState<'free' | 'paid'>('free')
   const [quantity] = useState(1)
+  const [entryError, setEntryError] = useState<string | null>(null)
+  const [entrySuccess, setEntrySuccess] = useState<string | null>(null)
+  const [failedEntryAttempt, setFailedEntryAttempt] = useState<FailedEntryAttempt | null>(null)
 
   useEffect(() => {
     checkAuth()
@@ -144,7 +162,7 @@ export default function GiveawayDetailPage() {
     }
   }
 
-  async function handleEnter(entryType: 'free' | 'paid') {
+  async function handleEnter(entryType: 'free' | 'paid', retryAttempt?: FailedEntryAttempt) {
     if (!user) {
       router.push('/login')
       return
@@ -152,33 +170,51 @@ export default function GiveawayDetailPage() {
 
     if (!giveaway) return
 
+    setEntryError(null)
+    setEntrySuccess(null)
+
     if (entryType === 'paid') {
       if (!walletAddress) {
-        alert('Please connect your wallet first')
+        setEntryError('Please connect your wallet first')
         return
       }
 
       const onPolygon = await isOnPolygon()
       if (!onPolygon) {
-        alert('Please switch to Polygon network')
+        setEntryError('Please switch to Polygon network')
         return
       }
     }
 
     setEntering(true)
+    const idempotencyKey = retryAttempt?.idempotencyKey || createIdempotencyKey()
+    let paymentConfirmed = retryAttempt?.paymentConfirmed || false
+    let paymentTxHash = retryAttempt?.paymentTxHash || null
+
+    setFailedEntryAttempt({
+      entryType,
+      idempotencyKey,
+      paymentConfirmed,
+      paymentTxHash,
+    })
 
     try {
-      if (entryType === 'paid') {
+      if (entryType === 'paid' && !paymentConfirmed) {
         const paymentResult = await payWithUSDC(1)
         if (!paymentResult.success) {
           throw new Error(paymentResult.error || 'Payment failed')
         }
+        paymentConfirmed = true
+        paymentTxHash = paymentResult.txHash || null
       }
 
-      const response = await fetch('/api/entries/create', {
+      const response = await fetch(`/giveaways/${giveaway.id}/api/entries/create`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ giveawayId: giveaway.id, entryType }),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Idempotency-Key': idempotencyKey,
+        },
+        body: JSON.stringify({ giveawayId: giveaway.id, entryType, paymentTxHash }),
       })
 
       const result = await response.json()
@@ -186,13 +222,21 @@ export default function GiveawayDetailPage() {
         throw new Error(result.error || 'Entry failed')
       }
 
-      alert(result.message || 'Entry successful!')
+      setEntrySuccess(result.message || 'Entry successful!')
+      setFailedEntryAttempt(null)
       
       // Refresh giveaway data
       await fetchGiveaway()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Entry error:', error)
-      alert(`Failed to enter: ${error.message || 'Unknown error'}`)
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      setEntryError(`Failed to enter: ${message}`)
+      setFailedEntryAttempt({
+        entryType,
+        idempotencyKey,
+        paymentConfirmed,
+        paymentTxHash,
+      })
     } finally {
       setEntering(false)
     }
@@ -218,26 +262,18 @@ export default function GiveawayDetailPage() {
     : null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="text-blue-400 hover:text-blue-300 font-semibold">
-              ← Back to Giveaways
-            </Link>
-            <Link href="/">
-              <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                ONAGUI
-              </h1>
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #020617, #172554, #0f172a)' }}>
+      {/* Back nav */}
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '12px 16px' }}>
+        <Link href="/giveaways" style={{ color: '#60a5fa', fontWeight: 600, textDecoration: 'none' }}>
+          ← Back to Giveaways
+        </Link>
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 16px 48px' }}>
+        <div className="giveaway-detail-grid" style={{ display: 'grid', gap: 32 }}>
           {/* Left - Image & Description */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="giveaway-detail-left" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <div className="bg-slate-900/50 backdrop-blur-xl border-2 border-slate-800 rounded-3xl overflow-hidden">
               <div className="relative h-96 bg-gradient-to-br from-slate-800 to-slate-900">
                 {giveaway.image_url ? (
@@ -378,6 +414,26 @@ export default function GiveawayDetailPage() {
                 >
                   {entering ? 'Processing...' : preferredEntryType === 'paid' ? 'Buy Ticket 1 USDC (Selected)' : 'Buy Ticket 1 USDC'}
                 </button>
+
+                {entryError && (
+                  <div className="mt-3 rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-300">
+                    <div>{entryError}</div>
+                    {failedEntryAttempt && !entering && (
+                      <button
+                        onClick={() => handleEnter(failedEntryAttempt.entryType, failedEntryAttempt)}
+                        className="mt-2 rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-semibold text-red-100 hover:bg-red-500/30"
+                      >
+                        Retry Last Attempt
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {entrySuccess && (
+                  <div className="mt-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-200">
+                    {entrySuccess}
+                  </div>
+                )}
               </div>
 
               {!user && (

@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import type { Database } from '@/types/supabase';
+
+type CookieOptions = Record<string, unknown>;
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -13,11 +15,11 @@ export async function GET() {
         get(name: string) {
           return cookieStore.get(name)?.value;
         },
-        set(name: string, value: string, options: any) {
-          cookieStore.set({ name, value, ...options });
+        set(name: string, value: string, options: CookieOptions) {
+          cookieStore.set({ name, value, ...(options as Record<string, unknown>) });
         },
-        remove(name: string, options: any) {
-          cookieStore.set({ name, value: '', ...options });
+        remove(name: string, options: CookieOptions) {
+          cookieStore.set({ name, value: '', ...(options as Record<string, unknown>) });
         },
       },
     }

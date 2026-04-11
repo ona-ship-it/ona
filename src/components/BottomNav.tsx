@@ -27,10 +27,10 @@ export default function BottomNav() {
       active: pathname === '/giveaways' || pathname.startsWith('/giveaways/'),
     },
     {
-      href: '/create-giveaway',
+      href: '/raffles/create',
       icon: 'plus',
       label: 'Create',
-      active: pathname === '/create-giveaway' || pathname.startsWith('/create-giveaway/'),
+      active: pathname === '/raffles/create' || pathname.startsWith('/raffles/create/'),
       special: true,
     },
     {
@@ -57,6 +57,7 @@ export default function BottomNav() {
               key={item.href}
               href={item.href}
               className={`nav-item ${item.active ? 'active' : ''} ${item.special ? 'create-btn' : ''}`}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, textDecoration: 'none' }}
             >
               {item.special ? (
                 <div className="create-icon">
@@ -86,6 +87,13 @@ export default function BottomNav() {
           padding: 6px 0 calc(8px + env(safe-area-inset-bottom));
           background: var(--bg-primary);
           border-top: 1px solid var(--border);
+        }
+
+        /* Hide bottom nav on desktop (1024px and above) */
+        @media (min-width: 1024px) {
+          .bottom-nav {
+            display: none;
+          }
         }
 
         .nav-item {
@@ -132,7 +140,7 @@ export default function BottomNav() {
           font-weight: 700;
         }
 
-        @media (min-width: 1024px) {
+        @media (min-width: 768px) {
           .bottom-nav {
             display: none;
           }

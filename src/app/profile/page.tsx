@@ -1,9 +1,12 @@
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+import { Suspense } from 'react';
+import ProfilePageClient from '@/app/profiles/ProfilePageClient';
 
-import ProfilePageClient from '../profiles/ProfilePageClient';
+export const metadata = { title: 'Profile | Onagui' };
 
 export default function ProfilePage() {
-  return <ProfilePageClient />;
+  return (
+    <Suspense>
+      <ProfilePageClient />
+    </Suspense>
+  );
 }
-

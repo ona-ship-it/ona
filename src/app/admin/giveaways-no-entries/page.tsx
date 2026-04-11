@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
+import { isAdmin as hasAdminAccess } from '@/lib/admin'
 import { useRouter } from 'next/navigation'
 import { Trash2, Star, AlertCircle, CheckCircle } from 'lucide-react'
 
@@ -43,10 +44,7 @@ export default function AdminGiveawaysNoEntriesPage() {
         return
       }
 
-      const { data: { user: fullUser } } = await supabase.auth.getUser()
-      const adminStatus = fullUser?.user_metadata?.is_admin === true
-
-      if (!adminStatus) {
+      if (!hasAdminAccess(user.email)) {
         router.push('/dashboard')
         return
       }

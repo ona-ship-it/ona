@@ -88,7 +88,7 @@ export default function HomeClient() {
 
       {/* Stats Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="items-grid">
           {stats.map((stat) => (
             <div key={stat.name} className="text-center">
               <div className="flex justify-center mb-4">
@@ -118,7 +118,7 @@ export default function HomeClient() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="items-grid">
           {features.map((feature) => (
             <Link
               key={feature.name}

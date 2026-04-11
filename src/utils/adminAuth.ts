@@ -2,10 +2,13 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import type { Database } from '@/types/supabase';
+import type { User } from '@supabase/supabase-js';
+
+type CookieOptions = Record<string, unknown>;
 
 export interface AdminAuthResult {
   success: boolean;
-  user?: any;
+  user?: User;
   error?: string;
   response?: NextResponse;
 }
@@ -26,11 +29,11 @@ export async function verifyAdminAuth(request: NextRequest): Promise<AdminAuthRe
           get(name: string) {
             return cookieStore.get(name)?.value;
           },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options });
+          set(name: string, value: string, options: CookieOptions) {
+            cookieStore.set({ name, value, ...(options as Record<string, unknown>) });
           },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: '', ...options });
+          remove(name: string, options: CookieOptions) {
+            cookieStore.set({ name, value: '', ...(options as Record<string, unknown>) });
           },
         },
       }
@@ -104,7 +107,7 @@ export async function verifyAdminAuth(request: NextRequest): Promise<AdminAuthRe
  * Higher-order function to wrap admin route handlers with authentication
  */
 export function withAdminAuth(
-  handler: (request: NextRequest, user: any) => Promise<NextResponse>
+  handler: (request: NextRequest, user: User) => Promise<NextResponse>
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
     const authResult = await verifyAdminAuth(request);
@@ -130,11 +133,11 @@ export async function createAdminSupabaseClient() {
         get(name: string) {
           return cookieStore.get(name)?.value;
         },
-        set(name: string, value: string, options: any) {
-          cookieStore.set({ name, value, ...options });
+        set(name: string, value: string, options: CookieOptions) {
+          cookieStore.set({ name, value, ...(options as Record<string, unknown>) });
         },
-        remove(name: string, options: any) {
-          cookieStore.set({ name, value: '', ...options });
+        remove(name: string, options: CookieOptions) {
+          cookieStore.set({ name, value: '', ...(options as Record<string, unknown>) });
         },
       },
     }

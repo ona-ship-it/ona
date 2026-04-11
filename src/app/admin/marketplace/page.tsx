@@ -100,7 +100,7 @@ export default function AdminMarketplace() {
       const { data, error } = await query
       if (error) throw error
 
-      const mapped = (data || []).map((item: any) => ({
+      const mapped = (data || []).map((item: { profiles?: { email?: string; full_name?: string } | null }) => ({
         ...item,
         seller_email: item.profiles?.email || 'Unknown',
         seller_name: item.profiles?.full_name || 'Unknown',
@@ -207,7 +207,7 @@ export default function AdminMarketplace() {
         <p className="text-slate-400 mb-8">Review, approve, suspend, and manage all marketplace listings</p>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', marginBottom: 32 }}>
           <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 text-center">
             <div className="text-2xl font-black text-white">{stats.total}</div>
             <div className="text-xs text-slate-400">Total</div>

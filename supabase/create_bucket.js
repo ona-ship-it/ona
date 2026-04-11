@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Script to create a public Supabase storage bucket
 // Usage: node create_bucket.js [bucketName]
 
@@ -20,7 +21,7 @@ function loadEnvLocal(envPath) {
         process.env[m[1]] = val;
       }
     });
-  } catch (e) {
+  } catch {
     // Ignore if file not found
   }
 }

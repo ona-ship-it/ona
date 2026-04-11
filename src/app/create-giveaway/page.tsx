@@ -29,6 +29,35 @@ type CreatedGiveawaySummary = {
   freeTicketLimit: number | null
 }
 
+type GiveawayInsertPayload = {
+  creator_id: string
+  title: string
+  description: string
+  emoji: string
+  image_url: string
+  prize_value: number
+  prize_currency: string
+  total_tickets: number
+  ticket_price: number
+  ticket_currency: string
+  is_free: boolean
+  free_ticket_limit: number | null
+  status: 'draft' | 'active'
+  end_date: string
+}
+
+type GiveawayInsertResult = {
+  id: string
+  title: string | null
+  share_code: string | null
+  share_url: string | null
+}
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message
+  return 'Unknown error'
+}
+
 export default function CreateGiveawayPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
@@ -63,7 +92,7 @@ export default function CreateGiveawayPage() {
     }
   }, [user, authLoading, router])
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: string, value: string | File | null) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     setError('')
   }
@@ -91,8 +120,8 @@ export default function CreateGiveawayPage() {
         .getPublicUrl(filePath)
 
       return publicUrl
-    } catch (err: any) {
-      const rawMessage = err?.message || 'Unknown upload error'
+    } catch (err: unknown) {
+      const rawMessage = getErrorMessage(err)
       const normalizedMessage = rawMessage.toLowerCase()
 
       if (normalizedMessage.includes('bucket') && normalizedMessage.includes('not found')) {
@@ -220,14 +249,17 @@ export default function CreateGiveawayPage() {
     setError('')
   }
 
-  const isMissingFreeTicketLimitColumnError = (err: any) => {
-    const rawMessage = (err?.message || '').toLowerCase()
+  const isMissingFreeTicketLimitColumnError = (err: unknown) => {
+    const rawMessage = getErrorMessage(err).toLowerCase()
     return rawMessage.includes('free_ticket_limit') && rawMessage.includes('schema cache')
   }
 
-  const isCreatorForeignKeyError = (err: any) => {
-    const rawMessage = (err?.message || '').toLowerCase()
-    const rawDetails = (err?.details || '').toLowerCase()
+  const isCreatorForeignKeyError = (err: unknown) => {
+    const rawMessage = getErrorMessage(err).toLowerCase()
+    const rawDetails =
+      typeof err === 'object' && err !== null && 'details' in err && typeof (err as { details?: unknown }).details === 'string'
+        ? ((err as { details: string }).details || '').toLowerCase()
+        : ''
     return (
       rawMessage.includes('giveaways_creator_id_fkey')
       || rawDetails.includes('giveaways_creator_id_fkey')
@@ -261,7 +293,7 @@ export default function CreateGiveawayPage() {
         throw new Error('Your session is invalid. Please sign out and sign in again, then retry.')
       }
 
-      let imageUrl = formData.imageUrl
+      const imageUrl = formData.imageUrl
       if (formData.imageFile && !imageUrl) {
         throw new Error('Image upload failed. Please re-select your image and try again.')
       }
@@ -272,7 +304,7 @@ export default function CreateGiveawayPage() {
 
       const endDateTime = new Date(`${formData.endDate}T${formData.endTime}`)
 
-      const giveawayInsertPayload: Record<string, any> = {
+      const giveawayInsertPayload: GiveawayInsertPayload = {
         creator_id: authenticatedUser.id,
         title: formData.title,
         description: formData.description,
@@ -295,7 +327,7 @@ export default function CreateGiveawayPage() {
         .select()
 
       if (insertError && isMissingFreeTicketLimitColumnError(insertError)) {
-        const { free_ticket_limit: omittedFreeTicketLimit, ...legacyPayload } = giveawayInsertPayload
+        const { free_ticket_limit: _omittedFreeTicketLimit, ...legacyPayload } = giveawayInsertPayload
         console.warn('free_ticket_limit missing in schema cache; retrying giveaway creation without that column')
 
         const retryInsert = await supabase
@@ -314,7 +346,7 @@ export default function CreateGiveawayPage() {
       if (insertError) throw insertError
       if (!data || !data[0]) throw new Error('Giveaway created but data could not be loaded')
 
-      const created = data[0] as any
+      const created = data[0] as GiveawayInsertResult
       const generatedShareCode = created.share_code || ''
       const canonicalShareUrl = generatedShareCode ? getShareUrlForCode(generatedShareCode) : ''
 
@@ -347,8 +379,8 @@ export default function CreateGiveawayPage() {
       }
 
       router.push('/profile')
-    } catch (err: any) {
-      setError(err.message || 'Failed to create giveaway')
+    } catch (err: unknown) {
+      setError(getErrorMessage(err) || 'Failed to create giveaway')
     } finally {
       setLoading(false)
     }
@@ -369,18 +401,8 @@ export default function CreateGiveawayPage() {
 
   if (createdGiveaway) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
-        <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl relative z-10">
-          <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3">
-              <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                ONAGUI
-              </h1>
-            </Link>
-          </div>
-        </header>
-
-        <div className="relative z-10 max-w-4xl mx-auto px-4 py-12">
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #020617, #172554, #0f172a)' }}>
+        <div style={{ maxWidth: 896, margin: '0 auto', padding: '48px 16px' }}>
           <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl p-8 space-y-6">
             <div>
               <h2 className="text-3xl font-bold text-white mb-2">Giveaway Published ✅</h2>
@@ -412,7 +434,7 @@ export default function CreateGiveawayPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
               <Link
                 href={`/giveaways/${createdGiveaway.id}`}
                 className="text-center py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all"
@@ -433,32 +455,19 @@ export default function CreateGiveawayPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
-      {/* Animated background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #020617, #172554, #0f172a)', position: 'relative' }}>
+      {/* Cancel link */}
+      <div style={{ maxWidth: 896, margin: '0 auto', padding: '12px 16px', display: 'flex', justifyContent: 'flex-end' }}>
+        <Link
+          href="/profile"
+          style={{ color: '#94a3b8', textDecoration: 'none' }}
+        >
+          Cancel
+        </Link>
       </div>
 
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl relative z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-              ONAGUI
-            </h1>
-          </Link>
-          <Link
-            href="/profile"
-            className="text-slate-400 hover:text-white transition-colors"
-          >
-            Cancel
-          </Link>
-        </div>
-      </header>
-
       {/* Main Content */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 py-12">
+      <div style={{ maxWidth: 896, margin: '0 auto', padding: '0 16px 48px' }}>
         {/* Progress Steps */}
         <div className="mb-12">
           <div className="flex items-center justify-between mb-4">
@@ -507,7 +516,7 @@ export default function CreateGiveawayPage() {
             <div className="space-y-6">
               <div>
                 <h2 className="text-3xl font-bold text-white mb-2">Create Your Giveaway</h2>
-                <p className="text-slate-400">Let's start with the basics</p>
+                <p className="text-slate-400">Let&apos;s start with the basics</p>
               </div>
 
               {/* Image Upload */}

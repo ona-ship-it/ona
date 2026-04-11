@@ -7,10 +7,14 @@ export interface SolanaWalletProvider {
   signAndSendTransaction: (transaction: Transaction) => Promise<{ signature: string }>;
 }
 
+type PhantomProvider = SolanaWalletProvider & {
+  isPhantom?: boolean;
+};
+
 export async function connectPhantomWallet(): Promise<SolanaWalletProvider | null> {
   if (typeof window === 'undefined') return null;
   
-  const { solana } = window as any;
+  const { solana } = window as Window & { solana?: PhantomProvider };
   
   if (!solana?.isPhantom) {
     alert('Please install Phantom Wallet for Solana donations!');

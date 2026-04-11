@@ -12,6 +12,11 @@ interface AppUser {
   email: string;
 }
 
+type AddTicketsResponse = {
+  data: boolean | null;
+  error: { message?: string } | null;
+};
+
 /**
  * @component AdminTicketManager
  * @description Provides an interface for admin users to add integer tickets to any user's wallet
@@ -62,7 +67,7 @@ export function AdminTicketManager() {
       const response = await (supabase.rpc('add_funds_to_wallet_tickets', {
         user_uuid: selectedUserId,
         amount_to_add: ticketAmount,
-      } as any) as any);
+      }) as AddTicketsResponse);
       
       const { data: success, error } = response;
 
@@ -76,9 +81,10 @@ export function AdminTicketManager() {
 
       setAmount('');
       setSelectedUserId('');
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Error adding tickets:', e);
-      alert(`Error: Could not add tickets. Details: ${e.message || e.toString()}`);
+      const message = e instanceof Error ? e.message : String(e);
+      alert(`Error: Could not add tickets. Details: ${message}`);
     } finally {
       setLoading(false);
     }
